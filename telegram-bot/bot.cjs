@@ -23,6 +23,8 @@ const PLAYERS_DIR = path.join(PROJECT_ROOT, 'docs', 'league-data', 'players');
 const T_INDEX_PATH = path.join(PROJECT_ROOT, 'docs', 'league-data', 'index', 'tournaments_index.json');
 const P_INDEX_PATH = path.join(PROJECT_ROOT, 'docs', 'league-data', 'index', 'players_index.json');
 
+const agent = new https.Agent({ keepAlive: true, timeout: 45000 });
+
 // Helper: Telegram API Request
 function telegramRequest(method, params = {}) {
   return new Promise((resolve, reject) => {
@@ -31,6 +33,7 @@ function telegramRequest(method, params = {}) {
       hostname: 'api.telegram.org',
       path: `/bot${TELEGRAM_TOKEN}/${method}`,
       method: 'POST',
+      agent: agent,
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData)
@@ -435,17 +438,20 @@ function saveFinishedMatchAI(aiResult) {
 let lastUpdateId = 0;
 async function pollUpdates() {
   try {
-    const res = await telegramRequest('getUpdates', { offset: lastUpdateId + 1, timeout: 30 });
-    if (res.ok && res.result && res.result.length > 0) {
+    const res = await telegramRequest('getUpdates', { offset: lastUpdateId + 1, timeout: 10 });
+    if (res && res.ok && res.result && res.result.length > 0) {
       for (const update of res.result) {
         lastUpdateId = update.update_id;
         handleTelegramUpdate(update);
       }
     }
   } catch (err) {
-    console.error('Polling error:', err.message);
+    // Quietly reconnect on network hiccup
+    if (!err.message.includes('ECONNRESET')) {
+      console.error('Polling notice:', err.message);
+    }
   }
-  setTimeout(pollUpdates, 1000);
+  setTimeout(pollUpdates, 1500);
 }
 
 // Handle Incoming Updates
