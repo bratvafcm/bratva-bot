@@ -13,8 +13,28 @@ const GITHUB_REPO = process.env.GITHUB_REPO || 'fc-bratva/fc-bratva.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
 const WEBSITE_URL = 'https://fc-bratva.github.io/';
 
+function sendResponse(res, statusCode, body, isJson = false) {
+  if (typeof res.status === 'function') {
+    if (isJson && typeof res.json === 'function') {
+      return res.status(statusCode).json(body);
+    }
+    return res.status(statusCode).send(body);
+  }
+  res.statusCode = statusCode;
+  if (isJson) {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.end(typeof body === 'string' ? body : JSON.stringify(body));
+  } else {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.end(typeof body === 'string' ? body : JSON.stringify(body));
+  }
+}
+
 function telegramRequest(method, params = {}) {
   return new Promise((resolve, reject) => {
+    if (!TELEGRAM_TOKEN) {
+      return reject(new Error('TELEGRAM_TOKEN environment variable is missing'));
+    }
     const postData = JSON.stringify(params);
     const req = https.request({
       hostname: 'api.telegram.org',
@@ -28,7 +48,7 @@ function telegramRequest(method, params = {}) {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
+        try { resolve(JSON.parse(data)); } catch (e) { resolve({ ok: false, error: e.message, raw: data }); }
       });
     });
     req.on('error', reject);
@@ -59,6 +79,7 @@ function downloadTelegramFile(fileId) {
 
 function githubApi(path, method = 'GET', body = null) {
   return new Promise((resolve, reject) => {
+    if (!GITHUB_PAT) return resolve(null);
     const headers = {
       'User-Agent': 'Bratva-Vercel-Bot',
       'Authorization': `Bearer ${GITHUB_PAT}`,
@@ -79,7 +100,7 @@ function githubApi(path, method = 'GET', body = null) {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
+        try { resolve(JSON.parse(data)); } catch (e) { resolve(null); }
       });
     });
     req.on('error', reject);
@@ -101,6 +122,7 @@ async function fetchGithubJson(filePath) {
 
 function analyzeImageWithGemini(imageBuffer) {
   return new Promise((resolve, reject) => {
+    if (!GEMINI_KEY) return reject(new Error('GEMINI_KEY environment variable is missing'));
     const base64Data = imageBuffer.toString('base64');
     const prompt = `You are the expert data extraction assistant for EA Sports FC Mobile league "БРАТВА".
 Extract tournament data. Return raw JSON:
@@ -168,19 +190,22 @@ RULES:
   });
 }
 
-function getTabsKeyboard(activeLang = 'ru', tIndexNum = 0) {
+function getTabsKeyboard(lang, tIndexNum = 0) {
+  const ruLabel = lang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = lang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = lang === 'ar' ? '• 🇲🇦 AR •' : '🇲🇦 AR';
+  const esLabel = lang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
   return {
     inline_keyboard: [
       [
-        { text: (activeLang === 'ru' ? '• 🇷🇺 Русский •' : '🇷🇺 Русский'), callback_data: `tab_${tIndexNum}_ru` },
-        { text: (activeLang === 'en' ? '• 🇬🇧 English •' : '🇬🇧 English'), callback_data: `tab_${tIndexNum}_en` }
+        { text: ruLabel, callback_data: `tab_${tIndexNum}_ru` },
+        { text: enLabel, callback_data: `tab_${tIndexNum}_en` },
+        { text: arLabel, callback_data: `tab_${tIndexNum}_ar` },
+        { text: esLabel, callback_data: `tab_${tIndexNum}_es` }
       ],
       [
-        { text: (activeLang === 'ar' ? '• 🇲🇦 العربية •' : '🇲🇦 العربية'), callback_data: `tab_${tIndexNum}_ar` },
-        { text: (activeLang === 'es' ? '• 🇪🇸 Español •' : '🇪🇸 Español'), callback_data: `tab_${tIndexNum}_es` }
-      ],
-      [
-        { text: '🌐 Live League Website', url: WEBSITE_URL }
+        { text: '🌐 Open Official League Website', url: WEBSITE_URL }
       ]
     ]
   };
@@ -244,6 +269,23 @@ function formatRecap(t, lang = 'ru') {
       `----------------------------\n` +
       `${strikesText}\n\n` +
       `🌐 *الترتيب المباشر:*\n${WEBSITE_URL}`;
+  } else if (lang === 'es') {
+    let outcome = isWin ? 'GRAN VICTORIA' : (isDraw ? 'EMPATE COMBATIVO' : 'RESULTADO DEL PARTIDO');
+    let closing = isWin ? "⚡ ¡Gran partido chavales! ¡A seguir ganando!" : "⚡ ¡Partido reñido! ¡La próxima nos llevamos la victoria!";
+    let strikesText = missed.length > 0
+      ? `⛔ *DISCIPLINA Y STRIKES:*\n${missed.join('\n')}\n⛔ ¡Strike 1/3! ¡Obligatorio jugar 3/3 en el próximo partido!`
+      : `✅ *100% DISCIPLINA:* ¡Todos los miembros jugaron 3/3 turnos!`;
+
+    return `⭐ *БРАТВА: ${outcome} vs ${opp}!* ⭐\n\n` +
+      `⚽ *Resultado:* ${ourScore} - ${oppScore}\n\n` +
+      `⭐ *MÁXIMOS GOLEADORES:*\n` +
+      `🥇 [ 1 | ${mp1} | ${mp1G}G ]\n` +
+      `🥈 [ 2 | ${mp2} | ${mp2G}G ]\n` +
+      `🥉 [ 3 | ${mp3} | ${mp3G}G ]\n\n` +
+      `${closing}\n\n` +
+      `----------------------------\n` +
+      `${strikesText}\n\n` +
+      `🌐 *Clasificación en vivo:*\n${WEBSITE_URL}`;
   } else {
     // Russian
     let outcome = isWin ? 'ПОБЕДА' : (isDraw ? 'БОЕВАЯ НИЧЬЯ' : 'МАТЧ');
@@ -266,16 +308,46 @@ function formatRecap(t, lang = 'ru') {
 }
 
 export default async function handler(req, res) {
-  if (req.method === 'GET') {
-    return res.status(200).json({ status: 'online', bot: 'BratvaFCMBot', mode: 'Vercel Serverless 24/7' });
-  }
-
-  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-
-  const update = req.body;
-  if (!update) return res.status(200).send('OK');
-
   try {
+    if (req.method === 'GET') {
+      return sendResponse(res, 200, {
+        status: 'online',
+        bot: 'BratvaFCMBot',
+        mode: 'Vercel Serverless 24/7',
+        channel: CHANNEL_ID,
+        website: WEBSITE_URL,
+        timestamp: new Date().toISOString()
+      }, true);
+    }
+
+    if (req.method !== 'POST') {
+      return sendResponse(res, 405, 'Method Not Allowed');
+    }
+
+    let update = req.body;
+    if (!update || typeof update !== 'object') {
+      try {
+        if (typeof update === 'string') {
+          update = JSON.parse(update);
+        } else {
+          const chunks = [];
+          for await (const chunk of req) {
+            chunks.push(chunk);
+          }
+          if (chunks.length > 0) {
+            update = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+          }
+        }
+      } catch (e) {
+        update = null;
+      }
+    }
+
+    if (!update) {
+      return sendResponse(res, 200, 'OK');
+    }
+
+    // Handle Callback Query (Language tabs)
     if (update.callback_query) {
       const cb = update.callback_query;
       const data = cb.data || '';
@@ -303,11 +375,13 @@ export default async function handler(req, res) {
         });
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
       }
-      return res.status(200).send('OK');
+      return sendResponse(res, 200, 'OK');
     }
 
     const message = update.message;
-    if (!message) return res.status(200).send('OK');
+    if (!message) {
+      return sendResponse(res, 200, 'OK');
+    }
 
     const chatId = message.chat.id;
     const text = (message.text || '').trim();
@@ -316,9 +390,19 @@ export default async function handler(req, res) {
       const msg = `⚜️ *БРАТВА FCM LEAGUE BOT (24/7 Cloud)* ⚜️\n\n` +
         `📸 Отправь мне скриншот турнира из EA FC Mobile!\n` +
         `Я автоматически обновлю сайт и канал!\n\n` +
-        `🌐 *Сайت лиги:* ${WEBSITE_URL}`;
+        `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
       await telegramRequest('sendMessage', { chat_id: chatId, text: msg, parse_mode: 'Markdown' });
-      return res.status(200).send('OK');
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/rules')) {
+      const rules = `📜 *ПРАВИЛА ЛИГИ БРАТВА:*\n\n` +
+        `1. Обязательно играть 3/3 в каждом турнире!\n` +
+        `2. 1 пропущенный матч = 1 страйк (1/3).\n` +
+        `3. 3 страйка = исключение из лиги.\n\n` +
+        `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
+      await telegramRequest('sendMessage', { chat_id: chatId, text: rules, parse_mode: 'Markdown' });
+      return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/recap') || text.startsWith('/broadcast')) {
@@ -332,9 +416,10 @@ export default async function handler(req, res) {
       if (chatId !== CHANNEL_ID) {
         await telegramRequest('sendMessage', { chat_id: chatId, text: `📢 Broadcast sent to ${CHANNEL_ID}!` });
       }
-      return res.status(200).send('OK');
+      return sendResponse(res, 200, 'OK');
     }
 
+    // Photo processing (Gemini Vision AI)
     if (message.photo && message.photo.length > 0) {
       await telegramRequest('sendMessage', { chat_id: chatId, text: '🔍 *Analyzing screenshot with Gemini Vision AI...*', parse_mode: 'Markdown' });
       const largestPhoto = message.photo[message.photo.length - 1];
@@ -343,7 +428,7 @@ export default async function handler(req, res) {
 
       if (!aiResult || aiResult.is_tournament_screenshot === false) {
         await telegramRequest('sendMessage', { chat_id: chatId, text: '⚠️ *Not a valid EA FC Mobile tournament screenshot!*' });
-        return res.status(200).send('OK');
+        return sendResponse(res, 200, 'OK');
       }
 
       if (aiResult.status === 'LIVE') {
@@ -352,7 +437,7 @@ export default async function handler(req, res) {
         const liveMsg = `🟢 *LIVE MATCH: vs ${aiResult.opponent_league}*\nScore: ${aiResult.score_bratva} - ${aiResult.score_opponent}\n\n` +
           `⛔ *ATTENTION PLEASE:*\n${pLines}\n\n⏳ Match ending soon! Attack 3/3 ASAP!`;
         await telegramRequest('sendMessage', { chat_id: chatId, text: liveMsg });
-        return res.status(200).send('OK');
+        return sendResponse(res, 200, 'OK');
       }
 
       const dateStr = new Date().toISOString().split('T')[0];
@@ -397,12 +482,12 @@ export default async function handler(req, res) {
       await telegramRequest('sendMessage', { chat_id: CHANNEL_ID, text: recap, parse_mode: 'Markdown', reply_markup: keys });
       await telegramRequest('sendMessage', { chat_id: chatId, text: `🔴 *MATCH COMPLETED & BROADCASTED TO ${CHANNEL_ID}!*\n\n${recap}`, parse_mode: 'Markdown', reply_markup: keys });
 
-      return res.status(200).send('OK');
+      return sendResponse(res, 200, 'OK');
     }
 
-    return res.status(200).send('OK');
+    return sendResponse(res, 200, 'OK');
   } catch (err) {
-    console.error('Webhook error:', err);
-    return res.status(200).send('Error handled');
+    console.error('Webhook Top-Level Error:', err);
+    return sendResponse(res, 200, 'Error handled: ' + err.message);
   }
-};
+}
