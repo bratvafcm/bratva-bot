@@ -10,6 +10,13 @@
   "max_possible_turns": 48,
   "matches": [
     {
+      "player_id": "karim",
+      "player_display_name": "KARIM",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
       "player_id": "real",
       "player_display_name": "Real",
       "ovr": 124,
@@ -24,7 +31,7 @@
       "turns_played": 0
     },
     {
-      "player_id": "player_2",
+      "player_id": "player_3",
       "player_display_name": "Тима",
       "ovr": 124,
       "goals_for": 6,
@@ -36,13 +43,6 @@
       "ovr": 123,
       "goals_for": 27,
       "turns_played": 3
-    },
-    {
-      "player_id": "progamer",
-      "player_display_name": "ProGamer",
-      "ovr": 122,
-      "goals_for": 0,
-      "turns_played": 0
     }
   ]
 }
