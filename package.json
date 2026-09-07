@@ -4,6 +4,7 @@
   "description": "EA FC Mobile League Tournament data pipeline for Братва",
   "type": "module",
   "scripts": {
+    "start": "node telegram-bot/bot.cjs",
     "process": "node src/process.js",
     "stats": "node src/stats-cli.js",
     "review": "node src/review-cli.js"

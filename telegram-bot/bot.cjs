@@ -18,9 +18,22 @@ const { exec } = require('child_process');
 const configPath = path.join(__dirname, 'config.json');
 const userSettingsPath = path.join(__dirname, 'user_settings.json');
 
-const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+let config = {};
+if (fs.existsSync(configPath)) {
+  try { config = JSON.parse(fs.readFileSync(configPath, 'utf8')); } catch (e) {}
+}
+
+// Fallback to environment variables for Cloud (Render, Koyeb, Railway)
+if (process.env.TELEGRAM_TOKEN) config.telegram_token = process.env.TELEGRAM_TOKEN;
+if (process.env.GEMINI_KEY) config.gemini_key = process.env.GEMINI_KEY;
+if (process.env.CHANNEL_ID) config.channel_id = process.env.CHANNEL_ID;
+if (process.env.GITHUB_PAT) config.github_pat = process.env.GITHUB_PAT;
+if (!config.bot_username) config.bot_username = process.env.BOT_USERNAME || 'BratvaFCMBot';
+if (!config.channel_id) config.channel_id = '@BRATVAFCM';
 if (!config.admin_passcodes) config.admin_passcodes = ['bratva2026', 'admin123'];
-if (!config.authorized_users) config.authorized_users = [];
+if (!config.authorized_users) config.authorized_users = ['7716243999'];
+if (config.auto_broadcast_channel === undefined) config.auto_broadcast_channel = true;
+if (config.auto_push_github === undefined) config.auto_push_github = true;
 
 let userSettings = {};
 if (fs.existsSync(userSettingsPath)) {
@@ -46,6 +59,21 @@ const T_INDEX_PATH = path.join(PROJECT_ROOT, 'docs', 'league-data', 'index', 'to
 const P_INDEX_PATH = path.join(PROJECT_ROOT, 'docs', 'league-data', 'index', 'players_index.json');
 
 const agent = new https.Agent({ keepAlive: true, timeout: 45000 });
+
+// Built-in HTTP Health-Check Server (for Render / Koyeb / Railway Cloud Deployment)
+const http = require('http');
+const PORT = process.env.PORT || 3000;
+const healthServer = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({
+    status: 'online',
+    bot: `@${config.bot_username || 'BratvaFCMBot'}`,
+    timestamp: new Date().toISOString()
+  }));
+});
+healthServer.listen(PORT, () => {
+  console.log(`🌐 Cloud health-check server listening on port ${PORT}`);
+});
 
 // Helper: Telegram API Request
 function telegramRequest(method, params = {}) {
@@ -827,7 +855,12 @@ function saveFinishedMatchAI(aiResult) {
 
   // Push to GitHub if enabled
   if (config.auto_push_github) {
-    exec('git add docs/league-data/ ; git commit -m "Auto-Update: Telegram Bot recorded tournament vs ' + tData.opponent_league + '" ; git push origin main', { cwd: PROJECT_ROOT }, (err, stdout, stderr) => {
+    const pat = config.github_pat || process.env.GITHUB_PAT;
+    const remoteTarget = pat ? `https://x-access-token:${pat}@github.com/fc-bratva/1.git` : 'origin';
+    const commitMsg = `Auto-Update: Telegram Bot recorded tournament vs ${tData.opponent_league}`;
+    const gitCmd = `git config user.name "DOXIBERO" ; git config user.email "acc.bicrafted@gmail.com" ; git add docs/league-data/ ; git commit -m "${commitMsg}" ; git push ${remoteTarget} main`;
+
+    exec(gitCmd, { cwd: PROJECT_ROOT }, (err, stdout, stderr) => {
       if (err) console.error('Git Push Error:', err);
       else console.log('Git Push Success:', stdout);
     });
