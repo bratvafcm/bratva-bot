@@ -1,6 +1,13 @@
 /**
  * Vercel Serverless Telegram Webhook Handler for БРАТВА FCM LEAGUE
  * 100% Free, 24/7 Always-On, Zero Credit Card Required
+ * Features:
+ * - Multi-screenshot Album Batching (media_group_id)
+ * - Incremental Multi-Screenshot Board Stitching (1-32 players)
+ * - Two-Column Layout Intelligence (Left = БРАТВА, Right = Opponent ignored)
+ * - Top-to-Bottom Rank Preserving Extraction (#1 to #N)
+ * - Multilingual Instant Tabs (RU, EN, AR, ES)
+ * - Safe Markdown & Automatic Plain-Text Fallback
  */
 
 import https from 'https';
@@ -15,9 +22,10 @@ const GITHUB_REPO = process.env.GITHUB_REPO || 'fc-bratva/fc-bratva.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
 const WEBSITE_URL = 'https://fc-bratva.github.io/';
 
-// Global in-memory cache and deduplication sets (persist across warm invocations)
+// Global in-memory cache and state (persists across warm invocations)
 let globalLatestTournament = null;
 const processedUpdates = new Set();
+const mediaGroupMap = new Map();
 const processingPhotos = new Set();
 
 function clean(str) {
@@ -225,43 +233,82 @@ async function getLatestTournament() {
   return null;
 }
 
-function analyzeImageWithGemini(imageBuffer) {
+/**
+ * High-Precision Multi-Image Analysis with Google Gemini Vision
+ * Correctly handles:
+ * - Two-column screen (LEFT = БРАТВА only, RIGHT = Opponent ignored)
+ * - Multi-screenshot stitching and deduplication across 1-4 images
+ * - Exact board order #1 to #N
+ * - Limit & turns mapping
+ */
+function analyzeImagesWithGemini(imageBuffers) {
   return new Promise((resolve, reject) => {
     if (!GEMINI_KEY) return reject(new Error('GEMINI_KEY environment variable is missing'));
-    const base64Data = imageBuffer.toString('base64');
-    const prompt = `You are the expert data extraction assistant for EA Sports FC Mobile league "БРАТВА".
-Extract tournament data. Return raw JSON:
+
+    const prompt = `You are the master tournament data auditor for EA Sports FC Mobile league "БРАТВА".
+You are analyzing ${imageBuffers.length} screenshot(s) of the SAME tournament leaderboard.
+
+CRITICAL RULES & SCREEN LAYOUT:
+1. TWO COLUMNS ON SCREEN:
+   - LEFT COLUMN: ALWAYS our league "БРАТВА". EXTRACT PLAYERS EXCLUSIVELY FROM THIS LEFT COLUMN!
+   - RIGHT COLUMN: OPPONENT league. COMPLETELY IGNORE the right column! DO NOT extract any opponent players!
+
+2. MULTI-SCREENSHOT SCROLLING & STITCHING:
+   - The user scrolled down the tournament table to capture all squad members across multiple screenshots.
+   - Consecutive screenshots may overlap (a player visible at the bottom of one screenshot might appear at the top of the next).
+   - DEDUPLICATE: Each player must appear EXACTLY ONCE in your final output.
+   - PRESERVE EXACT BOARD ORDER: On the far left of each row is a rank number (1, 2, 3... up to 32). Sort the players in exact top-to-bottom order (#1 to #N).
+
+3. SCORE & HEADER (Look at the top banner):
+   - Left side: "БРАТВА" score (e.g. 403 or 155) and turns (e.g. "47/96 TURNS" or "18/48 TURNS").
+   - Right side: Opponent league name (e.g. "Team Work" or "Memequis Juniors") and opponent score.
+   - Status: "LIVE" if active timer (e.g. "03:49:49"); "HISTORY" if completed (e.g. "12 MINS AGO", "1 DAY AGO", "HISTORY", or "FINAL").
+
+4. PLAYER ROW EXTRACTION (FROM LEFT COLUMN ONLY):
+   - "board_order": Row rank number (1 to 32).
+   - "name": Player's exact display name (top line in row). Do NOT translate or modify.
+   - "ovr": OVR rating number shown below the player's name (e.g. 124, 125, 127).
+   - "goals": The number next to the football icon under the "GOALS" column.
+   - "limit_remaining": Text under "LIMIT" column: "0/3", "1/3", "2/3", or "3/3".
+   - "turns_played": Calculate strictly:
+     * "0/3" = 3 turns played (0 left) -> 3
+     * "1/3" = 2 turns played (1 left) -> 2
+     * "2/3" = 1 turn played (2 left) -> 1
+     * "3/3" = 0 turns played (3 left, STRIKE) -> 0
+
+Return STRICT JSON ONLY, no markdown ticks, no commentary:
 {
   "is_tournament_screenshot": true,
   "status": "LIVE" or "HISTORY",
-  "time_info": "e.g. 03:49:49 or 19 HOURS AGO or 1 DAY AGO",
-  "opponent_league": "Opponent team name exactly as written",
+  "time_info": "e.g. 12 MINS AGO or 03:49:49",
+  "opponent_league": "Opponent Team Name",
   "score_bratva": number,
   "score_opponent": number,
   "turns_bratva": number,
   "turns_max": number,
   "players": [
     {
-      "name": "Player display name exactly as shown",
+      "board_order": number,
+      "name": "Exact Name",
       "ovr": number,
       "goals": number,
-      "limit_remaining": "3/3" or "2/3" or "1/3" or "0/3",
+      "limit_remaining": "0/3",
       "turns_played": number
     }
   ]
-}
-RULES:
-1. ORDER IS CRITICAL: Extract players in exact visual top-to-bottom board order (#1 to #N).
-2. LIMIT 3/3 = 0 turns played; LIMIT 0/3 = 3 turns played.`;
+}`;
 
-    const payload = JSON.stringify({
-      contents: [{
-        parts: [
-          { text: prompt },
-          { inline_data: { mime_type: 'image/jpeg', data: base64Data } }
-        ]
-      }]
-    });
+    const parts = [{ text: prompt }];
+    for (const buf of imageBuffers) {
+      parts.push({
+        inline_data: {
+          mime_type: 'image/jpeg',
+          data: buf.toString('base64')
+        }
+      });
+    }
+
+    const payload = JSON.stringify({ contents: [{ parts }] });
 
     const req = https.request({
       hostname: 'generativelanguage.googleapis.com',
@@ -362,15 +409,17 @@ function formatRecap(t, lang = 'ru') {
     });
   }
 
+  const squadCount = (t.matches || []).length;
+
   if (lang === 'en') {
     let outcome = isWin ? 'BIG WIN' : (isDraw ? 'HARD-FOUGHT DRAW' : 'MATCH RESULT');
     let closing = isWin ? "⚡ Awesome game boys! Let's keep winning!" : "⚡ Hard-fought match! Next time we take the win!";
     let strikesText = missed.length > 0
       ? `⛔ *DISCIPLINE & STRIKES:*\n${missed.join('\n')}\n⛔ Strike 1/3! Must play 3/3 in next match or get kicked!`
-      : `✅ *100% DISCIPLINE:* All squad members completed 3/3 turns!`;
+      : `✅ *100% DISCIPLINE:* All ${squadCount} squad members completed 3/3 turns!`;
 
     return `⭐ *БРАТВА: ${outcome} vs ${opp}!* ⭐\n\n` +
-      `⚽ *Score:* ${ourScore} - ${oppScore}\n\n` +
+      `⚽ *Score:* ${ourScore} - ${oppScore} (Squad: ${squadCount} players)\n\n` +
       `⭐ *TOP SCORERS:*\n` +
       `🥇 [ 1 | ${mp1} | ${mp1G}G ]\n` +
       `🥈 [ 2 | ${mp2} | ${mp2G}G ]\n` +
@@ -384,10 +433,10 @@ function formatRecap(t, lang = 'ru') {
     let closing = isWin ? "⚡ برافو يا شباب! استمروا في الانتصارات!" : "⚡ ماتش قوي! الماتش الجاي التعويض والفوز!";
     let strikesText = missed.length > 0
       ? `⛔ *قائمة الإنذارات (السترايكات):*\n${missed.join('\n')}\n⛔ إنذار 1/3! لازم تلعب 3/3 الماتش الجاي لتفادي الطرد!`
-      : `✅ *انضباط كامل 100%:* كاع الأعضاء لعبو 3/3 أشواط!`;
+      : `✅ *انضباط كامل 100%:* كاع ${squadCount} أعضاء لعبو 3/3 أشواط!`;
 
     return `⭐ *БРАТВА: ${outcome} ضد ${opp}!* ⭐\n\n` +
-      `⚽ *النتيجة:* ${ourScore} - ${oppScore}\n\n` +
+      `⚽ *النتيجة:* ${ourScore} - ${oppScore} (العدد: ${squadCount} لاعب)\n\n` +
       `⭐ *أفضل الهدافين:*\n` +
       `🥇 [ 1 | ${mp1} | ${mp1G} هدف ]\n` +
       `🥈 [ 2 | ${mp2} | ${mp2G} هدف ]\n` +
@@ -401,10 +450,10 @@ function formatRecap(t, lang = 'ru') {
     let closing = isWin ? "⚡ ¡Gran partido chavales! ¡A seguir ganando!" : "⚡ ¡Partido reñido! ¡La próxima nos llevamos la victoria!";
     let strikesText = missed.length > 0
       ? `⛔ *DISCIPLINA Y STRIKES:*\n${missed.join('\n')}\n⛔ ¡Strike 1/3! ¡Obligatorio jugar 3/3 en el próximo partido!`
-      : `✅ *100% DISCIPLINA:* ¡Todos los miembros jugaron 3/3 turnos!`;
+      : `✅ *100% DISCIPLINA:* ¡Todos los ${squadCount} miembros jugaron 3/3 turnos!`;
 
     return `⭐ *БРАТВА: ${outcome} vs ${opp}!* ⭐\n\n` +
-      `⚽ *Resultado:* ${ourScore} - ${oppScore}\n\n` +
+      `⚽ *Resultado:* ${ourScore} - ${oppScore} (${squadCount} jugadores)\n\n` +
       `⭐ *MÁXIMOS GOLEADORES:*\n` +
       `🥇 [ 1 | ${mp1} | ${mp1G}G ]\n` +
       `🥈 [ 2 | ${mp2} | ${mp2G}G ]\n` +
@@ -419,10 +468,10 @@ function formatRecap(t, lang = 'ru') {
     let closing = isWin ? "⚡ Красавцы парни! Идем дальше за победами!" : "⚡ Боевой матч! В след. матче только победа!";
     let strikesText = missed.length > 0
       ? `⛔ *ДИСЦИПЛИНА И СТРАЙКИ:*\n${missed.join('\n')}\n⛔ Страйк 1/3! Обязательно 3/3 в след. матче, иначе кик!`
-      : `✅ *100% ДИСЦИПЛИНА:* Все игроки сыграли 3/3!`;
+      : `✅ *100% ДИСЦИПЛИНА:* Все ${squadCount} игроков сыграли 3/3!`;
 
     return `⭐ *БРАТВА: ${outcome} vs ${opp}!* ⭐\n\n` +
-      `⚽ *Счет:* ${ourScore} - ${oppScore}\n\n` +
+      `⚽ *Счет:* ${ourScore} - ${oppScore} (В составе: ${squadCount} игроков)\n\n` +
       `⭐ *ЛУЧШИЕ ИГРОКИ:*\n` +
       `🥇 [ 1 | ${mp1} | ${mp1G}G ]\n` +
       `🥈 [ 2 | ${mp2} | ${mp2G}G ]\n` +
@@ -544,20 +593,105 @@ function generatePlayerStatsMessage(query) {
     `🌐 *Full Player Stats:*\n${WEBSITE_URL}`;
 }
 
+/**
+ * Handle Extracted AI Result (with incremental stitching & caching)
+ */
+async function handleTournamentResult(aiResult, chatId, res) {
+  if (!aiResult || aiResult.is_tournament_screenshot === false) {
+    await sendTelegramMessage(chatId, '⚠️ *Not a valid EA FC Mobile tournament screenshot!*');
+    return sendResponse(res, 200, 'OK');
+  }
+
+  if (aiResult.status === 'LIVE') {
+    const unplayed = (aiResult.players || []).filter(p => p.turns_played < 3 || p.limit_remaining === '3/3');
+    const pLines = unplayed.map(p => `[ ⏳ | ${clean(p.name)} | ${p.turns_played}/3 ]`).join('\n');
+    const liveMsg = `🟢 *LIVE MATCH: vs ${clean(aiResult.opponent_league)}*\nScore: ${aiResult.score_bratva} - ${aiResult.score_opponent}\n\n` +
+      `⛔ *ATTENTION PLEASE:*\n${pLines}\n\n⏳ Match ending soon! Attack 3/3 ASAP!`;
+    await sendTelegramMessage(chatId, liveMsg);
+    return sendResponse(res, 200, 'OK');
+  }
+
+  const dateStr = new Date().toISOString().split('T')[0];
+  const oppSlug = (aiResult.opponent_league || 'opponent').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const tId = `${dateStr}_${oppSlug}`;
+
+  const extractedMatches = (aiResult.players || []).map((p, idx) => ({
+    board_order: p.board_order || (idx + 1),
+    player_id: (p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || `player_${idx}`,
+    player_display_name: p.name,
+    ovr: p.ovr || 125,
+    goals_for: p.goals !== undefined ? p.goals : 0,
+    turns_played: p.turns_played !== undefined ? p.turns_played : (p.limit_remaining === '0/3' ? 3 : (p.limit_remaining === '3/3' ? 0 : 2))
+  }));
+
+  let tData = {
+    id: tId,
+    date: dateStr,
+    timestamp: Date.now(),
+    opponent_league: aiResult.opponent_league || 'OPPONENT',
+    our_total_goals: aiResult.score_bratva || 0,
+    opponent_total_goals: aiResult.score_opponent || 0,
+    result: (aiResult.score_bratva > aiResult.score_opponent) ? 'win' : (aiResult.score_bratva === aiResult.score_opponent ? 'draw' : 'loss'),
+    status: 'complete',
+    total_turns_played: aiResult.turns_bratva || 0,
+    max_possible_turns: aiResult.turns_max || 48,
+    matches: extractedMatches
+  };
+
+  // Smart Incremental Stitching: If same match was already partially captured, merge!
+  if (globalLatestTournament &&
+      globalLatestTournament.opponent_league.toLowerCase() === tData.opponent_league.toLowerCase() &&
+      (Date.now() - (globalLatestTournament.timestamp || 0)) < 30 * 60 * 1000) {
+    const existingMap = new Map(globalLatestTournament.matches.map(m => [m.player_id, m]));
+    extractedMatches.forEach(m => {
+      existingMap.set(m.player_id, m);
+    });
+    tData.matches = Array.from(existingMap.values()).sort((a, b) => (a.board_order || 99) - (b.board_order || 99));
+    tData.our_total_goals = Math.max(tData.our_total_goals, globalLatestTournament.our_total_goals);
+    tData.opponent_total_goals = Math.max(tData.opponent_total_goals, globalLatestTournament.opponent_total_goals);
+    tData.result = (tData.our_total_goals > tData.opponent_total_goals) ? 'win' : (tData.our_total_goals === tData.opponent_total_goals ? 'draw' : 'loss');
+  }
+
+  // Update in-memory live cache
+  globalLatestTournament = tData;
+
+  const recap = formatRecap(tData, 'ru');
+  const keys = getTabsKeyboard('ru', 0);
+
+  // Send to Channel and User
+  await sendTelegramMessage(CHANNEL_ID, recap, keys);
+  await sendTelegramMessage(chatId, `🔴 *MATCH COMPLETED & BROADCASTED TO ${CHANNEL_ID}!*\n\n${recap}`, keys);
+
+  // Commit to GitHub asynchronously
+  githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`)
+    .then(existingFile => {
+      const fileContent = Buffer.from(JSON.stringify(tData, null, 2)).toString('base64');
+      const commitPayload = {
+        message: `Auto-Update: Recorded tournament vs ${tData.opponent_league} (${tData.matches.length} players)`,
+        content: fileContent
+      };
+      if (existingFile && existingFile.sha) commitPayload.sha = existingFile.sha;
+      return githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`, 'PUT', commitPayload);
+    })
+    .catch(ghErr => console.error('GitHub API Commit Error:', ghErr));
+
+  return sendResponse(res, 200, 'OK');
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       return sendResponse(res, 200, {
         status: 'online',
         bot: 'BratvaFCMBot',
-        mode: 'Vercel Serverless 24/7',
+        mode: 'Vercel Serverless 24/7 (Multi-Screenshot & Two-Column Support)',
         channel: CHANNEL_ID,
         website: WEBSITE_URL,
         has_token: Boolean(TELEGRAM_TOKEN),
         token_len: TELEGRAM_TOKEN ? TELEGRAM_TOKEN.length : 0,
         has_gemini: Boolean(GEMINI_KEY),
         has_pat: Boolean(GITHUB_PAT),
-        cached_tournament: globalLatestTournament ? globalLatestTournament.id : null,
+        cached_tournament: globalLatestTournament ? `${globalLatestTournament.id} (${globalLatestTournament.matches.length} players)` : null,
         timestamp: new Date().toISOString()
       }, true);
     }
@@ -589,14 +723,14 @@ export default async function handler(req, res) {
       return sendResponse(res, 200, 'OK');
     }
 
-    // Deduplication by update_id to prevent Telegram retry storm
+    // Deduplication by update_id
     const updateId = update.update_id;
     if (updateId) {
       if (processedUpdates.has(updateId)) {
         return sendResponse(res, 200, 'Duplicate update dropped');
       }
       processedUpdates.add(updateId);
-      if (processedUpdates.size > 200) {
+      if (processedUpdates.size > 300) {
         const first = processedUpdates.values().next().value;
         processedUpdates.delete(first);
       }
@@ -685,83 +819,60 @@ export default async function handler(req, res) {
     const chatId = message.chat.id;
     const text = (message.text || '').trim();
 
-    // 2.1 Photo processing (Gemini Vision AI)
+    // 2.1 Photo processing with Album (Media Group) Batching & Deduplication
     if (message.photo && message.photo.length > 0) {
+      const mediaGroupId = message.media_group_id;
       const largestPhoto = message.photo[message.photo.length - 1];
       const photoId = largestPhoto.file_unique_id || largestPhoto.file_id;
 
-      // Deduplicate photo to prevent re-analyzing the same image if Telegram retries
+      // Handle Album / Media Group (Multiple screenshots sent together)
+      if (mediaGroupId) {
+        if (!mediaGroupMap.has(mediaGroupId)) {
+          // Designated leader request: register and wait for other photos
+          mediaGroupMap.set(mediaGroupId, {
+            chatId,
+            photos: [largestPhoto.file_id],
+            isProcessing: false
+          });
+
+          // Wait 2500ms to collect all photos in this album
+          await new Promise(resolve => setTimeout(resolve, 2500));
+
+          const groupData = mediaGroupMap.get(mediaGroupId);
+          if (groupData && !groupData.isProcessing) {
+            groupData.isProcessing = true;
+            const count = groupData.photos.length;
+            await sendTelegramMessage(chatId, `🔍 *Analyzing ${count} tournament screenshots together with Gemini Vision AI...*`);
+
+            const buffers = await Promise.all(groupData.photos.map(fid => downloadTelegramFile(fid)));
+            const aiResult = await analyzeImagesWithGemini(buffers);
+            mediaGroupMap.delete(mediaGroupId);
+
+            return await handleTournamentResult(aiResult, chatId, res);
+          }
+          return sendResponse(res, 200, 'OK');
+        } else {
+          // Non-leader request of the same media group: accumulate photo and exit
+          const groupData = mediaGroupMap.get(mediaGroupId);
+          if (groupData && !groupData.photos.includes(largestPhoto.file_id)) {
+            groupData.photos.push(largestPhoto.file_id);
+          }
+          return sendResponse(res, 200, 'Photo buffered in media group');
+        }
+      }
+
+      // Single photo uploaded individually
       if (processingPhotos.has(photoId)) {
         return sendResponse(res, 200, 'Duplicate photo dropped');
       }
       processingPhotos.add(photoId);
-      setTimeout(() => processingPhotos.delete(photoId), 120000);
+      setTimeout(() => processingPhotos.delete(photoId), 90000);
 
-      await sendTelegramMessage(chatId, '🔍 *Analyzing screenshot with Gemini Vision AI...*');
+      await sendTelegramMessage(chatId, '🔍 *Analyzing tournament screenshot with Gemini Vision AI...*');
       const imgBuffer = await downloadTelegramFile(largestPhoto.file_id);
-      const aiResult = await analyzeImageWithGemini(imgBuffer);
+      const aiResult = await analyzeImagesWithGemini([imgBuffer]);
 
-      if (!aiResult || aiResult.is_tournament_screenshot === false) {
-        await sendTelegramMessage(chatId, '⚠️ *Not a valid EA FC Mobile tournament screenshot!*');
-        return sendResponse(res, 200, 'OK');
-      }
-
-      if (aiResult.status === 'LIVE') {
-        const unplayed = (aiResult.players || []).filter(p => p.turns_played < 3 || p.limit_remaining === '3/3');
-        const pLines = unplayed.map(p => `[ ⏳ | ${clean(p.name)} | ${p.turns_played}/3 ]`).join('\n');
-        const liveMsg = `🟢 *LIVE MATCH: vs ${clean(aiResult.opponent_league)}*\nScore: ${aiResult.score_bratva} - ${aiResult.score_opponent}\n\n` +
-          `⛔ *ATTENTION PLEASE:*\n${pLines}\n\n⏳ Match ending soon! Attack 3/3 ASAP!`;
-        await sendTelegramMessage(chatId, liveMsg);
-        return sendResponse(res, 200, 'OK');
-      }
-
-      const dateStr = new Date().toISOString().split('T')[0];
-      const oppSlug = (aiResult.opponent_league || 'opponent').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-      const tId = `${dateStr}_${oppSlug}`;
-
-      const tData = {
-        id: tId,
-        date: dateStr,
-        opponent_league: aiResult.opponent_league || 'OPPONENT',
-        our_total_goals: aiResult.score_bratva || 0,
-        opponent_total_goals: aiResult.score_opponent || 0,
-        result: (aiResult.score_bratva > aiResult.score_opponent) ? 'win' : (aiResult.score_bratva === aiResult.score_opponent ? 'draw' : 'loss'),
-        status: 'complete',
-        total_turns_played: aiResult.turns_bratva || 0,
-        max_possible_turns: aiResult.turns_max || 48,
-        matches: (aiResult.players || []).map((p, idx) => ({
-          player_id: (p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || `player_${idx}`,
-          player_display_name: p.name,
-          ovr: p.ovr || 125,
-          goals_for: p.goals || 0,
-          turns_played: p.turns_played !== undefined ? p.turns_played : (p.limit_remaining === '0/3' ? 3 : 0)
-        }))
-      };
-
-      // Store in global cache so translation tabs work immediately for this match
-      globalLatestTournament = tData;
-
-      const recap = formatRecap(tData, 'ru');
-      const keys = getTabsKeyboard('ru', 0);
-
-      // Send to Channel and User immediately
-      await sendTelegramMessage(CHANNEL_ID, recap, keys);
-      await sendTelegramMessage(chatId, `🔴 *MATCH COMPLETED & BROADCASTED TO ${CHANNEL_ID}!*\n\n${recap}`, keys);
-
-      // Commit to GitHub asynchronously
-      githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`)
-        .then(existingFile => {
-          const fileContent = Buffer.from(JSON.stringify(tData, null, 2)).toString('base64');
-          const commitPayload = {
-            message: `Auto-Update: Recorded tournament vs ${tData.opponent_league}`,
-            content: fileContent
-          };
-          if (existingFile && existingFile.sha) commitPayload.sha = existingFile.sha;
-          return githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`, 'PUT', commitPayload);
-        })
-        .catch(ghErr => console.error('GitHub API Commit Error:', ghErr));
-
-      return sendResponse(res, 200, 'OK');
+      return await handleTournamentResult(aiResult, chatId, res);
     }
 
     // 2.2 Text Command Routing
@@ -817,8 +928,9 @@ export default async function handler(req, res) {
 
     // 2.3 Default fallback (Welcome & Interactive Menu for ANY text)
     const welcome = `⚜️ *БРАТВА FCM LEAGUE BOT (24/7 Cloud)* ⚜️\n\n` +
-      `📸 *Отправь мне скриншот турнира из EA FC Mobile!*\n` +
-      `Я автоматически распознаю результат, обновлю сайт и отправлю отчет в канал!\n\n` +
+      `📸 *Отправь мне скриншоты турнира из EA FC Mobile!*\n` +
+      `Можешь отправить сразу до 4-5 скриншотов турнира (альбомом)!\n` +
+      `Я объединю всех игроков от 1 до 32, обновлю сайт и отправлю отчет в канал!\n\n` +
       `📋 *Доступные команды:* Выберите кнопку ниже 👇`;
 
     await sendTelegramMessage(chatId, welcome, getMainKeyboard());
