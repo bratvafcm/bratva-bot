@@ -231,7 +231,7 @@ function loadLeagueData() {
 }
 
 // Interactive Multilingual Tabs Keyboard
-function getMatchTabsKeyboard(activeLang = 'ru', tIndexNum = 0) {
+function getMatchTabsKeyboard(activeLang = 'ru', tIndexNum = 0, isChannel = false) {
   const keyboard = [
     [
       { text: (activeLang === 'ru' ? '• 🇷🇺 Русский •' : '🇷🇺 Русский'), callback_data: `tab_${tIndexNum}_ru` },
@@ -246,7 +246,7 @@ function getMatchTabsKeyboard(activeLang = 'ru', tIndexNum = 0) {
     ]
   ];
 
-  if (config.channel_id) {
+  if (config.channel_id && !isChannel) {
     keyboard.unshift([
       { text: '📢 Broadcast to Channel Now', callback_data: `pubchannel_${tIndexNum}` }
     ]);
@@ -966,6 +966,19 @@ async function pollUpdates() {
 
 // Handle Incoming Updates
 async function handleTelegramUpdate(update) {
+  // 0. Handle Bot added as Admin in Channel or Group
+  if (update.my_chat_member && update.my_chat_member.chat) {
+    const chat = update.my_chat_member.chat;
+    if (chat.type === 'channel') {
+      const chanId = chat.username ? `@${chat.username}` : String(chat.id);
+      config.channel_id = chanId;
+      config.auto_broadcast_channel = true;
+      saveConfig();
+      console.log(`Auto-configured channel: ${chat.title} (${chanId})`);
+    }
+    return;
+  }
+
   // 1. Handle Callback Query (Inline buttons)
   if (update.callback_query) {
     const cb = update.callback_query;
@@ -992,7 +1005,8 @@ async function handleTelegramUpdate(update) {
       const targetLang = parts[2] || 'ru';
 
       const updatedText = generateRecapByLang(tIndexNum, targetLang);
-      const updatedKeyboard = getMatchTabsKeyboard(targetLang, tIndexNum);
+      const isChannel = cb.message && cb.message.chat && cb.message.chat.type === 'channel';
+      const updatedKeyboard = getMatchTabsKeyboard(targetLang, tIndexNum, isChannel);
 
       try {
         await editMessageText(chatId, cb.message.message_id, updatedText, 'Markdown', updatedKeyboard);
@@ -1014,7 +1028,7 @@ async function handleTelegramUpdate(update) {
       }
 
       const chanMsg = generateRecapByLang(tIndexNum, 'ru'); // Default Russian for official broadcast
-      const chanKeyboard = getMatchTabsKeyboard('ru', tIndexNum);
+      const chanKeyboard = getMatchTabsKeyboard('ru', tIndexNum, true);
 
       try {
         await sendMessage(config.channel_id, chanMsg, 'Markdown', chanKeyboard);
@@ -1150,6 +1164,22 @@ async function handleTelegramUpdate(update) {
     return;
   }
 
+  if (text.startsWith('/broadcast') || text.startsWith('/publish')) {
+    if (!config.channel_id) {
+      await sendMessage(chatId, '❌ No channel linked! Use /setchannel @YourChannel first.');
+      return;
+    }
+    const chanRecap = generateRecapByLang(0, 'ru');
+    const chanKeys = getMatchTabsKeyboard('ru', 0, true);
+    try {
+      await sendMessage(config.channel_id, chanRecap, 'Markdown', chanKeys);
+      await sendMessage(chatId, `📢 *Recap successfully published to ${config.channel_id}!*`, 'Markdown');
+    } catch (e) {
+      await sendMessage(chatId, `❌ Failed to broadcast to ${config.channel_id}: ${e.message}`);
+    }
+    return;
+  }
+
   if (text.startsWith('/strikes')) {
     const strikes = generateStrikesMessage();
     await sendMessage(chatId, strikes);
@@ -1271,7 +1301,7 @@ async function handleTelegramUpdate(update) {
         if (config.channel_id && config.auto_broadcast_channel) {
           try {
             const chanRecap = generateRecapByLang(0, 'ru');
-            const chanKeys = getMatchTabsKeyboard('ru', 0);
+            const chanKeys = getMatchTabsKeyboard('ru', 0, true);
             await sendMessage(config.channel_id, chanRecap, 'Markdown', chanKeys);
             await sendMessage(chatId, `📢 *Автоматически опубликовано в канале / Auto-published to ${config.channel_id}!*`, 'Markdown');
           } catch (err) {
