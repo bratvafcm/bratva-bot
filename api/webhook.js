@@ -596,7 +596,7 @@ function generatePlayerStatsMessage(query) {
 /**
  * Handle Extracted AI Result (with incremental stitching & caching)
  */
-async function handleTournamentResult(aiResult, chatId, res) {
+async function handleTournamentResult(aiResult, chatId, res, isAlbum = false) {
   if (!aiResult || aiResult.is_tournament_screenshot === false) {
     await sendTelegramMessage(chatId, '⚠️ *Not a valid EA FC Mobile tournament screenshot!*');
     return sendResponse(res, 200, 'OK');
@@ -638,8 +638,9 @@ async function handleTournamentResult(aiResult, chatId, res) {
     matches: extractedMatches
   };
 
-  // Smart Incremental Stitching: If same match was already partially captured, merge!
-  if (globalLatestTournament &&
+  // Smart Incremental Stitching: Only merge for single photo uploads if same opponent within 30 min.
+  // For full albums (isAlbum = true), start 100% fresh and clean!
+  if (!isAlbum && globalLatestTournament &&
       globalLatestTournament.opponent_league.toLowerCase() === tData.opponent_league.toLowerCase() &&
       (Date.now() - (globalLatestTournament.timestamp || 0)) < 30 * 60 * 1000) {
     const existingMap = new Map(globalLatestTournament.matches.map(m => [m.player_id, m]));
@@ -848,7 +849,7 @@ export default async function handler(req, res) {
             const aiResult = await analyzeImagesWithGemini(buffers);
             mediaGroupMap.delete(mediaGroupId);
 
-            return await handleTournamentResult(aiResult, chatId, res);
+            return await handleTournamentResult(aiResult, chatId, res, true);
           }
           return sendResponse(res, 200, 'OK');
         } else {
@@ -872,10 +873,16 @@ export default async function handler(req, res) {
       const imgBuffer = await downloadTelegramFile(largestPhoto.file_id);
       const aiResult = await analyzeImagesWithGemini([imgBuffer]);
 
-      return await handleTournamentResult(aiResult, chatId, res);
+      return await handleTournamentResult(aiResult, chatId, res, false);
     }
 
     // 2.2 Text Command Routing
+    if (text.startsWith('/reset') || text.startsWith('/clear')) {
+      globalLatestTournament = null;
+      await sendTelegramMessage(chatId, '🧹 *Match cache reset!* You can now send fresh screenshots for a clean start.', getMainKeyboard());
+      return sendResponse(res, 200, 'OK');
+    }
+
     if (text.startsWith('/top') || text.startsWith('/leaderboard')) {
       const topMsg = generateTopScorersMessage();
       await sendTelegramMessage(chatId, topMsg, getMainKeyboard());
