@@ -2,3 +2,4 @@ node_modules/
 screenshots-inbox/
 .env
 *.log
+telegram-bot/config.json
