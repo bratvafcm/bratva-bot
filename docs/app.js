@@ -2748,16 +2748,19 @@ const BroadcastGenerator = {
     const dDivider = '----------------------------\n----------------------------';
 
     // =========================================================================
-    // 1. TOURNAMENT SQUAD CALL (Active vs Bayern 2 Monique - 8 Starters)
+    // 1. TOURNAMENT SQUAD CALL (Active Roster - Chosen Players on Top)
     // =========================================================================
-    const lineupList = `[ ⚽ | саня | 3/3 ]
-[ ⚽ | Mohamed_Osama | 3/3 ]
-[ ⚽ | RÈDHAWK前 | 3/3 ]
-[ ⚽ | Rogelio | 3/3 ]
-[ ⚽ | Abirsh07 | 3/3 ]
-[ ⚽ | DOXIBÉRO | 3/3 ]
-[ ⚽ | Тима | 3/3 ]
-[ ⚽ | DOXIBERO1 | 3/3 ]`;
+    const activeParticipants = [];
+    if (latestT && latestT.matches) {
+      latestT.matches.forEach(m => {
+        const pName = m.player_display_name || ((state.players || []).find(p => p.player_id === m.player_id)?.display_name || m.player_id);
+        activeParticipants.push(`[ ⚽ | ${pName} | 3/3 ]`);
+      });
+    }
+
+    const lineupList = activeParticipants.length > 0
+      ? activeParticipants.join('\n')
+      : `[ ⚽ | саня | 3/3 ]\n[ ⚽ | Abirsh07 | 3/3 ]\n[ ⚽ | DOXIBERO1 | 3/3 ]\n[ ⚽ | KOUSTAV_007 | 3/3 ]\n[ ⚽ | Omar | 3/3 ]\n[ ⚽ | Rogelio | 3/3 ]\n[ ⚽ | Mohamed_Osama | 3/3 ]\n[ ⚽ | Тима | 3/3 ]`;
 
     const rallyHeader = `⭐ СОСТАВ НА ТУРНИР / STARTING LINEUP ⭐\n${lineupList}`;
     const rallyRU = `⚔️ В БОЙ, БРАТВА! Состав выше — заходите и сыграйте 3/3!`;
@@ -2770,18 +2773,24 @@ ${dDivider}
 ${rallyEN}`;
 
     // =========================================================================
-    // 2. LIVE MATCH WARNING (Active Match Countdown + 8 Starters with 0/3)
+    // 2. LIVE MATCH WARNING (Active Countdown + Unplayed List)
     // =========================================================================
-    const liveHeader = `⛔ ВНИМАНИЕ / ATTENTION PLEASE ⛔
-[ ⏳ | саня | 0/3 ]
-[ ⏳ | Mohamed_Osama | 0/3 ]
-[ ⏳ | RÈDHAWK前 | 0/3 ]
-[ ⏳ | Rogelio | 0/3 ]
-[ ⏳ | Abirsh07 | 0/3 ]
-[ ⏳ | DOXIBÉRO | 0/3 ]
-[ ⏳ | Тима | 0/3 ]
-[ ⏳ | DOXIBERO1 | 0/3 ]`;
+    const liveUnplayed = [];
+    if (latestT && latestT.matches) {
+      latestT.matches.forEach(m => {
+        const turns = m.turns_played !== undefined ? m.turns_played : 0;
+        if (turns < rules.minTurnsPerTournament) {
+          const pName = m.player_display_name || ((state.players || []).find(p => p.player_id === m.player_id)?.display_name || m.player_id);
+          liveUnplayed.push(`[ ⏳ | ${pName} | ${turns}/${rules.minTurnsPerTournament} ]`);
+        }
+      });
+    }
 
+    const liveListStr = liveUnplayed.length > 0
+      ? liveUnplayed.join('\n')
+      : `[ ⏳ | саня | 0/3 ]\n[ ⏳ | Omar | 0/3 ]\n[ ⏳ | Abirsh07 | 0/3 ]`;
+
+    const liveHeader = `⛔ ВНИМАНИЕ / ATTENTION PLEASE ⛔\n${liveListStr}`;
     const liveRU = `⏳ До конца турнира мало времени! Сыграйте 3/3, чтобы избежать кика!`;
     const liveEN = `⏳ Match ending soon! Attack 3/3 ASAP to avoid kick!`;
 
@@ -2795,22 +2804,36 @@ ${liveEN}`;
     // 3. LAST MATCH RECAP (Energetic Squad Language + Boxed Ranks)
     // =========================================================================
     const lastT = completed[0] || {};
-    const lastOpp = lastT.opponent_league || 'ITALIANI F.C';
-    const lastOurScore = lastT.our_total_goals || 119;
-    const lastOppScore = lastT.opponent_total_goals || 216;
+    const lastOpp = lastT.opponent_league || 'IRAN. gold';
+    const lastOurScore = lastT.our_total_goals !== undefined ? lastT.our_total_goals : 277;
+    const lastOppScore = lastT.opponent_total_goals !== undefined ? lastT.opponent_total_goals : 277;
     const isWin = lastT.result === 'win' || (lastOurScore > lastOppScore);
+    const isDraw = lastT.result === 'draw' || (lastOurScore === lastOppScore);
+
     const matchPerformers = ((lastT.matches || []).slice()).sort((a, b) => (b.goals_for || 0) - (a.goals_for || 0));
     const mp1 = matchPerformers[0] ? ((state.players || []).find(p => p.player_id === matchPerformers[0].player_id)?.display_name || 'саня') : 'саня';
-    const mp1Goals = matchPerformers[0] ? matchPerformers[0].goals_for : 33;
-    const mp2 = matchPerformers[1] ? ((state.players || []).find(p => p.player_id === matchPerformers[1].player_id)?.display_name || 'Slothx8') : 'Slothx8';
-    const mp2Goals = matchPerformers[1] ? matchPerformers[1].goals_for : 30;
-    const mp3 = matchPerformers[2] ? ((state.players || []).find(p => p.player_id === matchPerformers[2].player_id)?.display_name || 'DOXIBÉRO') : 'DOXIBÉRO';
+    const mp1Goals = matchPerformers[0] ? matchPerformers[0].goals_for : 34;
+    const mp2 = matchPerformers[1] ? ((state.players || []).find(p => p.player_id === matchPerformers[1].player_id)?.display_name || 'Omar') : 'Omar';
+    const mp2Goals = matchPerformers[1] ? matchPerformers[1].goals_for : 31;
+    const mp3 = matchPerformers[2] ? ((state.players || []).find(p => p.player_id === matchPerformers[2].player_id)?.display_name || 'Abirsh07') : 'Abirsh07';
     const mp3Goals = matchPerformers[2] ? matchPerformers[2].goals_for : 28;
 
-    const titleRU = isWin ? `⭐ БРАТВА: ПОБЕДА vs ${lastOpp}!` : `⭐ БРАТВА: МАТЧ vs ${lastOpp}!`;
-    const titleEN = isWin ? `⭐ БРАТВА: BIG WIN vs ${lastOpp}!` : `⭐ БРАТВА: MATCH vs ${lastOpp}!`;
-    const closingRU = isWin ? '⚡ Красавцы парни! Идем дальше за победами!' : '⚡ Красавцы за голы! В след. матче берем реванш!';
-    const closingEN = isWin ? "⚡ Awesome game boys! Let's keep winning!" : '⚡ Great goals boys! Next match we get our revenge!';
+    let titleRU = `⭐ БРАТВА: МАТЧ vs ${lastOpp}!`;
+    let titleEN = `⭐ БРАТВА: MATCH vs ${lastOpp}!`;
+    let closingRU = '⚡ Красавцы за голы! В след. матче берем реванш!';
+    let closingEN = '⚡ Great goals boys! Next match we get our revenge!';
+
+    if (isWin) {
+      titleRU = `⭐ БРАТВА: ПОБЕДА vs ${lastOpp}!`;
+      titleEN = `⭐ БРАТВА: BIG WIN vs ${lastOpp}!`;
+      closingRU = '⚡ Красавцы парни! Идем дальше за победами!';
+      closingEN = "⚡ Awesome game boys! Let's keep winning!";
+    } else if (isDraw) {
+      titleRU = `⭐ БРАТВА: НИЧЬЯ vs ${lastOpp}!`;
+      titleEN = `⭐ БРАТВА: TIE vs ${lastOpp}!`;
+      closingRU = '⚡ Боевая ничья! В след. матче только победа!';
+      closingEN = '⚡ Hard-fought draw! Next match we take the win!';
+    }
 
     const reviewRU = `${titleRU}
 ⚽ Счет: ${lastOurScore} - ${lastOppScore}
@@ -3243,25 +3266,25 @@ const LeagueNewsModal = {
         sub: 'Real-time tournament events, notices, and match intelligence',
         items: [
           {
-            tag: 'LIVE TOURNAMENT',
+            tag: 'LATEST MATCH',
             tagClass: 'badge-live',
-            time: '~24h Remaining',
-            title: 'Active Match: БРАТВА 0 - 0 Bayern 2 Monique',
-            desc: '8v8 tournament kicked off vs Bayern 2 Monique. Selected 8 starters: саня, Mohamed_Osama, RÈDHAWK前, Rogelio, Abirsh07, DOXIBÉRO, Тима, DOXIBERO1.'
+            time: '19 Hours Ago',
+            title: 'Hard-Fought Draw: БРАТВА 277 - 277 IRAN. gold',
+            desc: 'Intense battle ending in a draw. Top scorers: саня (34G), Omar (31G), Abirsh07 (28G), KOUSTAV_007 (28G).'
           },
           {
-            tag: 'RECENT MATCH',
-            tagClass: 'badge-loss',
-            time: 'Previous Match',
-            title: 'Match Concluded: БРАТВА 159 - 181 РОССИЯ',
-            desc: 'Tough battle vs РОССИЯ. Top scorers: саня (33G), Omar (27G), DOXIBÉRO (26G), Mike (26G).'
-          },
-          {
-            tag: 'PREVIOUS VICTORY',
+            tag: 'RECENT VICTORY',
             tagClass: 'badge-win',
-            time: 'Previous Tournament',
-            title: 'Victory: БРАТВА 225 - 144 Team Work',
-            desc: 'Dominant team performance with 100% squad discipline. Top scorers: саня (37G), Mike (33G), DOXIBÉRO (31G).'
+            time: '1 Day Ago',
+            title: 'Win: БРАТВА 259 - 177 TH\'·TheDemon·\'FC',
+            desc: 'Dominant 16v16 triumph. Top scorers: саня (31G), Abirsh07 (28G), KOUSTAV_007 (28G), Mohamed_Osama (27G).'
+          },
+          {
+            tag: 'PRIOR VICTORIES',
+            tagClass: 'badge-win',
+            time: '3-4 Days Ago',
+            title: 'Wins vs الافضل الرياضي26 (302-193) & Bayern 2 Monique (217-148)',
+            desc: 'Consecutive strong victories keeping БРАТВА in strong championship form.'
           },
           {
             tag: 'SYSTEM REGULATION',
@@ -3277,18 +3300,18 @@ const LeagueNewsModal = {
         sub: 'Лента событий, статус турнира и командные сводки',
         items: [
           {
-            tag: 'МАТЧ ИДЕТ',
+            tag: 'ПОСЛЕДНИЙ МАТЧ',
             tagClass: 'badge-live',
-            time: 'Осталось ~40 мин',
-            title: 'Срочный матч: БРАТВА 159 - 181 РОССИЯ',
-            desc: 'Разрыв всего 22 гола! Игроки RÈDHAWK前 и Mohamed_Osama имеют по 3/3 попытки. Срочно зайдите в игру и забейте свои голы!'
+            time: '19 часов назад',
+            title: 'Боевая ничья: БРАТВА 277 - 277 IRAN. gold',
+            desc: 'Напряженная борьба до последней секунды. Топ бомбардиры: саня (34G), Omar (31G), Abirsh07 (28G), KOUSTAV_007 (28G).'
           },
           {
             tag: 'ПОБЕДА В МАТЧЕ',
             tagClass: 'badge-win',
-            time: 'Прошедший турнир',
-            title: 'Победа: БРАТВА 225 - 144 Team Work',
-            desc: 'Уверенная победа и 100% явка состава. Топ бомбардиры: саня (37 голов), Mike (33 гола), DOXIBÉRO (31 гол).'
+            time: '1 день назад',
+            title: 'Победа: БРАТВА 259 - 177 TH\'·TheDemon·\'FC',
+            desc: 'Уверенный разгром соперника 16 на 16. Топ игроки: саня (31G), Abirsh07 (28G), KOUSTAV_007 (28G).'
           },
           {
             tag: 'РЕГЛАМЕНТ',
@@ -3304,18 +3327,18 @@ const LeagueNewsModal = {
         sub: 'شريط الأحداث المباشرة، حالة المباراة، والقرارات الإدارية',
         items: [
           {
-            tag: 'مباراة جارية',
+            tag: 'آخر مباراة',
             tagClass: 'badge-live',
-            time: 'متبقي ~40 دقيقة',
-            title: 'معركة حاسمة: БРАТВА 159 - 181 РОССИЯ',
-            desc: 'الفارق 22 هدف فقط! اللاعبون RÈDHAWK前 و Mohamed_Osama متبقي لكل منهما 3/3 محاولات. ادخلوا للملعب وسجلوا أهدافكم لتحقيق الفوز!'
+            time: 'منذ 19 ساعة',
+            title: 'تعادل ملحمي: БРАТВА 277 - 277 IRAN. gold',
+            desc: 'مباراة قوية انتهت بالتعادل. الهدافون: саня (34 هدف)، Omar (31 هدف)، Abirsh07 (28 هدف)، KOUSTAV_007 (28 هدف).'
           },
           {
             tag: 'فوز مستحق',
             tagClass: 'badge-win',
-            time: 'البطولة السابقة',
-            title: 'انتصار ساحق: БРАТВА 225 - 144 Team Work',
-            desc: 'أداء جماعي رائع مع انضباط 100%. هدافو المباراة: саня (37 هدف)، Mike (33 هدف)، DOXIBÉRO (31 هدف).'
+            time: 'منذ يوم',
+            title: 'انتصار: БРАТВА 259 - 177 TH\'·TheDemon·\'FC',
+            desc: 'فوز عريض بنتيجة 259 - 177 في مواجهة 16 ضد 16.'
           },
           {
             tag: 'نظام الانضباط',
@@ -3331,18 +3354,18 @@ const LeagueNewsModal = {
         sub: 'Estado del torneo en vivo, alertas y avisos oficiales',
         items: [
           {
-            tag: 'PARTIDO EN VIVO',
+            tag: 'ÚLTIMO PARTIDO',
             tagClass: 'badge-live',
-            time: 'Quedan ~40 min',
-            title: 'Batalla en directo: БРАТВА 159 - 181 РОССИЯ',
-            desc: '¡La diferencia es de solo 22 goles! RÈDHAWK前 y Mohamed_Osama tienen 3/3 turnos pendientes. ¡Al campo a asegurar la victoria!'
+            time: 'Hace 19 horas',
+            title: 'Empate reñido: БРАТВА 277 - 277 IRAN. gold',
+            desc: 'Gran partido que finalizó en tablas. Máximos goleadores: саня (34G), Omar (31G), Abirsh07 (28G).'
           },
           {
             tag: 'VICTORIA',
             tagClass: 'badge-win',
-            time: 'Último torneo',
-            title: 'Victoria: БРАТВА 225 - 144 Team Work',
-            desc: 'Excelente rendimiento con 100% de turnos jugados. Goleadores: саня (37G), Mike (33G), DOXIBÉRO (31G).'
+            time: 'Hace 1 día',
+            title: 'Victoria: БРАТВА 259 - 177 TH\'·TheDemon·\'FC',
+            desc: 'Triunfo claro por 259 a 177 en formato 16 contra 16.'
           },
           {
             tag: 'REGLAMENTO ACTIVO',
@@ -3354,7 +3377,6 @@ const LeagueNewsModal = {
         ]
       }
     };
-
     const c = newsData[lang] || newsData.en;
 
     container.innerHTML = `

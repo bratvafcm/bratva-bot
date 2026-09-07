@@ -26,6 +26,42 @@
       "turns_played": 0,
       "player_display_name": "ProGamer",
       "player_id": "progamer"
+    },
+    {
+      "tournament_id": "2026-09-04_al-afdal-al-riyadi-26",
+      "match_index_in_tournament": 15,
+      "opponent_display_name": "الافضل الرياضي26",
+      "opponent_id": "26",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "ProGamer",
+      "player_id": "progamer"
+    },
+    {
+      "tournament_id": "2026-09-06_th-thedemon-fc",
+      "match_index_in_tournament": 15,
+      "opponent_display_name": "TH'·TheDemon·'FC",
+      "opponent_id": "th_thedemon_fc",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "ProGamer",
+      "player_id": "progamer"
+    },
+    {
+      "tournament_id": "2026-09-07_iran-gold",
+      "match_index_in_tournament": 15,
+      "opponent_display_name": "IRAN. gold",
+      "opponent_id": "iran_gold",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "draw",
+      "turns_played": 0,
+      "player_display_name": "ProGamer",
+      "player_id": "progamer"
     }
   ]
 }

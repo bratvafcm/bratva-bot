@@ -68,5 +68,37 @@
     "opponent_total_goals": 216,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-09-03_bayern-2-monique": {
+    "date": "2026-09-03",
+    "opponent_league": "Bayern 2 Monique",
+    "our_total_goals": 217,
+    "opponent_total_goals": 148,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-09-04_al-afdal-al-riyadi-26": {
+    "date": "2026-09-04",
+    "opponent_league": "الافضل الرياضي26",
+    "our_total_goals": 302,
+    "opponent_total_goals": 193,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-09-06_th-thedemon-fc": {
+    "date": "2026-09-06",
+    "opponent_league": "TH'·TheDemon·'FC",
+    "our_total_goals": 259,
+    "opponent_total_goals": 177,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-09-07_iran-gold": {
+    "date": "2026-09-07",
+    "opponent_league": "IRAN. gold",
+    "our_total_goals": 277,
+    "opponent_total_goals": 277,
+    "result": "draw",
+    "status": "complete"
   }
 }

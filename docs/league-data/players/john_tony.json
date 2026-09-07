@@ -38,6 +38,18 @@
       "turns_played": 0,
       "player_display_name": "John_Tony",
       "player_id": "john_tony"
+    },
+    {
+      "tournament_id": "2026-09-04_al-afdal-al-riyadi-26",
+      "match_index_in_tournament": 10,
+      "opponent_display_name": "الافضل الرياضي26",
+      "opponent_id": "26",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "John_Tony",
+      "player_id": "john_tony"
     }
   ],
   "eligibility_streak": {

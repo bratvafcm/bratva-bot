@@ -110,6 +110,42 @@
       "turns_played": 3,
       "player_display_name": "DOXIBÉRO",
       "player_id": "doxibro"
+    },
+    {
+      "tournament_id": "2026-09-03_bayern-2-monique",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "Bayern 2 Monique",
+      "opponent_id": "bayern_2_monique",
+      "goals_for": 29,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "DOXIBÉRO",
+      "player_id": "doxibro"
+    },
+    {
+      "tournament_id": "2026-09-06_th-thedemon-fc",
+      "match_index_in_tournament": 11,
+      "opponent_display_name": "TH'·TheDemon·'FC",
+      "opponent_id": "th_thedemon_fc",
+      "goals_for": 19,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "DOXIBÉRO",
+      "player_id": "doxibro"
+    },
+    {
+      "tournament_id": "2026-09-07_iran-gold",
+      "match_index_in_tournament": 12,
+      "opponent_display_name": "IRAN. gold",
+      "opponent_id": "iran_gold",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "draw",
+      "turns_played": 0,
+      "player_display_name": "DOXIBÉRO",
+      "player_id": "doxibro"
     }
   ],
   "eligibility_streak": {

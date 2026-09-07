@@ -1,0 +1,31 @@
+{
+  "player_id": "sushenley",
+  "display_name": "SUSHEnley",
+  "known_aliases": [],
+  "matches": [
+    {
+      "tournament_id": "2026-09-06_th-thedemon-fc",
+      "match_index_in_tournament": 10,
+      "opponent_display_name": "TH'·TheDemon·'FC",
+      "opponent_id": "th_thedemon_fc",
+      "goals_for": 22,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "SUSHEnley",
+      "player_id": "sushenley"
+    },
+    {
+      "tournament_id": "2026-09-07_iran-gold",
+      "match_index_in_tournament": 10,
+      "opponent_display_name": "IRAN. gold",
+      "opponent_id": "iran_gold",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "draw",
+      "turns_played": 0,
+      "player_display_name": "SUSHEnley",
+      "player_id": "sushenley"
+    }
+  ]
+}
