@@ -15,6 +15,15 @@ const GITHUB_REPO = process.env.GITHUB_REPO || 'fc-bratva/fc-bratva.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
 const WEBSITE_URL = 'https://fc-bratva.github.io/';
 
+// Global in-memory cache and deduplication sets (persist across warm invocations)
+let globalLatestTournament = null;
+const processedUpdates = new Set();
+const processingPhotos = new Set();
+
+function clean(str) {
+  return String(str || '').replace(/[_*`\[\]()]/g, ' ').trim();
+}
+
 function sendResponse(res, statusCode, body, isJson = false) {
   if (typeof res.status === 'function') {
     if (isJson && typeof res.json === 'function') {
@@ -76,6 +85,27 @@ async function sendTelegramMessage(chatId, text, replyMarkup = null) {
       return await telegramRequest('sendMessage', plainParams);
     } catch (e) {
       console.error('sendTelegramMessage plain fallback error:', e);
+    }
+  }
+}
+
+async function editTelegramMessage(chatId, messageId, text, replyMarkup = null) {
+  try {
+    const params = { chat_id: chatId, message_id: messageId, text: text, parse_mode: 'Markdown' };
+    if (replyMarkup) params.reply_markup = replyMarkup;
+    const res = await telegramRequest('editMessageText', params);
+    if (!res.ok) {
+      delete params.parse_mode;
+      return await telegramRequest('editMessageText', params);
+    }
+    return res;
+  } catch (err) {
+    try {
+      const plainParams = { chat_id: chatId, message_id: messageId, text: text.replace(/[*_`\[\]()]/g, '') };
+      if (replyMarkup) plainParams.reply_markup = replyMarkup;
+      return await telegramRequest('editMessageText', plainParams);
+    } catch (e) {
+      console.error('editTelegramMessage plain error:', e);
     }
   }
 }
@@ -184,6 +214,7 @@ function loadLeagueData() {
 }
 
 async function getLatestTournament() {
+  if (globalLatestTournament) return globalLatestTournament;
   const { tournaments } = loadLeagueData();
   if (tournaments && tournaments.length > 0) return tournaments[0];
   const tIndex = await fetchGithubJson('docs/league-data/index/tournaments_index.json');
@@ -309,25 +340,25 @@ function getTabsKeyboard(lang, tIndexNum = 0) {
 
 function formatRecap(t, lang = 'ru') {
   if (!t) return 'No match data available.';
-  const opp = t.opponent_league || 'OPPONENT';
+  const opp = clean(t.opponent_league || 'OPPONENT');
   const ourScore = t.our_total_goals || 0;
   const oppScore = t.opponent_total_goals || 0;
   const isWin = ourScore > oppScore;
   const isDraw = ourScore === oppScore;
 
   const performers = ((t.matches || []).slice()).sort((a, b) => (b.goals_for || 0) - (a.goals_for || 0));
-  const mp1 = performers[0]?.player_display_name || 'Player 1';
+  const mp1 = clean(performers[0]?.player_display_name || 'Player 1');
   const mp1G = performers[0]?.goals_for || 0;
-  const mp2 = performers[1]?.player_display_name || 'Player 2';
+  const mp2 = clean(performers[1]?.player_display_name || 'Player 2');
   const mp2G = performers[1]?.goals_for || 0;
-  const mp3 = performers[2]?.player_display_name || 'Player 3';
+  const mp3 = clean(performers[2]?.player_display_name || 'Player 3');
   const mp3G = performers[2]?.goals_for || 0;
 
   const missed = [];
   if (t.matches) {
     t.matches.forEach(m => {
       const turns = m.turns_played !== undefined ? m.turns_played : 0;
-      if (turns < 3) missed.push(`[ ❌ | ${m.player_display_name} | ${turns}/3 ]`);
+      if (turns < 3) missed.push(`[ ❌ | ${clean(m.player_display_name)} | ${turns}/3 ]`);
     });
   }
 
@@ -407,7 +438,7 @@ function generateTopScorersMessage() {
   const { pIndex } = loadLeagueData();
   const list = Object.entries(pIndex).map(([id, data]) => ({
     id,
-    name: data.display_name || id,
+    name: clean(data.display_name || id),
     goals: data.total_goals || 0,
     matches: data.total_matches || 0,
     avg: data.average_goals || 0
@@ -432,7 +463,7 @@ async function generateStrikesMessage() {
   if (t.matches) {
     t.matches.forEach(m => {
       const turns = m.turns_played !== undefined ? m.turns_played : 0;
-      if (turns < 3) missed.push(`[ ❌ | ${m.player_display_name} | ${turns}/3 ]`);
+      if (turns < 3) missed.push(`[ ❌ | ${clean(m.player_display_name)} | ${turns}/3 ]`);
     });
   }
 
@@ -450,7 +481,7 @@ function generateLineupMessage() {
   const { pIndex } = loadLeagueData();
   const list = Object.entries(pIndex).map(([id, data]) => ({
     id,
-    name: data.display_name || id,
+    name: clean(data.display_name || id),
     goals: data.total_goals || 0,
     matches: data.total_matches || 0,
     avg: data.average_goals || 0,
@@ -473,7 +504,7 @@ async function generateTournamentsMessage() {
 
   const lines = list.map(t => {
     const resIcon = t.result === 'win' ? '🟢 WIN' : (t.result === 'draw' ? '🟡 DRAW' : '🔴 LOSS');
-    return `• *vs ${t.opponent_league}* (${t.date}): ${t.our_total_goals} - ${t.opponent_total_goals} [${resIcon}]`;
+    return `• *vs ${clean(t.opponent_league)}* (${t.date}): ${t.our_total_goals} - ${t.opponent_total_goals} [${resIcon}]`;
   });
 
   return `📊 *RECENT TOURNAMENTS / ПОСЛЕДНИЕ ТУРНИРЫ:*\n\n${lines.join('\n')}\n\n🌐 *Full Match History:*\n${WEBSITE_URL}`;
@@ -495,7 +526,7 @@ function generatePlayerStatsMessage(query) {
   });
 
   if (!found) {
-    return `❌ Player "${query}" not found. Try /top to view top players list.\n🌐 ${WEBSITE_URL}`;
+    return `❌ Player "${clean(query)}" not found. Try /top to view top players list.\n🌐 ${WEBSITE_URL}`;
   }
 
   const indexData = pIndex[found.player_id] || {};
@@ -504,7 +535,7 @@ function generatePlayerStatsMessage(query) {
   const avg = totalMatches > 0 ? (totalGoals / totalMatches).toFixed(1) : 0;
   const strikes = indexData.eligibility_streak?.current_fail_streak || 0;
 
-  return `👤 *PLAYER PROFILE: ${found.display_name}*\n` +
+  return `👤 *PLAYER PROFILE: ${clean(found.display_name)}*\n` +
     `----------------------------\n` +
     `⚽ Total Goals: *${totalGoals}*\n` +
     `🏟️ Tournaments: *${totalMatches}*\n` +
@@ -526,6 +557,7 @@ export default async function handler(req, res) {
         token_len: TELEGRAM_TOKEN ? TELEGRAM_TOKEN.length : 0,
         has_gemini: Boolean(GEMINI_KEY),
         has_pat: Boolean(GITHUB_PAT),
+        cached_tournament: globalLatestTournament ? globalLatestTournament.id : null,
         timestamp: new Date().toISOString()
       }, true);
     }
@@ -557,6 +589,19 @@ export default async function handler(req, res) {
       return sendResponse(res, 200, 'OK');
     }
 
+    // Deduplication by update_id to prevent Telegram retry storm
+    const updateId = update.update_id;
+    if (updateId) {
+      if (processedUpdates.has(updateId)) {
+        return sendResponse(res, 200, 'Duplicate update dropped');
+      }
+      processedUpdates.add(updateId);
+      if (processedUpdates.size > 200) {
+        const first = processedUpdates.values().next().value;
+        processedUpdates.delete(first);
+      }
+    }
+
     // 1. Handle Callback Query (Buttons)
     if (update.callback_query) {
       const cb = update.callback_query;
@@ -572,16 +617,11 @@ export default async function handler(req, res) {
         const updatedText = formatRecap(t, targetLang);
         const updatedKeyboard = getTabsKeyboard(targetLang, tIndexNum);
 
-        try {
-          await telegramRequest('editMessageText', {
-            chat_id: chatId,
-            message_id: cb.message.message_id,
-            text: updatedText,
-            parse_mode: 'Markdown',
-            reply_markup: updatedKeyboard
-          });
-        } catch (e) {}
-        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        await editTelegramMessage(chatId, cb.message.message_id, updatedText, updatedKeyboard);
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: `✓ ${targetLang.toUpperCase()}`
+        });
         return sendResponse(res, 200, 'OK');
       }
 
@@ -647,8 +687,17 @@ export default async function handler(req, res) {
 
     // 2.1 Photo processing (Gemini Vision AI)
     if (message.photo && message.photo.length > 0) {
-      await sendTelegramMessage(chatId, '🔍 *Analyzing screenshot with Gemini Vision AI...*');
       const largestPhoto = message.photo[message.photo.length - 1];
+      const photoId = largestPhoto.file_unique_id || largestPhoto.file_id;
+
+      // Deduplicate photo to prevent re-analyzing the same image if Telegram retries
+      if (processingPhotos.has(photoId)) {
+        return sendResponse(res, 200, 'Duplicate photo dropped');
+      }
+      processingPhotos.add(photoId);
+      setTimeout(() => processingPhotos.delete(photoId), 120000);
+
+      await sendTelegramMessage(chatId, '🔍 *Analyzing screenshot with Gemini Vision AI...*');
       const imgBuffer = await downloadTelegramFile(largestPhoto.file_id);
       const aiResult = await analyzeImageWithGemini(imgBuffer);
 
@@ -659,8 +708,8 @@ export default async function handler(req, res) {
 
       if (aiResult.status === 'LIVE') {
         const unplayed = (aiResult.players || []).filter(p => p.turns_played < 3 || p.limit_remaining === '3/3');
-        const pLines = unplayed.map(p => `[ ⏳ | ${p.name} | ${p.turns_played}/3 ]`).join('\n');
-        const liveMsg = `🟢 *LIVE MATCH: vs ${aiResult.opponent_league}*\nScore: ${aiResult.score_bratva} - ${aiResult.score_opponent}\n\n` +
+        const pLines = unplayed.map(p => `[ ⏳ | ${clean(p.name)} | ${p.turns_played}/3 ]`).join('\n');
+        const liveMsg = `🟢 *LIVE MATCH: vs ${clean(aiResult.opponent_league)}*\nScore: ${aiResult.score_bratva} - ${aiResult.score_opponent}\n\n` +
           `⛔ *ATTENTION PLEASE:*\n${pLines}\n\n⏳ Match ending soon! Attack 3/3 ASAP!`;
         await sendTelegramMessage(chatId, liveMsg);
         return sendResponse(res, 200, 'OK');
@@ -681,7 +730,7 @@ export default async function handler(req, res) {
         total_turns_played: aiResult.turns_bratva || 0,
         max_possible_turns: aiResult.turns_max || 48,
         matches: (aiResult.players || []).map((p, idx) => ({
-          player_id: p.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || `player_${idx}`,
+          player_id: (p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || `player_${idx}`,
           player_display_name: p.name,
           ovr: p.ovr || 125,
           goals_for: p.goals || 0,
@@ -689,24 +738,28 @@ export default async function handler(req, res) {
         }))
       };
 
-      try {
-        const fileContent = Buffer.from(JSON.stringify(tData, null, 2)).toString('base64');
-        const existingFile = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`);
-        const commitPayload = {
-          message: `Auto-Update: Recorded tournament vs ${tData.opponent_league}`,
-          content: fileContent
-        };
-        if (existingFile && existingFile.sha) commitPayload.sha = existingFile.sha;
-        await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`, 'PUT', commitPayload);
-      } catch (ghErr) {
-        console.error('GitHub API Commit Error:', ghErr);
-      }
+      // Store in global cache so translation tabs work immediately for this match
+      globalLatestTournament = tData;
 
       const recap = formatRecap(tData, 'ru');
       const keys = getTabsKeyboard('ru', 0);
 
+      // Send to Channel and User immediately
       await sendTelegramMessage(CHANNEL_ID, recap, keys);
       await sendTelegramMessage(chatId, `🔴 *MATCH COMPLETED & BROADCASTED TO ${CHANNEL_ID}!*\n\n${recap}`, keys);
+
+      // Commit to GitHub asynchronously
+      githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`)
+        .then(existingFile => {
+          const fileContent = Buffer.from(JSON.stringify(tData, null, 2)).toString('base64');
+          const commitPayload = {
+            message: `Auto-Update: Recorded tournament vs ${tData.opponent_league}`,
+            content: fileContent
+          };
+          if (existingFile && existingFile.sha) commitPayload.sha = existingFile.sha;
+          return githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`, 'PUT', commitPayload);
+        })
+        .catch(ghErr => console.error('GitHub API Commit Error:', ghErr));
 
       return sendResponse(res, 200, 'OK');
     }
