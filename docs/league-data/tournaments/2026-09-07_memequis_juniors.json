@@ -1,0 +1,54 @@
+{
+  "id": "2026-09-07_memequis_juniors",
+  "date": "2026-09-07",
+  "timestamp": 1788821806502,
+  "opponent_league": "Memequis Juniors",
+  "our_total_goals": 155,
+  "opponent_total_goals": 220,
+  "result": "loss",
+  "status": "complete",
+  "total_turns_played": 18,
+  "max_possible_turns": 48,
+  "matches": [
+    {
+      "board_order": 12,
+      "player_id": "real",
+      "player_display_name": "Real",
+      "ovr": 124,
+      "goals_for": 19,
+      "turns_played": 2
+    },
+    {
+      "board_order": 13,
+      "player_id": "doxib_ro",
+      "player_display_name": "DOXIBÉRO",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 14,
+      "player_id": "player_2",
+      "player_display_name": "Тима",
+      "ovr": 124,
+      "goals_for": 6,
+      "turns_played": 1
+    },
+    {
+      "board_order": 15,
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
+      "ovr": 123,
+      "goals_for": 27,
+      "turns_played": 3
+    },
+    {
+      "board_order": 16,
+      "player_id": "progamer",
+      "player_display_name": "ProGamer",
+      "ovr": 122,
+      "goals_for": 0,
+      "turns_played": 0
+    }
+  ]
+}
