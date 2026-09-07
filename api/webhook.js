@@ -3,7 +3,7 @@
  * 100% Free, 24/7 Always-On, Zero Credit Card Required
  */
 
-const https = require('https');
+import https from 'https';
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const GEMINI_KEY = process.env.GEMINI_KEY;
@@ -265,7 +265,7 @@ function formatRecap(t, lang = 'ru') {
   }
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   if (req.method === 'GET') {
     return res.status(200).json({ status: 'online', bot: 'BratvaFCMBot', mode: 'Vercel Serverless 24/7' });
   }
