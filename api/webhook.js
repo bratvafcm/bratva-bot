@@ -1,10 +1,11 @@
 /**
  * Vercel Serverless Telegram Webhook Handler for БРАТВА FCM LEAGUE
  * 100% Free, 24/7 Always-On, Zero Credit Card Required
+ * Powered by Google Gemini 3.6 Flash (Latest 2026 Architecture)
+ * 
  * Features:
- * - Multi-screenshot Album Batching (media_group_id)
- * - Incremental Multi-Screenshot Board Stitching (1-32 players)
- * - Two-Column Layout Intelligence (Left = БРАТВА, Right = Opponent ignored)
+ * - Cross-Instance Multi-Screenshot Album Batching (via GitHub .tmp store)
+ * - Two-Column Layout Intelligence (Left = БРАТВА only, Right = Opponent ignored)
  * - Top-to-Bottom Rank Preserving Extraction (#1 to #N)
  * - Multilingual Instant Tabs (RU, EN, AR, ES)
  * - Safe Markdown & Automatic Plain-Text Fallback
@@ -16,11 +17,15 @@ import path from 'path';
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const GEMINI_KEY = process.env.GEMINI_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 const GITHUB_PAT = process.env.GITHUB_PAT;
 const GITHUB_REPO = process.env.GITHUB_REPO || 'fc-bratva/fc-bratva.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
 const WEBSITE_URL = 'https://fc-bratva.github.io/';
+
+export const config = {
+  maxDuration: 60
+};
 
 // Global in-memory cache and state (persists across warm invocations)
 let globalLatestTournament = null;
@@ -234,10 +239,10 @@ async function getLatestTournament() {
 }
 
 /**
- * High-Precision Multi-Image Analysis with Google Gemini Vision
+ * High-Precision Multi-Image Analysis with Google Gemini 3.6 Flash
  * Correctly handles:
  * - Two-column screen (LEFT = БРАТВА only, RIGHT = Opponent ignored)
- * - Multi-screenshot stitching and deduplication across 1-4 images
+ * - Multi-screenshot stitching and deduplication across 1-5 images
  * - Exact board order #1 to #N
  * - Limit & turns mapping
  */
@@ -246,7 +251,7 @@ function analyzeImagesWithGemini(imageBuffers) {
     if (!GEMINI_KEY) return reject(new Error('GEMINI_KEY environment variable is missing'));
 
     const prompt = `You are the master tournament data auditor for EA Sports FC Mobile league "БРАТВА".
-You are analyzing ${imageBuffers.length} screenshot(s) of the SAME tournament leaderboard.
+You are analyzing ${imageBuffers.length} screenshots of the SAME tournament leaderboard.
 
 CRITICAL RULES & SCREEN LAYOUT:
 1. TWO COLUMNS ON SCREEN:
@@ -257,20 +262,20 @@ CRITICAL RULES & SCREEN LAYOUT:
    - The user scrolled down the tournament table to capture all squad members across multiple screenshots.
    - Consecutive screenshots may overlap (a player visible at the bottom of one screenshot might appear at the top of the next).
    - DEDUPLICATE: Each player must appear EXACTLY ONCE in your final output.
-   - PRESERVE EXACT BOARD ORDER: On the far left of each row is a rank number (1, 2, 3... up to 32). Sort the players in exact top-to-bottom order (#1 to #N).
+   - PRESERVE EXACT BOARD ORDER: On the far left of each row is a rank number (1, 2, 3... up to 16 or 32). Sort the players in exact top-to-bottom order (#1 to #N).
 
-3. SCORE & HEADER (Look at the top banner):
-   - Left side: "БРАТВА" score (e.g. 403 or 155) and turns (e.g. "47/96 TURNS" or "18/48 TURNS").
-   - Right side: Opponent league name (e.g. "Team Work" or "Memequis Juniors") and opponent score.
-   - Status: "LIVE" if active timer (e.g. "03:49:49"); "HISTORY" if completed (e.g. "12 MINS AGO", "1 DAY AGO", "HISTORY", or "FINAL").
+3. SCORE & HEADER (Look at top banner):
+   - Left side: "БРАТВА" score (e.g. 155) and turns (e.g. "18/48 TURNS").
+   - Right side: Opponent league name (e.g. "Memequis Juniors") and score (e.g. 220).
+   - Status: "HISTORY" (completed) or "LIVE" if active timer.
 
 4. PLAYER ROW EXTRACTION (FROM LEFT COLUMN ONLY):
-   - "board_order": Row rank number (1 to 32).
+   - "board_order": Row rank number (1 to 16 or 32).
    - "name": Player's exact display name (top line in row). Do NOT translate or modify.
-   - "ovr": OVR rating number shown below the player's name (e.g. 124, 125, 127).
-   - "goals": The number next to the football icon under the "GOALS" column.
+   - "ovr": OVR rating number shown below player name (e.g. 124, 125, 128).
+   - "goals": The number next to the football icon under "GOALS".
    - "limit_remaining": Text under "LIMIT" column: "0/3", "1/3", "2/3", or "3/3".
-   - "turns_played": Calculate strictly:
+   - "turns_played":
      * "0/3" = 3 turns played (0 left) -> 3
      * "1/3" = 2 turns played (1 left) -> 2
      * "2/3" = 1 turn played (2 left) -> 1
@@ -310,35 +315,42 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
 
     const payload = JSON.stringify({ contents: [{ parts }] });
 
-    const req = https.request({
-      hostname: 'generativelanguage.googleapis.com',
-      path: `/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload)
-      }
-    }, res => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          if (parsed.candidates && parsed.candidates[0].content.parts[0].text) {
-            let rawText = parsed.candidates[0].content.parts[0].text.trim();
-            rawText = rawText.replace(/^\`\`\`json\s*/i, '').replace(/^\`\`\`\s*/i, '').replace(/\`\`\`\s*$/i, '').trim();
-            resolve(JSON.parse(rawText));
-          } else {
-            reject(new Error('Invalid response from Gemini API'));
-          }
-        } catch (e) {
-          reject(e);
+    const callModel = (modelName) => {
+      const req = https.request({
+        hostname: 'generativelanguage.googleapis.com',
+        path: `/v1beta/models/${modelName}:generateContent?key=${GEMINI_KEY}`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload)
         }
+      }, res => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.candidates && parsed.candidates[0].content) {
+              let rawText = parsed.candidates[0].content.parts[0].text.trim();
+              rawText = rawText.replace(/^\`\`\`json\s*/i, '').replace(/^\`\`\`\s*/i, '').replace(/\`\`\`\s*$/i, '').trim();
+              resolve(JSON.parse(rawText));
+            } else if (modelName !== 'gemini-3.8-flash') {
+              console.warn(`Model ${modelName} returned error, trying fallback gemini-3.8-flash:`, data);
+              callModel('gemini-3.8-flash');
+            } else {
+              reject(new Error(`Gemini API Error: ${data}`));
+            }
+          } catch (e) {
+            reject(e);
+          }
+        });
       });
-    });
-    req.on('error', reject);
-    req.write(payload);
-    req.end();
+      req.on('error', reject);
+      req.write(payload);
+      req.end();
+    };
+
+    callModel(GEMINI_MODEL);
   });
 }
 
@@ -685,7 +697,8 @@ export default async function handler(req, res) {
       return sendResponse(res, 200, {
         status: 'online',
         bot: 'BratvaFCMBot',
-        mode: 'Vercel Serverless 24/7 (Multi-Screenshot & Two-Column Support)',
+        engine: GEMINI_MODEL,
+        mode: 'Vercel Serverless 24/7 (Cross-Instance Album & Two-Column Support)',
         channel: CHANNEL_ID,
         website: WEBSITE_URL,
         has_token: Boolean(TELEGRAM_TOKEN),
@@ -820,46 +833,77 @@ export default async function handler(req, res) {
     const chatId = message.chat.id;
     const text = (message.text || '').trim();
 
-    // 2.1 Photo processing with Album (Media Group) Batching & Deduplication
+    // 2.1 Photo processing with Cross-Instance Coordination & Album Support
     if (message.photo && message.photo.length > 0) {
       const mediaGroupId = message.media_group_id;
       const largestPhoto = message.photo[message.photo.length - 1];
       const photoId = largestPhoto.file_unique_id || largestPhoto.file_id;
 
-      // Handle Album / Media Group (Multiple screenshots sent together)
+      // Multi-Screenshot Album (Media Group)
       if (mediaGroupId) {
-        if (!mediaGroupMap.has(mediaGroupId)) {
-          // Designated leader request: register and wait for other photos
-          mediaGroupMap.set(mediaGroupId, {
-            chatId,
-            photos: [largestPhoto.file_id],
-            isProcessing: false
-          });
+        // Step A: Register photo into shared GitHub temp store
+        const tempFileName = `album_${mediaGroupId}_${message.message_id}.json`;
+        const tempContent = Buffer.from(JSON.stringify({ fileId: largestPhoto.file_id, chatId })).toString('base64');
+        await githubApi(`/repos/${GITHUB_REPO}/contents/.tmp/${tempFileName}`, 'PUT', {
+          message: `temp album photo ${tempFileName}`,
+          content: tempContent
+        });
 
-          // Wait 2500ms to collect all photos in this album
-          await new Promise(resolve => setTimeout(resolve, 2500));
+        // Step B: Elect atomic leader via GitHub distributed lock
+        const lockRes = await githubApi(`/repos/${GITHUB_REPO}/contents/.tmp/lock_${mediaGroupId}.json`, 'PUT', {
+          message: `lock for album ${mediaGroupId}`,
+          content: Buffer.from(JSON.stringify({ leaderId: message.message_id, time: Date.now() })).toString('base64')
+        });
 
-          const groupData = mediaGroupMap.get(mediaGroupId);
-          if (groupData && !groupData.isProcessing) {
-            groupData.isProcessing = true;
-            const count = groupData.photos.length;
-            await sendTelegramMessage(chatId, `🔍 *Analyzing ${count} tournament screenshots together with Gemini Vision AI...*`);
-
-            const buffers = await Promise.all(groupData.photos.map(fid => downloadTelegramFile(fid)));
-            const aiResult = await analyzeImagesWithGemini(buffers);
-            mediaGroupMap.delete(mediaGroupId);
-
-            return await handleTournamentResult(aiResult, chatId, res, true);
-          }
-          return sendResponse(res, 200, 'OK');
-        } else {
-          // Non-leader request of the same media group: accumulate photo and exit
-          const groupData = mediaGroupMap.get(mediaGroupId);
-          if (groupData && !groupData.photos.includes(largestPhoto.file_id)) {
-            groupData.photos.push(largestPhoto.file_id);
-          }
-          return sendResponse(res, 200, 'Photo buffered in media group');
+        const isLeader = Boolean(lockRes && lockRes.content && lockRes.content.sha);
+        if (!isLeader) {
+          // Secondary request of the same media group (follower container): photo registered, exit cleanly
+          return sendResponse(res, 200, 'Photo registered in album');
         }
+
+        // Designated leader: Wait 4500ms for all sibling photos in the album to arrive and register
+        await new Promise(resolve => setTimeout(resolve, 4500));
+
+        // Fetch all album photos from GitHub .tmp
+        const tmpFiles = await githubApi(`/repos/${GITHUB_REPO}/contents/.tmp`);
+        let albumFileIds = [];
+        const lockSha = lockRes.content.sha;
+
+        if (Array.isArray(tmpFiles)) {
+          const matching = tmpFiles.filter(f => f.name && f.name.startsWith(`album_${mediaGroupId}_`));
+          for (const f of matching) {
+            try {
+              const fData = await githubApi(`/repos/${GITHUB_REPO}/contents/${f.path}`);
+              if (fData && fData.content) {
+                const parsed = JSON.parse(Buffer.from(fData.content, 'base64').toString('utf8'));
+                if (parsed.fileId && !albumFileIds.includes(parsed.fileId)) {
+                  albumFileIds.push(parsed.fileId);
+                }
+              }
+              // Cleanup temp file asynchronously
+              githubApi(`/repos/${GITHUB_REPO}/contents/${f.path}`, 'DELETE', {
+                message: 'cleanup temp album photo',
+                sha: f.sha
+              }).catch(() => {});
+            } catch (e) {}
+          }
+        }
+
+        // Cleanup lock file asynchronously
+        githubApi(`/repos/${GITHUB_REPO}/contents/.tmp/lock_${mediaGroupId}.json`, 'DELETE', {
+          message: 'cleanup album lock',
+          sha: lockSha
+        }).catch(() => {});
+
+        if (albumFileIds.length === 0) albumFileIds = [largestPhoto.file_id];
+
+        const count = albumFileIds.length;
+        await sendTelegramMessage(chatId, `🔍 *Analyzing ${count} tournament screenshots together with Gemini 3.6 Flash...*`);
+
+        const buffers = await Promise.all(albumFileIds.map(fid => downloadTelegramFile(fid)));
+        const aiResult = await analyzeImagesWithGemini(buffers);
+
+        return await handleTournamentResult(aiResult, chatId, res, true);
       }
 
       // Single photo uploaded individually
@@ -869,7 +913,7 @@ export default async function handler(req, res) {
       processingPhotos.add(photoId);
       setTimeout(() => processingPhotos.delete(photoId), 90000);
 
-      await sendTelegramMessage(chatId, '🔍 *Analyzing tournament screenshot with Gemini Vision AI...*');
+      await sendTelegramMessage(chatId, '🔍 *Analyzing tournament screenshot with Gemini 3.6 Flash...*');
       const imgBuffer = await downloadTelegramFile(largestPhoto.file_id);
       const aiResult = await analyzeImagesWithGemini([imgBuffer]);
 
