@@ -691,6 +691,70 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false) {
   return sendResponse(res, 200, 'OK');
 }
 
+const BUFFER_ISSUE_NUMBER = 1;
+
+async function bufferPhoto(albumId, fileId, chatId) {
+  return await githubApi(`/repos/${GITHUB_REPO}/issues/${BUFFER_ISSUE_NUMBER}/comments`, 'POST', {
+    body: JSON.stringify({ albumId, fileId, chatId, time: Date.now() })
+  });
+}
+
+async function getBufferedPhotos(albumId, chatId = null) {
+  const res = await githubApi(`/repos/${GITHUB_REPO}/issues/${BUFFER_ISSUE_NUMBER}/comments`);
+  if (!Array.isArray(res)) return [];
+  const items = [];
+  for (const c of res) {
+    try {
+      const parsed = JSON.parse(c.body);
+      const matchAlbum = albumId && parsed.albumId === albumId;
+      const matchChat = chatId && String(parsed.chatId) === String(chatId);
+      if (matchAlbum || matchChat) {
+        items.push({ commentId: c.id, albumId: parsed.albumId, fileId: parsed.fileId, chatId: parsed.chatId, time: parsed.time });
+      }
+    } catch (e) {}
+  }
+  return items;
+}
+
+async function clearBufferedPhotos(commentIds) {
+  for (const id of commentIds) {
+    githubApi(`/repos/${GITHUB_REPO}/issues/comments/${id}`, 'DELETE').catch(() => {});
+  }
+}
+
+async function processBufferedAlbum(albumId, chatId, res = null) {
+  const items = await getBufferedPhotos(albumId, chatId);
+  if (items.length === 0) {
+    if (res) return sendResponse(res, 200, 'Already processed or empty buffer');
+    return;
+  }
+
+  // Deduplicate unique file_ids while preserving arrival order
+  const uniqueFileIds = [];
+  for (const it of items) {
+    if (it.fileId && !uniqueFileIds.includes(it.fileId)) {
+      uniqueFileIds.push(it.fileId);
+    }
+  }
+
+  const count = uniqueFileIds.length;
+  await sendTelegramMessage(chatId, `🔍 *Analyzing ${count} tournament screenshot${count > 1 ? 's' : ''} together with Gemini 3.6 Flash...*`);
+
+  // Clear from buffer immediately to avoid duplicate runs
+  const commentIds = items.map(it => it.commentId);
+  await clearBufferedPhotos(commentIds);
+
+  try {
+    const buffers = await Promise.all(uniqueFileIds.map(fid => downloadTelegramFile(fid)));
+    const aiResult = await analyzeImagesWithGemini(buffers);
+    return await handleTournamentResult(aiResult, chatId, res, true);
+  } catch (err) {
+    console.error('Error in processBufferedAlbum:', err);
+    await sendTelegramMessage(chatId, `❌ *Analysis Error:* ${clean(err.message)}`);
+    if (res) return sendResponse(res, 200, 'Analysis Error');
+  }
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
@@ -755,6 +819,21 @@ export default async function handler(req, res) {
       const cb = update.callback_query;
       const data = cb.data || '';
       const chatId = cb.message ? cb.message.chat.id : cb.from.id;
+
+      if (data.startsWith('analyze_')) {
+        const albumId = data.replace('analyze_', '');
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: 'Starting analysis...' });
+        return await processBufferedAlbum(albumId, chatId, res);
+      }
+
+      if (data.startsWith('clear_')) {
+        const albumId = data.replace('clear_', '');
+        const items = await getBufferedPhotos(albumId, chatId);
+        await clearBufferedPhotos(items.map(it => it.commentId));
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: 'Buffer cleared!' });
+        await sendTelegramMessage(chatId, '🗑️ *Screenshot buffer cleared. Ready for new screenshots!*');
+        return sendResponse(res, 200, 'OK');
+      }
 
       if (data.startsWith('tab_')) {
         const parts = data.split('_');
@@ -833,97 +912,66 @@ export default async function handler(req, res) {
     const chatId = message.chat.id;
     const text = (message.text || '').trim();
 
-    // 2.1 Photo processing with Cross-Instance Coordination & Album Support
+    // 2.1 Photo processing with High-Speed Issue #1 Buffer + Interactive Button + Auto-Debounce
     if (message.photo && message.photo.length > 0) {
-      const mediaGroupId = message.media_group_id;
       const largestPhoto = message.photo[message.photo.length - 1];
-      const photoId = largestPhoto.file_unique_id || largestPhoto.file_id;
+      const mediaGroupId = message.media_group_id;
+      const albumId = mediaGroupId || `chat_${chatId}`;
 
-      // Multi-Screenshot Album (Media Group)
-      if (mediaGroupId) {
-        // Step A: Register photo into shared GitHub temp store
-        const tempFileName = `album_${mediaGroupId}_${message.message_id}.json`;
-        const tempContent = Buffer.from(JSON.stringify({ fileId: largestPhoto.file_id, chatId })).toString('base64');
-        await githubApi(`/repos/${GITHUB_REPO}/contents/.tmp/${tempFileName}`, 'PUT', {
-          message: `temp album photo ${tempFileName}`,
-          content: tempContent
-        });
+      // 1. Buffer this photo to GitHub Issue #1 (Fast 150ms HTTP POST, zero Git conflicts!)
+      await bufferPhoto(albumId, largestPhoto.file_id, chatId);
 
-        // Step B: Elect atomic leader via GitHub distributed lock
-        const lockRes = await githubApi(`/repos/${GITHUB_REPO}/contents/.tmp/lock_${mediaGroupId}.json`, 'PUT', {
-          message: `lock for album ${mediaGroupId}`,
-          content: Buffer.from(JSON.stringify({ leaderId: message.message_id, time: Date.now() })).toString('base64')
-        });
+      // 2. Fetch current buffer for this album/chat
+      const currentItems = await getBufferedPhotos(albumId, chatId);
+      const count = currentItems.length;
 
-        const isLeader = Boolean(lockRes && lockRes.content && lockRes.content.sha);
-        if (!isLeader) {
-          // Secondary request of the same media group (follower container): photo registered, exit cleanly
-          return sendResponse(res, 200, 'Photo registered in album');
+      // 3. Send interactive control message with "Analyze Now" button
+      const keyboard = {
+        inline_keyboard: [
+          [
+            { text: `🚀 Analyze ${count} Screenshot${count > 1 ? 's' : ''} Now`, callback_data: `analyze_${albumId}` }
+          ],
+          [
+            { text: '🗑️ Clear Buffer', callback_data: `clear_${albumId}` }
+          ]
+        ]
+      };
+
+      await sendTelegramMessage(
+        chatId,
+        `📸 *Screenshot received!* (Batch: *${count}* screenshot${count > 1 ? 's' : ''})\n` +
+        `👉 Send more screenshots, or tap button below when ready:`,
+        keyboard
+      );
+
+      // 4. For Albums (media_group_id): The first photo waits 22 seconds for mobile upload lag,
+      // then auto-processes if user hasn't clicked the button yet!
+      if (mediaGroupId && count === 1) {
+        await new Promise(resolve => setTimeout(resolve, 22000));
+        const pending = await getBufferedPhotos(albumId, chatId);
+        if (pending.length > 0) {
+          return await processBufferedAlbum(albumId, chatId, res);
         }
-
-        // Designated leader: Wait 4500ms for all sibling photos in the album to arrive and register
-        await new Promise(resolve => setTimeout(resolve, 4500));
-
-        // Fetch all album photos from GitHub .tmp
-        const tmpFiles = await githubApi(`/repos/${GITHUB_REPO}/contents/.tmp`);
-        let albumFileIds = [];
-        const lockSha = lockRes.content.sha;
-
-        if (Array.isArray(tmpFiles)) {
-          const matching = tmpFiles.filter(f => f.name && f.name.startsWith(`album_${mediaGroupId}_`));
-          for (const f of matching) {
-            try {
-              const fData = await githubApi(`/repos/${GITHUB_REPO}/contents/${f.path}`);
-              if (fData && fData.content) {
-                const parsed = JSON.parse(Buffer.from(fData.content, 'base64').toString('utf8'));
-                if (parsed.fileId && !albumFileIds.includes(parsed.fileId)) {
-                  albumFileIds.push(parsed.fileId);
-                }
-              }
-              // Cleanup temp file asynchronously
-              githubApi(`/repos/${GITHUB_REPO}/contents/${f.path}`, 'DELETE', {
-                message: 'cleanup temp album photo',
-                sha: f.sha
-              }).catch(() => {});
-            } catch (e) {}
-          }
-        }
-
-        // Cleanup lock file asynchronously
-        githubApi(`/repos/${GITHUB_REPO}/contents/.tmp/lock_${mediaGroupId}.json`, 'DELETE', {
-          message: 'cleanup album lock',
-          sha: lockSha
-        }).catch(() => {});
-
-        if (albumFileIds.length === 0) albumFileIds = [largestPhoto.file_id];
-
-        const count = albumFileIds.length;
-        await sendTelegramMessage(chatId, `🔍 *Analyzing ${count} tournament screenshots together with Gemini 3.6 Flash...*`);
-
-        const buffers = await Promise.all(albumFileIds.map(fid => downloadTelegramFile(fid)));
-        const aiResult = await analyzeImagesWithGemini(buffers);
-
-        return await handleTournamentResult(aiResult, chatId, res, true);
       }
 
-      // Single photo uploaded individually
-      if (processingPhotos.has(photoId)) {
-        return sendResponse(res, 200, 'Duplicate photo dropped');
-      }
-      processingPhotos.add(photoId);
-      setTimeout(() => processingPhotos.delete(photoId), 90000);
-
-      await sendTelegramMessage(chatId, '🔍 *Analyzing tournament screenshot with Gemini 3.6 Flash...*');
-      const imgBuffer = await downloadTelegramFile(largestPhoto.file_id);
-      const aiResult = await analyzeImagesWithGemini([imgBuffer]);
-
-      return await handleTournamentResult(aiResult, chatId, res, false);
+      return sendResponse(res, 200, 'Photo buffered');
     }
 
     // 2.2 Text Command Routing
+    if (text.startsWith('/done') || text.startsWith('/analyze')) {
+      const items = await getBufferedPhotos(null, chatId);
+      if (items.length === 0) {
+        await sendTelegramMessage(chatId, '⚠️ *No buffered screenshots found.* Please send tournament screenshots first!');
+        return sendResponse(res, 200, 'OK');
+      }
+      return await processBufferedAlbum(null, chatId, res);
+    }
+
     if (text.startsWith('/reset') || text.startsWith('/clear')) {
       globalLatestTournament = null;
-      await sendTelegramMessage(chatId, '🧹 *Match cache reset!* You can now send fresh screenshots for a clean start.', getMainKeyboard());
+      const items = await getBufferedPhotos(null, chatId);
+      await clearBufferedPhotos(items.map(it => it.commentId));
+      await sendTelegramMessage(chatId, '🧹 *Match cache & screenshot buffer reset!* Ready for fresh screenshots.', getMainKeyboard());
       return sendResponse(res, 200, 'OK');
     }
 
