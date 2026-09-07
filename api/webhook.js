@@ -4,6 +4,8 @@
  */
 
 import https from 'https';
+import fs from 'fs';
+import path from 'path';
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const GEMINI_KEY = process.env.GEMINI_KEY;
@@ -55,6 +57,27 @@ function telegramRequest(method, params = {}) {
     req.write(postData);
     req.end();
   });
+}
+
+async function sendTelegramMessage(chatId, text, replyMarkup = null) {
+  try {
+    const params = { chat_id: chatId, text: text, parse_mode: 'Markdown' };
+    if (replyMarkup) params.reply_markup = replyMarkup;
+    const res = await telegramRequest('sendMessage', params);
+    if (!res.ok) {
+      delete params.parse_mode;
+      return await telegramRequest('sendMessage', params);
+    }
+    return res;
+  } catch (err) {
+    try {
+      const plainParams = { chat_id: chatId, text: text.replace(/[*_`\[\]()]/g, '') };
+      if (replyMarkup) plainParams.reply_markup = replyMarkup;
+      return await telegramRequest('sendMessage', plainParams);
+    } catch (e) {
+      console.error('sendTelegramMessage plain fallback error:', e);
+    }
+  }
 }
 
 function downloadTelegramFile(fileId) {
@@ -117,6 +140,57 @@ async function fetchGithubJson(filePath) {
       return JSON.parse(content);
     }
   } catch (e) {}
+  return null;
+}
+
+function loadLeagueData() {
+  const root = process.cwd();
+  let pIndex = {};
+  let tIndex = {};
+  let players = [];
+  let tournaments = [];
+
+  try {
+    const pIndexPath = path.join(root, 'docs', 'league-data', 'index', 'players_index.json');
+    if (fs.existsSync(pIndexPath)) pIndex = JSON.parse(fs.readFileSync(pIndexPath, 'utf8'));
+  } catch (e) {}
+
+  try {
+    const tIndexPath = path.join(root, 'docs', 'league-data', 'index', 'tournaments_index.json');
+    if (fs.existsSync(tIndexPath)) tIndex = JSON.parse(fs.readFileSync(tIndexPath, 'utf8'));
+  } catch (e) {}
+
+  try {
+    const pDir = path.join(root, 'docs', 'league-data', 'players');
+    if (fs.existsSync(pDir)) {
+      const files = fs.readdirSync(pDir).filter(f => f.endsWith('.json'));
+      players = files.map(f => {
+        try { return JSON.parse(fs.readFileSync(path.join(pDir, f), 'utf8')); } catch (e) { return null; }
+      }).filter(Boolean);
+    }
+  } catch (e) {}
+
+  try {
+    const tDir = path.join(root, 'docs', 'league-data', 'tournaments');
+    if (fs.existsSync(tDir)) {
+      const files = fs.readdirSync(tDir).filter(f => f.endsWith('.json')).sort().reverse();
+      tournaments = files.map(f => {
+        try { return JSON.parse(fs.readFileSync(path.join(tDir, f), 'utf8')); } catch (e) { return null; }
+      }).filter(Boolean);
+    }
+  } catch (e) {}
+
+  return { pIndex, tIndex, players, tournaments };
+}
+
+async function getLatestTournament() {
+  const { tournaments } = loadLeagueData();
+  if (tournaments && tournaments.length > 0) return tournaments[0];
+  const tIndex = await fetchGithubJson('docs/league-data/index/tournaments_index.json');
+  if (tIndex) {
+    const ids = Object.keys(tIndex).reverse();
+    if (ids[0]) return await fetchGithubJson(`docs/league-data/tournaments/${ids[0]}.json`);
+  }
   return null;
 }
 
@@ -188,6 +262,28 @@ RULES:
     req.write(payload);
     req.end();
   });
+}
+
+function getMainKeyboard() {
+  return {
+    inline_keyboard: [
+      [
+        { text: '🏆 Top Scorers', callback_data: 'cmd_top' },
+        { text: '⭐ Last Recap', callback_data: 'cmd_recap' }
+      ],
+      [
+        { text: '⛔ Strikes & Debtors', callback_data: 'cmd_strikes' },
+        { text: '🎯 Best Lineup', callback_data: 'cmd_lineup' }
+      ],
+      [
+        { text: '📜 Rules', callback_data: 'cmd_rules' },
+        { text: '📊 Tournaments', callback_data: 'cmd_tournaments' }
+      ],
+      [
+        { text: '🌐 Official League Website', url: WEBSITE_URL }
+      ]
+    ]
+  };
 }
 
 function getTabsKeyboard(lang, tIndexNum = 0) {
@@ -307,6 +403,116 @@ function formatRecap(t, lang = 'ru') {
   }
 }
 
+function generateTopScorersMessage() {
+  const { pIndex } = loadLeagueData();
+  const list = Object.entries(pIndex).map(([id, data]) => ({
+    id,
+    name: data.display_name || id,
+    goals: data.total_goals || 0,
+    matches: data.total_matches || 0,
+    avg: data.average_goals || 0
+  })).sort((a, b) => b.goals - a.goals);
+
+  if (list.length === 0) return 'No player stats recorded yet.';
+
+  const top10 = list.slice(0, 10);
+  const lines = top10.map((p, idx) => {
+    const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `[ ${idx + 1} ]`));
+    return `${medal} *${p.name}* — ${p.goals} goals (${p.matches} matches, avg ${p.avg})`;
+  });
+
+  return `🏆 *БРАТВА LEAGUE — TOP SCORERS* 🏆\n\n${lines.join('\n')}\n\n🌐 *Full Standings:*\n${WEBSITE_URL}`;
+}
+
+async function generateStrikesMessage() {
+  const t = await getLatestTournament();
+  if (!t) return 'No match data recorded yet.';
+
+  const missed = [];
+  if (t.matches) {
+    t.matches.forEach(m => {
+      const turns = m.turns_played !== undefined ? m.turns_played : 0;
+      if (turns < 3) missed.push(`[ ❌ | ${m.player_display_name} | ${turns}/3 ]`);
+    });
+  }
+
+  if (missed.length === 0) {
+    return `✅ *100% ДИСЦИПЛИНА / 100% DISCIPLINE:*\nВсе игроки сыграли 3/3!\nAll members completed 3/3 turns!\n\n🌐 *Website:*\n${WEBSITE_URL}`;
+  }
+
+  return `⛔ *ВНИМАНИЕ / ATTENTION PLEASE:*\n${missed.join('\n')}\n\n` +
+    `⛔ Страйк 1/3! Обязательно 3/3 в след. матче, иначе кик!\n` +
+    `⛔ Strike 1/3! Must play 3/3 in next match or get kicked!\n\n` +
+    `🌐 *Website:*\n${WEBSITE_URL}`;
+}
+
+function generateLineupMessage() {
+  const { pIndex } = loadLeagueData();
+  const list = Object.entries(pIndex).map(([id, data]) => ({
+    id,
+    name: data.display_name || id,
+    goals: data.total_goals || 0,
+    matches: data.total_matches || 0,
+    avg: data.average_goals || 0,
+    strikes: data.eligibility_streak?.current_fail_streak || 0
+  })).filter(p => p.strikes === 0).sort((a, b) => b.avg - a.avg);
+
+  const lineup = list.slice(0, 8);
+  const lines = lineup.map((p, idx) => `[ 🟢 | ${idx + 1}. ${p.name} | avg ${p.avg}G | ${p.matches}M ]`);
+
+  return `🎯 *РЕКОМЕНДОВАННЫЙ СОСТАВ / RECOMMENDED LINEUP (TOP 8):*\n\n` +
+    `${lines.join('\n')}\n\n` +
+    `⚡ Based on performance & 100% discipline record!\n` +
+    `🌐 *Website:*\n${WEBSITE_URL}`;
+}
+
+async function generateTournamentsMessage() {
+  const { tournaments } = loadLeagueData();
+  const list = (tournaments || []).slice(0, 5);
+  if (list.length === 0) return 'No tournaments recorded yet.';
+
+  const lines = list.map(t => {
+    const resIcon = t.result === 'win' ? '🟢 WIN' : (t.result === 'draw' ? '🟡 DRAW' : '🔴 LOSS');
+    return `• *vs ${t.opponent_league}* (${t.date}): ${t.our_total_goals} - ${t.opponent_total_goals} [${resIcon}]`;
+  });
+
+  return `📊 *RECENT TOURNAMENTS / ПОСЛЕДНИЕ ТУРНИРЫ:*\n\n${lines.join('\n')}\n\n🌐 *Full Match History:*\n${WEBSITE_URL}`;
+}
+
+function generatePlayerStatsMessage(query) {
+  if (!query || !query.trim()) {
+    return '⚠️ Please specify a player name, e.g.: `/player DOXIBERO1`';
+  }
+  const { pIndex, players } = loadLeagueData();
+  const q = query.trim().toLowerCase();
+
+  const found = players.find(p => {
+    if (!p) return false;
+    const pid = (p.player_id || '').toLowerCase();
+    const dname = (p.display_name || '').toLowerCase();
+    const aliases = (p.known_aliases || []).map(a => a.toLowerCase());
+    return pid === q || dname === q || pid.includes(q) || dname.includes(q) || aliases.some(a => a.includes(q));
+  });
+
+  if (!found) {
+    return `❌ Player "${query}" not found. Try /top to view top players list.\n🌐 ${WEBSITE_URL}`;
+  }
+
+  const indexData = pIndex[found.player_id] || {};
+  const totalMatches = found.matches ? found.matches.length : (indexData.total_matches || 0);
+  const totalGoals = found.matches ? found.matches.reduce((s, m) => s + (m.goals_for || 0), 0) : (indexData.total_goals || 0);
+  const avg = totalMatches > 0 ? (totalGoals / totalMatches).toFixed(1) : 0;
+  const strikes = indexData.eligibility_streak?.current_fail_streak || 0;
+
+  return `👤 *PLAYER PROFILE: ${found.display_name}*\n` +
+    `----------------------------\n` +
+    `⚽ Total Goals: *${totalGoals}*\n` +
+    `🏟️ Tournaments: *${totalMatches}*\n` +
+    `📊 Average: *${avg} goals/match*\n` +
+    `⛔ Current Strikes: *${strikes}*\n\n` +
+    `🌐 *Full Player Stats:*\n${WEBSITE_URL}`;
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
@@ -316,6 +522,10 @@ export default async function handler(req, res) {
         mode: 'Vercel Serverless 24/7',
         channel: CHANNEL_ID,
         website: WEBSITE_URL,
+        has_token: Boolean(TELEGRAM_TOKEN),
+        token_len: TELEGRAM_TOKEN ? TELEGRAM_TOKEN.length : 0,
+        has_gemini: Boolean(GEMINI_KEY),
+        has_pat: Boolean(GITHUB_PAT),
         timestamp: new Date().toISOString()
       }, true);
     }
@@ -347,7 +557,7 @@ export default async function handler(req, res) {
       return sendResponse(res, 200, 'OK');
     }
 
-    // Handle Callback Query (Language tabs)
+    // 1. Handle Callback Query (Buttons)
     if (update.callback_query) {
       const cb = update.callback_query;
       const data = cb.data || '';
@@ -358,26 +568,75 @@ export default async function handler(req, res) {
         const tIndexNum = parseInt(parts[1], 10) || 0;
         const targetLang = parts[2] || 'ru';
 
-        const tIndex = await fetchGithubJson('docs/league-data/index/tournaments_index.json');
-        const tIds = Object.keys(tIndex || {}).reverse();
-        const tId = tIds[tIndexNum] || tIds[0];
-        const t = await fetchGithubJson(`docs/league-data/tournaments/${tId}.json`);
-
+        const t = await getLatestTournament();
         const updatedText = formatRecap(t, targetLang);
         const updatedKeyboard = getTabsKeyboard(targetLang, tIndexNum);
 
-        await telegramRequest('editMessageText', {
-          chat_id: chatId,
-          message_id: cb.message.message_id,
-          text: updatedText,
-          parse_mode: 'Markdown',
-          reply_markup: updatedKeyboard
-        });
+        try {
+          await telegramRequest('editMessageText', {
+            chat_id: chatId,
+            message_id: cb.message.message_id,
+            text: updatedText,
+            parse_mode: 'Markdown',
+            reply_markup: updatedKeyboard
+          });
+        } catch (e) {}
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
       }
+
+      if (data === 'cmd_top') {
+        const text = generateTopScorersMessage();
+        await sendTelegramMessage(chatId, text, getMainKeyboard());
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'cmd_recap') {
+        const t = await getLatestTournament();
+        const recap = formatRecap(t, 'ru');
+        await sendTelegramMessage(chatId, recap, getTabsKeyboard('ru', 0));
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'cmd_strikes') {
+        const text = await generateStrikesMessage();
+        await sendTelegramMessage(chatId, text, getMainKeyboard());
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'cmd_lineup') {
+        const text = generateLineupMessage();
+        await sendTelegramMessage(chatId, text, getMainKeyboard());
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'cmd_rules') {
+        const rules = `📜 *ПРАВИЛА ЛИГИ БРАТВА:*\n\n` +
+          `1. Обязательно играть 3/3 в каждом турнире!\n` +
+          `2. 1 пропущенный матч = 1 страйк (1/3).\n` +
+          `3. 3 страйка = исключение из лиги.\n\n` +
+          `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
+        await sendTelegramMessage(chatId, rules, getMainKeyboard());
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'cmd_tournaments') {
+        const text = await generateTournamentsMessage();
+        await sendTelegramMessage(chatId, text, getMainKeyboard());
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
       return sendResponse(res, 200, 'OK');
     }
 
+    // 2. Handle Messages
     const message = update.message;
     if (!message) {
       return sendResponse(res, 200, 'OK');
@@ -386,48 +645,15 @@ export default async function handler(req, res) {
     const chatId = message.chat.id;
     const text = (message.text || '').trim();
 
-    if (text.startsWith('/start') || text.startsWith('/help')) {
-      const msg = `⚜️ *БРАТВА FCM LEAGUE BOT (24/7 Cloud)* ⚜️\n\n` +
-        `📸 Отправь мне скриншот турнира из EA FC Mobile!\n` +
-        `Я автоматически обновлю сайт и канал!\n\n` +
-        `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
-      await telegramRequest('sendMessage', { chat_id: chatId, text: msg, parse_mode: 'Markdown' });
-      return sendResponse(res, 200, 'OK');
-    }
-
-    if (text.startsWith('/rules')) {
-      const rules = `📜 *ПРАВИЛА ЛИГИ БРАТВА:*\n\n` +
-        `1. Обязательно играть 3/3 в каждом турнире!\n` +
-        `2. 1 пропущенный матч = 1 страйк (1/3).\n` +
-        `3. 3 страйка = исключение из лиги.\n\n` +
-        `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
-      await telegramRequest('sendMessage', { chat_id: chatId, text: rules, parse_mode: 'Markdown' });
-      return sendResponse(res, 200, 'OK');
-    }
-
-    if (text.startsWith('/recap') || text.startsWith('/broadcast')) {
-      const tIndex = await fetchGithubJson('docs/league-data/index/tournaments_index.json');
-      const tIds = Object.keys(tIndex || {}).reverse();
-      const t = await fetchGithubJson(`docs/league-data/tournaments/${tIds[0]}.json`);
-      const recap = formatRecap(t, 'ru');
-      const keys = getTabsKeyboard('ru', 0);
-
-      await telegramRequest('sendMessage', { chat_id: CHANNEL_ID, text: recap, parse_mode: 'Markdown', reply_markup: keys });
-      if (chatId !== CHANNEL_ID) {
-        await telegramRequest('sendMessage', { chat_id: chatId, text: `📢 Broadcast sent to ${CHANNEL_ID}!` });
-      }
-      return sendResponse(res, 200, 'OK');
-    }
-
-    // Photo processing (Gemini Vision AI)
+    // 2.1 Photo processing (Gemini Vision AI)
     if (message.photo && message.photo.length > 0) {
-      await telegramRequest('sendMessage', { chat_id: chatId, text: '🔍 *Analyzing screenshot with Gemini Vision AI...*', parse_mode: 'Markdown' });
+      await sendTelegramMessage(chatId, '🔍 *Analyzing screenshot with Gemini Vision AI...*');
       const largestPhoto = message.photo[message.photo.length - 1];
       const imgBuffer = await downloadTelegramFile(largestPhoto.file_id);
       const aiResult = await analyzeImageWithGemini(imgBuffer);
 
       if (!aiResult || aiResult.is_tournament_screenshot === false) {
-        await telegramRequest('sendMessage', { chat_id: chatId, text: '⚠️ *Not a valid EA FC Mobile tournament screenshot!*' });
+        await sendTelegramMessage(chatId, '⚠️ *Not a valid EA FC Mobile tournament screenshot!*');
         return sendResponse(res, 200, 'OK');
       }
 
@@ -436,7 +662,7 @@ export default async function handler(req, res) {
         const pLines = unplayed.map(p => `[ ⏳ | ${p.name} | ${p.turns_played}/3 ]`).join('\n');
         const liveMsg = `🟢 *LIVE MATCH: vs ${aiResult.opponent_league}*\nScore: ${aiResult.score_bratva} - ${aiResult.score_opponent}\n\n` +
           `⛔ *ATTENTION PLEASE:*\n${pLines}\n\n⏳ Match ending soon! Attack 3/3 ASAP!`;
-        await telegramRequest('sendMessage', { chat_id: chatId, text: liveMsg });
+        await sendTelegramMessage(chatId, liveMsg);
         return sendResponse(res, 200, 'OK');
       }
 
@@ -479,12 +705,70 @@ export default async function handler(req, res) {
       const recap = formatRecap(tData, 'ru');
       const keys = getTabsKeyboard('ru', 0);
 
-      await telegramRequest('sendMessage', { chat_id: CHANNEL_ID, text: recap, parse_mode: 'Markdown', reply_markup: keys });
-      await telegramRequest('sendMessage', { chat_id: chatId, text: `🔴 *MATCH COMPLETED & BROADCASTED TO ${CHANNEL_ID}!*\n\n${recap}`, parse_mode: 'Markdown', reply_markup: keys });
+      await sendTelegramMessage(CHANNEL_ID, recap, keys);
+      await sendTelegramMessage(chatId, `🔴 *MATCH COMPLETED & BROADCASTED TO ${CHANNEL_ID}!*\n\n${recap}`, keys);
 
       return sendResponse(res, 200, 'OK');
     }
 
+    // 2.2 Text Command Routing
+    if (text.startsWith('/top') || text.startsWith('/leaderboard')) {
+      const topMsg = generateTopScorersMessage();
+      await sendTelegramMessage(chatId, topMsg, getMainKeyboard());
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/strikes')) {
+      const strikesMsg = await generateStrikesMessage();
+      await sendTelegramMessage(chatId, strikesMsg, getMainKeyboard());
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/lineup')) {
+      const lineupMsg = generateLineupMessage();
+      await sendTelegramMessage(chatId, lineupMsg, getMainKeyboard());
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/tournaments')) {
+      const tMsg = await generateTournamentsMessage();
+      await sendTelegramMessage(chatId, tMsg, getMainKeyboard());
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/player') || text.startsWith('/stats') || text.startsWith('/p ')) {
+      const parts = text.split(/\s+/);
+      const query = parts.slice(1).join(' ');
+      const pMsg = generatePlayerStatsMessage(query);
+      await sendTelegramMessage(chatId, pMsg, getMainKeyboard());
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/rules')) {
+      const rules = `📜 *ПРАВИЛА ЛИГИ БРАТВА:*\n\n` +
+        `1. Обязательно играть 3/3 в каждом турнире!\n` +
+        `2. 1 пропущенный матч = 1 страйк (1/3).\n` +
+        `3. 3 страйка = исключение из лиги.\n\n` +
+        `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
+      await sendTelegramMessage(chatId, rules, getMainKeyboard());
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/recap') || text.startsWith('/broadcast')) {
+      const t = await getLatestTournament();
+      const recap = formatRecap(t, 'ru');
+      const keys = getTabsKeyboard('ru', 0);
+      await sendTelegramMessage(chatId, recap, keys);
+      return sendResponse(res, 200, 'OK');
+    }
+
+    // 2.3 Default fallback (Welcome & Interactive Menu for ANY text)
+    const welcome = `⚜️ *БРАТВА FCM LEAGUE BOT (24/7 Cloud)* ⚜️\n\n` +
+      `📸 *Отправь мне скриншот турнира из EA FC Mobile!*\n` +
+      `Я автоматически распознаю результат, обновлю сайт и отправлю отчет в канал!\n\n` +
+      `📋 *Доступные команды:* Выберите кнопку ниже 👇`;
+
+    await sendTelegramMessage(chatId, welcome, getMainKeyboard());
     return sendResponse(res, 200, 'OK');
   } catch (err) {
     console.error('Webhook Top-Level Error:', err);
