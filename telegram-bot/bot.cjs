@@ -242,7 +242,7 @@ function getMatchTabsKeyboard(activeLang = 'ru', tIndexNum = 0, isChannel = fals
       { text: (activeLang === 'es' ? '• 🇪🇸 Español •' : '🇪🇸 Español'), callback_data: `tab_${tIndexNum}_es` }
     ],
     [
-      { text: '🌐 Live League Website', url: 'https://bilal-26.github.io/fc-bratva/' }
+      { text: '🌐 Live League Website', url: 'https://fc-bratva.github.io/' }
     ]
   ];
 
@@ -285,7 +285,7 @@ function generateRecapByLang(tIndexNum = 0, lang = 'ru') {
     });
   }
 
-  const websiteLink = 'https://bilal-26.github.io/fc-bratva/';
+  const websiteLink = 'https://fc-bratva.github.io/';
 
   if (lang === 'en') {
     let outcome = isWin ? 'BIG WIN' : (isDraw ? 'HARD-FOUGHT DRAW' : 'MATCH RESULT');
