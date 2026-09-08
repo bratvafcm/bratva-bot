@@ -668,37 +668,23 @@ async function getRegisteredPlayers() {
     }
   } catch (e) {}
 
-  return { lastUpdated: new Date().toISOString(), registrations: {} };
+  return { lastUpdated: new Date().toISOString(), registrations: {}, pending_uids: {} };
 }
 
-async function savePlayerRegistration(reg) {
-  const current = await getRegisteredPlayers();
-  const regMap = current.registrations || {};
-  regMap[reg.player_id] = {
-    player_id: reg.player_id,
-    display_name: reg.display_name,
-    telegram_id: reg.telegram_id,
-    telegram_username: reg.telegram_username || '',
-    telegram_name: reg.telegram_name || '',
-    registered_at: new Date().toISOString()
-  };
-
-  const updated = {
-    lastUpdated: new Date().toISOString(),
-    registrations: regMap
-  };
-  inMemoryRegistered = updated;
+async function saveRegisteredPlayersRaw(data, commitMsg = 'Update registered_players') {
+  data.lastUpdated = new Date().toISOString();
+  inMemoryRegistered = data;
 
   try {
     const localPath = path.join(process.cwd(), 'docs', 'league-data', 'registered_players.json');
-    fs.writeFileSync(localPath, JSON.stringify(updated, null, 2), 'utf8');
+    fs.writeFileSync(localPath, JSON.stringify(data, null, 2), 'utf8');
   } catch (e) {}
 
   try {
     const existingFile = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/registered_players.json`);
-    const fileContent = Buffer.from(JSON.stringify(updated, null, 2)).toString('base64');
+    const fileContent = Buffer.from(JSON.stringify(data, null, 2)).toString('base64');
     const commitPayload = {
-      message: `Player Verified: ${reg.display_name} -> TG @${reg.telegram_username || reg.telegram_id}`,
+      message: commitMsg,
       content: fileContent
     };
     if (existingFile && existingFile.sha) commitPayload.sha = existingFile.sha;
@@ -707,7 +693,56 @@ async function savePlayerRegistration(reg) {
     console.error('Failed to commit registered_players.json to GitHub:', e);
   }
 
-  return updated;
+  return data;
+}
+
+async function savePlayerRegistration(reg) {
+  const current = await getRegisteredPlayers();
+  if (!current.registrations) current.registrations = {};
+  if (current.pending_uids && current.pending_uids[String(reg.telegram_id)]) {
+    delete current.pending_uids[String(reg.telegram_id)];
+  }
+
+  current.registrations[reg.player_id] = {
+    player_id: reg.player_id,
+    display_name: reg.display_name,
+    in_game_name: reg.in_game_name || reg.display_name,
+    uid: reg.uid || null,
+    telegram_id: reg.telegram_id,
+    telegram_username: reg.telegram_username || '',
+    telegram_name: reg.telegram_name || '',
+    is_new_member: reg.is_new_member || false,
+    registered_at: new Date().toISOString()
+  };
+
+  const commitMsg = `Player Verified: ${reg.display_name}${reg.uid ? ` (UID: ${reg.uid})` : ''} -> TG @${reg.telegram_username || reg.telegram_id}`;
+  return await saveRegisteredPlayersRaw(current, commitMsg);
+}
+
+async function setPendingUid(telegramId, data) {
+  const current = await getRegisteredPlayers();
+  if (!current.pending_uids) current.pending_uids = {};
+  current.pending_uids[String(telegramId)] = {
+    ...data,
+    requested_at: new Date().toISOString()
+  };
+  inMemoryRegistered = current;
+  try {
+    const localPath = path.join(process.cwd(), 'docs', 'league-data', 'registered_players.json');
+    fs.writeFileSync(localPath, JSON.stringify(current, null, 2), 'utf8');
+  } catch (e) {}
+}
+
+async function clearPendingUid(telegramId) {
+  const current = await getRegisteredPlayers();
+  if (current.pending_uids && current.pending_uids[String(telegramId)]) {
+    delete current.pending_uids[String(telegramId)];
+    inMemoryRegistered = current;
+    try {
+      const localPath = path.join(process.cwd(), 'docs', 'league-data', 'registered_players.json');
+      fs.writeFileSync(localPath, JSON.stringify(current, null, 2), 'utf8');
+    } catch (e) {}
+  }
 }
 
 function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru', includeBroadcastBtn = false) {
@@ -1204,30 +1239,30 @@ function formatChannelWelcome(lang = 'ru') {
 function formatVerificationPrompt(lang = 'ru') {
   if (lang === 'en') {
     return `⚜️ *BRATVA FCM — SQUAD ENTRY* ⚜️\n\n` +
-      `Welcome to our league! To get your invite link to our official Telegram Channel & Squad Discussion Chat:\n\n` +
+      `Welcome to our league! Joining our official channel and team chat is mandatory for all members.\n\n` +
       `👉 *Please send your EA FC Mobile username here in chat*\n` +
       `_(Type it exactly as it appears in the game)_\n\n` +
       `⚡ Once sent, the bot will immediately give you your link to join our official channel & squad chat!`;
   }
   if (lang === 'ar') {
-    return `⚜️ *دوري БРАТВА FCM — الانضمام للقناة* ⚜️\n\n` +
-      `أهلاً بك في الفريق! للحصول على رابط الدخول إلى القناة الرسمية ومجموعة النقاش الخاصة بالفريق:\n\n` +
-      `👉 *أرسل اسمك في EA FC Mobile هنا في المحادثة*\n` +
+    return `⚜️ *دوري БРАТВА FCM — الانضمام للقناة والفريق* ⚜️\n\n` +
+      `أهلاً بك في الفريق! الانضمام إلى القناة الرسمية ومجموعة الفريق إلزامي لجميع اللاعبين.\n\n` +
+      `👉 *أرسل اسم المستخدم (username) الخاص بك في EA FC Mobile هنا في المحادثة*\n` +
       `_(اكتب اسمك تماماً كما يظهر داخل اللعبة)_\n\n` +
       `⚡ بمجرد إرسال اسمك، ستحصل فوراً على رابط الدخول إلى القناة والمجموعة الرسمية!`;
   }
   if (lang === 'es') {
     return `⚜️ *BRATVA FCM — ACCESO AL EQUIPO* ⚜️\n\n` +
-      `¡Bienvenido a la liga! Para recibir tu enlace de acceso a nuestro canal oficial y al grupo de debate del equipo:\n\n` +
-      `👉 *Envía tu nombre de EA FC Mobile aquí en el chat*\n` +
+      `¡Bienvenido a la liga! Unirse al canal oficial y al chat del equipo es obligatorio para todos los participantes.\n\n` +
+      `👉 *Envía tu nombre de usuario de EA FC Mobile aquí en el chat*\n` +
       `_(Escríbelo exactamente como aparece en el juego)_\n\n` +
-      `⚡ ¡Una vez enviado, recibirás de inmediato el enlace para unirte al canal y al chat!`;
+      `⚡ ¡Una vez enviado, el bot te dará de inmediato el enlace para unirte a nuestro canal y chat privado!`;
   }
   return `⚜️ *БРАТВА FCM — ВХОД В КАНАЛ И ЧАТ* ⚜️\n\n` +
-    `Приветствуем в нашей лиге! Чтобы получить ссылку на наш официальный Telegram канал и чат обсуждений:\n\n` +
-    `👉 *Напиши свой никнейм в EA FC Mobile сюда в чат*\n` +
-    `_(В точности так, как он указан в игре)_\n\n` +
-    `⚡ Бот сразу выдаст тебе ссылку для входа в закрытый канал и чат лиги!`;
+    `Приветствуем в нашей лиге! Вход в официальный канал и чат команды обязателен для всех участников.\n\n` +
+    `👉 *Напиши свое имя пользователя (username) в EA FC Mobile сюда в чат*\n` +
+    `_(В точности так, как в игре)_\n\n` +
+    `⚡ Бот сразу выдаст тебе ссылку для входа в наш закрытый канал и чат лиги!`;
 }
 
 function getVerificationKeyboard(currentLang = 'ru') {
@@ -1251,29 +1286,34 @@ function getVerificationKeyboard(currentLang = 'ru') {
   };
 }
 
-function formatVerificationSuccess(matchedName, lang = 'ru') {
+function formatVerificationSuccess(matchedName, uid = null, lang = 'ru') {
+  const uidText = uid ? ` (UID: \`${clean(uid)}\`)` : '';
   if (lang === 'en') {
-    return `✅ *ACCOUNT SUCCESSFULLY VERIFIED!* ⚜️\n\n` +
-      `Welcome, *${clean(matchedName)}*! Your league membership in BRATVA FCM is now officially recorded.\n\n` +
-      `👉 *Status:* Verified & Active\n` +
-      `👉 *Next Step:* Tap below to join our official channel & squad discussion chat:`;
+    return `✅ *ACCOUNT CONFIRMED!* ⚜️\n\n` +
+      `Player: *${clean(matchedName)}*${uidText}\n` +
+      `Your participation in BRATVA FCM is officially recorded.\n\n` +
+      `👉 *Status:* In Squad / Active Member\n` +
+      `👉 *Next Step:* Tap the button below to join our official Telegram channel & squad discussion chat:`;
   }
   if (lang === 'ar') {
     return `✅ *تم تأكيد حسابك بنجاح!* ⚜️\n\n` +
-      `أهلاً بك يا *${clean(matchedName)}*! تم تسجيل وتأكيد عضويتك في دوري БРАТВА FCM رسمياً.\n\n` +
-      `👉 *الحالة:* عضو مؤكد ونشط\n` +
-      `👉 *الخطوة التالية:* اضغط بالأسفل للدخول إلى القناة الرسمية ومجموعة النقاش الخاصة بالفريق:`;
+      `اللاعب: *${clean(matchedName)}*${uidText}\n` +
+      `تم تسجيل مشاركتك في دوري БРАТВА FCM رسمياً في النظام.\n\n` +
+      `👉 *الحالة:* عضو نشط في الفريق\n` +
+      `👉 *الخطوة التالية:* اضغط على الزر بالأسفل للانضمام إلى القناة ومجموعة النقاش الخاصة بالفريق:`;
   }
   if (lang === 'es') {
-    return `✅ *¡CUENTA VERIFICADA CON ÉXITO!* ⚜️\n\n` +
-      `¡Bienvenido, *${clean(matchedName)}*! Tu membresía en BRATVA FCM ya está registrada oficialmente.\n\n` +
-      `👉 *Estado:* Verificado y Activo\n` +
-      `👉 *Siguiente paso:* Toca abajo para unirte al canal oficial y al grupo de debate del equipo:`;
+    return `✅ *¡CUENTA CONFIRMADA CON ÉXITO!* ⚜️\n\n` +
+      `Jugador: *${clean(matchedName)}*${uidText}\n` +
+      `Tu participación en BRATVA FCM ha sido registrada oficialmente.\n\n` +
+      `👉 *Estado:* En el equipo / Miembro Activo\n` +
+      `👉 *Siguiente paso:* Toca el botón de abajo para unirte a nuestro canal oficial y chat del equipo:`;
   }
   return `✅ *АККАУНТ УСПЕШНО ПОДТВЕРЖДЕН!* ⚜️\n\n` +
-    `Привет, *${clean(matchedName)}*! Твое участие в лиге БРАТВА FCM официально зафиксировано в системе.\n\n` +
-    `👉 *Твой статус:* В составе (Verified)\n` +
-    `👉 *Следующий шаг:* Вступай в закрытую папку (канал с турнирами + чат обсуждений) по кнопке ниже:`;
+    `Игрок: *${clean(matchedName)}*${uidText}\n` +
+    `Твое участие в лиге БРАТВА FCM официально зафиксировано в системе.\n\n` +
+    `👉 *Твой статус:* В составе лиги (Active)\n` +
+    `👉 *Следующий шаг:* Вступай в наш закрытый канал и чат обсуждений по кнопке ниже:`;
 }
 
 function getVerificationSuccessKeyboard(playerId, currentLang = 'ru') {
@@ -1286,9 +1326,15 @@ function getVerificationSuccessKeyboard(playerId, currentLang = 'ru') {
                       currentLang === 'es' ? '👥 Unirse al Canal y Grupo Oficial' :
                       currentLang === 'en' ? '👥 Join Official Channel & Chat' : '👥 Вступить в Канал и Чат Лиги';
 
-  const cardLabel = currentLang === 'ar' ? '🌐 بطاقتك الشخصية في الموقع' :
-                    currentLang === 'es' ? '🌐 Tu Tarjeta en la Web' :
-                    currentLang === 'en' ? '🌐 Your Player Card on Website' : '🌐 Твоя Карточка на Сайте';
+  const { pIndex } = loadLeagueData();
+  const hasStats = pIndex && pIndex[playerId];
+
+  const cardLabel = currentLang === 'ar' ? (hasStats ? '🌐 بطاقتك الشخصية في الموقع' : '🌐 الموقع الرسمي للدوري') :
+                    currentLang === 'es' ? (hasStats ? '🌐 Tu Tarjeta en la Web' : '🌐 Sitio Oficial de la Liga') :
+                    currentLang === 'en' ? (hasStats ? '🌐 Your Player Card on Website' : '🌐 Official League Website') :
+                    (hasStats ? '🌐 Твоя Карточка на Сайте' : '🌐 Официальный Сайт Лиги');
+
+  const cardUrl = hasStats ? `${WEBSITE_URL}?player=${encodeURIComponent(playerId)}` : WEBSITE_URL;
 
   return {
     inline_keyboard: [
@@ -1302,7 +1348,111 @@ function getVerificationSuccessKeyboard(playerId, currentLang = 'ru') {
         { text: folderLabel, url: COMMUNITY_URL }
       ],
       [
-        { text: cardLabel, url: `${WEBSITE_URL}?player=${encodeURIComponent(playerId)}` }
+        { text: cardLabel, url: cardUrl }
+      ]
+    ]
+  };
+}
+
+function formatUidPrompt(inGameName, lang = 'ru') {
+  if (lang === 'en') {
+    return `⚠️ *A PLAYER WITH THIS NAME IS ALREADY IN THE LEAGUE!* ⚜️\n\n` +
+      `Username: *${clean(inGameName)}*\n\n` +
+      `Another member has already registered with this exact username.\n` +
+      `To distinguish your account and avoid confusion:\n\n` +
+      `👉 *Please send your in-game UID (User ID) here in chat*\n` +
+      `_(You can copy your UID from your EA FC Mobile profile)_\n\n` +
+      `⚡ Once sent, you'll immediately get your invite link to our official channel & squad chat!`;
+  }
+  if (lang === 'ar') {
+    return `⚠️ *يوجد لاعب بنفس هذا الاسم في الدوري بالفعل!* ⚜️\n\n` +
+      `الاسم: *${clean(inGameName)}*\n\n` +
+      `تم تسجيل عضو آخر بنفس هذا الاسم مسبقاً.\n` +
+      `للتعرف على حسابك وتجنب أي التباس بينكما:\n\n` +
+      `👉 *أرسل الـ UID الخاص بك في اللعبة هنا في المحادثة*\n` +
+      `_(يمكنك نسخ الـ UID من ملفك الشخصي داخل EA FC Mobile)_\n\n` +
+      `⚡ بمجرد إرسال الـ UID، ستحصل فوراً على رابط الدخول إلى القناة ومجموعة الفريق!`;
+  }
+  if (lang === 'es') {
+    return `⚠️ *¡YA HAY UN JUGADOR CON ESTE NOMBRE EN LA LIGA!* ⚜️\n\n` +
+      `Nombre: *${clean(inGameName)}*\n\n` +
+      `Otro miembro ya se ha registrado con este mismo nombre.\n` +
+      `Para distinguir tu cuenta y evitar confusiones:\n\n` +
+      `👉 *Envía tu UID (User ID) del juego aquí en el chat*\n` +
+      `_(Puedes copiar tu UID desde tu perfil de EA FC Mobile)_\n\n` +
+      `⚡ ¡En cuanto envíes tu UID, recibirás de inmediato el enlace al canal y al chat!`;
+  }
+  return `⚠️ *ИГРОК С ТАКИМ ИМЕНЕМ УЖЕ ЕСТЬ В ЛИГЕ!* ⚜️\n\n` +
+    `Никнейм: *${clean(inGameName)}*\n\n` +
+    `В лиге уже зарегистрирован участник с таким же никнеймом.\n` +
+    `Чтобы мы точно знали твой аккаунт и не перепутали вас:\n\n` +
+    `👉 *Отправь сюда свой игровой UID (User ID)*\n` +
+    `_(UID можно скопировать в профиле EA FC Mobile)_\n\n` +
+    `⚡ Как только отправишь UID, бот сразу выдаст тебе ссылку для входа в канал и чат лиги!`;
+}
+
+function getUidPromptKeyboard(encodedName, currentLang = 'ru') {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  return {
+    inline_keyboard: [
+      [
+        { text: ruLabel, callback_data: `tab_veruid_${encodedName}_ru` },
+        { text: enLabel, callback_data: `tab_veruid_${encodedName}_en` },
+        { text: arLabel, callback_data: `tab_veruid_${encodedName}_ar` },
+        { text: esLabel, callback_data: `tab_veruid_${encodedName}_es` }
+      ],
+      [
+        { text: '🌐 Official League Website', url: WEBSITE_URL }
+      ]
+    ]
+  };
+}
+
+function formatPhotoWarning(lang = 'ru') {
+  if (lang === 'en') {
+    return `⛔ *LEAGUE ADMINS ONLY!* ⚠️\n\n` +
+      `Uploading tournament match screenshots is strictly reserved for League Admins.\n\n` +
+      `👉 *Are you a league member?*\n` +
+      `Send your *EA FC Mobile username* here in chat to get your official invite link to our private channel & squad chat!`;
+  }
+  if (lang === 'ar') {
+    return `⛔ *خاص بمسؤولي الدوري فقط!* ⚠️\n\n` +
+      `تحميل لقطات مباريات البطولة متاح فقط لمسؤولي ومؤسس الدوري.\n\n` +
+      `👉 *هل أنت عضو في الفريق؟*\n` +
+      `أرسل *اسمك في EA FC Mobile* هنا للحصول على رابط الانضمام إلى القناة الرسمية ومجموعة الفريق!`;
+  }
+  if (lang === 'es') {
+    return `⛔ *¡SOLO PARA ADMINISTRADORES!* ⚠️\n\n` +
+      `La subida de capturas de torneos está reservada exclusivamente para administradores.\n\n` +
+      `👉 *¿Eres miembro de la liga?*\n` +
+      `¡Envía tu *nombre de EA FC Mobile* aquí en el chat para recibir el enlace a nuestro canal y chat privado!`;
+  }
+  return `⛔ *ТОЛЬКО ДЛЯ АДМИНИСТРАТОРОВ ЛИГИ!* ⚠️\n\n` +
+    `Загружать скриншоты матчей турнира могут только администраторы лиги.\n\n` +
+    `👉 *Ты участник лиги?*\n` +
+    `Отправь свое *имя пользователя (username) в EA FC Mobile* сюда в чат, чтобы получить ссылку на закрытый канал и чат лиги!`;
+}
+
+function getPhotoWarningKeyboard(currentLang = 'ru') {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  return {
+    inline_keyboard: [
+      [
+        { text: ruLabel, callback_data: 'tab_verphoto_0_ru' },
+        { text: enLabel, callback_data: 'tab_verphoto_0_en' },
+        { text: arLabel, callback_data: 'tab_verphoto_0_ar' },
+        { text: esLabel, callback_data: 'tab_verphoto_0_es' }
+      ],
+      [
+        { text: '🌐 Official League Website', url: WEBSITE_URL }
       ]
     ]
   };
@@ -1329,6 +1479,12 @@ async function formatPendingAudit(lang = 'ru') {
     }
   }
 
+  for (const [rId, reg] of Object.entries(registeredMap)) {
+    if (reg && reg.display_name && !allPlayersMap.has(reg.player_id)) {
+      allPlayersMap.set(reg.player_id, reg.display_name);
+    }
+  }
+
   const verified = [];
   const pending = [];
 
@@ -1336,7 +1492,9 @@ async function formatPendingAudit(lang = 'ru') {
     const reg = registeredMap[pid];
     if (reg) {
       const tgUser = reg.telegram_username ? `@${reg.telegram_username}` : `ID:${reg.telegram_id}`;
-      verified.push(`• *${clean(name)}* → ${tgUser}`);
+      const uidTag = reg.uid ? ` [UID: ${reg.uid}]` : '';
+      const newTag = reg.is_new_member ? ' *(New)*' : '';
+      verified.push(`• *${clean(name)}*${uidTag}${newTag} → ${tgUser}`);
     } else {
       pending.push(`• *${clean(name)}*`);
     }
@@ -2148,10 +2306,21 @@ export default async function handler(req, res) {
           updatedText = formatVerificationPrompt(targetLang);
           updatedKeyboard = getVerificationKeyboard(targetLang);
         } else if (category === 'versuccess') {
+          const regData = await getRegisteredPlayers();
+          const reg = (regData.registrations || {})[param] || {};
           const { pIndex } = loadLeagueData();
-          const pData = pIndex[param] || { display_name: param };
-          updatedText = formatVerificationSuccess(pData.display_name || param, targetLang);
+          const pData = pIndex[param] || {};
+          const dispName = reg.display_name || pData.display_name || param;
+          const uid = reg.uid || null;
+          updatedText = formatVerificationSuccess(dispName, uid, targetLang);
           updatedKeyboard = getVerificationSuccessKeyboard(param, targetLang);
+        } else if (category === 'veruid') {
+          const rawName = decodeURIComponent(param);
+          updatedText = formatUidPrompt(rawName, targetLang);
+          updatedKeyboard = getUidPromptKeyboard(param, targetLang);
+        } else if (category === 'verphoto') {
+          updatedText = formatPhotoWarning(targetLang);
+          updatedKeyboard = getPhotoWarningKeyboard(targetLang);
         } else if (category === 'player') {
           updatedText = generatePlayerStatsMessage(param, targetLang);
           updatedKeyboard = getPlayerKeyboard(param, targetLang);
@@ -2358,22 +2527,67 @@ export default async function handler(req, res) {
     if (!isAdmin) {
       // 1. Photos are strictly blocked for non-admins (match upload is admin-only)
       if (message.photo && message.photo.length > 0) {
-        await sendTelegramMessage(chatId, `⛔ *Только администраторы лиги могут загружать скриншоты матчей!*\n\n_(Only League Admins can upload match screenshots)_`);
-        return sendResponse(res, 200, 'Non-admin photo rejected');
+        const photoMsg = formatPhotoWarning('ru');
+        const photoKeys = getPhotoWarningKeyboard('ru');
+        await sendTelegramMessage(chatId, photoMsg, photoKeys);
+        return sendResponse(res, 200, 'Non-admin photo rejected with tabs');
       }
 
-      // 2. Check if this player is ALREADY verified & registered
       const regData = await getRegisteredPlayers();
-      const existingReg = Object.values(regData.registrations || {}).find(r => String(r.telegram_id) === String(userId));
+      const pendingMap = regData.pending_uids || {};
+      const pendingEntry = pendingMap[String(userId)];
 
-      if (existingReg && (!text || text === '/start' || text === '/help' || text === '/verify')) {
-        const vSuccessText = formatVerificationSuccess(existingReg.display_name, 'ru');
+      // 2. If user is in the middle of sending their in-game UID (duplicate name resolution)
+      if (pendingEntry) {
+        if (text === '/cancel' || text === '/start') {
+          await clearPendingUid(userId);
+          const vPrompt = formatVerificationPrompt('ru');
+          const vKeys = getVerificationKeyboard('ru');
+          await sendTelegramMessage(chatId, vPrompt, vKeys);
+          return sendResponse(res, 200, 'Pending UID cleared');
+        }
+
+        const uid = text.replace(/^(uid\s*[:=]?\s*)/i, '').trim();
+        const cleanUid = uid.replace(/[^a-zA-Z0-9]/g, '');
+        const baseId = (pendingEntry.base_id || 'member').split('_uid_')[0];
+        const playerId = `${baseId}_uid_${cleanUid || Date.now()}`;
+
+        await savePlayerRegistration({
+          player_id: playerId,
+          display_name: pendingEntry.display_name,
+          in_game_name: pendingEntry.display_name,
+          uid: uid,
+          telegram_id: userId,
+          telegram_username: message.from ? (message.from.username || '') : '',
+          telegram_name: `${message.from ? (message.from.first_name || '') : ''} ${message.from ? (message.from.last_name || '') : ''}`.trim(),
+          is_new_member: pendingEntry.is_new_member || false
+        });
+
+        const vSuccessText = formatVerificationSuccess(pendingEntry.display_name, uid, 'ru');
+        const vSuccessKeys = getVerificationSuccessKeyboard(playerId, 'ru');
+        await sendTelegramMessage(chatId, vSuccessText, vSuccessKeys);
+        return sendResponse(res, 200, 'Duplicate resolved with UID');
+      }
+
+      // 3. Check if this player is ALREADY verified & registered
+      const existingReg = Object.values(regData.registrations || {}).find(r => String(r.telegram_id) === String(userId));
+      if (existingReg) {
+        if (text === '/reset' || text === '/change') {
+          delete regData.registrations[existingReg.player_id];
+          await saveRegisteredPlayersRaw(regData, `Player Reset: TG @${existingReg.telegram_username || userId}`);
+          const vPrompt = formatVerificationPrompt('ru');
+          const vKeys = getVerificationKeyboard('ru');
+          await sendTelegramMessage(chatId, vPrompt, vKeys);
+          return sendResponse(res, 200, 'Registration reset');
+        }
+
+        const vSuccessText = formatVerificationSuccess(existingReg.display_name, existingReg.uid, 'ru');
         const vSuccessKeys = getVerificationSuccessKeyboard(existingReg.player_id, 'ru');
         await sendTelegramMessage(chatId, vSuccessText, vSuccessKeys);
-        return sendResponse(res, 200, 'OK');
+        return sendResponse(res, 200, 'Already registered');
       }
 
-      // 3. New / Unregistered Player -> Show multilingual verification prompt
+      // 4. New / Unregistered Player -> Show multilingual verification prompt
       if (!text || text === '/start' || text === '/help' || text === '/verify') {
         const vPrompt = formatVerificationPrompt('ru');
         const vKeys = getVerificationKeyboard('ru');
@@ -2381,40 +2595,63 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
-      // 4. User entered their in-game EA FC Mobile username: match against active roster
-      const matched = findPlayerByQuery(text);
-      if (matched) {
-        await savePlayerRegistration({
-          player_id: matched.player_id,
-          display_name: matched.display_name,
-          telegram_id: userId,
-          telegram_username: message.from ? (message.from.username || '') : '',
-          telegram_name: `${message.from ? (message.from.first_name || '') : ''} ${message.from ? (message.from.last_name || '') : ''}`.trim()
+      // 5. User submitted their in-game username
+      const inputName = text.trim();
+
+      // Check if this username is already registered by a DIFFERENT Telegram user (Duplicate Name)
+      const existingClaim = Object.values(regData.registrations || {}).find(r => {
+        const regName = (r.in_game_name || r.display_name || '').toLowerCase().trim();
+        const query = inputName.toLowerCase().trim();
+        return regName === query && String(r.telegram_id) !== String(userId);
+      });
+
+      if (existingClaim) {
+        // DUPLICATE DETECTED: Request in-game UID to distinguish between players
+        await setPendingUid(userId, {
+          display_name: inputName,
+          base_id: existingClaim.player_id,
+          is_new_member: existingClaim.is_new_member || false
         });
 
-        const vSuccessText = formatVerificationSuccess(matched.display_name, 'ru');
-        const vSuccessKeys = getVerificationSuccessKeyboard(matched.player_id, 'ru');
-        await sendTelegramMessage(chatId, vSuccessText, vSuccessKeys);
-        return sendResponse(res, 200, 'OK');
-      } else {
-        const notFoundKeys = {
-          inline_keyboard: [
-            [
-              { text: '🌐 Check League Roster on Website', url: WEBSITE_URL }
-            ]
-          ]
-        };
-
-        const notFoundText =
-          `❌ *Игрок "${clean(text)}" не найден в составе лиги!* ⚠️\n\n` +
-          `Пожалуйста, проверь точное написание ника в EA FC Mobile и отправь его еще раз.\n\n` +
-          `📌 *Советы:*\n` +
-          `• Пиши точно как в профиле игры (например: \`саня\`, \`DOXIBERO1\`, \`Grego\`).\n` +
-          `• Если ты только недавно вступил в лигу в игре, напиши администраторам: @BRATVAFCM`;
-
-        await sendTelegramMessage(chatId, notFoundText, notFoundKeys);
-        return sendResponse(res, 200, 'OK');
+        const uidPrompt = formatUidPrompt(inputName, 'ru');
+        const uidKeys = getUidPromptKeyboard(encodeURIComponent(inputName), 'ru');
+        await sendTelegramMessage(chatId, uidPrompt, uidKeys);
+        return sendResponse(res, 200, 'Duplicate name, requested UID');
       }
+
+      // Check if username matches active tournament roster
+      const matched = findPlayerByQuery(inputName);
+      let playerId = '';
+      let displayName = '';
+      let isNew = false;
+
+      if (matched) {
+        playerId = matched.player_id;
+        displayName = matched.display_name;
+        isNew = false;
+      } else {
+        // ACCEPT ALL MEMBERS: league has up to 100 players, many join before tournaments
+        const cleanBase = inputName.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '') || `user_${userId}`;
+        playerId = `member_${cleanBase}`;
+        displayName = inputName;
+        isNew = true;
+      }
+
+      await savePlayerRegistration({
+        player_id: playerId,
+        display_name: displayName,
+        in_game_name: displayName,
+        uid: null,
+        telegram_id: userId,
+        telegram_username: message.from ? (message.from.username || '') : '',
+        telegram_name: `${message.from ? (message.from.first_name || '') : ''} ${message.from ? (message.from.last_name || '') : ''}`.trim(),
+        is_new_member: isNew
+      });
+
+      const vSuccessText = formatVerificationSuccess(displayName, null, 'ru');
+      const vSuccessKeys = getVerificationSuccessKeyboard(playerId, 'ru');
+      await sendTelegramMessage(chatId, vSuccessText, vSuccessKeys);
+      return sendResponse(res, 200, 'Registration successful');
     }
 
     // 2.1 Photo processing with High-Speed Issue #1 Buffer + Interactive Button + Auto-Debounce
@@ -2639,8 +2876,11 @@ export default async function handler(req, res) {
       }
     }
 
-    // 2.4 Private Chat AI Assistant (Gemini 3.6 Flash) - STRICTLY for private 1-on-1 chat!
+    // 2.4 Private Chat AI Assistant (Gemini 3.6 Flash) - STRICTLY for private 1-on-1 chat for Admins only!
     if (isPrivate && text) {
+      if (!isAdmin) {
+        return sendResponse(res, 200, 'AI chat restricted to admins');
+      }
       await telegramRequest('sendChatAction', { chat_id: chatId, action: 'typing' });
       try {
         const aiAnswer = await askGeminiAI(text);
