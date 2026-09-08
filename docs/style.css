@@ -1984,6 +1984,16 @@ body.modal-open {
 .header-square-btn:active {
   transform: scale(0.94);
 }
+.telegram-header-btn {
+  color: #29b6f6;
+  text-decoration: none;
+}
+.telegram-header-btn:hover {
+  color: #ffffff;
+  border-color: #29b6f6;
+  background: rgba(41, 182, 246, 0.18);
+  box-shadow: 0 0 14px rgba(41, 182, 246, 0.4);
+}
 .header-btn-badge-dot {
   position: absolute;
   top: 7px;
@@ -2230,6 +2240,44 @@ body.modal-open {
   color: var(--ucl-cyan);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+.rules-modal-telegram-link {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.rules-tg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(41, 182, 246, 0.12);
+  border: 1px solid rgba(41, 182, 246, 0.35);
+  color: #29b6f6;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.rules-tg-btn:hover {
+  background: #29b6f6;
+  color: #0b1120;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(41, 182, 246, 0.35);
+}
+.rules-tg-btn.bot {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.35);
+  color: #c084fc;
+}
+.rules-tg-btn.bot:hover {
+  background: #c084fc;
+  color: #0b1120;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35);
 }
 
 /* --- News Feed Cards --- */

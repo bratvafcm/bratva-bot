@@ -1,7 +1,0 @@
-{
-  "telegram_token": "YOUR_TELEGRAM_BOT_TOKEN_HERE",
-  "gemini_key": "YOUR_GOOGLE_AI_STUDIO_KEY_HERE",
-  "bot_username": "BratvaFCMBot",
-  "gemini_model": "gemini-3.5-flash",
-  "auto_push_github": true
-}
