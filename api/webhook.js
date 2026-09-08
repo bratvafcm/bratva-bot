@@ -595,7 +595,7 @@ function formatRecap(t, lang = 'ru') {
   }
 }
 
-function generateTopScorersMessage() {
+function formatTopScorers(lang = 'ru') {
   const { pIndex } = loadLeagueData();
   const list = Object.entries(pIndex).map(([id, data]) => ({
     id,
@@ -610,13 +610,25 @@ function generateTopScorersMessage() {
   const top10 = list.slice(0, 10);
   const lines = top10.map((p, idx) => {
     const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `[ ${idx + 1} ]`));
-    return `${medal} *${p.name}* — ${p.goals} goals (${p.matches} matches, avg ${p.avg})`;
+    if (lang === 'en') return `${medal} *${p.name}* — ${p.goals} goals (${p.matches} matches, avg ${p.avg})`;
+    if (lang === 'ar') return `${medal} *${p.name}* — ${p.goals} بيت (${p.matches} ماتش، معدل ${p.avg})`;
+    if (lang === 'es') return `${medal} *${p.name}* — ${p.goals} goles (${p.matches} partidos, prom. ${p.avg})`;
+    return `${medal} *${p.name}* — ${p.goals} голов (${p.matches} матчей, сред. ${p.avg})`;
   });
 
-  return `🏆 *БРАТВА LEAGUE — TOP SCORERS* 🏆\n\n${lines.join('\n')}\n\n🌐 *Full Standings:*\n${WEBSITE_URL}`;
+  if (lang === 'en') {
+    return `🏆 *БРАТВА LEAGUE — TOP SCORERS* 🏆\n\n${lines.join('\n')}\n\n🌐 *Full Standings:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'ar') {
+    return `🏆 *كتيبة БРАТВА — قائمة الهدافين التاريخيين* 🏆\n\n${lines.join('\n')}\n\n🌐 *الترتيب الكامل:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'es') {
+    return `🏆 *LIGA БРАТВА — MÁXIMOS GOLEADORES* 🏆\n\n${lines.join('\n')}\n\n🌐 *Clasificación completa:* ${WEBSITE_URL}`;
+  }
+  return `🏆 *БРАТВА LEAGUE — ЛУЧШИЕ БОМБАРДИРЫ* 🏆\n\n${lines.join('\n')}\n\n🌐 *Полная таблица:* ${WEBSITE_URL}`;
 }
 
-async function generateStrikesMessage() {
+async function formatStrikes(lang = 'ru') {
   const t = await getLatestTournament();
   if (!t) return 'No match data recorded yet.';
 
@@ -624,21 +636,38 @@ async function generateStrikesMessage() {
   if (t.matches) {
     t.matches.forEach(m => {
       const turns = m.turns_played !== undefined ? m.turns_played : 0;
-      if (turns < 3) missed.push(`[ ❌ | ${clean(m.player_display_name)} | ${turns}/3 ]`);
+      if (turns < 3) missed.push(`⌛ | ${clean(m.player_display_name)} | ${turns}/3`);
     });
   }
 
   if (missed.length === 0) {
-    return `✅ *100% ДИСЦИПЛИНА / 100% DISCIPLINE:*\nВсе игроки сыграли 3/3!\nAll members completed 3/3 turns!\n\n🌐 *Website:*\n${WEBSITE_URL}`;
+    if (lang === 'en') return `✅ *100% SQUAD DISCIPLINE!*\nAll members completed all 3/3 turns! Outstanding commitment!\n\n🌐 *Website:* ${WEBSITE_URL}`;
+    if (lang === 'ar') return `✅ *انضباط 100% فالتيم!*\nكلشي لعب 3/3 أشواط ديالو كاملة! برافو للكتيبة!\n\n🌐 *الموقع الرسمي:* ${WEBSITE_URL}`;
+    if (lang === 'es') return `✅ *¡100% DISCIPLINA EN EL EQUIPO!*\n¡Todos los miembros jugaron sus 3/3 turnos! ¡Excelente trabajo!\n\n🌐 *Sitio oficial:* ${WEBSITE_URL}`;
+    return `✅ *100% ДИСЦИПЛИНА!*\nВсе игроки сыграли 3/3 ходов! Отличная командная работа!\n\n🌐 *Сайт лиги:* ${WEBSITE_URL}`;
   }
 
-  return `⛔ *ВНИМАНИЕ / ATTENTION PLEASE:*\n${missed.join('\n')}\n\n` +
-    `⛔ Страйк 1/3! Обязательно 3/3 в след. матче, иначе кик!\n` +
-    `⛔ Strike 1/3! Must play 3/3 in next match or get kicked!\n\n` +
-    `🌐 *Website:*\n${WEBSITE_URL}`;
+  if (lang === 'en') {
+    return `⛔ *WARNING: UNPLAYED TURNS:*\n${missed.join('\n')}\n\n` +
+      `⚠️ Strike 1/3 received! Must play all 3/3 in next tournament or face removal!\n\n` +
+      `🌐 *Website:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'ar') {
+    return `⛔ *تنبيه: لاعبين باقين ما كملوش أشواطهم:*\n${missed.join('\n')}\n\n` +
+      `⚠️ إنذار سترايك 1/3 تسجل! التورنوا الجاي ضروري تلعب 3/3 لتفادي الطرد من الليغا!\n\n` +
+      `🌐 *الموقع المباشر:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'es') {
+    return `⛔ *ATENCIÓN: TURNOS PENDIENTES:*\n${missed.join('\n')}\n\n` +
+      `⚠️ ¡Strike 1/3 asignado! ¡Obligatorio jugar 3/3 en el próximo partido o serás expulsado!\n\n` +
+      `🌐 *Sitio oficial:* ${WEBSITE_URL}`;
+  }
+  return `⛔ *ВНИМАНИЕ: ПРОПУСКИ ХОДОВ:*\n${missed.join('\n')}\n\n` +
+    `⚠️ Получен страйк 1/3! В следующем матче обязательно 3/3, иначе кик!\n\n` +
+    `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
 }
 
-function generateLineupMessage() {
+function formatLineup(lang = 'ru') {
   const { pIndex } = loadLeagueData();
   const list = Object.entries(pIndex).map(([id, data]) => ({
     id,
@@ -650,25 +679,60 @@ function generateLineupMessage() {
   })).filter(p => p.strikes === 0).sort((a, b) => b.avg - a.avg);
 
   const lineup = list.slice(0, 8);
-  const lines = lineup.map((p, idx) => `[ 🟢 | ${idx + 1}. ${p.name} | avg ${p.avg}G | ${p.matches}M ]`);
+  const lines = lineup.map((p, idx) => {
+    if (lang === 'en') return `[ 🟢 | ${idx + 1}. ${p.name} | avg ${p.avg}G | ${p.matches}M ]`;
+    if (lang === 'ar') return `[ 🟢 | ${idx + 1}. ${p.name} | معدل ${p.avg} | ${p.matches}م ]`;
+    if (lang === 'es') return `[ 🟢 | ${idx + 1}. ${p.name} | prom ${p.avg}G | ${p.matches}P ]`;
+    return `[ 🟢 | ${idx + 1}. ${p.name} | сред. ${p.avg}Г | ${p.matches}М ]`;
+  });
 
-  return `🎯 *РЕКОМЕНДОВАННЫЙ СОСТАВ / RECOMMENDED LINEUP (TOP 8):*\n\n` +
-    `${lines.join('\n')}\n\n` +
-    `⚡ Based on performance & 100% discipline record!\n` +
-    `🌐 *Website:*\n${WEBSITE_URL}`;
+  if (lang === 'en') {
+    return `🎯 *RECOMMENDED COMPETITIVE SQUAD (TOP 8):*\n\n${lines.join('\n')}\n\n` +
+      `⚡ Ranked by performance & flawless 100% discipline record!\n🌐 *Website:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'ar') {
+    return `🎯 *التشكيلة الأساسية المثالية (أفضل 8 لاعبين):*\n\n${lines.join('\n')}\n\n` +
+      `⚡ ترتيب مبني على معدل الأهداف والانضباط الكامل 100% فالتورنوات!\n🌐 *الموقع:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'es') {
+    return `🎯 *ALINEACIÓN COMPETITIVA RECOMENDADA (TOP 8):*\n\n${lines.join('\n')}\n\n` +
+      `⚡ ¡Basado en rendimiento y 100% de disciplina impecable!\n🌐 *Sitio:* ${WEBSITE_URL}`;
+  }
+  return `🎯 *РЕКОМЕНДОВАННЫЙ СОСТАВ (ТОП-8):*\n\n${lines.join('\n')}\n\n` +
+    `⚡ На основе результативности и 100% игровой дисциплины!\n🌐 *Сайт лиги:* ${WEBSITE_URL}`;
 }
 
-async function generateTournamentsMessage() {
+function formatTournaments(lang = 'ru') {
   const { tournaments } = loadLeagueData();
   const list = (tournaments || []).slice(0, 5);
   if (list.length === 0) return 'No tournaments recorded yet.';
 
   const lines = list.map(t => {
-    const resIcon = t.result === 'win' ? '🟢 WIN' : (t.result === 'draw' ? '🟡 DRAW' : '🔴 LOSS');
+    let resIcon = '🟢 WIN';
+    if (t.result === 'draw') resIcon = '🟡 DRAW';
+    if (t.result === 'loss') resIcon = '🔴 LOSS';
+
+    if (lang === 'ru') {
+      resIcon = t.result === 'win' ? '🟢 ПОБЕДА' : (t.result === 'draw' ? '🟡 НИЧЬЯ' : '🔴 ПОРАЖЕНИЕ');
+    } else if (lang === 'ar') {
+      resIcon = t.result === 'win' ? '🟢 فوز' : (t.result === 'draw' ? '🟡 تعادل' : '🔴 هزيمة');
+    } else if (lang === 'es') {
+      resIcon = t.result === 'win' ? '🟢 VICTORIA' : (t.result === 'draw' ? '🟡 EMPATE' : '🔴 DERROTA');
+    }
+
     return `• *vs ${clean(t.opponent_league)}* (${t.date}): ${t.our_total_goals} - ${t.opponent_total_goals} [${resIcon}]`;
   });
 
-  return `📊 *RECENT TOURNAMENTS / ПОСЛЕДНИЕ ТУРНИРЫ:*\n\n${lines.join('\n')}\n\n🌐 *Full Match History:*\n${WEBSITE_URL}`;
+  if (lang === 'en') {
+    return `📊 *RECENT БРАТВА TOURNAMENTS:*\n\n${lines.join('\n')}\n\n🌐 *Full Match History:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'ar') {
+    return `📊 *آخر مباريات كتيبة БРАТВА:*\n\n${lines.join('\n')}\n\n🌐 *أرشيف المباريات الكامل:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'es') {
+    return `📊 *ÚLTIMOS TORNEOS DE БРАТВА:*\n\n${lines.join('\n')}\n\n🌐 *Historial completo:* ${WEBSITE_URL}`;
+  }
+  return `📊 *ПОСЛЕДНИЕ ТУРНИРЫ БРАТВА:*\n\n${lines.join('\n')}\n\n🌐 *Полная история матчей:* ${WEBSITE_URL}`;
 }
 
 function generatePlayerStatsMessage(query) {
@@ -705,7 +769,7 @@ function generatePlayerStatsMessage(query) {
     `🌐 *Full Player Stats:*\n${WEBSITE_URL}`;
 }
 
-function generateKicklistMessage() {
+function formatKicklist(lang = 'ru') {
   const { pIndex } = loadLeagueData();
   const critical = [];
   const warning = [];
@@ -715,26 +779,93 @@ function generateKicklistMessage() {
     const streak = data.eligibility_streak?.current_fail_streak || 0;
     const isFlagged = data.eligibility_streak?.flagged_for_review || streak >= 3;
     if (isFlagged || streak >= 3) {
-      critical.push(`🚨 *${name}* — ${streak} consecutive misses (ELIGIBLE FOR KICK ⛔)`);
+      if (lang === 'en') critical.push(`🚨 *${name}* — ${streak} consecutive misses (ELIGIBLE FOR KICK ⛔)`);
+      else if (lang === 'ar') critical.push(`🚨 *${name}* — ${streak} تورنوات غائب (مرشح للطرد ⛔)`);
+      else if (lang === 'es') critical.push(`🚨 *${name}* — ${streak} ausencias seguidas (APTO PARA EXPULSIÓN ⛔)`);
+      else critical.push(`🚨 *${name}* — ${streak} пропуска подряд (КАНДИДАТ НА КИК ⛔)`);
     } else if (streak > 0) {
-      warning.push(`⚠️ *${name}* — ${streak}/3 misses (Warning strike ❌)`);
+      if (lang === 'en') warning.push(`⚠️ *${name}* — ${streak}/3 misses (Warning strike ❌)`);
+      else if (lang === 'ar') warning.push(`⚠️ *${name}* — ${streak}/3 غيابات (إنذار سترايك ❌)`);
+      else if (lang === 'es') warning.push(`⚠️ *${name}* — ${streak}/3 faltas (Strike de aviso ❌)`);
+      else warning.push(`⚠️ *${name}* — ${streak}/3 пропуска (Предупреждение ❌)`);
     }
   });
 
-  let msg = `📋 *БРАТВА INACTIVITY & KICK REVIEW* 📋\n\n`;
-  if (critical.length > 0) {
-    msg += `🚨 *CRITICAL: ELIGIBLE FOR IMMEDIATE KICK (3+ STRIKES):*\n${critical.join('\n')}\n\n`;
+  if (lang === 'en') {
+    let msg = `📋 *БРАТВА INACTIVITY & KICK REVIEW* 📋\n\n`;
+    if (critical.length > 0) msg += `🚨 *CRITICAL: ELIGIBLE FOR IMMEDIATE KICK (3+ STRIKES):*\n${critical.join('\n')}\n\n`;
+    if (warning.length > 0) msg += `⚠️ *ON NOTICE (1-2 STRIKES):*\n${warning.join('\n')}\n\n`;
+    if (critical.length === 0 && warning.length === 0) msg += `✅ *PERFECT SQUAD DISCIPLINE!*\nAll active members have 0 strikes. Squad is 100% active!\n\n`;
+    msg += `⚖️ *Official Rule:* 3 missed tournaments in a row = automatic kick.\n🌐 *Full Standings:* ${WEBSITE_URL}`;
+    return msg;
   }
-  if (warning.length > 0) {
-    msg += `⚠️ *ON NOTICE (1-2 STRIKES):*\n${warning.join('\n')}\n\n`;
+  if (lang === 'ar') {
+    let msg = `📋 *كتيبة БРАТВА: فحص الغيابات والمُعرضين للطرد* 📋\n\n`;
+    if (critical.length > 0) msg += `🚨 *حالة خطيرة: مرشحين للطرد الفوري (3+ سترايكات):*\n${critical.join('\n')}\n\n`;
+    if (warning.length > 0) msg += `⚠️ *تحت الإنذار (1-2 سترايك):*\n${warning.join('\n')}\n\n`;
+    if (critical.length === 0 && warning.length === 0) msg += `✅ *انضباط مثالي! كل أعضاء الفريق عندهم 0 إنذارات.*\n\n`;
+    msg += `⚖️ *القانون الرسمي:* 3 غيابات متتالية = طرد تلقائي من الليغا.\n🌐 *الترتيب الكامل:* ${WEBSITE_URL}`;
+    return msg;
   }
-  if (critical.length === 0 && warning.length === 0) {
-    msg += `✅ *PERFECT LEAGUE DISCIPLINE!*\nAll active members have 0 strikes. Squad is 100% active!\n\n`;
+  if (lang === 'es') {
+    let msg = `📋 *БРАТВА: AUDITORÍA DE INACTIVIDAD Y EXPULSIONES* 📋\n\n`;
+    if (critical.length > 0) msg += `🚨 *CRÍTICO: APTOS PARA EXPULSIÓN INMEDIATA (3+ STRIKES):*\n${critical.join('\n')}\n\n`;
+    if (warning.length > 0) msg += `⚠️ *BAJO AVISO (1-2 STRIKES):*\n${warning.join('\n')}\n\n`;
+    if (critical.length === 0 && warning.length === 0) msg += `✅ *¡DISCIPLINA PERFECTA! Todos los miembros tienen 0 strikes.*\n\n`;
+    msg += `⚖️ *Regla oficial:* 3 torneos consecutivos sin jugar = expulsión automática.\n🌐 *Clasificación:* ${WEBSITE_URL}`;
+    return msg;
   }
-
-  msg += `⚖️ *Official Rule:* 3 missed tournaments in a row = automatic kick.\n🌐 *Full Standings:*\n${WEBSITE_URL}`;
+  let msg = `📋 *БРАТВА: ПРОВЕРКА АКТИВНОСТИ И КАНДИДАТЫ НА КИК* 📋\n\n`;
+  if (critical.length > 0) msg += `🚨 *КРИТИЧНО: КАНДИДАТЫ НА ИСКЛЮЧЕНИЕ (3+ СТРАЙКА):*\n${critical.join('\n')}\n\n`;
+  if (warning.length > 0) msg += `⚠️ *НА ПРЕДУПРЕЖДЕНИИ (1-2 СТРАЙКА):*\n${warning.join('\n')}\n\n`;
+  if (critical.length === 0 && warning.length === 0) msg += `✅ *ИДЕАЛЬНАЯ ДИСЦИПЛИНА! У всех бойцов 0 страйков. Состав 100% активен!*\n\n`;
+  msg += `⚖️ *Правило лиги:* 3 пропуска турниров подряд = автоматический кик.\n🌐 *Полная таблица:* ${WEBSITE_URL}`;
   return msg;
 }
+
+function formatRules(lang = 'ru') {
+  if (lang === 'en') {
+    return `📜 *OFFICIAL БРАТВА LEAGUE RULES:* 📜\n\n` +
+      `1. ⚽ Mandatory to play all *3/3* turns in every tournament!\n` +
+      `2. ⚠️ 1 missed tournament = 1 warning strike (1/3).\n` +
+      `3. ⛔ 3 consecutive strikes = automatic removal (kick) from league.\n` +
+      `4. 🎯 Target: *20+ goals* per tournament!\n\n` +
+      `👥 *Telegram Community (Channel + Chat):*\n${COMMUNITY_URL}\n\n` +
+      `🌐 *Official Website:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'ar') {
+    return `📜 *قوانين كتيبة БРАТВА الرسمية:* 📜\n\n` +
+      `1. ⚽ إجباري تلعب *3/3* أشواط كاملة فكل تورنوا!\n` +
+      `2. ⚠️ تضييع تورنوا = إنذار سترايك (1/3).\n` +
+      `3. ⛔ 3 سترايكات متتالية = طرد نهائي ومباشر من الليغا.\n` +
+      `4. 🎯 الهدف الأدنى: *20+ بيت* فكل ماتش!\n\n` +
+      `👥 *مجتمع تيليغرام (القناة + المجموعة):*\n${COMMUNITY_URL}\n\n` +
+      `🌐 *الموقع الرسمي:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'es') {
+    return `📜 *REGLAS OFICIALES DE LA LIGA БРАТВА:* 📜\n\n` +
+      `1. ⚽ ¡Obligatorio jugar los *3/3* turnos en cada torneo!\n` +
+      `2. ⚠️ 1 torneo sin jugar = 1 strike de aviso (1/3).\n` +
+      `3. ⛔ 3 strikes consecutivos = expulsión automática de la liga.\n` +
+      `4. 🎯 Objetivo mínimo: *¡20+ goles* por torneo!\n\n` +
+      `👥 *Comunidad de Telegram (Canal + Chat):*\n${COMMUNITY_URL}\n\n` +
+      `🌐 *Sitio oficial:* ${WEBSITE_URL}`;
+  }
+  return `📜 *ПРАВИЛА ЛИГИ БРАТВА:* 📜\n\n` +
+    `1. ⚽ Обязательно играть *3/3* в каждом турнире!\n` +
+    `2. ⚠️ 1 пропущенный матч = 1 страйк (1/3).\n` +
+    `3. ⛔ 3 страйка подряд = исключение из лиги (кик).\n` +
+    `4. 🎯 Планка: *20+ голов* за турнир!\n\n` +
+    `👥 *Telegram Сообщество (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
+    `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
+}
+
+const generateTopScorersMessage = (lang = 'ru') => formatTopScorers(lang);
+const generateStrikesMessage = (lang = 'ru') => formatStrikes(lang);
+const generateLineupMessage = (lang = 'ru') => formatLineup(lang);
+const generateTournamentsMessage = (lang = 'ru') => formatTournaments(lang);
+const generateKicklistMessage = (lang = 'ru') => formatKicklist(lang);
+const generateRulesMessage = (lang = 'ru') => formatRules(lang);
 
 function formatMvp(lang = 'multi') {
   const { pIndex, tournaments } = loadLeagueData();
@@ -1309,6 +1440,24 @@ export default async function handler(req, res) {
         } else if (category === 'mvp') {
           updatedText = formatMvp(targetLang);
           updatedKeyboard = getLanguageKeyboard('mvp', '0', targetLang);
+        } else if (category === 'rules') {
+          updatedText = formatRules(targetLang);
+          updatedKeyboard = getLanguageKeyboard('rules', '0', targetLang);
+        } else if (category === 'top') {
+          updatedText = formatTopScorers(targetLang);
+          updatedKeyboard = getLanguageKeyboard('top', '0', targetLang);
+        } else if (category === 'strikes') {
+          updatedText = await formatStrikes(targetLang);
+          updatedKeyboard = getLanguageKeyboard('strikes', '0', targetLang);
+        } else if (category === 'lineup') {
+          updatedText = formatLineup(targetLang);
+          updatedKeyboard = getLanguageKeyboard('lineup', '0', targetLang);
+        } else if (category === 'tournaments') {
+          updatedText = formatTournaments(targetLang);
+          updatedKeyboard = getLanguageKeyboard('tournaments', '0', targetLang);
+        } else if (category === 'kicklist') {
+          updatedText = formatKicklist(targetLang);
+          updatedKeyboard = getLanguageKeyboard('kicklist', '0', targetLang);
         }
 
         if (updatedText) {
@@ -1322,8 +1471,8 @@ export default async function handler(req, res) {
       }
 
       if (data === 'cmd_top') {
-        const text = generateTopScorersMessage();
-        await sendTelegramMessage(chatId, text, getMainKeyboard());
+        const text = formatTopScorers('ru');
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('top', '0', 'ru'));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -1337,34 +1486,29 @@ export default async function handler(req, res) {
       }
 
       if (data === 'cmd_strikes') {
-        const text = await generateStrikesMessage();
-        await sendTelegramMessage(chatId, text, getMainKeyboard());
+        const text = await formatStrikes('ru');
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('strikes', '0', 'ru'));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
 
       if (data === 'cmd_lineup') {
-        const text = generateLineupMessage();
-        await sendTelegramMessage(chatId, text, getMainKeyboard());
+        const text = formatLineup('ru');
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('lineup', '0', 'ru'));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
 
       if (data === 'cmd_rules') {
-        const rules = `📜 *ПРАВИЛА ЛИГИ БРАТВА:*\n\n` +
-          `1. Обязательно играть 3/3 в каждом турнире!\n` +
-          `2. 1 пропущенный матч = 1 страйк (1/3).\n` +
-          `3. 3 страйка = исключение из лиги.\n\n` +
-          `👥 *Telegram Сообщество (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
-          `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
-        await sendTelegramMessage(chatId, rules, getMainKeyboard());
+        const rules = formatRules('ru');
+        await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', 'ru'));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
 
       if (data === 'cmd_tournaments') {
-        const text = await generateTournamentsMessage();
-        await sendTelegramMessage(chatId, text, getMainKeyboard());
+        const text = formatTournaments('ru');
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('tournaments', '0', 'ru'));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -1416,8 +1560,8 @@ export default async function handler(req, res) {
       }
 
       if (data === 'cmd_kicklist') {
-        const text = generateKicklistMessage();
-        await sendTelegramMessage(chatId, text, getMainKeyboard());
+        const text = formatKicklist('ru');
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('kicklist', '0', 'ru'));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -1507,26 +1651,26 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/top') || text.startsWith('/leaderboard')) {
-      const topMsg = generateTopScorersMessage();
-      await sendTelegramMessage(chatId, topMsg, getMainKeyboard());
+      const topMsg = formatTopScorers('ru');
+      await sendTelegramMessage(chatId, topMsg, getLanguageKeyboard('top', '0', 'ru'));
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/strikes')) {
-      const strikesMsg = await generateStrikesMessage();
-      await sendTelegramMessage(chatId, strikesMsg, getMainKeyboard());
+      const strikesMsg = await formatStrikes('ru');
+      await sendTelegramMessage(chatId, strikesMsg, getLanguageKeyboard('strikes', '0', 'ru'));
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/lineup')) {
-      const lineupMsg = generateLineupMessage();
-      await sendTelegramMessage(chatId, lineupMsg, getMainKeyboard());
+      const lineupMsg = formatLineup('ru');
+      await sendTelegramMessage(chatId, lineupMsg, getLanguageKeyboard('lineup', '0', 'ru'));
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/tournaments')) {
-      const tMsg = await generateTournamentsMessage();
-      await sendTelegramMessage(chatId, tMsg, getMainKeyboard());
+      const tMsg = formatTournaments('ru');
+      await sendTelegramMessage(chatId, tMsg, getLanguageKeyboard('tournaments', '0', 'ru'));
       return sendResponse(res, 200, 'OK');
     }
 
@@ -1539,13 +1683,8 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/rules')) {
-      const rules = `📜 *ПРАВИЛА ЛИГИ БРАТВА:*\n\n` +
-        `1. Обязательно играть 3/3 в каждом турнире!\n` +
-        `2. 1 пропущенный матч = 1 страйк (1/3).\n` +
-        `3. 3 страйка = исключение из лиги.\n\n` +
-        `👥 *Telegram Сообщество (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
-        `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
-      await sendTelegramMessage(chatId, rules, getMainKeyboard());
+      const rules = formatRules('ru');
+      await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', 'ru'));
       return sendResponse(res, 200, 'OK');
     }
 
@@ -1558,8 +1697,8 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/kicklist') || text.startsWith('/flagged')) {
-      const kickMsg = generateKicklistMessage();
-      await sendTelegramMessage(chatId, kickMsg, getMainKeyboard());
+      const kickMsg = formatKicklist('ru');
+      await sendTelegramMessage(chatId, kickMsg, getLanguageKeyboard('kicklist', '0', 'ru'));
       return sendResponse(res, 200, 'OK');
     }
 
