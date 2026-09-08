@@ -572,30 +572,8 @@ function formatRecap(t, lang = 'ru') {
       `----------------------------\n` +
       `${strikesText}\n\n` +
       `🌐 *Clasificación en vivo:*\n${WEBSITE_URL}`;
-  } else if (lang === 'multi') {
-    let outcome = isWin ? 'ПОБЕДА / WIN / انتصار' : (isDraw ? 'БОЕВАЯ НИЧЬЯ / DRAW / تعادل' : 'МАТЧ / MATCH / نتيجة المباراة');
-    let closing_ru = isWin ? "⚡ Красавцы парни! Идем дальше за победами!" : "⚡ Боевой матч! В след. матче только победа!";
-    let closing_en = isWin ? "⚡ Awesome game boys! Let's keep winning!" : "⚡ Hard-fought match! Next time we take the win!";
-    let closing_ar = isWin ? "⚡ برافو يا شباب! استمروا في الانتصارات!" : "⚡ ماتش قوي! الماتش الجاي التعويض والفوز!";
-
-    let strikesText = missed.length > 0
-      ? `⛔ *ДИСЦИПЛИНА / STRIKES / الإنذارات:*\n${missed.join('\n')}\n⛔ 3 missed = KICK / 3 пропуска = кик / 3 غيابات = طرد!`
-      : `✅ *100% DISCIPLINE:* Все / All / كاع ${squadCount} игроков сыграли 3/3!`;
-
-    return `⭐ *БРАТВА: ${outcome} vs ${opp}!* ⭐\n\n` +
-      `⚽ *Счет / Score / النتيجة:* ${ourScore} - ${oppScore} (${squadCount} игроков / players)\n\n` +
-      `⭐ *TOP SCORERS / ЛУЧШИЕ ИГРОКИ / الهدافين:*\n` +
-      `🥇 [ 1 | ${mp1} | ${mp1G}G ]\n` +
-      `🥈 [ 2 | ${mp2} | ${mp2G}G ]\n` +
-      `🥉 [ 3 | ${mp3} | ${mp3G}G ]\n\n` +
-      `🇷🇺 ${closing_ru}\n` +
-      `🇬🇧 ${closing_en}\n` +
-      `🇲🇦 ${closing_ar}\n\n` +
-      `----------------------------\n` +
-      `${strikesText}\n\n` +
-      `🌐 *Live Standings / Таблица:*\n${WEBSITE_URL}`;
   } else {
-    // Russian
+    // Russian (Default)
     let outcome = isWin ? 'ПОБЕДА' : (isDraw ? 'БОЕВАЯ НИЧЬЯ' : 'МАТЧ');
     let closing = isWin ? "⚡ Красавцы парни! Идем дальше за победами!" : "⚡ Боевой матч! В след. матче только победа!";
     let strikesText = missed.length > 0
@@ -828,30 +806,20 @@ function formatMvp(lang = 'multi') {
       `🌐 *Clasificación en vivo:*\n${WEBSITE_URL}`;
   }
 
-  // Multi-lingual (Default for broadcast into Channel & Group)
-  return `👑 *БРАТВА MVP SPOTLIGHT / ЛУЧШИЙ ИГРОК / لاعب الأسبوع* 👑\n\n` +
+  // Russian (Default)
+  return `👑 *БРАТВА: ЛУЧШИЙ ИГРОК НЕДЕЛИ (MVP)* 👑\n\n` +
     `⭐ *MVP:* *${mvp.name}* 🥇\n` +
-    `⚽ Goals / Голы / الأهداف: *${mvp.goals}* (${mvp.matches} tournaments, *avg ${mvp.avg}* G/M)\n` +
-    `🎯 Discipline / Дисциплина: *100% (0 Strikes)*\n\n` +
-    `🥈 *2nd / 2-е место / الوصيف:* ${runnerUp ? `${runnerUp.name} (${runnerUp.goals}G, avg ${runnerUp.avg})` : '-'}\n` +
-    `🥉 *3rd / 3-е место / المركز الثالث:* ${third ? `${third.name} (${third.goals}G, avg ${third.avg})` : '-'}\n\n` +
-    `🇷🇺 Выдающаяся игра за честь БРАТВА!\n` +
-    `🇬🇧 Outstanding performance leading БРАТВА to glory!\n` +
-    `🇲🇦 أداء أسطوري وتألق كبير مع كتيبة БРАТВА!\n\n` +
-    `🌐 *Full Standings / Таблица:*\n${WEBSITE_URL}`;
+    `⚽ Голы: *${mvp.goals}* (${mvp.matches} турниров, *ср. ${mvp.avg}* г/м)\n` +
+    `🎯 Дисциплина: *100% (0 Страйков)*\n\n` +
+    `🥈 *2-е место:* ${runnerUp ? `${runnerUp.name} (${runnerUp.goals}Г, ср. ${runnerUp.avg})` : '-'}\n` +
+    `🥉 *3-е место:* ${third ? `${third.name} (${third.goals}Г, ср. ${third.avg})` : '-'}\n\n` +
+    `⚡ Выдающаяся игра за честь БРАТВА!\n` +
+    `🌐 *Сайт лиги:*\n${WEBSITE_URL}`;
 }
 
-const generateMvpMessage = (lang = 'multi') => formatMvp(lang);
+const generateMvpMessage = (lang = 'ru') => formatMvp(lang);
 
-function formatRally(lang = 'multi') {
-  if (lang === 'ru') {
-    return `⚔️ *БРАТВА LEAGUE: БОЕВОЙ СБОР!* ⚔️\n\n` +
-      `🛡️ *Бойцы БРАТВА!* Новый турнир стартовал!\n` +
-      `⚽ Обязательно сыграть *3/3* ходов в матче!\n` +
-      `🎯 Планка: *20+ голов*!\n` +
-      `⛔ Пропуск турнира = автоматический страйк (3 страйка = кик)!\n\n` +
-      `🌐 *Сайт лиги:*\n${WEBSITE_URL}`;
-  }
+function formatRally(lang = 'ru') {
   if (lang === 'en') {
     return `⚔️ *БРАТВА LEAGUE: TOURNAMENT RALLY!* ⚔️\n\n` +
       `🛡️ *Attention БРАТВА Squad!* Tournament is LIVE!\n` +
@@ -877,27 +845,18 @@ function formatRally(lang = 'multi') {
       `🌐 *Sitio oficial:*\n${WEBSITE_URL}`;
   }
 
-  // Multi-lingual (Default for broadcast into Channel & Group)
-  return `⚔️ *БРАТВА LEAGUE: TOURNAMENT RALLY!* ⚔️\n` +
-    `🛡️ *БОЕВОЙ СБОР / BATTLE CRY / نداء المعركة* 🛡️\n\n` +
-    `🇷🇺 *РУССКИЙ:*\n` +
-    `⚽ Новый турнир стартовал! Сыграть *3/3* ходов!\n` +
+  // Russian (Default)
+  return `⚔️ *БРАТВА LEAGUE: БОЕВОЙ СБОР!* ⚔️\n\n` +
+    `🛡️ *Бойцы БРАТВА!* Новый турнир стартовал!\n` +
+    `⚽ Обязательно сыграть *3/3* ходов в матче!\n` +
     `🎯 Планка: *20+ голов*!\n` +
-    `⛔ Пропуск турнира = страйк (3 страйка = кик)!\n\n` +
-    `🇬🇧 *ENGLISH:*\n` +
-    `⚽ Tournament is LIVE! Complete all *3/3* turns!\n` +
-    `🎯 Minimum target: *20+ goals*!\n` +
-    `⛔ No skipped turns — protect our rank!\n\n` +
-    `🇲🇦 *العربية (DARIJA):*\n` +
-    `⚽ التورنوا بدا! ضروري كلشي يلعب *3/3* أشواط ديالو!\n` +
-    `🎯 الهدف: *20+ بيت* على الأقل!\n` +
-    `⛔ 3 غيابات = طرد مباشر من الليغ!\n\n` +
-    `🌐 *Standings & Website:*\n${WEBSITE_URL}`;
+    `⛔ Пропуск турнира = автоматический страйк (3 страйка = кик)!\n\n` +
+    `🌐 *Сайт лиги:*\n${WEBSITE_URL}`;
 }
 
-const generateRallyMessage = (lang = 'multi') => formatRally(lang);
+const generateRallyMessage = (lang = 'ru') => formatRally(lang);
 
-function formatLiveAlert(aiResult, lang = 'multi') {
+function formatLiveAlert(aiResult, lang = 'ru') {
   if (!aiResult) return 'No active live match data.';
   const opp = clean(aiResult.opponent_league || 'OPPONENT');
   const ourG = aiResult.score_bratva || 0;
@@ -908,14 +867,6 @@ function formatLiveAlert(aiResult, lang = 'multi') {
     ? unplayed.map(p => `[ ⏳ | ${clean(p.name)} | ${p.turns_played}/3 ]`).join('\n')
     : '✅ All squad members have completed their turns!';
 
-  if (lang === 'ru') {
-    return `🟢 *МАТЧ В ПРЯМОМ ЭФИРЕ: vs ${opp}*\n` +
-      `⚽ *Счет:* ${ourG} - ${oppG}\n` +
-      `⏳ *Время:* ${timeInfo}\n\n` +
-      `⛔ *ВНИМАНИЕ: ОСТАЛИСЬ НЕ СЫГРАННЫЕ ХОДЫ:*\n${pLines}\n\n` +
-      `⚡ Срочно зайдите в игру и сыграйте 3/3 ходов!\n\n` +
-      `🌐 *Сайт лиги:*\n${WEBSITE_URL}`;
-  }
   if (lang === 'en') {
     return `🟢 *LIVE MATCH: vs ${opp}*\n` +
       `⚽ *Score:* ${ourG} - ${oppG}\n` +
@@ -930,7 +881,7 @@ function formatLiveAlert(aiResult, lang = 'multi') {
       `⏳ *الوقت المتبقي:* ${timeInfo}\n\n` +
       `⛔ *تنبيه: لاعبين باقين ما لعبوش كاملين:*\n${pLines}\n\n` +
       `⚡ *مطلوب دابا:* دخلو للعبة وكملو 3/3 أشواط ديالكم لتفادي السترايك!\n\n` +
-      `🌐 *الموقع المباشر:*\n${WEBSITE_URL}`;
+      `🌐 *الموقع المباشر:* ${WEBSITE_URL}`;
   }
   if (lang === 'es') {
     return `🟢 *PARTIDO EN DIRECTO: vs ${opp}*\n` +
@@ -941,16 +892,13 @@ function formatLiveAlert(aiResult, lang = 'multi') {
       `🌐 *Marcador en vivo:*\n${WEBSITE_URL}`;
   }
 
-  // Multi-lingual (Default for broadcast into Channel & Group)
-  return `🟢 *LIVE MATCH ALERT / ВНИМАНИЕ: МАТЧ ИДЕТ* 🟢\n` +
-    `⚔️ vs *${opp}*\n` +
-    `⚽ *Score / Счет / النتيجة:* ${ourG} - ${oppG}\n` +
-    `⏳ *Timer / Время / الوقت:* ${timeInfo}\n\n` +
-    `⛔ *UNPLAYED TURNS / НЕ СЫГРАЛИ / ما كملوش:*\n${pLines}\n\n` +
-    `🇷🇺 Зайдите в игру и сыграйте 3/3 ходов срочно!\n` +
-    `🇬🇧 Jump in and complete your 3/3 turns immediately!\n` +
-    `🇲🇦 دخلو دابا للعبة وكملو 3/3 أشواط ديالكم!\n\n` +
-    `🌐 *Live Tracker:*\n${WEBSITE_URL}`;
+  // Russian (Default)
+  return `🟢 *МАТЧ В ПРЯМОМ ЭФИРЕ: vs ${opp}*\n` +
+    `⚽ *Счет:* ${ourG} - ${oppG}\n` +
+    `⏳ *Время:* ${timeInfo}\n\n` +
+    `⛔ *ВНИМАНИЕ: ОСТАЛИСЬ НЕ СЫГРАННЫЕ ХОДЫ:*\n${pLines}\n\n` +
+    `⚡ Срочно зайдите в игру и сыграйте 3/3 ходов!\n\n` +
+    `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
 }
 
 /**
@@ -1033,8 +981,8 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false) {
   // Update in-memory live cache
   globalLatestTournament = tData;
 
-  const recap = formatRecap(tData, 'multi');
-  const keys = getLanguageKeyboard('recap', '0', 'multi');
+  const recap = formatRecap(tData, 'ru');
+  const keys = getLanguageKeyboard('recap', '0', 'ru');
 
   // Send to Channel and User
   await sendTelegramMessage(CHANNEL_ID, recap, keys);
@@ -1184,8 +1132,8 @@ export default async function handler(req, res) {
       try {
         const url = new URL(req.url, `https://${req.headers.host || 'bratva-bot.vercel.app'}`);
         if (url.searchParams.get('cron') === 'daily_rally') {
-          const rallyMsg = formatRally('multi');
-          const rallyKeys = getLanguageKeyboard('rally', '0', 'multi');
+          const rallyMsg = formatRally('ru');
+          const rallyKeys = getLanguageKeyboard('rally', '0', 'ru');
           await sendTelegramMessage(CHANNEL_ID, rallyMsg, rallyKeys);
           return sendResponse(res, 200, {
             status: 'success',
@@ -1331,8 +1279,8 @@ export default async function handler(req, res) {
 
       if (data === 'cmd_recap') {
         const t = await getLatestTournament();
-        const recap = formatRecap(t, 'multi');
-        await sendTelegramMessage(chatId, recap, getLanguageKeyboard('recap', '0', 'multi'));
+        const recap = formatRecap(t, 'ru');
+        await sendTelegramMessage(chatId, recap, getLanguageKeyboard('recap', '0', 'ru'));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -1370,8 +1318,8 @@ export default async function handler(req, res) {
       }
 
       if (data === 'bcast_live') {
-        const liveMsg = formatLiveAlert(globalLatestLiveResult, 'multi');
-        const liveKeys = getLanguageKeyboard('live', '0', 'multi');
+        const liveMsg = formatLiveAlert(globalLatestLiveResult, 'ru');
+        const liveKeys = getLanguageKeyboard('live', '0', 'ru');
         await sendTelegramMessage(CHANNEL_ID, liveMsg, liveKeys);
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: '📢 Live alert posted to channel!' });
         await sendTelegramMessage(chatId, `✅ *Live match alert broadcasted to ${CHANNEL_ID}!*`);
@@ -1379,8 +1327,8 @@ export default async function handler(req, res) {
       }
 
       if (data === 'bcast_mvp') {
-        const mvpMsg = formatMvp('multi');
-        const mvpKeys = getLanguageKeyboard('mvp', '0', 'multi');
+        const mvpMsg = formatMvp('ru');
+        const mvpKeys = getLanguageKeyboard('mvp', '0', 'ru');
         await sendTelegramMessage(CHANNEL_ID, mvpMsg, mvpKeys);
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: '👑 MVP spotlight posted!' });
         await sendTelegramMessage(chatId, `✅ *MVP Spotlight broadcasted to ${CHANNEL_ID}!*`);
@@ -1388,7 +1336,7 @@ export default async function handler(req, res) {
       }
 
       if (data === 'cmd_mvp') {
-        const mvpMsg = formatMvp('multi');
+        const mvpMsg = formatMvp('ru');
         latestMvpMessage = mvpMsg;
         const mvpKeys = {
           inline_keyboard: [
@@ -1557,7 +1505,7 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/mvp') || text.startsWith('/totw')) {
-      const mvpMsg = formatMvp('multi');
+      const mvpMsg = formatMvp('ru');
       latestMvpMessage = mvpMsg;
       const mvpKeys = {
         inline_keyboard: [
@@ -1580,8 +1528,8 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/rally') || text.startsWith('/remind')) {
-      const rallyMsg = formatRally('multi');
-      const rallyKeys = getLanguageKeyboard('rally', '0', 'multi');
+      const rallyMsg = formatRally('ru');
+      const rallyKeys = getLanguageKeyboard('rally', '0', 'ru');
       await sendTelegramMessage(CHANNEL_ID, rallyMsg, rallyKeys);
       await sendTelegramMessage(chatId, `📢 *Tournament rally reminder sent to ${CHANNEL_ID}!*`, getMainKeyboard());
       return sendResponse(res, 200, 'OK');
