@@ -356,6 +356,93 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
   });
 }
 
+/**
+ * Natural Language Chat with Gemini AI (STRICTLY for Private DM with the bot)
+ */
+function askGeminiAI(userQuestion) {
+  return new Promise((resolve, reject) => {
+    if (!GEMINI_KEY) return reject(new Error('GEMINI_KEY is missing'));
+
+    let topScorersSummary = '';
+    let recentTournamentsSummary = '';
+    try {
+      const { pIndex, tournaments } = loadLeagueData();
+      topScorersSummary = Object.entries(pIndex)
+        .map(([id, d]) => `${d.display_name || id}: ${d.total_goals || 0} goals`)
+        .slice(0, 10)
+        .join(', ');
+      recentTournamentsSummary = (tournaments || []).slice(0, 3)
+        .map(t => `${t.id} (${t.score_bratva || 0}-${t.score_opponent || 0})`)
+        .join(', ');
+    } catch (e) {
+      // ignore
+    }
+
+    const systemPrompt = `You are the official AI Assistant for the "БРАТВА" FCM League in EA Sports FC Mobile.
+League Website: ${WEBSITE_URL}
+Telegram Channel: ${CHANNEL_ID}
+
+League Knowledge & Context:
+- League Name: БРАТВА (FCM League)
+- Game: EA Sports FC Mobile
+- Core Rules: Every member MUST play all 3 turns (3/3) in tournaments. Target is 20+ goals per tournament. 1 missed match = 1 strike. 3 strikes = automatic kick from the league.
+- Top scorers right now: ${topScorersSummary || 'See website for live leaderboard'}
+- Recent tournaments: ${recentTournamentsSummary || 'See website'}
+
+CRITICAL GUIDELINES:
+- Reply in the EXACT same language the user speaks (Moroccan Darija / Arabizi / Arabic, Russian, English, French, Spanish, etc.).
+- If the user talks in Darija (e.g. Arabizi numbers like 7, 3, 9, kh, etc. or Arabic script), respond naturally in warm, friendly Moroccan Darija.
+- If they ask about EA FC Mobile (gameplay, tactics, 4-3-3 Holding, 4-1-2-1-2 Narrow, skill moves, scouting, best players), provide expert pro-level gaming advice.
+- If they ask about БРАТВА league, standings, or rules, give accurate info based on the league context above.
+- If they ask general questions, respond concisely, smartly, and politely just like Gemini.
+- Use emojis and clean formatting. Keep responses focused and engaging.`;
+
+    const payload = JSON.stringify({
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: `${systemPrompt}\n\nUser Question:\n${userQuestion}` }]
+        }
+      ]
+    });
+
+    const callModel = (modelName) => {
+      const req = https.request({
+        hostname: 'generativelanguage.googleapis.com',
+        path: `/v1beta/models/${modelName}:generateContent?key=${GEMINI_KEY}`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload)
+        }
+      }, res => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.candidates && parsed.candidates[0].content) {
+              const answer = parsed.candidates[0].content.parts[0].text.trim();
+              resolve(answer);
+            } else if (modelName !== 'gemini-3.8-flash') {
+              callModel('gemini-3.8-flash');
+            } else {
+              reject(new Error(`Gemini Chat Error: ${data}`));
+            }
+          } catch (e) {
+            reject(e);
+          }
+        });
+      });
+      req.on('error', reject);
+      req.write(payload);
+      req.end();
+    };
+
+    callModel(GEMINI_MODEL);
+  });
+}
+
 function getMainKeyboard() {
   return {
     inline_keyboard: [
@@ -992,6 +1079,10 @@ export default async function handler(req, res) {
       return sendResponse(res, 200, 'OK');
     }
 
+    if (update.channel_post) {
+      return sendResponse(res, 200, 'Channel post ignored');
+    }
+
     // Deduplication by update_id
     const updateId = update.update_id;
     if (updateId) {
@@ -1147,7 +1238,13 @@ export default async function handler(req, res) {
     }
 
     const chatId = message.chat.id;
+    const isPrivate = !message.chat || message.chat.type === 'private';
     const text = (message.text || '').trim();
+
+    // In channels or public groups, completely ignore chat so the bot NEVER talks in channel/groups
+    if (!isPrivate && !text.startsWith('/')) {
+      return sendResponse(res, 200, 'Non-private chatter ignored');
+    }
 
     // 2.1 Photo processing with High-Speed Issue #1 Buffer + Interactive Button + Auto-Debounce
     if (message.photo && message.photo.length > 0) {
@@ -1292,14 +1389,32 @@ export default async function handler(req, res) {
       return sendResponse(res, 200, 'OK');
     }
 
-    // 2.3 Default fallback (Welcome & Interactive Menu for ANY text)
-    const welcome = `⚜️ *БРАТВА FCM LEAGUE BOT (24/7 Cloud)* ⚜️\n\n` +
-      `📸 *Отправь мне скриншоты турнира из EA FC Mobile!*\n` +
-      `Можешь отправить сразу до 4-5 скриншотов турнира (альбомом)!\n` +
-      `Я объединю всех игроков от 1 до 32, обновлю сайт и отправлю отчет в канал!\n\n` +
-      `📋 *Доступные команды:* Выберите кнопку ниже 👇`;
+    if (text.startsWith('/start') || text.startsWith('/help') || text.startsWith('/menu')) {
+      const welcome = `⚜️ *БРАТВА FCM LEAGUE BOT (24/7 Cloud)* ⚜️\n\n` +
+        `📸 *Отправь мне скриншоты турнира из EA FC Mobile!*\n` +
+        `Можешь отправить сразу до 4-5 скриншотов турнира (альбомом)!\n` +
+        `Я объединю всех игроков от 1 до 32, обновлю сайт и отправлю отчет в канал!\n\n` +
+        `💬 *AI Chat (Private):* Tqder tsowlni direct hna f chat b Darija, English aw Russian!\n\n` +
+        `📋 *Доступные команды:* Выберите кнопку ниже 👇`;
 
-    await sendTelegramMessage(chatId, welcome, getMainKeyboard());
+      await sendTelegramMessage(chatId, welcome, getMainKeyboard());
+      return sendResponse(res, 200, 'OK');
+    }
+
+    // 2.3 Private Chat AI Assistant (Gemini 3.6 Flash) - STRICTLY for private 1-on-1 chat!
+    if (isPrivate && text) {
+      await telegramRequest('sendChatAction', { chat_id: chatId, action: 'typing' });
+      try {
+        const aiAnswer = await askGeminiAI(text);
+        await sendTelegramMessage(chatId, aiAnswer);
+        return sendResponse(res, 200, 'OK');
+      } catch (chatErr) {
+        console.error('Gemini private chat error:', chatErr);
+        await sendTelegramMessage(chatId, `🤖 *AI Assistant:* Samhliya, wqe3 mochkil sghir. Jreb 3awed sewelni!`, getMainKeyboard());
+        return sendResponse(res, 200, 'OK');
+      }
+    }
+
     return sendResponse(res, 200, 'OK');
   } catch (err) {
     console.error('Webhook Top-Level Error:', err);
