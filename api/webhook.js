@@ -2362,7 +2362,18 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'Non-admin photo rejected');
       }
 
-      // 2. /start or empty text or greeting -> Show multilingual verification prompt
+      // 2. Check if this player is ALREADY verified & registered
+      const regData = await getRegisteredPlayers();
+      const existingReg = Object.values(regData.registrations || {}).find(r => String(r.telegram_id) === String(userId));
+
+      if (existingReg && (!text || text === '/start' || text === '/help' || text === '/verify')) {
+        const vSuccessText = formatVerificationSuccess(existingReg.display_name, 'ru');
+        const vSuccessKeys = getVerificationSuccessKeyboard(existingReg.player_id, 'ru');
+        await sendTelegramMessage(chatId, vSuccessText, vSuccessKeys);
+        return sendResponse(res, 200, 'OK');
+      }
+
+      // 3. New / Unregistered Player -> Show multilingual verification prompt
       if (!text || text === '/start' || text === '/help' || text === '/verify') {
         const vPrompt = formatVerificationPrompt('ru');
         const vKeys = getVerificationKeyboard('ru');
@@ -2370,7 +2381,7 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
-      // 3. User entered their in-game EA FC Mobile username: match against active roster
+      // 4. User entered their in-game EA FC Mobile username: match against active roster
       const matched = findPlayerByQuery(text);
       if (matched) {
         await savePlayerRegistration({
