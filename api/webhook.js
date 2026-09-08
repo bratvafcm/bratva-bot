@@ -472,29 +472,49 @@ function getMainKeyboard() {
   };
 }
 
-function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru') {
+function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru', includeBroadcastBtn = false) {
   const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
   const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
   const arLabel = currentLang === 'ar' ? '• 🇲🇦 AR •' : '🇲🇦 AR';
   const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
 
-  return {
-    inline_keyboard: [
-      [
-        { text: ruLabel, callback_data: `tab_${category}_${param}_ru` },
-        { text: enLabel, callback_data: `tab_${category}_${param}_en` },
-        { text: arLabel, callback_data: `tab_${category}_${param}_ar` },
-        { text: esLabel, callback_data: `tab_${category}_${param}_es` }
-      ],
-      [
-        { text: '🌐 Open Official League Website', url: WEBSITE_URL }
-      ]
-    ]
+  const categoryTitles = {
+    recap: 'Recap',
+    rules: 'Rules',
+    top: 'Top Scorers',
+    strikes: 'Strikes & Debtors',
+    lineup: 'Best Lineup',
+    tournaments: 'Tournaments',
+    kicklist: 'Kick Review',
+    live: 'Live Alert',
+    mvp: 'MVP Spotlight',
+    rally: 'Rally Reminder'
   };
+  const title = categoryTitles[category] || 'to Channel';
+
+  const rows = [];
+  if (includeBroadcastBtn) {
+    rows.push([
+      { text: `📢 Post ${title} to Channel`, callback_data: `bcast_${category}` }
+    ]);
+  }
+
+  rows.push([
+    { text: ruLabel, callback_data: `tab_${category}_${param}_ru` },
+    { text: enLabel, callback_data: `tab_${category}_${param}_en` },
+    { text: arLabel, callback_data: `tab_${category}_${param}_ar` },
+    { text: esLabel, callback_data: `tab_${category}_${param}_es` }
+  ]);
+
+  rows.push([
+    { text: '🌐 Open Official League Website', url: WEBSITE_URL }
+  ]);
+
+  return { inline_keyboard: rows };
 }
 
-function getTabsKeyboard(lang, tIndexNum = 0) {
-  return getLanguageKeyboard('recap', String(tIndexNum), lang);
+function getTabsKeyboard(lang, tIndexNum = 0, includeBroadcastBtn = false) {
+  return getLanguageKeyboard('recap', String(tIndexNum), lang, includeBroadcastBtn);
 }
 
 function formatRecap(t, lang = 'ru') {
@@ -1048,22 +1068,7 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false) {
     const liveMsg = formatLiveAlert(aiResult, 'ru');
     latestLiveMessage = liveMsg;
 
-    const liveKeys = {
-      inline_keyboard: [
-        [
-          { text: '📢 Post Live Alert to Channel', callback_data: 'bcast_live' }
-        ],
-        [
-          { text: '• 🇷🇺 RU •', callback_data: 'tab_live_0_ru' },
-          { text: '🇬🇧 EN', callback_data: 'tab_live_0_en' },
-          { text: '🇲🇦 AR', callback_data: 'tab_live_0_ar' },
-          { text: '🇪🇸 ES', callback_data: 'tab_live_0_es' }
-        ],
-        [
-          { text: '🌐 Official League Website', url: WEBSITE_URL }
-        ]
-      ]
-    };
+    const liveKeys = getLanguageKeyboard('live', '0', 'ru', true);
 
     await sendTelegramMessage(chatId, liveMsg, liveKeys);
     return sendResponse(res, 200, 'OK');
@@ -1115,11 +1120,12 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false) {
   globalLatestTournament = tData;
 
   const recap = formatRecap(tData, 'ru');
-  const keys = getLanguageKeyboard('recap', '0', 'ru');
+  const channelKeys = getLanguageKeyboard('recap', '0', 'ru', false);
+  const dmKeys = getLanguageKeyboard('recap', '0', 'ru', true);
 
   // Send to Channel and User
-  await sendTelegramMessage(CHANNEL_ID, recap, keys);
-  await sendTelegramMessage(chatId, `🔴 *MATCH COMPLETED & BROADCASTED TO ${CHANNEL_ID}!*`, keys);
+  await sendTelegramMessage(CHANNEL_ID, recap, channelKeys);
+  await sendTelegramMessage(chatId, `🔴 *MATCH COMPLETED & BROADCASTED TO ${CHANNEL_ID}!*`, dmKeys);
 
   // Commit to GitHub with full index synchronization (awaited so Vercel waits)
   try {
@@ -1421,15 +1427,15 @@ export default async function handler(req, res) {
         if (category === 'recap') {
           const t = await getLatestTournament();
           updatedText = formatRecap(t, targetLang);
-          updatedKeyboard = getLanguageKeyboard('recap', param, targetLang);
+          updatedKeyboard = getLanguageKeyboard('recap', param, targetLang, isCbPrivate);
         } else if (category === 'rally') {
           updatedText = formatRally(targetLang);
-          updatedKeyboard = getLanguageKeyboard('rally', '0', targetLang);
+          updatedKeyboard = getLanguageKeyboard('rally', '0', targetLang, isCbPrivate);
         } else if (category === 'live') {
           const liveResult = await getLiveMatchResult();
           if (liveResult) {
             updatedText = formatLiveAlert(liveResult, targetLang);
-            updatedKeyboard = getLanguageKeyboard('live', '0', targetLang);
+            updatedKeyboard = getLanguageKeyboard('live', '0', targetLang, isCbPrivate);
           } else {
             await telegramRequest('answerCallbackQuery', {
               callback_query_id: cb.id,
@@ -1439,25 +1445,25 @@ export default async function handler(req, res) {
           }
         } else if (category === 'mvp') {
           updatedText = formatMvp(targetLang);
-          updatedKeyboard = getLanguageKeyboard('mvp', '0', targetLang);
+          updatedKeyboard = getLanguageKeyboard('mvp', '0', targetLang, isCbPrivate);
         } else if (category === 'rules') {
           updatedText = formatRules(targetLang);
-          updatedKeyboard = getLanguageKeyboard('rules', '0', targetLang);
+          updatedKeyboard = getLanguageKeyboard('rules', '0', targetLang, isCbPrivate);
         } else if (category === 'top') {
           updatedText = formatTopScorers(targetLang);
-          updatedKeyboard = getLanguageKeyboard('top', '0', targetLang);
+          updatedKeyboard = getLanguageKeyboard('top', '0', targetLang, isCbPrivate);
         } else if (category === 'strikes') {
           updatedText = await formatStrikes(targetLang);
-          updatedKeyboard = getLanguageKeyboard('strikes', '0', targetLang);
+          updatedKeyboard = getLanguageKeyboard('strikes', '0', targetLang, isCbPrivate);
         } else if (category === 'lineup') {
           updatedText = formatLineup(targetLang);
-          updatedKeyboard = getLanguageKeyboard('lineup', '0', targetLang);
+          updatedKeyboard = getLanguageKeyboard('lineup', '0', targetLang, isCbPrivate);
         } else if (category === 'tournaments') {
           updatedText = formatTournaments(targetLang);
-          updatedKeyboard = getLanguageKeyboard('tournaments', '0', targetLang);
+          updatedKeyboard = getLanguageKeyboard('tournaments', '0', targetLang, isCbPrivate);
         } else if (category === 'kicklist') {
           updatedText = formatKicklist(targetLang);
-          updatedKeyboard = getLanguageKeyboard('kicklist', '0', targetLang);
+          updatedKeyboard = getLanguageKeyboard('kicklist', '0', targetLang, isCbPrivate);
         }
 
         if (updatedText) {
@@ -1470,9 +1476,63 @@ export default async function handler(req, res) {
         }
       }
 
+      if (data.startsWith('bcast_')) {
+        const cat = data.replace('bcast_', '');
+        let bcastText = '';
+        let catName = 'Update';
+
+        if (cat === 'live') {
+          const liveResult = await getLiveMatchResult();
+          bcastText = formatLiveAlert(liveResult, 'ru');
+          if ((!liveResult || bcastText.includes('No active live match data')) && cb.message && cb.message.text) {
+            bcastText = cb.message.text;
+          }
+          catName = 'Live match alert';
+        } else if (cat === 'mvp') {
+          bcastText = formatMvp('ru');
+          catName = 'MVP Spotlight';
+        } else if (cat === 'recap') {
+          const t = await getLatestTournament();
+          bcastText = formatRecap(t, 'ru');
+          catName = 'Tournament Recap';
+        } else if (cat === 'rules') {
+          bcastText = formatRules('ru');
+          catName = 'League Rules';
+        } else if (cat === 'top') {
+          bcastText = formatTopScorers('ru');
+          catName = 'Top Scorers Leaderboard';
+        } else if (cat === 'strikes') {
+          bcastText = await formatStrikes('ru');
+          catName = 'Strikes & Debtors List';
+        } else if (cat === 'lineup') {
+          bcastText = formatLineup('ru');
+          catName = 'Best Lineup';
+        } else if (cat === 'tournaments') {
+          bcastText = formatTournaments('ru');
+          catName = 'Tournaments Overview';
+        } else if (cat === 'kicklist') {
+          bcastText = formatKicklist('ru');
+          catName = 'Kick Review';
+        } else if (cat === 'rally') {
+          bcastText = formatRally('ru');
+          catName = 'Rally Reminder';
+        }
+
+        if (bcastText) {
+          const channelKeyboard = getLanguageKeyboard(cat, '0', 'ru', false);
+          await sendTelegramMessage(CHANNEL_ID, bcastText, channelKeyboard);
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: `📢 ${catName} posted to channel!`
+          });
+          await sendTelegramMessage(chatId, `✅ *${catName} broadcasted to ${CHANNEL_ID} with translation buttons!*`, getMainKeyboard());
+          return sendResponse(res, 200, 'OK');
+        }
+      }
+
       if (data === 'cmd_top') {
         const text = formatTopScorers('ru');
-        await sendTelegramMessage(chatId, text, getLanguageKeyboard('top', '0', 'ru'));
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('top', '0', 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -1480,88 +1540,50 @@ export default async function handler(req, res) {
       if (data === 'cmd_recap') {
         const t = await getLatestTournament();
         const recap = formatRecap(t, 'ru');
-        await sendTelegramMessage(chatId, recap, getLanguageKeyboard('recap', '0', 'ru'));
+        await sendTelegramMessage(chatId, recap, getLanguageKeyboard('recap', '0', 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
 
       if (data === 'cmd_strikes') {
         const text = await formatStrikes('ru');
-        await sendTelegramMessage(chatId, text, getLanguageKeyboard('strikes', '0', 'ru'));
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('strikes', '0', 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
 
       if (data === 'cmd_lineup') {
         const text = formatLineup('ru');
-        await sendTelegramMessage(chatId, text, getLanguageKeyboard('lineup', '0', 'ru'));
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('lineup', '0', 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
 
       if (data === 'cmd_rules') {
         const rules = formatRules('ru');
-        await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', 'ru'));
+        await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
 
       if (data === 'cmd_tournaments') {
         const text = formatTournaments('ru');
-        await sendTelegramMessage(chatId, text, getLanguageKeyboard('tournaments', '0', 'ru'));
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('tournaments', '0', 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
-        return sendResponse(res, 200, 'OK');
-      }
-
-      if (data === 'bcast_live') {
-        const liveResult = await getLiveMatchResult();
-        let liveMsg = formatLiveAlert(liveResult, 'ru');
-        if ((!liveResult || liveMsg.includes('No active live match data')) && cb.message && cb.message.text) {
-          liveMsg = cb.message.text;
-        }
-        const liveKeys = getLanguageKeyboard('live', '0', 'ru');
-        await sendTelegramMessage(CHANNEL_ID, liveMsg, liveKeys);
-        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: '📢 Live alert posted to channel!' });
-        await sendTelegramMessage(chatId, `✅ *Live match alert broadcasted to ${CHANNEL_ID}!*`);
-        return sendResponse(res, 200, 'OK');
-      }
-
-      if (data === 'bcast_mvp') {
-        const mvpMsg = formatMvp('ru');
-        const mvpKeys = getLanguageKeyboard('mvp', '0', 'ru');
-        await sendTelegramMessage(CHANNEL_ID, mvpMsg, mvpKeys);
-        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: '👑 MVP spotlight posted!' });
-        await sendTelegramMessage(chatId, `✅ *MVP Spotlight broadcasted to ${CHANNEL_ID}!*`);
         return sendResponse(res, 200, 'OK');
       }
 
       if (data === 'cmd_mvp') {
         const mvpMsg = formatMvp('ru');
         latestMvpMessage = mvpMsg;
-        const mvpKeys = {
-          inline_keyboard: [
-            [
-              { text: '📢 Post MVP to Channel', callback_data: 'bcast_mvp' }
-            ],
-            [
-              { text: '• 🇷🇺 RU •', callback_data: 'tab_mvp_0_ru' },
-              { text: '🇬🇧 EN', callback_data: 'tab_mvp_0_en' },
-              { text: '🇲🇦 AR', callback_data: 'tab_mvp_0_ar' },
-              { text: '🇪🇸 ES', callback_data: 'tab_mvp_0_es' }
-            ],
-            [
-              { text: '🌐 Official League Website', url: WEBSITE_URL }
-            ]
-          ]
-        };
-        await sendTelegramMessage(chatId, mvpMsg, mvpKeys);
+        await sendTelegramMessage(chatId, mvpMsg, getLanguageKeyboard('mvp', '0', 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
 
       if (data === 'cmd_kicklist') {
         const text = formatKicklist('ru');
-        await sendTelegramMessage(chatId, text, getLanguageKeyboard('kicklist', '0', 'ru'));
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('kicklist', '0', 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -1652,25 +1674,25 @@ export default async function handler(req, res) {
 
     if (text.startsWith('/top') || text.startsWith('/leaderboard')) {
       const topMsg = formatTopScorers('ru');
-      await sendTelegramMessage(chatId, topMsg, getLanguageKeyboard('top', '0', 'ru'));
+      await sendTelegramMessage(chatId, topMsg, getLanguageKeyboard('top', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/strikes')) {
       const strikesMsg = await formatStrikes('ru');
-      await sendTelegramMessage(chatId, strikesMsg, getLanguageKeyboard('strikes', '0', 'ru'));
+      await sendTelegramMessage(chatId, strikesMsg, getLanguageKeyboard('strikes', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/lineup')) {
       const lineupMsg = formatLineup('ru');
-      await sendTelegramMessage(chatId, lineupMsg, getLanguageKeyboard('lineup', '0', 'ru'));
+      await sendTelegramMessage(chatId, lineupMsg, getLanguageKeyboard('lineup', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/tournaments')) {
       const tMsg = formatTournaments('ru');
-      await sendTelegramMessage(chatId, tMsg, getLanguageKeyboard('tournaments', '0', 'ru'));
+      await sendTelegramMessage(chatId, tMsg, getLanguageKeyboard('tournaments', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
     }
 
@@ -1684,52 +1706,35 @@ export default async function handler(req, res) {
 
     if (text.startsWith('/rules')) {
       const rules = formatRules('ru');
-      await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', 'ru'));
+      await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/recap') || text.startsWith('/broadcast')) {
       const t = await getLatestTournament();
       const recap = formatRecap(t, 'ru');
-      const keys = getTabsKeyboard('ru', 0);
+      const keys = getTabsKeyboard('ru', 0, true);
       await sendTelegramMessage(chatId, recap, keys);
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/kicklist') || text.startsWith('/flagged')) {
       const kickMsg = formatKicklist('ru');
-      await sendTelegramMessage(chatId, kickMsg, getLanguageKeyboard('kicklist', '0', 'ru'));
+      await sendTelegramMessage(chatId, kickMsg, getLanguageKeyboard('kicklist', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/mvp') || text.startsWith('/totw')) {
       const mvpMsg = formatMvp('ru');
       latestMvpMessage = mvpMsg;
-      const mvpKeys = {
-        inline_keyboard: [
-          [
-            { text: '📢 Post MVP to Channel', callback_data: 'bcast_mvp' }
-          ],
-          [
-            { text: '• 🇷🇺 RU •', callback_data: 'tab_mvp_0_ru' },
-            { text: '🇬🇧 EN', callback_data: 'tab_mvp_0_en' },
-            { text: '🇲🇦 AR', callback_data: 'tab_mvp_0_ar' },
-            { text: '🇪🇸 ES', callback_data: 'tab_mvp_0_es' }
-          ],
-          [
-            { text: '🌐 Official League Website', url: WEBSITE_URL }
-          ]
-        ]
-      };
-      await sendTelegramMessage(chatId, mvpMsg, mvpKeys);
+      await sendTelegramMessage(chatId, mvpMsg, getLanguageKeyboard('mvp', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/rally') || text.startsWith('/remind')) {
       const rallyMsg = formatRally('ru');
-      const rallyKeys = getLanguageKeyboard('rally', '0', 'ru');
-      await sendTelegramMessage(CHANNEL_ID, rallyMsg, rallyKeys);
-      await sendTelegramMessage(chatId, `📢 *Tournament rally reminder sent to ${CHANNEL_ID}!*`, getMainKeyboard());
+      const rallyKeys = getLanguageKeyboard('rally', '0', 'ru', true);
+      await sendTelegramMessage(chatId, rallyMsg, rallyKeys);
       return sendResponse(res, 200, 'OK');
     }
 
