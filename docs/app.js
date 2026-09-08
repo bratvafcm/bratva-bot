@@ -1253,8 +1253,7 @@ const state = {
   leaderboardWindow: 'last'
 };
 
-// Tabs order for animation direction
-const tabsOrder = ['dashboard', 'tournaments', 'players', 'leaderboard', 'rules'];
+const tabsOrder = ['dashboard', 'tournaments', 'players', 'leaderboard'];
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -2556,7 +2555,17 @@ const RulesManager = {
     this.recalculateSystem(false);
   },
 
-  loadRules() {
+  async loadRules() {
+    try {
+      const res = await fetch(`league-data/rules.json?v=${Date.now()}`);
+      if (res.ok) {
+        const json = await res.json();
+        this.currentRules = { ...this.defaultRules, ...json };
+        this.recalculateSystem(false);
+        return;
+      }
+    } catch (e) {}
+
     if (typeof localStorage !== 'undefined') {
       const saved = localStorage.getItem('fc_bratva_rules_v1');
       if (saved) {
