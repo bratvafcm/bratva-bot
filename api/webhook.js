@@ -1203,31 +1203,31 @@ function formatChannelWelcome(lang = 'ru') {
 
 function formatVerificationPrompt(lang = 'ru') {
   if (lang === 'en') {
-    return `⚜️ *BRATVA FCM — SQUAD VERIFICATION* ⚜️\n\n` +
-      `Welcome to our league! To verify your active squad spot and avoid being removed after the 3-day warning window, link your account now:\n\n` +
-      `👉 *Please send your exact EA FC Mobile in-game username here in chat*\n` +
-      `_(Type it exactly as shown in-game, e.g. \`DOXIBERO1\` or \`саня\`)_\n\n` +
-      `⚡ Once verified, you will immediately receive direct access to our official Telegram Channel & Squad Discussion Chat!`;
+    return `⚜️ *BRATVA FCM — SQUAD ENTRY* ⚜️\n\n` +
+      `Welcome to our league! To get your invite link to our official Telegram Channel & Squad Discussion Chat:\n\n` +
+      `👉 *Please send your EA FC Mobile username here in chat*\n` +
+      `_(Type it exactly as it appears in the game)_\n\n` +
+      `⚡ Once sent, the bot will immediately give you your link to join our official channel & squad chat!`;
   }
   if (lang === 'ar') {
-    return `⚜️ *دوري БРАТВА FCM — تأكيد العضوية* ⚜️\n\n` +
-      `أهلاً بك في الفريق! لتأكيد مقعدك في الدوري وتجنب الاستبعاد بعد انتهاء مهلة الـ 3 أيام، يرجى ربط حسابك الآن:\n\n` +
-      `👉 *أرسل اسمك الدقيق في EA FC Mobile هنا في المحادثة*\n` +
-      `_(اكتبه تماماً كما يظهر داخل اللعبة، مثلاً: \`DOXIBERO1\` أو \`саня\`)_\n\n` +
-      `⚡ بمجرد تأكيد اسمك، ستحصل فوراً على رابط الدخول إلى القناة الرسمية ومجموعة النقاش الخاصة بالفريق!`;
+    return `⚜️ *دوري БРАТВА FCM — الانضمام للقناة* ⚜️\n\n` +
+      `أهلاً بك في الفريق! للحصول على رابط الدخول إلى القناة الرسمية ومجموعة النقاش الخاصة بالفريق:\n\n` +
+      `👉 *أرسل اسمك في EA FC Mobile هنا في المحادثة*\n` +
+      `_(اكتب اسمك تماماً كما يظهر داخل اللعبة)_\n\n` +
+      `⚡ بمجرد إرسال اسمك، ستحصل فوراً على رابط الدخول إلى القناة والمجموعة الرسمية!`;
   }
   if (lang === 'es') {
-    return `⚜️ *BRATVA FCM — VERIFICACIÓN DE JUGADOR* ⚜️\n\n` +
-      `¡Bienvenido al equipo! Para confirmar tu plaza en la liga y evitar ser expulsado tras el aviso de 3 días, vincula tu cuenta ahora:\n\n` +
-      `👉 *Envía tu nombre exacto de EA FC Mobile aquí en el chat*\n` +
-      `_(Escríbelo exactamente como aparece en el juego, ej.: \`DOXIBERO1\` o \`саня\`)_\n\n` +
-      `⚡ ¡Una vez verificado, recibirás acceso directo a nuestro canal oficial y al grupo de debate del equipo!`;
+    return `⚜️ *BRATVA FCM — ACCESO AL EQUIPO* ⚜️\n\n` +
+      `¡Bienvenido a la liga! Para recibir tu enlace de acceso a nuestro canal oficial y al grupo de debate del equipo:\n\n` +
+      `👉 *Envía tu nombre de EA FC Mobile aquí en el chat*\n` +
+      `_(Escríbelo exactamente como aparece en el juego)_\n\n` +
+      `⚡ ¡Una vez enviado, recibirás de inmediato el enlace para unirte al canal y al chat!`;
   }
-  return `⚜️ *БРАТВА FCM — ПОДТВЕРЖДЕНИЕ ИГРОКА* ⚜️\n\n` +
-    `Приветствуем в нашей лиге! Чтобы закрепить за собой место в составе и не попасть под кик после дедлайна в 3 дня, подтверди свой аккаунт:\n\n` +
-    `👉 *Напиши сюда свой точный никнейм в EA FC Mobile*\n` +
-    `_(В точности как в игре, например: \`саня\` или \`DOXIBERO1\`)_\n\n` +
-    `⚡ После проверки бот сразу выдаст тебе персональную карточку и доступ в наш закрытый канал и чат лиги!`;
+  return `⚜️ *БРАТВА FCM — ВХОД В КАНАЛ И ЧАТ* ⚜️\n\n` +
+    `Приветствуем в нашей лиге! Чтобы получить ссылку на наш официальный Telegram канал и чат обсуждений:\n\n` +
+    `👉 *Напиши свой никнейм в EA FC Mobile сюда в чат*\n` +
+    `_(В точности так, как он указан в игре)_\n\n` +
+    `⚡ Бот сразу выдаст тебе ссылку для входа в закрытый канал и чат лиги!`;
 }
 
 function getVerificationKeyboard(currentLang = 'ru') {
