@@ -170,6 +170,18 @@
       "turns_played": 3,
       "player_display_name": "DOXIBERO1",
       "player_id": "doxibero1"
+    },
+    {
+      "tournament_id": "2026-09-08_memequis_juniors",
+      "match_index_in_tournament": 14,
+      "opponent_display_name": "Memequis Juniors",
+      "opponent_id": "memequis_juniors",
+      "goals_for": 27,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "DOXIBERO1",
+      "player_id": "doxibero1"
     }
   ],
   "eligibility_streak": {

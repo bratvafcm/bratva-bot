@@ -100,5 +100,13 @@
     "opponent_total_goals": 277,
     "result": "draw",
     "status": "complete"
+  },
+  "2026-09-08_memequis_juniors": {
+    "date": "2026-09-08",
+    "opponent_league": "Memequis Juniors",
+    "our_total_goals": 155,
+    "opponent_total_goals": 220,
+    "result": "loss",
+    "status": "complete"
   }
 }

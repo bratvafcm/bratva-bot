@@ -675,18 +675,76 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false) {
   await sendTelegramMessage(CHANNEL_ID, recap, keys);
   await sendTelegramMessage(chatId, `🔴 *MATCH COMPLETED & BROADCASTED TO ${CHANNEL_ID}!*\n\n${recap}`, keys);
 
-  // Commit to GitHub asynchronously
-  githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`)
-    .then(existingFile => {
-      const fileContent = Buffer.from(JSON.stringify(tData, null, 2)).toString('base64');
-      const commitPayload = {
-        message: `Auto-Update: Recorded tournament vs ${tData.opponent_league} (${tData.matches.length} players)`,
-        content: fileContent
+  // Commit to GitHub with full index synchronization (awaited so Vercel waits)
+  try {
+    // 1. Commit Tournament JSON
+    const existingFile = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`);
+    const fileContent = Buffer.from(JSON.stringify(tData, null, 2)).toString('base64');
+    const commitPayload = {
+      message: `Auto-Update: Recorded tournament vs ${tData.opponent_league} (${tData.matches.length} players)`,
+      content: fileContent
+    };
+    if (existingFile && existingFile.sha) commitPayload.sha = existingFile.sha;
+    await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`, 'PUT', commitPayload);
+
+    // 2. Update and Commit tournaments_index.json
+    const existingTIndex = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/tournaments_index.json`);
+    let tIndexObj = {};
+    if (existingTIndex && existingTIndex.content) {
+      try { tIndexObj = JSON.parse(Buffer.from(existingTIndex.content, 'base64').toString('utf8')); } catch (e) {}
+    }
+    tIndexObj[tId] = {
+      date: tData.date,
+      opponent_league: tData.opponent_league,
+      our_total_goals: tData.our_total_goals,
+      opponent_total_goals: tData.opponent_total_goals,
+      result: tData.result,
+      status: tData.status
+    };
+    const tIndexPayload = {
+      message: `Auto-Update: Index tournament vs ${tData.opponent_league}`,
+      content: Buffer.from(JSON.stringify(tIndexObj, null, 2)).toString('base64')
+    };
+    if (existingTIndex && existingTIndex.sha) tIndexPayload.sha = existingTIndex.sha;
+    await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/tournaments_index.json`, 'PUT', tIndexPayload);
+
+    // 3. Update and Commit players_index.json
+    const existingPIndex = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/players_index.json`);
+    let pIndexObj = {};
+    if (existingPIndex && existingPIndex.content) {
+      try { pIndexObj = JSON.parse(Buffer.from(existingPIndex.content, 'base64').toString('utf8')); } catch (e) {}
+    }
+    tData.matches.forEach(m => {
+      const prev = pIndexObj[m.player_id] || {};
+      const prevMatches = prev.total_matches || 0;
+      const prevGoals = prev.total_goals || 0;
+      const newMatches = prevMatches + 1;
+      const newGoals = prevGoals + (m.goals_for || 0);
+      const prevStreak = prev.eligibility_streak?.current_fail_streak || 0;
+      const currentFailStreak = (m.turns_played < 3) ? (prevStreak + 1) : 0;
+      pIndexObj[m.player_id] = {
+        display_name: m.player_display_name,
+        total_goals: newGoals,
+        total_matches: newMatches,
+        average_goals: parseFloat((newGoals / newMatches).toFixed(1)),
+        last_tournament_date: tData.date,
+        eligibility_streak: {
+          current_fail_streak: currentFailStreak,
+          last_evaluated_tournament_id: tId,
+          flagged_for_review: currentFailStreak >= 3
+        }
       };
-      if (existingFile && existingFile.sha) commitPayload.sha = existingFile.sha;
-      return githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`, 'PUT', commitPayload);
-    })
-    .catch(ghErr => console.error('GitHub API Commit Error:', ghErr));
+    });
+    const pIndexPayload = {
+      message: `Auto-Update: Player standings for vs ${tData.opponent_league}`,
+      content: Buffer.from(JSON.stringify(pIndexObj, null, 2)).toString('base64')
+    };
+    if (existingPIndex && existingPIndex.sha) pIndexPayload.sha = existingPIndex.sha;
+    await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/players_index.json`, 'PUT', pIndexPayload);
+
+  } catch (ghErr) {
+    console.error('GitHub API Sync Error:', ghErr);
+  }
 
   return sendResponse(res, 200, 'OK');
 }

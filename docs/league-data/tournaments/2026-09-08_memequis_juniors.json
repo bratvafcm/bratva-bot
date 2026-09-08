@@ -1,7 +1,7 @@
 {
   "id": "2026-09-08_memequis_juniors",
   "date": "2026-09-08",
-  "timestamp": 1788825792343,
+  "timestamp": 1788826788531,
   "opponent_league": "Memequis Juniors",
   "our_total_goals": 155,
   "opponent_total_goals": 220,
@@ -12,7 +12,7 @@
   "matches": [
     {
       "board_order": 1,
-      "player_id": "player_0",
+      "player_id": "саня",
       "player_display_name": "саня",
       "ovr": 128,
       "goals_for": 0,
@@ -47,6 +47,94 @@
       "player_id": "omar",
       "player_display_name": "Omar",
       "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 6,
+      "player_id": "abirsh07",
+      "player_display_name": "Abirsh07",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 7,
+      "player_id": "mohamed_osama",
+      "player_display_name": "Mohamed_Osama",
+      "ovr": 125,
+      "goals_for": 25,
+      "turns_played": 3
+    },
+    {
+      "board_order": 8,
+      "player_id": "rogelio",
+      "player_display_name": "Rogelio",
+      "ovr": 125,
+      "goals_for": 22,
+      "turns_played": 3
+    },
+    {
+      "board_order": 9,
+      "player_id": "psg",
+      "player_display_name": "PSG",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 10,
+      "player_id": "sushenley",
+      "player_display_name": "SUSHenley",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 11,
+      "player_id": "karim",
+      "player_display_name": "KARIM",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 12,
+      "player_id": "real",
+      "player_display_name": "Real",
+      "ovr": 124,
+      "goals_for": 19,
+      "turns_played": 2
+    },
+    {
+      "board_order": 13,
+      "player_id": "doxibero",
+      "player_display_name": "DOXIBÉRO",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 14,
+      "player_id": "тима",
+      "player_display_name": "Тима",
+      "ovr": 124,
+      "goals_for": 6,
+      "turns_played": 1
+    },
+    {
+      "board_order": 15,
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
+      "ovr": 123,
+      "goals_for": 27,
+      "turns_played": 3
+    },
+    {
+      "board_order": 16,
+      "player_id": "progamer",
+      "player_display_name": "ProGamer",
+      "ovr": 122,
       "goals_for": 0,
       "turns_played": 0
     }

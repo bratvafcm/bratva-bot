@@ -62,6 +62,18 @@
       "turns_played": 0,
       "player_display_name": "ProGamer",
       "player_id": "progamer"
+    },
+    {
+      "tournament_id": "2026-09-08_memequis_juniors",
+      "match_index_in_tournament": 15,
+      "opponent_display_name": "Memequis Juniors",
+      "opponent_id": "memequis_juniors",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "ProGamer",
+      "player_id": "progamer"
     }
   ]
 }
