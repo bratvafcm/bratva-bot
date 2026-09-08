@@ -559,6 +559,9 @@ function getMainKeyboard(currentLang = 'ru') {
         { text: tournLabel, callback_data: 'cmd_tournaments' }
       ],
       [
+        { text: '👥 Telegram Audit (3-Day Kick Tracker)', callback_data: 'cmd_pending' }
+      ],
+      [
         { text: webLabel, url: WEBSITE_URL }
       ]
     ]
@@ -637,6 +640,71 @@ async function saveLeagueRules(newRules, updatedBy = 'admin') {
     await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/rules.json`, 'PUT', commitPayload);
   } catch (e) {
     console.error('Failed to commit rules.json to GitHub:', e);
+  }
+
+  return updated;
+}
+
+let inMemoryRegistered = null;
+
+async function getRegisteredPlayers() {
+  if (inMemoryRegistered) return inMemoryRegistered;
+  try {
+    const localPath = path.join(process.cwd(), 'docs', 'league-data', 'registered_players.json');
+    if (fs.existsSync(localPath)) {
+      const data = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+      inMemoryRegistered = data;
+      return data;
+    }
+  } catch (e) {}
+
+  try {
+    const file = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/registered_players.json`);
+    if (file && file.content) {
+      const content = Buffer.from(file.content, 'base64').toString('utf8');
+      const data = JSON.parse(content);
+      inMemoryRegistered = data;
+      return data;
+    }
+  } catch (e) {}
+
+  return { lastUpdated: new Date().toISOString(), registrations: {} };
+}
+
+async function savePlayerRegistration(reg) {
+  const current = await getRegisteredPlayers();
+  const regMap = current.registrations || {};
+  regMap[reg.player_id] = {
+    player_id: reg.player_id,
+    display_name: reg.display_name,
+    telegram_id: reg.telegram_id,
+    telegram_username: reg.telegram_username || '',
+    telegram_name: reg.telegram_name || '',
+    registered_at: new Date().toISOString()
+  };
+
+  const updated = {
+    lastUpdated: new Date().toISOString(),
+    registrations: regMap
+  };
+  inMemoryRegistered = updated;
+
+  try {
+    const localPath = path.join(process.cwd(), 'docs', 'league-data', 'registered_players.json');
+    fs.writeFileSync(localPath, JSON.stringify(updated, null, 2), 'utf8');
+  } catch (e) {}
+
+  try {
+    const existingFile = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/registered_players.json`);
+    const fileContent = Buffer.from(JSON.stringify(updated, null, 2)).toString('base64');
+    const commitPayload = {
+      message: `Player Verified: ${reg.display_name} -> TG @${reg.telegram_username || reg.telegram_id}`,
+      content: fileContent
+    };
+    if (existingFile && existingFile.sha) commitPayload.sha = existingFile.sha;
+    await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/registered_players.json`, 'PUT', commitPayload);
+  } catch (e) {
+    console.error('Failed to commit registered_players.json to GitHub:', e);
   }
 
   return updated;
@@ -1131,6 +1199,190 @@ function formatChannelWelcome(lang = 'ru') {
     `• Вся статистика каждого игрока (голы, сыгранные ходы, рекорды) ведется в реальном времени на нашем сайте.\n` +
     `• Обязательно вступайте в наш чат обсуждений — там мы обсуждаем тактику, составы и координируем ходы!\n\n` +
     `⚔️ *Правило простое:* Играем ответственно, всегда забираем свои 3/3 ходов и побеждаем вместе! ⚽`;
+}
+
+function formatVerificationPrompt(lang = 'ru') {
+  if (lang === 'en') {
+    return `⚜️ *BRATVA FCM — SQUAD VERIFICATION* ⚜️\n\n` +
+      `Welcome to our league! To verify your active squad spot and avoid being removed after the 3-day warning window, link your account now:\n\n` +
+      `👉 *Please send your exact EA FC Mobile in-game username here in chat*\n` +
+      `_(Type it exactly as shown in-game, e.g. \`DOXIBERO1\` or \`саня\`)_\n\n` +
+      `⚡ Once verified, you will immediately receive direct access to our official Telegram Channel & Squad Discussion Chat!`;
+  }
+  if (lang === 'ar') {
+    return `⚜️ *دوري БРАТВА FCM — تأكيد العضوية* ⚜️\n\n` +
+      `أهلاً بك في الفريق! لتأكيد مقعدك في الدوري وتجنب الاستبعاد بعد انتهاء مهلة الـ 3 أيام، يرجى ربط حسابك الآن:\n\n` +
+      `👉 *أرسل اسمك الدقيق في EA FC Mobile هنا في المحادثة*\n` +
+      `_(اكتبه تماماً كما يظهر داخل اللعبة، مثلاً: \`DOXIBERO1\` أو \`саня\`)_\n\n` +
+      `⚡ بمجرد تأكيد اسمك، ستحصل فوراً على رابط الدخول إلى القناة الرسمية ومجموعة النقاش الخاصة بالفريق!`;
+  }
+  if (lang === 'es') {
+    return `⚜️ *BRATVA FCM — VERIFICACIÓN DE JUGADOR* ⚜️\n\n` +
+      `¡Bienvenido al equipo! Para confirmar tu plaza en la liga y evitar ser expulsado tras el aviso de 3 días, vincula tu cuenta ahora:\n\n` +
+      `👉 *Envía tu nombre exacto de EA FC Mobile aquí en el chat*\n` +
+      `_(Escríbelo exactamente como aparece en el juego, ej.: \`DOXIBERO1\` o \`саня\`)_\n\n` +
+      `⚡ ¡Una vez verificado, recibirás acceso directo a nuestro canal oficial y al grupo de debate del equipo!`;
+  }
+  return `⚜️ *БРАТВА FCM — ПОДТВЕРЖДЕНИЕ ИГРОКА* ⚜️\n\n` +
+    `Приветствуем в нашей лиге! Чтобы закрепить за собой место в составе и не попасть под кик после дедлайна в 3 дня, подтверди свой аккаунт:\n\n` +
+    `👉 *Напиши сюда свой точный никнейм в EA FC Mobile*\n` +
+    `_(В точности как в игре, например: \`саня\` или \`DOXIBERO1\`)_\n\n` +
+    `⚡ После проверки бот сразу выдаст тебе персональную карточку и доступ в наш закрытый канал и чат лиги!`;
+}
+
+function getVerificationKeyboard(currentLang = 'ru') {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  return {
+    inline_keyboard: [
+      [
+        { text: ruLabel, callback_data: 'tab_verify_0_ru' },
+        { text: enLabel, callback_data: 'tab_verify_0_en' },
+        { text: arLabel, callback_data: 'tab_verify_0_ar' },
+        { text: esLabel, callback_data: 'tab_verify_0_es' }
+      ],
+      [
+        { text: '🌐 Official League Website', url: WEBSITE_URL }
+      ]
+    ]
+  };
+}
+
+function formatVerificationSuccess(matchedName, lang = 'ru') {
+  if (lang === 'en') {
+    return `✅ *ACCOUNT SUCCESSFULLY VERIFIED!* ⚜️\n\n` +
+      `Welcome, *${clean(matchedName)}*! Your league membership in BRATVA FCM is now officially recorded.\n\n` +
+      `👉 *Status:* Verified & Active\n` +
+      `👉 *Next Step:* Tap below to join our official channel & squad discussion chat:`;
+  }
+  if (lang === 'ar') {
+    return `✅ *تم تأكيد حسابك بنجاح!* ⚜️\n\n` +
+      `أهلاً بك يا *${clean(matchedName)}*! تم تسجيل وتأكيد عضويتك في دوري БРАТВА FCM رسمياً.\n\n` +
+      `👉 *الحالة:* عضو مؤكد ونشط\n` +
+      `👉 *الخطوة التالية:* اضغط بالأسفل للدخول إلى القناة الرسمية ومجموعة النقاش الخاصة بالفريق:`;
+  }
+  if (lang === 'es') {
+    return `✅ *¡CUENTA VERIFICADA CON ÉXITO!* ⚜️\n\n` +
+      `¡Bienvenido, *${clean(matchedName)}*! Tu membresía en BRATVA FCM ya está registrada oficialmente.\n\n` +
+      `👉 *Estado:* Verificado y Activo\n` +
+      `👉 *Siguiente paso:* Toca abajo para unirte al canal oficial y al grupo de debate del equipo:`;
+  }
+  return `✅ *АККАУНТ УСПЕШНО ПОДТВЕРЖДЕН!* ⚜️\n\n` +
+    `Привет, *${clean(matchedName)}*! Твое участие в лиге БРАТВА FCM официально зафиксировано в системе.\n\n` +
+    `👉 *Твой статус:* В составе (Verified)\n` +
+    `👉 *Следующий шаг:* Вступай в закрытую папку (канал с турнирами + чат обсуждений) по кнопке ниже:`;
+}
+
+function getVerificationSuccessKeyboard(playerId, currentLang = 'ru') {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  const folderLabel = currentLang === 'ar' ? '👥 انضم للقناة والمجموعة الرسمية' :
+                      currentLang === 'es' ? '👥 Unirse al Canal y Grupo Oficial' :
+                      currentLang === 'en' ? '👥 Join Official Channel & Chat' : '👥 Вступить в Канал и Чат Лиги';
+
+  const cardLabel = currentLang === 'ar' ? '🌐 بطاقتك الشخصية في الموقع' :
+                    currentLang === 'es' ? '🌐 Tu Tarjeta en la Web' :
+                    currentLang === 'en' ? '🌐 Your Player Card on Website' : '🌐 Твоя Карточка на Сайте';
+
+  return {
+    inline_keyboard: [
+      [
+        { text: ruLabel, callback_data: `tab_versuccess_${playerId}_ru` },
+        { text: enLabel, callback_data: `tab_versuccess_${playerId}_en` },
+        { text: arLabel, callback_data: `tab_versuccess_${playerId}_ar` },
+        { text: esLabel, callback_data: `tab_versuccess_${playerId}_es` }
+      ],
+      [
+        { text: folderLabel, url: COMMUNITY_URL }
+      ],
+      [
+        { text: cardLabel, url: `${WEBSITE_URL}?player=${encodeURIComponent(playerId)}` }
+      ]
+    ]
+  };
+}
+
+async function formatPendingAudit(lang = 'ru') {
+  const regData = await getRegisteredPlayers();
+  const registeredMap = regData.registrations || {};
+
+  const { pIndex } = loadLeagueData();
+
+  const allPlayersMap = new Map();
+  for (const [pid, p] of Object.entries(pIndex || {})) {
+    if (p && p.display_name) {
+      allPlayersMap.set(pid, p.display_name);
+    }
+  }
+
+  if (globalLatestTournament && globalLatestTournament.matches) {
+    for (const m of globalLatestTournament.matches) {
+      if (m.player_id && m.player_display_name) {
+        allPlayersMap.set(m.player_id, m.player_display_name);
+      }
+    }
+  }
+
+  const verified = [];
+  const pending = [];
+
+  for (const [pid, name] of allPlayersMap.entries()) {
+    const reg = registeredMap[pid];
+    if (reg) {
+      const tgUser = reg.telegram_username ? `@${reg.telegram_username}` : `ID:${reg.telegram_id}`;
+      verified.push(`• *${clean(name)}* → ${tgUser}`);
+    } else {
+      pending.push(`• *${clean(name)}*`);
+    }
+  }
+
+  const total = allPlayersMap.size;
+  const vCount = verified.length;
+  const pCount = pending.length;
+  const pct = total > 0 ? Math.round((vCount / total) * 100) : 0;
+
+  let msg = `📋 *БРАТВА FCM — TELEGRAM SQUAD AUDIT* ⚜️\n\n` +
+    `📊 *Registration Status (3-Day Deadline):*\n` +
+    `• Total Roster: *${total}* players\n` +
+    `• ✅ Verified on Telegram: *${vCount}* (${pct}%)\n` +
+    `• ❌ Not Registered (To Kick): *${pCount}* (${100 - pct}%)\n\n`;
+
+  if (pCount > 0) {
+    msg += `❌ *PLAYERS NOT YET ON TELEGRAM (${pCount}):*\n` +
+      `${pending.slice(0, 30).join('\n')}\n\n` +
+      `⚠️ *Anyone remaining on this ❌ list after the 3-day deadline will be kicked from the in-game league!*\n\n`;
+  } else {
+    msg += `🎉 *100% SQUAD VERIFIED!* All members have successfully registered on Telegram!\n\n`;
+  }
+
+  if (vCount > 0) {
+    msg += `✅ *VERIFIED MEMBERS (${vCount}):*\n` +
+      `${verified.slice(0, 20).join('\n')}${verified.length > 20 ? `\n_...and ${verified.length - 20} more_` : ''}`;
+  }
+
+  return msg;
+}
+
+function getPendingKeyboard() {
+  return {
+    inline_keyboard: [
+      [
+        { text: '🔄 Refresh Audit Live', callback_data: 'cmd_pending' }
+      ],
+      [
+        { text: '📢 Broadcast Welcome to Channel', callback_data: 'bcast_welcome' }
+      ],
+      [
+        { text: '📋 Back to Admin Menu', callback_data: 'cmd_menu' }
+      ]
+    ]
+  };
 }
 
 function formatMyStatsPrompt(lang = 'ru') {
@@ -1892,6 +2144,14 @@ export default async function handler(req, res) {
         } else if (category === 'welcome') {
           updatedText = formatChannelWelcome(targetLang);
           updatedKeyboard = getLanguageKeyboard('welcome', '0', targetLang, false);
+        } else if (category === 'verify') {
+          updatedText = formatVerificationPrompt(targetLang);
+          updatedKeyboard = getVerificationKeyboard(targetLang);
+        } else if (category === 'versuccess') {
+          const { pIndex } = loadLeagueData();
+          const pData = pIndex[param] || { display_name: param };
+          updatedText = formatVerificationSuccess(pData.display_name || param, targetLang);
+          updatedKeyboard = getVerificationSuccessKeyboard(param, targetLang);
         } else if (category === 'player') {
           updatedText = generatePlayerStatsMessage(param, targetLang);
           updatedKeyboard = getPlayerKeyboard(param, targetLang);
@@ -1976,6 +2236,13 @@ export default async function handler(req, res) {
         const recap = formatRecap(t, 'ru');
         await sendTelegramMessage(chatId, recap, getLanguageKeyboard('recap', '0', 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'cmd_pending') {
+        const auditMsg = await formatPendingAudit('ru');
+        await sendTelegramMessage(chatId, auditMsg, getPendingKeyboard());
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: 'Audit updated!' });
         return sendResponse(res, 200, 'OK');
       }
 
@@ -2085,31 +2352,58 @@ export default async function handler(req, res) {
     const userId = message.from ? message.from.id : null;
     const isAdmin = await isUserAdmin(userId);
 
+    // ==========================================
+    // 🔒 NON-ADMIN FLOW: 1-on-1 Player Verification & Onboarding
+    // ==========================================
     if (!isAdmin) {
-      const channelUsername = CHANNEL_ID.startsWith('@') ? CHANNEL_ID.slice(1) : CHANNEL_ID;
-      const channelLink = `https://t.me/${channelUsername}`;
-      const deniedKeyboard = {
-        inline_keyboard: [
-          [
-            { text: '📢 Official Channel', url: channelLink },
-            { text: '🌐 League Website', url: WEBSITE_URL }
+      // 1. Photos are strictly blocked for non-admins (match upload is admin-only)
+      if (message.photo && message.photo.length > 0) {
+        await sendTelegramMessage(chatId, `⛔ *Только администраторы лиги могут загружать скриншоты матчей!*\n\n_(Only League Admins can upload match screenshots)_`);
+        return sendResponse(res, 200, 'Non-admin photo rejected');
+      }
+
+      // 2. /start or empty text or greeting -> Show multilingual verification prompt
+      if (!text || text === '/start' || text === '/help' || text === '/verify') {
+        const vPrompt = formatVerificationPrompt('ru');
+        const vKeys = getVerificationKeyboard('ru');
+        await sendTelegramMessage(chatId, vPrompt, vKeys);
+        return sendResponse(res, 200, 'OK');
+      }
+
+      // 3. User entered their in-game EA FC Mobile username: match against active roster
+      const matched = findPlayerByQuery(text);
+      if (matched) {
+        await savePlayerRegistration({
+          player_id: matched.player_id,
+          display_name: matched.display_name,
+          telegram_id: userId,
+          telegram_username: message.from ? (message.from.username || '') : '',
+          telegram_name: `${message.from ? (message.from.first_name || '') : ''} ${message.from ? (message.from.last_name || '') : ''}`.trim()
+        });
+
+        const vSuccessText = formatVerificationSuccess(matched.display_name, 'ru');
+        const vSuccessKeys = getVerificationSuccessKeyboard(matched.player_id, 'ru');
+        await sendTelegramMessage(chatId, vSuccessText, vSuccessKeys);
+        return sendResponse(res, 200, 'OK');
+      } else {
+        const notFoundKeys = {
+          inline_keyboard: [
+            [
+              { text: '🌐 Check League Roster on Website', url: WEBSITE_URL }
+            ]
           ]
-        ]
-      };
+        };
 
-      const deniedMsg =
-        `⛔ *BRATVA FCM — ADMIN PORTAL ONLY*\n\n` +
-        `🇷🇺 *Этот бот закрыт для игроков и доступен только администрации лиги.*\n` +
-        `🇬🇧 *This bot is strictly private for League Admins only.*\n` +
-        `🇸🇦 *هذا البوت مخصص حصرياً لإدارة الدوري. لا يمكن للاعبين استخدامه.*\n` +
-        `🇪🇸 *Este bot es de uso exclusivo para los administradores de la liga.*\n\n` +
-        `📊 *Players can view all matches, rankings & rules here:*\n` +
-        `• 📢 *Telegram Channel:* ${CHANNEL_ID}\n` +
-        `• 🌐 *Official Website:* ${WEBSITE_URL}\n\n` +
-        `_(ID: \`${userId || 'unknown'}\`)_`;
+        const notFoundText =
+          `❌ *Игрок "${clean(text)}" не найден в составе лиги!* ⚠️\n\n` +
+          `Пожалуйста, проверь точное написание ника в EA FC Mobile и отправь его еще раз.\n\n` +
+          `📌 *Советы:*\n` +
+          `• Пиши точно как в профиле игры (например: \`саня\`, \`DOXIBERO1\`, \`Grego\`).\n` +
+          `• Если ты только недавно вступил в лигу в игре, напиши администраторам: @BRATVAFCM`;
 
-      await sendTelegramMessage(chatId, deniedMsg, deniedKeyboard);
-      return sendResponse(res, 200, 'Non-admin access blocked');
+        await sendTelegramMessage(chatId, notFoundText, notFoundKeys);
+        return sendResponse(res, 200, 'OK');
+      }
     }
 
     // 2.1 Photo processing with High-Speed Issue #1 Buffer + Interactive Button + Auto-Debounce
@@ -2273,6 +2567,13 @@ export default async function handler(req, res) {
       const wText = formatChannelWelcome('ru');
       const wKeys = getLanguageKeyboard('welcome', '0', 'ru', true);
       await sendTelegramMessage(chatId, wText, wKeys);
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/pending') || text.startsWith('/checkjoin') || text.startsWith('/registered') || text.startsWith('/audit')) {
+      const auditMsg = await formatPendingAudit('ru');
+      const auditKeys = getPendingKeyboard();
+      await sendTelegramMessage(chatId, auditMsg, auditKeys);
       return sendResponse(res, 200, 'OK');
     }
 
