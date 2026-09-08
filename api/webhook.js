@@ -21,7 +21,7 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 const GITHUB_PAT = process.env.GITHUB_PAT;
 const GITHUB_REPO = process.env.GITHUB_REPO || 'fc-bratva/fc-bratva.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
-const WEBSITE_URL = process.env.WEBSITE_URL || 'https://fc-bratva.github.io/1/';
+const WEBSITE_URL = process.env.WEBSITE_URL || 'https://bratvafcm.github.io/';
 const COMMUNITY_URL = 'https://t.me/addlist/c2IRI0ZsvfEwYzU0';
 
 export const config = {
