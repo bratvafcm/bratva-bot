@@ -1,7 +1,7 @@
 {
   "id": "2026-09-08_memequis_juniors",
   "date": "2026-09-08",
-  "timestamp": 1788825723260,
+  "timestamp": 1788825732986,
   "opponent_league": "Memequis Juniors",
   "our_total_goals": 155,
   "opponent_total_goals": 220,
@@ -10,6 +10,14 @@
   "total_turns_played": 18,
   "max_possible_turns": 48,
   "matches": [
+    {
+      "board_order": 11,
+      "player_id": "karim",
+      "player_display_name": "KARIM",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
     {
       "board_order": 12,
       "player_id": "real",
@@ -28,7 +36,7 @@
     },
     {
       "board_order": 14,
-      "player_id": "player_2",
+      "player_id": "player_3",
       "player_display_name": "Тима",
       "ovr": 124,
       "goals_for": 6,
@@ -41,14 +49,6 @@
       "ovr": 123,
       "goals_for": 27,
       "turns_played": 3
-    },
-    {
-      "board_order": 16,
-      "player_id": "progamer",
-      "player_display_name": "ProGamer",
-      "ovr": 122,
-      "goals_for": 0,
-      "turns_played": 0
     }
   ]
 }
