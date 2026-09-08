@@ -22,6 +22,7 @@ const GITHUB_PAT = process.env.GITHUB_PAT;
 const GITHUB_REPO = process.env.GITHUB_REPO || 'fc-bratva/fc-bratva.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
 const WEBSITE_URL = 'https://fc-bratva.github.io/';
+const COMMUNITY_URL = 'https://t.me/addlist/c2IRI0ZsvfEwYzU0';
 
 export const config = {
   maxDuration: 60
@@ -382,6 +383,7 @@ function askGeminiAI(userQuestion) {
     const systemPrompt = `You are the official AI Assistant for the "БРАТВА" FCM League in EA Sports FC Mobile.
 League Website: ${WEBSITE_URL}
 Telegram Channel: ${CHANNEL_ID}
+Telegram Community Folder (Channel + Discussion Group): ${COMMUNITY_URL}
 
 League Knowledge & Context:
 - League Name: БРАТВА (FCM League)
@@ -1353,6 +1355,7 @@ export default async function handler(req, res) {
           `1. Обязательно играть 3/3 в каждом турнире!\n` +
           `2. 1 пропущенный матч = 1 страйк (1/3).\n` +
           `3. 3 страйка = исключение из лиги.\n\n` +
+          `👥 *Telegram Сообщество (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
           `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
         await sendTelegramMessage(chatId, rules, getMainKeyboard());
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
@@ -1540,6 +1543,7 @@ export default async function handler(req, res) {
         `1. Обязательно играть 3/3 в каждом турнире!\n` +
         `2. 1 пропущенный матч = 1 страйк (1/3).\n` +
         `3. 3 страйка = исключение из лиги.\n\n` +
+        `👥 *Telegram Сообщество (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
         `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
       await sendTelegramMessage(chatId, rules, getMainKeyboard());
       return sendResponse(res, 200, 'OK');
@@ -1595,6 +1599,7 @@ export default async function handler(req, res) {
         `📸 *Отправь мне скриншоты турнира из EA FC Mobile!*\n` +
         `Можешь отправить сразу до 4-5 скриншотов турнира (альбомом)!\n` +
         `Я объединю всех игроков от 1 до 32, обновлю сайт и отправлю отчет в канал!\n\n` +
+        `👥 *Telegram Сообщество (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
         `💬 *AI Chat (Private):* Tqder tsowlni direct hna f chat b Darija, English aw Russian!\n\n` +
         `📋 *Доступные команды:* Выберите кнопку ниже 👇`;
 
