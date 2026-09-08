@@ -1239,6 +1239,18 @@ export default async function handler(req, res) {
       const cb = update.callback_query;
       const data = cb.data || '';
       const chatId = cb.message ? cb.message.chat.id : cb.from.id;
+      const isCbPrivate = !cb.message || !cb.message.chat || cb.message.chat.type === 'private';
+
+      // If clicked inside a group, only allow in-place language translation tabs (tab_)
+      // All other bot actions/menus are strictly blocked from posting into groups!
+      if (!isCbPrivate && !data.startsWith('tab_')) {
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: '⚠️ Bot commands & menus are only available in private DM @BratvaFCMBot',
+          show_alert: true
+        });
+        return sendResponse(res, 200, 'Group callback ignored');
+      }
 
       if (data.startsWith('analyze_')) {
         const albumId = data.replace('analyze_', '');
@@ -1421,9 +1433,11 @@ export default async function handler(req, res) {
     const isPrivate = !message.chat || message.chat.type === 'private';
     const text = (message.text || '').trim();
 
-    // In channels or public groups, completely ignore chat so the bot NEVER talks in channel/groups
-    if (!isPrivate && !text.startsWith('/')) {
-      return sendResponse(res, 200, 'Non-private chatter ignored');
+    // Strict Policy: The bot ONLY operates in 1-on-1 private DMs with users.
+    // In ALL groups/supergroups (Discussion groups, team chats), the bot is 100% MUTED.
+    // Zero commands, zero replies, zero photo processing in groups.
+    if (!isPrivate) {
+      return sendResponse(res, 200, 'All group messages strictly ignored');
     }
 
     // 2.1 Photo processing with High-Speed Issue #1 Buffer + Interactive Button + Auto-Debounce
