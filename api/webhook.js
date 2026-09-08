@@ -862,9 +862,9 @@ function formatLiveAlert(aiResult, lang = 'ru') {
   const ourG = aiResult.score_bratva || 0;
   const oppG = aiResult.score_opponent || 0;
   const timeInfo = clean(aiResult.time_info || 'Live in progress');
-  const unplayed = (aiResult.players || []).filter(p => p.turns_played < 3 || p.limit_remaining === '3/3');
+  const unplayed = (aiResult.players || []).filter(p => (p.turns_played !== undefined && p.turns_played < 3) || p.limit_remaining === '3/3');
   const pLines = unplayed.length > 0
-    ? unplayed.map(p => `[ ⏳ | ${clean(p.name)} | ${p.turns_played}/3 ]`).join('\n')
+    ? unplayed.map(p => `⌛ | ${clean(p.name)} | ${p.turns_played ?? 0}/3`).join('\n')
     : '✅ All squad members have completed their turns!';
 
   if (lang === 'en') {
@@ -911,8 +911,8 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false) {
   }
 
   if (aiResult.status === 'LIVE') {
-    globalLatestLiveResult = aiResult;
-    const liveMsg = formatLiveAlert(aiResult, 'multi');
+    await saveLiveMatchResult(aiResult);
+    const liveMsg = formatLiveAlert(aiResult, 'ru');
     latestLiveMessage = liveMsg;
 
     const liveKeys = {
@@ -1063,6 +1063,34 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false) {
 }
 
 const BUFFER_ISSUE_NUMBER = 1;
+
+async function saveLiveMatchResult(aiResult) {
+  globalLatestLiveResult = aiResult;
+  try {
+    await githubApi(`/repos/${GITHUB_REPO}/issues/${BUFFER_ISSUE_NUMBER}`, 'PATCH', {
+      body: JSON.stringify({ type: 'live_match_state', data: aiResult, updatedAt: Date.now() })
+    });
+  } catch (e) {
+    console.error('Failed to persist live match state:', e);
+  }
+}
+
+async function getLiveMatchResult() {
+  if (globalLatestLiveResult) return globalLatestLiveResult;
+  try {
+    const issue = await githubApi(`/repos/${GITHUB_REPO}/issues/${BUFFER_ISSUE_NUMBER}`);
+    if (issue && issue.body) {
+      const parsed = JSON.parse(issue.body);
+      if (parsed && (parsed.type === 'live_match_state' || parsed.status === 'LIVE')) {
+        globalLatestLiveResult = parsed.data || parsed;
+        return globalLatestLiveResult;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to get live match state:', e);
+  }
+  return null;
+}
 
 async function bufferPhoto(albumId, fileId, chatId) {
   return await githubApi(`/repos/${GITHUB_REPO}/issues/${BUFFER_ISSUE_NUMBER}/comments`, 'POST', {
@@ -1253,8 +1281,17 @@ export default async function handler(req, res) {
           updatedText = formatRally(targetLang);
           updatedKeyboard = getLanguageKeyboard('rally', '0', targetLang);
         } else if (category === 'live') {
-          updatedText = formatLiveAlert(globalLatestLiveResult, targetLang);
-          updatedKeyboard = getLanguageKeyboard('live', '0', targetLang);
+          const liveResult = await getLiveMatchResult();
+          if (liveResult) {
+            updatedText = formatLiveAlert(liveResult, targetLang);
+            updatedKeyboard = getLanguageKeyboard('live', '0', targetLang);
+          } else {
+            await telegramRequest('answerCallbackQuery', {
+              callback_query_id: cb.id,
+              text: '⚠️ Live match data expired'
+            });
+            return sendResponse(res, 200, 'OK');
+          }
         } else if (category === 'mvp') {
           updatedText = formatMvp(targetLang);
           updatedKeyboard = getLanguageKeyboard('mvp', '0', targetLang);
@@ -1318,7 +1355,11 @@ export default async function handler(req, res) {
       }
 
       if (data === 'bcast_live') {
-        const liveMsg = formatLiveAlert(globalLatestLiveResult, 'ru');
+        const liveResult = await getLiveMatchResult();
+        let liveMsg = formatLiveAlert(liveResult, 'ru');
+        if ((!liveResult || liveMsg.includes('No active live match data')) && cb.message && cb.message.text) {
+          liveMsg = cb.message.text;
+        }
         const liveKeys = getLanguageKeyboard('live', '0', 'ru');
         await sendTelegramMessage(CHANNEL_ID, liveMsg, liveKeys);
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: '📢 Live alert posted to channel!' });
