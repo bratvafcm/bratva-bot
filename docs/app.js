@@ -2526,9 +2526,11 @@ function openTournamentModal(tId) {
 const RulesManager = {
   defaultRules: {
     maxMissesKick: 3,
+    consecutiveMissesKick: 2,
+    rollingHorizon: 5,
     minTurnsPerTournament: 3,
     minGoalsPerTournament: 20,
-    evaluationHorizon: 3
+    telegramDeadlineDays: 3
   },
 
   currentRules: null,

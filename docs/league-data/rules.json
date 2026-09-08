@@ -1,8 +1,10 @@
 {
   "minTurnsPerTournament": 3,
   "maxMissesKick": 3,
+  "consecutiveMissesKick": 2,
+  "rollingHorizon": 5,
   "minGoalsPerTournament": 20,
-  "evaluationHorizon": 3,
-  "lastUpdated": "2026-09-08T17:00:00.000Z",
+  "telegramDeadlineDays": 3,
+  "lastUpdated": "2026-09-08T23:15:00.000Z",
   "updatedBy": "admin"
 }

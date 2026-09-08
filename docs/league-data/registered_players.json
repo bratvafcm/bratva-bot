@@ -12,5 +12,9 @@
       "is_new_member": true,
       "registered_at": "2026-09-08T20:45:27.180Z"
     }
+  },
+  "current_checkin": {
+    "ready": [],
+    "away": []
   }
 }
