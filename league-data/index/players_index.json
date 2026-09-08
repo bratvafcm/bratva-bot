@@ -13,25 +13,25 @@
   },
   "doxibero1": {
     "display_name": "DOXIBERO1",
-    "total_goals": 170,
-    "total_matches": 7,
-    "average_goals": 24,
-    "last_tournament_date": "2026-08-29",
+    "total_goals": 383,
+    "total_matches": 15,
+    "average_goals": 25.5,
+    "last_tournament_date": "2026-09-08",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
       "flagged_for_review": false
     }
   },
   "doxibro": {
     "display_name": "DOXIBÉRO",
-    "total_goals": 196,
-    "total_matches": 6,
-    "average_goals": 33,
-    "last_tournament_date": "2026-08-29",
+    "total_goals": 328,
+    "total_matches": 12,
+    "average_goals": 27,
+    "last_tournament_date": "2026-09-07",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-07_iran-gold",
       "flagged_for_review": false
     }
   },
@@ -61,25 +61,25 @@
   },
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
-    "total_goals": 132,
-    "total_matches": 7,
-    "average_goals": 19,
-    "last_tournament_date": "2026-08-29",
+    "total_goals": 296,
+    "total_matches": 14,
+    "average_goals": 21.1,
+    "last_tournament_date": "2026-09-08",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
       "flagged_for_review": false
     }
   },
   "sanya": {
     "display_name": "саня",
-    "total_goals": 280,
-    "total_matches": 8,
+    "total_goals": 532,
+    "total_matches": 15,
     "average_goals": 35,
-    "last_tournament_date": "2026-08-29",
+    "last_tournament_date": "2026-09-07",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "last_evaluated_tournament_id": "2026-09-07_iran-gold",
       "flagged_for_review": false
     }
   },
@@ -97,14 +97,14 @@
   },
   "redhawk": {
     "display_name": "RÈDHAWK前",
-    "total_goals": 26,
-    "total_matches": 2,
-    "average_goals": 13,
-    "last_tournament_date": "2026-08-29",
+    "total_goals": 63,
+    "total_matches": 8,
+    "average_goals": 8,
+    "last_tournament_date": "2026-09-07",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
-      "flagged_for_review": false
+      "current_fail_streak": 4,
+      "last_evaluated_tournament_id": "2026-09-07_iran-gold",
+      "flagged_for_review": true
     }
   },
   "jeniik_": {
@@ -181,13 +181,13 @@
   },
   "mike": {
     "display_name": "Mike",
-    "total_goals": 53,
-    "total_matches": 2,
-    "average_goals": 27,
-    "last_tournament_date": "2026-08-29",
+    "total_goals": 185,
+    "total_matches": 9,
+    "average_goals": 20.6,
+    "last_tournament_date": "2026-09-08",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
       "flagged_for_review": false
     }
   },
@@ -206,12 +206,12 @@
   "john_tony": {
     "display_name": "John_Tony",
     "total_goals": 0,
-    "total_matches": 2,
+    "total_matches": 4,
     "average_goals": 0,
-    "last_tournament_date": "2026-08-29",
+    "last_tournament_date": "2026-09-04",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-04_al-afdal-al-riyadi-26",
       "flagged_for_review": false
     }
   },
@@ -301,25 +301,25 @@
   },
   "psg": {
     "display_name": "PSG",
-    "total_goals": 26,
-    "total_matches": 1,
-    "average_goals": 26,
-    "last_tournament_date": "2026-08-29",
+    "total_goals": 71,
+    "total_matches": 5,
+    "average_goals": 14.2,
+    "last_tournament_date": "2026-09-08",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
       "flagged_for_review": false
     }
   },
   "abirsh07": {
     "display_name": "Abirsh07",
-    "total_goals": 34,
-    "total_matches": 1,
-    "average_goals": 34,
-    "last_tournament_date": "2026-08-29",
+    "total_goals": 206,
+    "total_matches": 8,
+    "average_goals": 25.8,
+    "last_tournament_date": "2026-09-08",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
       "flagged_for_review": false
     }
   },
@@ -338,12 +338,12 @@
   "dip": {
     "display_name": "Dip",
     "total_goals": 27,
-    "total_matches": 1,
-    "average_goals": 27,
-    "last_tournament_date": "2026-08-29",
+    "total_matches": 2,
+    "average_goals": 14,
+    "last_tournament_date": "2026-08-31",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-08-31_royal-challenger",
       "flagged_for_review": false
     }
   },
@@ -361,25 +361,25 @@
   },
   "koustav_007": {
     "display_name": "KOUSTAV_007",
-    "total_goals": 30,
-    "total_matches": 1,
-    "average_goals": 30,
-    "last_tournament_date": "2026-08-29",
+    "total_goals": 173,
+    "total_matches": 7,
+    "average_goals": 24.7,
+    "last_tournament_date": "2026-09-08",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
       "flagged_for_review": false
     }
   },
   "mee": {
     "display_name": "MEE",
     "total_goals": 0,
-    "total_matches": 1,
+    "total_matches": 3,
     "average_goals": 0,
-    "last_tournament_date": "2026-08-29",
+    "last_tournament_date": "2026-09-04",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-04_al-afdal-al-riyadi-26",
       "flagged_for_review": false
     }
   },
@@ -421,13 +421,157 @@
   },
   "tima": {
     "display_name": "Тима",
-    "total_goals": 20,
-    "total_matches": 1,
-    "average_goals": 20,
-    "last_tournament_date": "2026-08-29",
+    "total_goals": 110,
+    "total_matches": 6,
+    "average_goals": 18,
+    "last_tournament_date": "2026-09-07",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "last_evaluated_tournament_id": "2026-09-07_iran-gold",
+      "flagged_for_review": false
+    }
+  },
+  "omar": {
+    "display_name": "Omar",
+    "total_goals": 117,
+    "total_matches": 7,
+    "average_goals": 16.7,
+    "last_tournament_date": "2026-09-08",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "flagged_for_review": false
+    }
+  },
+  "slothx8": {
+    "display_name": "Slothx8",
+    "total_goals": 60,
+    "total_matches": 2,
+    "average_goals": 30,
+    "last_tournament_date": "2026-09-01",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-01_italiani-fc",
+      "flagged_for_review": false
+    }
+  },
+  "progamer": {
+    "display_name": "ProGamer",
+    "total_goals": 29,
+    "total_matches": 6,
+    "average_goals": 4.8,
+    "last_tournament_date": "2026-09-08",
+    "eligibility_streak": {
+      "current_fail_streak": 5,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "flagged_for_review": true
+    }
+  },
+  "yazaaa_ya": {
+    "display_name": "yazaaa_ya",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-08-31",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-08-31_royal-challenger",
+      "flagged_for_review": false
+    }
+  },
+  "rogelio": {
+    "display_name": "Rogelio",
+    "total_goals": 113,
+    "total_matches": 5,
+    "average_goals": 22.6,
+    "last_tournament_date": "2026-09-08",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "flagged_for_review": false
+    }
+  },
+  "grego": {
+    "display_name": "Grego",
+    "total_goals": 38,
+    "total_matches": 4,
+    "average_goals": 9.5,
+    "last_tournament_date": "2026-09-08",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "flagged_for_review": false
+    }
+  },
+  "real": {
+    "display_name": "Real",
+    "total_goals": 57,
+    "total_matches": 4,
+    "average_goals": 14.3,
+    "last_tournament_date": "2026-09-08",
+    "eligibility_streak": {
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "flagged_for_review": false
+    }
+  },
+  "sushenley": {
+    "display_name": "SUSHenley",
+    "total_goals": 22,
+    "total_matches": 3,
+    "average_goals": 7.3,
+    "last_tournament_date": "2026-09-08",
+    "eligibility_streak": {
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "flagged_for_review": false
+    }
+  },
+  "саня": {
+    "display_name": "саня",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-08",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "flagged_for_review": false
+    }
+  },
+  "karim": {
+    "display_name": "KARIM",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-08",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "flagged_for_review": false
+    }
+  },
+  "doxibero": {
+    "display_name": "DOXIBÉRO",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-08",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "flagged_for_review": false
+    }
+  },
+  "тима": {
+    "display_name": "Тима",
+    "total_goals": 6,
+    "total_matches": 1,
+    "average_goals": 6,
+    "last_tournament_date": "2026-09-08",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
       "flagged_for_review": false
     }
   }

@@ -1,0 +1,69 @@
+{
+  "id": "2026-09-01_italiani-fc",
+  "date": "2026-09-01",
+  "opponent_league": "ITALIANI F.C",
+  "our_total_goals": 119,
+  "opponent_total_goals": 216,
+  "result": "loss",
+  "status": "complete",
+  "total_turns_played": 12,
+  "max_possible_turns": 24,
+  "matches": [
+    {
+      "player_id": "sanya",
+      "player_display_name": "саня",
+      "ovr": 129,
+      "goals_for": 33,
+      "turns_played": 3
+    },
+    {
+      "player_id": "slothx8",
+      "player_display_name": "Slothx8",
+      "ovr": 126,
+      "goals_for": 30,
+      "turns_played": 3
+    },
+    {
+      "player_id": "koustav_007",
+      "player_display_name": "KOUSTAV_007",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "player_id": "progamer",
+      "player_display_name": "ProGamer",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "player_id": "omar",
+      "player_display_name": "Omar",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "player_id": "mike",
+      "player_display_name": "Mike",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "player_id": "doxibro",
+      "player_display_name": "DOXIBÉRO",
+      "ovr": 125,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
+      "ovr": 122,
+      "goals_for": 28,
+      "turns_played": 3
+    }
+  ]
+}

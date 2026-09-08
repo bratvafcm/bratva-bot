@@ -1,0 +1,125 @@
+{
+  "id": "2026-08-31_royal-challenger",
+  "date": "2026-08-31",
+  "opponent_league": "ROYAL CHALLENGER",
+  "our_total_goals": 334,
+  "opponent_total_goals": 381,
+  "result": "loss",
+  "status": "complete",
+  "total_turns_played": 39,
+  "max_possible_turns": 48,
+  "matches": [
+    {
+      "player_id": "sanya",
+      "player_display_name": "саня",
+      "ovr": 129,
+      "goals_for": 39,
+      "turns_played": 3
+    },
+    {
+      "player_id": "slothx8",
+      "player_display_name": "Slothx8",
+      "ovr": 126,
+      "goals_for": 30,
+      "turns_played": 3
+    },
+    {
+      "player_id": "redhawk",
+      "player_display_name": "RÈDHAWK前",
+      "ovr": 126,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "player_id": "mohamed_osama",
+      "player_display_name": "Mohamed_Osama",
+      "ovr": 126,
+      "goals_for": 26,
+      "turns_played": 3
+    },
+    {
+      "player_id": "doxibro",
+      "player_display_name": "DOXIBÉRO",
+      "ovr": 125,
+      "goals_for": 30,
+      "turns_played": 3
+    },
+    {
+      "player_id": "koustav_007",
+      "player_display_name": "KOUSTAV_007",
+      "ovr": 125,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "player_id": "progamer",
+      "player_display_name": "ProGamer",
+      "ovr": 125,
+      "goals_for": 29,
+      "turns_played": 3
+    },
+    {
+      "player_id": "mike",
+      "player_display_name": "Mike",
+      "ovr": 125,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "player_id": "dip",
+      "player_display_name": "Dip",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "player_id": "omar",
+      "player_display_name": "Omar",
+      "ovr": 125,
+      "goals_for": 22,
+      "turns_played": 3
+    },
+    {
+      "player_id": "abirsh07",
+      "player_display_name": "Abirsh07",
+      "ovr": 125,
+      "goals_for": 26,
+      "turns_played": 3
+    },
+    {
+      "player_id": "yazaaa_ya",
+      "player_display_name": "yazaaa_ya",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 3
+    },
+    {
+      "player_id": "john_tony",
+      "player_display_name": "John_Tony",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "player_id": "mee",
+      "player_display_name": "MEE",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "player_id": "tima",
+      "player_display_name": "Тима",
+      "ovr": 124,
+      "goals_for": 22,
+      "turns_played": 3
+    },
+    {
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
+      "ovr": 122,
+      "goals_for": 26,
+      "turns_played": 3
+    }
+  ]
+}

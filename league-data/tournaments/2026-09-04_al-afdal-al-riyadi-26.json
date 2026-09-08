@@ -1,0 +1,125 @@
+{
+  "id": "2026-09-04_al-afdal-al-riyadi-26",
+  "date": "2026-09-04",
+  "opponent_league": "الافضل الرياضي26",
+  "our_total_goals": 302,
+  "opponent_total_goals": 193,
+  "result": "win",
+  "status": "complete",
+  "total_turns_played": 38,
+  "max_possible_turns": 48,
+  "matches": [
+    {
+      "player_id": "sanya",
+      "player_display_name": "саня",
+      "ovr": 128,
+      "goals_for": 42,
+      "turns_played": 3
+    },
+    {
+      "player_id": "redhawk",
+      "player_display_name": "RÈDHAWK前",
+      "ovr": 126,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "player_id": "mohamed_osama",
+      "player_display_name": "Mohamed_Osama",
+      "ovr": 125,
+      "goals_for": 33,
+      "turns_played": 3
+    },
+    {
+      "player_id": "koustav_007",
+      "player_display_name": "KOUSTAV_007",
+      "ovr": 125,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "player_id": "mike",
+      "player_display_name": "Mike",
+      "ovr": 125,
+      "goals_for": 30,
+      "turns_played": 3
+    },
+    {
+      "player_id": "grego",
+      "player_display_name": "Grego",
+      "ovr": 125,
+      "goals_for": 15,
+      "turns_played": 2
+    },
+    {
+      "player_id": "omar",
+      "player_display_name": "Omar",
+      "ovr": 125,
+      "goals_for": 25,
+      "turns_played": 3
+    },
+    {
+      "player_id": "abirsh07",
+      "player_display_name": "Abirsh07",
+      "ovr": 125,
+      "goals_for": 32,
+      "turns_played": 3
+    },
+    {
+      "player_id": "rogelio",
+      "player_display_name": "Rogelio",
+      "ovr": 125,
+      "goals_for": 19,
+      "turns_played": 3
+    },
+    {
+      "player_id": "psg",
+      "player_display_name": "PSG",
+      "ovr": 125,
+      "goals_for": 25,
+      "turns_played": 3
+    },
+    {
+      "player_id": "john_tony",
+      "player_display_name": "John_Tony",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 3
+    },
+    {
+      "player_id": "real",
+      "player_display_name": "Real",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "player_id": "mee",
+      "player_display_name": "MEE",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 3
+    },
+    {
+      "player_id": "tima",
+      "player_display_name": "Тима",
+      "ovr": 124,
+      "goals_for": 24,
+      "turns_played": 3
+    },
+    {
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
+      "ovr": 123,
+      "goals_for": 29,
+      "turns_played": 3
+    },
+    {
+      "player_id": "progamer",
+      "player_display_name": "ProGamer",
+      "ovr": 122,
+      "goals_for": 0,
+      "turns_played": 0
+    }
+  ]
+}

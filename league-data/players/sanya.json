@@ -98,6 +98,90 @@
       "turns_played": 3,
       "player_display_name": "саня",
       "player_id": "sanya"
+    },
+    {
+      "tournament_id": "2026-08-30_rossiya",
+      "match_index_in_tournament": 0,
+      "opponent_display_name": "РОССИЯ",
+      "opponent_id": "rossiya",
+      "goals_for": 33,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "sanya"
+    },
+    {
+      "tournament_id": "2026-08-31_royal-challenger",
+      "match_index_in_tournament": 0,
+      "opponent_display_name": "ROYAL CHALLENGER",
+      "opponent_id": "royal_challenger",
+      "goals_for": 39,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "sanya"
+    },
+    {
+      "tournament_id": "2026-09-01_italiani-fc",
+      "match_index_in_tournament": 0,
+      "opponent_display_name": "ITALIANI F.C",
+      "opponent_id": "italiani_fc",
+      "goals_for": 33,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "sanya"
+    },
+    {
+      "tournament_id": "2026-09-03_bayern-2-monique",
+      "match_index_in_tournament": 0,
+      "opponent_display_name": "Bayern 2 Monique",
+      "opponent_id": "bayern_2_monique",
+      "goals_for": 40,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "sanya"
+    },
+    {
+      "tournament_id": "2026-09-04_al-afdal-al-riyadi-26",
+      "match_index_in_tournament": 0,
+      "opponent_display_name": "الافضل الرياضي26",
+      "opponent_id": "26",
+      "goals_for": 42,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "sanya"
+    },
+    {
+      "tournament_id": "2026-09-06_th-thedemon-fc",
+      "match_index_in_tournament": 0,
+      "opponent_display_name": "TH'·TheDemon·'FC",
+      "opponent_id": "th_thedemon_fc",
+      "goals_for": 31,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "sanya"
+    },
+    {
+      "tournament_id": "2026-09-07_iran-gold",
+      "match_index_in_tournament": 0,
+      "opponent_display_name": "IRAN. gold",
+      "opponent_id": "iran_gold",
+      "goals_for": 34,
+      "goals_against": 0,
+      "result": "draw",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "sanya"
     }
   ],
   "eligibility_streak": {

@@ -1,0 +1,110 @@
+{
+  "tournament_id": "2026-08-30_rossiya",
+  "date": "2026-08-30",
+  "opponent_league": "РОССИЯ",
+  "format": "8v8",
+  "status": "complete",
+  "our_total_goals": 159,
+  "opponent_total_goals": 181,
+  "result": "loss",
+  "our_turns": 18,
+  "opponent_turns": 15,
+  "matches": [
+    {
+      "tournament_id": "2026-08-30_rossiya",
+      "match_index_in_tournament": 0,
+      "opponent_display_name": "РОССИЯ",
+      "opponent_id": "rossiya",
+      "goals_for": 33,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "sanya"
+    },
+    {
+      "tournament_id": "2026-08-30_rossiya",
+      "match_index_in_tournament": 1,
+      "opponent_display_name": "РОССИЯ",
+      "opponent_id": "rossiya",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "RÈDHAWK前",
+      "player_id": "redhawk"
+    },
+    {
+      "tournament_id": "2026-08-30_rossiya",
+      "match_index_in_tournament": 2,
+      "opponent_display_name": "РОССИЯ",
+      "opponent_id": "rossiya",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Mohamed_Osama",
+      "player_id": "mohamed_osama"
+    },
+    {
+      "tournament_id": "2026-08-30_rossiya",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "РОССИЯ",
+      "opponent_id": "rossiya",
+      "goals_for": 26,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "DOXIBÉRO",
+      "player_id": "doxibro"
+    },
+    {
+      "tournament_id": "2026-08-30_rossiya",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "РОССИЯ",
+      "opponent_id": "rossiya",
+      "goals_for": 26,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Mike",
+      "player_id": "mike"
+    },
+    {
+      "tournament_id": "2026-08-30_rossiya",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "РОССИЯ",
+      "opponent_id": "rossiya",
+      "goals_for": 27,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Omar",
+      "player_id": "omar"
+    },
+    {
+      "tournament_id": "2026-08-30_rossiya",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "РОССИЯ",
+      "opponent_id": "rossiya",
+      "goals_for": 24,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Abirsh07",
+      "player_id": "abirsh07"
+    },
+    {
+      "tournament_id": "2026-08-30_rossiya",
+      "match_index_in_tournament": 7,
+      "opponent_display_name": "РОССИЯ",
+      "opponent_id": "rossiya",
+      "goals_for": 23,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "DOXIBERO1",
+      "player_id": "doxibero1"
+    }
+  ]
+}

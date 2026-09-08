@@ -1,0 +1,31 @@
+{
+  "player_id": "slothx8",
+  "display_name": "Slothx8",
+  "known_aliases": [],
+  "matches": [
+    {
+      "tournament_id": "2026-08-31_royal-challenger",
+      "match_index_in_tournament": 1,
+      "opponent_display_name": "ROYAL CHALLENGER",
+      "opponent_id": "royal_challenger",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Slothx8",
+      "player_id": "slothx8"
+    },
+    {
+      "tournament_id": "2026-09-01_italiani-fc",
+      "match_index_in_tournament": 1,
+      "opponent_display_name": "ITALIANI F.C",
+      "opponent_id": "italiani_fc",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Slothx8",
+      "player_id": "slothx8"
+    }
+  ]
+}
