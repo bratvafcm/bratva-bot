@@ -85,6 +85,45 @@ function telegramRequest(method, params = {}) {
   });
 }
 
+const adminCache = new Map(); // userId -> { isAdmin: boolean, expiresAt: number }
+
+async function isUserAdmin(userId) {
+  if (!userId) return false;
+  const strId = String(userId);
+
+  // 1. In-memory cache (5 min TTL)
+  const cached = adminCache.get(strId);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.isAdmin;
+  }
+
+  // 2. ADMIN_USER_IDS environment variable whitelist
+  const envAdminIds = (process.env.ADMIN_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (envAdminIds.includes(strId)) {
+    adminCache.set(strId, { isAdmin: true, expiresAt: Date.now() + 5 * 60 * 1000 });
+    return true;
+  }
+
+  // 3. Check Channel Creator or Administrator status on CHANNEL_ID
+  try {
+    const res = await telegramRequest('getChatMember', {
+      chat_id: CHANNEL_ID,
+      user_id: userId
+    });
+    if (res && res.ok && res.result) {
+      const st = res.result.status;
+      const isAdmin = (st === 'creator' || st === 'administrator');
+      adminCache.set(strId, { isAdmin, expiresAt: Date.now() + 5 * 60 * 1000 });
+      return isAdmin;
+    }
+  } catch (err) {
+    console.warn('isUserAdmin check failed via getChatMember:', err.message);
+  }
+
+  adminCache.set(strId, { isAdmin: false, expiresAt: Date.now() + 60 * 1000 });
+  return false;
+}
+
 async function sendTelegramMessage(chatId, text, replyMarkup = null) {
   try {
     const params = { chat_id: chatId, text: text, parse_mode: 'Markdown' };
@@ -1700,6 +1739,21 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'Group callback ignored');
       }
 
+      // Security Gate: Translation tabs (tab_) are public for channel subscribers.
+      // All other interactive actions (analyze, clear, rules, menus, broadcasts) strictly require Admin!
+      if (!data.startsWith('tab_')) {
+        const userId = cb.from ? cb.from.id : null;
+        const isAdmin = await isUserAdmin(userId);
+        if (!isAdmin) {
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: '⛔ Access Denied: League Admins only.',
+            show_alert: true
+          });
+          return sendResponse(res, 200, 'Non-admin callback blocked');
+        }
+      }
+
       if (data.startsWith('analyze_')) {
         const albumId = data.replace('analyze_', '');
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: 'Starting analysis...' });
@@ -1962,6 +2016,38 @@ export default async function handler(req, res) {
     // Zero commands, zero replies, zero photo processing in groups.
     if (!isPrivate) {
       return sendResponse(res, 200, 'All group messages strictly ignored');
+    }
+
+    // 🔒 Admin Security Gate: Players have NO access to the bot.
+    // Only verified Administrators / Creator of the league can access bot features.
+    const userId = message.from ? message.from.id : null;
+    const isAdmin = await isUserAdmin(userId);
+
+    if (!isAdmin) {
+      const channelUsername = CHANNEL_ID.startsWith('@') ? CHANNEL_ID.slice(1) : CHANNEL_ID;
+      const channelLink = `https://t.me/${channelUsername}`;
+      const deniedKeyboard = {
+        inline_keyboard: [
+          [
+            { text: '📢 Official Channel', url: channelLink },
+            { text: '🌐 League Website', url: WEBSITE_URL }
+          ]
+        ]
+      };
+
+      const deniedMsg =
+        `⛔ *BRATVA FCM — ADMIN PORTAL ONLY*\n\n` +
+        `🇷🇺 *Этот бот закрыт для игроков и доступен только администрации лиги.*\n` +
+        `🇬🇧 *This bot is strictly private for League Admins only.*\n` +
+        `🇸🇦 *هذا البوت مخصص حصرياً لإدارة الدوري. لا يمكن للاعبين استخدامه.*\n` +
+        `🇪🇸 *Este bot es de uso exclusivo para los administradores de la liga.*\n\n` +
+        `📊 *Players can view all matches, rankings & rules here:*\n` +
+        `• 📢 *Telegram Channel:* ${CHANNEL_ID}\n` +
+        `• 🌐 *Official Website:* ${WEBSITE_URL}\n\n` +
+        `_(ID: \`${userId || 'unknown'}\`)_`;
+
+      await sendTelegramMessage(chatId, deniedMsg, deniedKeyboard);
+      return sendResponse(res, 200, 'Non-admin access blocked');
     }
 
     // 2.1 Photo processing with High-Speed Issue #1 Buffer + Interactive Button + Auto-Debounce
