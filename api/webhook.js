@@ -29,6 +29,8 @@ export const config = {
 
 // Global in-memory cache and state (persists across warm invocations)
 let globalLatestTournament = null;
+let latestLiveMessage = null;
+let latestMvpMessage = null;
 const processedUpdates = new Set();
 const mediaGroupMap = new Map();
 const processingPhotos = new Set();
@@ -362,8 +364,12 @@ function getMainKeyboard() {
         { text: '⭐ Last Recap', callback_data: 'cmd_recap' }
       ],
       [
-        { text: '⛔ Strikes & Debtors', callback_data: 'cmd_strikes' },
+        { text: '👑 MVP Spotlight', callback_data: 'cmd_mvp' },
         { text: '🎯 Best Lineup', callback_data: 'cmd_lineup' }
+      ],
+      [
+        { text: '⛔ Strikes & Debtors', callback_data: 'cmd_strikes' },
+        { text: '🚨 Kick Review', callback_data: 'cmd_kicklist' }
       ],
       [
         { text: '📜 Rules', callback_data: 'cmd_rules' },
@@ -605,6 +611,94 @@ function generatePlayerStatsMessage(query) {
     `🌐 *Full Player Stats:*\n${WEBSITE_URL}`;
 }
 
+function generateKicklistMessage() {
+  const { pIndex } = loadLeagueData();
+  const critical = [];
+  const warning = [];
+
+  Object.entries(pIndex).forEach(([id, data]) => {
+    const name = clean(data.display_name || id);
+    const streak = data.eligibility_streak?.current_fail_streak || 0;
+    const isFlagged = data.eligibility_streak?.flagged_for_review || streak >= 3;
+    if (isFlagged || streak >= 3) {
+      critical.push(`🚨 *${name}* — ${streak} consecutive misses (ELIGIBLE FOR KICK ⛔)`);
+    } else if (streak > 0) {
+      warning.push(`⚠️ *${name}* — ${streak}/3 misses (Warning strike ❌)`);
+    }
+  });
+
+  let msg = `📋 *БРАТВА INACTIVITY & KICK REVIEW* 📋\n\n`;
+  if (critical.length > 0) {
+    msg += `🚨 *CRITICAL: ELIGIBLE FOR IMMEDIATE KICK (3+ STRIKES):*\n${critical.join('\n')}\n\n`;
+  }
+  if (warning.length > 0) {
+    msg += `⚠️ *ON NOTICE (1-2 STRIKES):*\n${warning.join('\n')}\n\n`;
+  }
+  if (critical.length === 0 && warning.length === 0) {
+    msg += `✅ *PERFECT LEAGUE DISCIPLINE!*\nAll active members have 0 strikes. Squad is 100% active!\n\n`;
+  }
+
+  msg += `⚖️ *Official Rule:* 3 missed tournaments in a row = automatic kick.\n🌐 *Full Standings:*\n${WEBSITE_URL}`;
+  return msg;
+}
+
+function generateMvpMessage() {
+  const { pIndex, tournaments } = loadLeagueData();
+  const recentT = (tournaments || []).slice(0, 5);
+
+  const candidates = Object.entries(pIndex).map(([id, data]) => {
+    const name = clean(data.display_name || id);
+    let goalsInRecent = 0;
+    let matchesInRecent = 0;
+
+    recentT.forEach(t => {
+      const match = (t.matches || []).find(m => m.player_id === id);
+      if (match) {
+        goalsInRecent += (match.goals_for || 0);
+        matchesInRecent += 1;
+      }
+    });
+
+    const avgInRecent = matchesInRecent > 0 ? (goalsInRecent / matchesInRecent) : 0;
+    const strikes = data.eligibility_streak?.current_fail_streak || 0;
+
+    return { id, name, goals: goalsInRecent, matches: matchesInRecent, avg: parseFloat(avgInRecent.toFixed(1)), strikes };
+  }).filter(c => c.matches >= 1 && c.strikes === 0).sort((a, b) => b.avg - a.avg || b.goals - a.goals);
+
+  if (candidates.length === 0) {
+    return 'No MVP candidates found in recent tournaments.';
+  }
+
+  const mvp = candidates[0];
+  const runnerUp = candidates[1];
+  const third = candidates[2];
+
+  let msg = `👑 *БРАТВА PLAYER OF THE WEEK (MVP SPOTLIGHT)* 👑\n\n` +
+    `⭐ *MVP:* *${mvp.name}* 🥇\n` +
+    `⚽ Goals: *${mvp.goals}* (${mvp.matches} tournaments, *avg ${mvp.avg}* G/M)\n` +
+    `🎯 Discipline: *100% (0 Strikes)*\n\n` +
+    `🥈 *Runner-Up:* ${runnerUp ? `${runnerUp.name} (${runnerUp.goals}G, avg ${runnerUp.avg})` : '-'}\n` +
+    `🥉 *3rd Place:* ${third ? `${third.name} (${third.goals}G, avg ${third.avg})` : '-'}\n\n` +
+    `⚡ Outstanding performance leading БРАТВА to glory!\n` +
+    `🌐 *Full Player Standings:*\n${WEBSITE_URL}`;
+
+  return msg;
+}
+
+function generateRallyMessage() {
+  return `⚔️ *БРАТВА LEAGUE: TOURNAMENT RALLY!* ⚔️\n\n` +
+    `🛡️ *Бойцы БРАТВА!* Новый турнир стартовал!\n` +
+    `⚽ Обязательно сыграть *3/3* ходов в матче!\n` +
+    `🎯 Планка: *20+ голов*!\n` +
+    `⛔ Пропуск турнира = автоматический страйк (3 страйка = кик)!\n\n` +
+    `----------------------------\n` +
+    `⚔️ *BATTLE CRY / ATTENTION ALL MEMBERS:*\n` +
+    `⚽ All members must complete all 3/3 turns!\n` +
+    `🎯 Minimum target: 20+ goals!\n` +
+    `⛔ No skipped turns — protect our league ranking!\n\n` +
+    `🌐 *Standings & Website:*\n${WEBSITE_URL}`;
+}
+
 /**
  * Handle Extracted AI Result (with incremental stitching & caching)
  */
@@ -617,9 +711,32 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false) {
   if (aiResult.status === 'LIVE') {
     const unplayed = (aiResult.players || []).filter(p => p.turns_played < 3 || p.limit_remaining === '3/3');
     const pLines = unplayed.map(p => `[ ⏳ | ${clean(p.name)} | ${p.turns_played}/3 ]`).join('\n');
-    const liveMsg = `🟢 *LIVE MATCH: vs ${clean(aiResult.opponent_league)}*\nScore: ${aiResult.score_bratva} - ${aiResult.score_opponent}\n\n` +
-      `⛔ *ATTENTION PLEASE:*\n${pLines}\n\n⏳ Match ending soon! Attack 3/3 ASAP!`;
-    await sendTelegramMessage(chatId, liveMsg);
+    const opp = clean(aiResult.opponent_league || 'OPPONENT');
+    const ourG = aiResult.score_bratva || 0;
+    const oppG = aiResult.score_opponent || 0;
+    const timeInfo = clean(aiResult.time_info || 'Live in progress');
+
+    const liveMsg = `🟢 *LIVE MATCH: vs ${opp}*\n` +
+      `⚽ *Score:* ${ourG} - ${oppG}\n` +
+      `⏳ *Timer:* ${timeInfo}\n\n` +
+      `⛔ *ATTENTION PLEASE (UNPLAYED TURNS):*\n${pLines}\n\n` +
+      `⚡ *Action Required:* Jump in and complete your 3/3 turns immediately!\n\n` +
+      `🌐 *Live Tracker:* ${WEBSITE_URL}`;
+
+    latestLiveMessage = liveMsg;
+
+    const liveKeys = {
+      inline_keyboard: [
+        [
+          { text: '📢 Post Live Alert to Channel', callback_data: 'bcast_live' }
+        ],
+        [
+          { text: '🌐 Official League Website', url: WEBSITE_URL }
+        ]
+      ]
+    };
+
+    await sendTelegramMessage(chatId, liveMsg, liveKeys);
     return sendResponse(res, 200, 'OK');
   }
 
@@ -816,6 +933,22 @@ async function processBufferedAlbum(albumId, chatId, res = null) {
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
+      try {
+        const url = new URL(req.url, `https://${req.headers.host || 'bratva-bot.vercel.app'}`);
+        if (url.searchParams.get('cron') === 'daily_rally') {
+          const rallyMsg = generateRallyMessage();
+          await sendTelegramMessage(CHANNEL_ID, rallyMsg);
+          return sendResponse(res, 200, {
+            status: 'success',
+            action: 'daily_rally_broadcast',
+            channel: CHANNEL_ID,
+            timestamp: new Date().toISOString()
+          }, true);
+        }
+      } catch (cronErr) {
+        console.error('Cron error:', cronErr);
+      }
+
       return sendResponse(res, 200, {
         status: 'online',
         bot: 'BratvaFCMBot',
@@ -957,6 +1090,52 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
+      if (data === 'bcast_live') {
+        if (!latestLiveMessage) {
+          await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: 'No active live alert cached.' });
+          return sendResponse(res, 200, 'OK');
+        }
+        await sendTelegramMessage(CHANNEL_ID, latestLiveMessage);
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: '📢 Live alert posted to channel!' });
+        await sendTelegramMessage(chatId, `✅ *Live match alert broadcasted to ${CHANNEL_ID}!*`);
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'bcast_mvp') {
+        if (!latestMvpMessage) {
+          latestMvpMessage = generateMvpMessage();
+        }
+        await sendTelegramMessage(CHANNEL_ID, latestMvpMessage);
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: '👑 MVP spotlight posted!' });
+        await sendTelegramMessage(chatId, `✅ *MVP Spotlight broadcasted to ${CHANNEL_ID}!*`);
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'cmd_mvp') {
+        const mvpMsg = generateMvpMessage();
+        latestMvpMessage = mvpMsg;
+        const mvpKeys = {
+          inline_keyboard: [
+            [
+              { text: '📢 Post MVP to Channel', callback_data: 'bcast_mvp' }
+            ],
+            [
+              { text: '🌐 Official League Website', url: WEBSITE_URL }
+            ]
+          ]
+        };
+        await sendTelegramMessage(chatId, mvpMsg, mvpKeys);
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'cmd_kicklist') {
+        const text = generateKicklistMessage();
+        await sendTelegramMessage(chatId, text, getMainKeyboard());
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
       await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
       return sendResponse(res, 200, 'OK');
     }
@@ -1080,6 +1259,36 @@ export default async function handler(req, res) {
       const recap = formatRecap(t, 'ru');
       const keys = getTabsKeyboard('ru', 0);
       await sendTelegramMessage(chatId, recap, keys);
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/kicklist') || text.startsWith('/flagged')) {
+      const kickMsg = generateKicklistMessage();
+      await sendTelegramMessage(chatId, kickMsg, getMainKeyboard());
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/mvp') || text.startsWith('/totw')) {
+      const mvpMsg = generateMvpMessage();
+      latestMvpMessage = mvpMsg;
+      const mvpKeys = {
+        inline_keyboard: [
+          [
+            { text: '📢 Post MVP to Channel', callback_data: 'bcast_mvp' }
+          ],
+          [
+            { text: '🌐 Official League Website', url: WEBSITE_URL }
+          ]
+        ]
+      };
+      await sendTelegramMessage(chatId, mvpMsg, mvpKeys);
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/rally') || text.startsWith('/remind')) {
+      const rallyMsg = generateRallyMessage();
+      await sendTelegramMessage(CHANNEL_ID, rallyMsg);
+      await sendTelegramMessage(chatId, `📢 *Tournament rally reminder sent to ${CHANNEL_ID}!*`, getMainKeyboard());
       return sendResponse(res, 200, 'OK');
     }
 

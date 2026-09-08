@@ -3,5 +3,11 @@
     "api/webhook.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/webhook?cron=daily_rally",
+      "schedule": "0 18 * * *"
+    }
+  ]
 }
