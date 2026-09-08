@@ -21,7 +21,7 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 const GITHUB_PAT = process.env.GITHUB_PAT;
 const GITHUB_REPO = process.env.GITHUB_REPO || 'fc-bratva/fc-bratva.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
-const WEBSITE_URL = 'https://fc-bratva.github.io/';
+const WEBSITE_URL = process.env.WEBSITE_URL || 'https://fc-bratva.github.io/1/';
 const COMMUNITY_URL = 'https://t.me/addlist/c2IRI0ZsvfEwYzU0';
 
 export const config = {
@@ -446,27 +446,113 @@ CRITICAL GUIDELINES:
   });
 }
 
-function getMainKeyboard() {
+function getMainKeyboard(currentLang = 'ru') {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  const myStatsLabel = currentLang === 'ar' ? '👤 إحصائياتي الشخصية (أرسل اسمك)' :
+                       currentLang === 'es' ? '👤 Mis Estadísticas (Escribe tu Nick)' :
+                       currentLang === 'en' ? '👤 My Stats / Player Card' : '👤 Моя Статистика (Напиши ник)';
+
+  const topLabel = currentLang === 'ar' ? '🏆 الهدافون' :
+                   currentLang === 'es' ? '🏆 Goleadores' :
+                   currentLang === 'en' ? '🏆 Top Scorers' : '🏆 Топ Бомбардиров';
+
+  const recapLabel = currentLang === 'ar' ? '⭐ آخر ملخص' :
+                     currentLang === 'es' ? '⭐ Último Resumen' :
+                     currentLang === 'en' ? '⭐ Last Recap' : '⭐ Последний Матч';
+
+  const mvpLabel = currentLang === 'ar' ? '👑 نجم الأسبوع' :
+                   currentLang === 'es' ? '👑 Jugador MVP' :
+                   currentLang === 'en' ? '👑 MVP Spotlight' : '👑 Лучший Игрок';
+
+  const lineupLabel = currentLang === 'ar' ? '🎯 التشكيلة المثالية' :
+                      currentLang === 'es' ? '🎯 Mejor Alineación' :
+                      currentLang === 'en' ? '🎯 Best Lineup' : '🎯 Основа Лиги';
+
+  const strikesLabel = currentLang === 'ar' ? '⛔ الإنذارات والمقصرون' :
+                       currentLang === 'es' ? '⛔ Strikes y Deudores' :
+                       currentLang === 'en' ? '⛔ Strikes & Debtors' : '⛔ Страйки и Должники';
+
+  const kickLabel = currentLang === 'ar' ? '🚨 مراجعة الاستبعاد' :
+                    currentLang === 'es' ? '🚨 Revisión Expulsión' :
+                    currentLang === 'en' ? '🚨 Kick Review' : '🚨 Кандидаты на Кик';
+
+  const rulesLabel = currentLang === 'ar' ? '📜 القوانين' :
+                     currentLang === 'es' ? '📜 Reglas' :
+                     currentLang === 'en' ? '📜 Rules' : '📜 Правила Лиги';
+
+  const tournLabel = currentLang === 'ar' ? '📊 سجل البطولات' :
+                     currentLang === 'es' ? '📊 Torneos' :
+                     currentLang === 'en' ? '📊 Tournaments' : '📊 Все Турниры';
+
+  const webLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                   currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
+                   currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный Сайт Лиги';
+
   return {
     inline_keyboard: [
       [
-        { text: '🏆 Top Scorers', callback_data: 'cmd_top' },
-        { text: '⭐ Last Recap', callback_data: 'cmd_recap' }
+        { text: ruLabel, callback_data: 'tab_menu_0_ru' },
+        { text: enLabel, callback_data: 'tab_menu_0_en' },
+        { text: arLabel, callback_data: 'tab_menu_0_ar' },
+        { text: esLabel, callback_data: 'tab_menu_0_es' }
       ],
       [
-        { text: '👑 MVP Spotlight', callback_data: 'cmd_mvp' },
-        { text: '🎯 Best Lineup', callback_data: 'cmd_lineup' }
+        { text: myStatsLabel, callback_data: 'cmd_mystats' }
       ],
       [
-        { text: '⛔ Strikes & Debtors', callback_data: 'cmd_strikes' },
-        { text: '🚨 Kick Review', callback_data: 'cmd_kicklist' }
+        { text: topLabel, callback_data: 'cmd_top' },
+        { text: recapLabel, callback_data: 'cmd_recap' }
       ],
       [
-        { text: '📜 Rules', callback_data: 'cmd_rules' },
-        { text: '📊 Tournaments', callback_data: 'cmd_tournaments' }
+        { text: mvpLabel, callback_data: 'cmd_mvp' },
+        { text: lineupLabel, callback_data: 'cmd_lineup' }
       ],
       [
-        { text: '🌐 Official League Website', url: WEBSITE_URL }
+        { text: strikesLabel, callback_data: 'cmd_strikes' },
+        { text: kickLabel, callback_data: 'cmd_kicklist' }
+      ],
+      [
+        { text: rulesLabel, callback_data: 'cmd_rules' },
+        { text: tournLabel, callback_data: 'cmd_tournaments' }
+      ],
+      [
+        { text: webLabel, url: WEBSITE_URL }
+      ]
+    ]
+  };
+}
+
+function getPlayerKeyboard(playerId, currentLang = 'ru') {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  const webLabel = currentLang === 'ar' ? '🌐 عرض الملف التفاعلي في الموقع' :
+                   currentLang === 'es' ? '🌐 Ver Perfil Interactivo en Web' :
+                   currentLang === 'en' ? '🌐 View Full Web Dashboard' : '🌐 Открыть Профиль на Сайте';
+
+  const menuLabel = currentLang === 'ar' ? '📋 العودة للقائمة الرئيسية' :
+                    currentLang === 'es' ? '📋 Menú Principal' :
+                    currentLang === 'en' ? '📋 Back to Menu' : '📋 Главное Меню';
+
+  return {
+    inline_keyboard: [
+      [
+        { text: webLabel, url: `${WEBSITE_URL}?player=${encodeURIComponent(playerId)}` }
+      ],
+      [
+        { text: ruLabel, callback_data: `tab_player_${playerId}_ru` },
+        { text: enLabel, callback_data: `tab_player_${playerId}_en` },
+        { text: arLabel, callback_data: `tab_player_${playerId}_ar` },
+        { text: esLabel, callback_data: `tab_player_${playerId}_es` }
+      ],
+      [
+        { text: menuLabel, callback_data: 'cmd_menu' }
       ]
     ]
   };
@@ -533,7 +619,10 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
     kicklist: 'Kick Review',
     live: 'Live Alert',
     mvp: 'MVP Spotlight',
-    rally: 'Rally Reminder'
+    rally: 'Rally Reminder',
+    mystats: 'Player Search',
+    player: 'Player Profile',
+    menu: 'Main Menu'
   };
   const title = categoryTitles[category] || 'to Channel';
 
@@ -802,38 +891,208 @@ function formatTournaments(lang = 'ru') {
   return `📊 *ПОСЛЕДНИЕ ТУРНИРЫ БРАТВА:*\n\n${lines.join('\n')}\n\n🌐 *Полная история матчей:* ${WEBSITE_URL}`;
 }
 
-function generatePlayerStatsMessage(query) {
-  if (!query || !query.trim()) {
-    return '⚠️ Please specify a player name, e.g.: `/player DOXIBERO1`';
-  }
-  const { pIndex, players } = loadLeagueData();
+function findPlayerByQuery(query) {
+  if (!query || typeof query !== 'string') return null;
   const q = query.trim().toLowerCase();
+  if (q.length < 2) return null;
+  const { pIndex, players } = loadLeagueData();
 
-  const found = players.find(p => {
+  // 1. Exact match by player_id in pIndex
+  if (pIndex[q]) {
+    return {
+      player_id: q,
+      display_name: pIndex[q].display_name || q,
+      ...pIndex[q]
+    };
+  }
+
+  // 2. Exact match in players list
+  const exactPlayer = players.find(p => {
     if (!p) return false;
     const pid = (p.player_id || '').toLowerCase();
     const dname = (p.display_name || '').toLowerCase();
-    const aliases = (p.known_aliases || []).map(a => a.toLowerCase());
-    return pid === q || dname === q || pid.includes(q) || dname.includes(q) || aliases.some(a => a.includes(q));
+    return pid === q || dname === q;
   });
+  if (exactPlayer) return exactPlayer;
 
-  if (!found) {
-    return `❌ Player "${clean(query)}" not found. Try /top to view top players list.\n🌐 ${WEBSITE_URL}`;
+  // 3. Exact match in pIndex by display_name
+  for (const [id, data] of Object.entries(pIndex)) {
+    if ((data.display_name || '').toLowerCase() === q) {
+      return { player_id: id, ...data };
+    }
   }
 
-  const indexData = pIndex[found.player_id] || {};
-  const totalMatches = found.matches ? found.matches.length : (indexData.total_matches || 0);
-  const totalGoals = found.matches ? found.matches.reduce((s, m) => s + (m.goals_for || 0), 0) : (indexData.total_goals || 0);
-  const avg = totalMatches > 0 ? (totalGoals / totalMatches).toFixed(1) : 0;
-  const strikes = indexData.eligibility_streak?.current_fail_streak || 0;
+  // 4. Aliases in players
+  const aliasMatch = players.find(p => {
+    if (!p || !p.known_aliases) return false;
+    return p.known_aliases.some(a => (a || '').toLowerCase() === q);
+  });
+  if (aliasMatch) return aliasMatch;
 
-  return `👤 *PLAYER PROFILE: ${clean(found.display_name)}*\n` +
+  // 5. Substring match (if query is at least 3 chars)
+  if (q.length >= 3) {
+    for (const [id, data] of Object.entries(pIndex)) {
+      const pid = id.toLowerCase();
+      const dname = (data.display_name || '').toLowerCase();
+      if (pid.includes(q) || dname.includes(q)) {
+        return { player_id: id, ...data };
+      }
+    }
+  }
+
+  return null;
+}
+
+function generatePlayerStatsMessage(query, lang = 'ru') {
+  if (!query || !query.trim()) {
+    if (lang === 'ar') return '⚠️ يرجى تحديد اسم اللاعب، مثال: `/player DOXIBERO1`';
+    if (lang === 'es') return '⚠️ Por favor indica el nombre de un jugador, ej: `/player DOXIBERO1`';
+    if (lang === 'en') return '⚠️ Please specify a player name, e.g.: `/player DOXIBERO1`';
+    return '⚠️ Пожалуйста, укажите имя игрока, например: `/player DOXIBERO1`';
+  }
+  const { pIndex, players } = loadLeagueData();
+  const found = findPlayerByQuery(query);
+
+  if (!found) {
+    if (lang === 'ar') return `❌ اللاعب "${clean(query)}" غير موجود في قاعدة بيانات الدوري. جرب /top لعرض قائمة الهدافين.\n🌐 ${WEBSITE_URL}`;
+    if (lang === 'es') return `❌ Jugador "${clean(query)}" no encontrado en la base de datos. Usa /top para ver goleadores.\n🌐 ${WEBSITE_URL}`;
+    if (lang === 'en') return `❌ Player "${clean(query)}" not found in league database. Try /top to view top scorers.\n🌐 ${WEBSITE_URL}`;
+    return `❌ Игрок "${clean(query)}" не найден в базе данных Лиги. Попробуйте /top для списка бомбардиров.\n🌐 ${WEBSITE_URL}`;
+  }
+
+  const pid = found.player_id;
+  const indexData = pIndex[pid] || found;
+  const fullPlayer = players.find(p => p && p.player_id === pid) || found;
+
+  const totalMatches = fullPlayer.matches ? fullPlayer.matches.length : (indexData.total_matches || 0);
+  const totalGoals = fullPlayer.matches ? fullPlayer.matches.reduce((s, m) => s + (m.goals_for || 0), 0) : (indexData.total_goals || 0);
+  const avg = totalMatches > 0 ? (totalGoals / totalMatches).toFixed(1) : (indexData.average_goals || 0);
+  const strikes = indexData.eligibility_streak?.current_fail_streak || 0;
+  const dName = clean(found.display_name || pid);
+  const statusIcon = strikes >= 3 ? '🚨' : (strikes > 0 ? '⚠️' : '✅');
+  const profileUrl = `${WEBSITE_URL}?player=${encodeURIComponent(pid)}`;
+
+  if (lang === 'en') {
+    const statusText = strikes >= 3 ? 'ELIGIBLE FOR KICK (3+ strikes)' : (strikes > 0 ? `Warning (${strikes}/3 strikes)` : 'Active & Safe (0 strikes)');
+    return `👤 *PLAYER PROFILE: ${dName}*\n` +
+      `----------------------------\n` +
+      `⚽ Total Goals: *${totalGoals}*\n` +
+      `🏟️ Tournaments: *${totalMatches}*\n` +
+      `📊 Scoring Average: *${avg} goals/match*\n` +
+      `⛔ Discipline Status: ${statusIcon} *${statusText}*\n\n` +
+      `🌐 *Interactive Profile & Match History:*\n${profileUrl}`;
+  }
+  if (lang === 'ar') {
+    const statusText = strikes >= 3 ? 'مؤهل للاستبعاد (3+ غيابات)' : (strikes > 0 ? `إنذار غياب (${strikes}/3)` : 'نشط ومنضبط (0 غيابات)');
+    return `👤 *الملف الشخصي للاعب: ${dName}*\n` +
+      `----------------------------\n` +
+      `⚽ إجمالي الأهداف: *${totalGoals}*\n` +
+      `🏟️ البطولات الملعوبة: *${totalMatches}*\n` +
+      `📊 المعدل التهديفي: *${avg} هدف/مباراة*\n` +
+      `⛔ حالة الانضباط: ${statusIcon} *${statusText}*\n\n` +
+      `🌐 *الملف التفاعلي وسجل المباريات:*\n${profileUrl}`;
+  }
+  if (lang === 'es') {
+    const statusText = strikes >= 3 ? 'APTO PARA EXPULSIÓN (3+ faltas)' : (strikes > 0 ? `Aviso (${strikes}/3 strikes)` : 'Activo y Seguro (0 faltas)');
+    return `👤 *PERFIL DEL JUGADOR: ${dName}*\n` +
+      `----------------------------\n` +
+      `⚽ Goles Totales: *${totalGoals}*\n` +
+      `🏟️ Torneos Jugados: *${totalMatches}*\n` +
+      `📊 Promedio Goleador: *${avg} goles/partido*\n` +
+      `⛔ Estado de Disciplina: ${statusIcon} *${statusText}*\n\n` +
+      `🌐 *Perfil Interactivo e Historial:*\n${profileUrl}`;
+  }
+
+  const statusText = strikes >= 3 ? 'КАНДИДАТ НА КИК (3+ пропуска)' : (strikes > 0 ? `Предупреждение (${strikes}/3 страйка)` : 'Активен и в норме (0 страйков)');
+  return `👤 *ПРОФИЛЬ ИГРОКА: ${dName}*\n` +
     `----------------------------\n` +
-    `⚽ Total Goals: *${totalGoals}*\n` +
-    `🏟️ Tournaments: *${totalMatches}*\n` +
-    `📊 Average: *${avg} goals/match*\n` +
-    `⛔ Current Strikes: *${strikes}*\n\n` +
-    `🌐 *Full Player Stats:*\n${WEBSITE_URL}`;
+    `⚽ Всего голов: *${totalGoals}*\n` +
+    `🏟️ Турниров сыграно: *${totalMatches}*\n` +
+    `📊 Средняя результативность: *${avg} голов/матч*\n` +
+    `⛔ Дисциплина: ${statusIcon} *${statusText}*\n\n` +
+    `🌐 *Интерактивный профиль и матчи:*\n${profileUrl}`;
+}
+
+function formatWelcome(lang = 'ru') {
+  if (lang === 'en') {
+    return `⚜️ *BRATVA FCM LEAGUE BOT (24/7 Cloud)* ⚜️\n\n` +
+      `📸 *Send tournament screenshots from EA FC Mobile!*\n` +
+      `Upload 4-5 screenshots together as an album!\n` +
+      `I merge all players (#1 to #32), update the live website, and broadcast recaps to the channel!\n\n` +
+      `👥 *Telegram Community (Channel + Group):*\n${COMMUNITY_URL}\n\n` +
+      `💬 *Player Profile / AI Chat:* Type any player name (e.g. \`DOXIBERO1\`) for their instant card, or ask any question!\n\n` +
+      `📋 *Main Menu:* Choose an option below 👇`;
+  }
+  if (lang === 'ar') {
+    return `⚜️ *بوت دوري براتفا FCM LEAGUE (سحابي 24/7)* ⚜️\n\n` +
+      `📸 *أرسل لقطات شاشة (Screenshots) لنتائج بطولة EA FC Mobile!*\n` +
+      `يمكنك إرسال حتى 4-5 لقطات شاشة معاً دفعة واحدة كألبوم!\n` +
+      `سأقوم بدمج جميع اللاعبين (#1 إلى #32)، وتحديث الموقع الرسمي، وبث التقرير في القناة!\n\n` +
+      `👥 *مجتمع تيليجرام (القناة + المجموعة):*\n${COMMUNITY_URL}\n\n` +
+      `💬 *الملف الشخصي / الدردشة:* اكتب اسم أي لاعب (مثل \`DOXIBERO1\`) لعرض بطاقته، أو اسأل أي سؤال!\n\n` +
+      `📋 *القائمة الرئيسية:* اختر من الأزرار أدناه 👇`;
+  }
+  if (lang === 'es') {
+    return `⚜️ *BOT DE LA LIGA BRATVA FCM (Nube 24/7)* ⚜️\n\n` +
+      `📸 *¡Envíame capturas de pantalla del torneo de EA FC Mobile!*\n` +
+      `¡Puedes enviar de 4 a 5 capturas juntas como un álbum!\n` +
+      `¡Uniré a todos los jugadores (#1 al #32), actualizaré la web oficial y publicaré el resumen en el canal!\n\n` +
+      `👥 *Comunidad de Telegram (Canal + Grupo):*\n${COMMUNITY_URL}\n\n` +
+      `💬 *Perfil de Jugador / Chat:* ¡Escribe el nombre de cualquier jugador (ej. \`DOXIBERO1\`) para ver su tarjeta o haz cualquier pregunta!\n\n` +
+      `📋 *Menú Principal:* Elige una opción abajo 👇`;
+  }
+  return `⚜️ *БРАТВА FCM LEAGUE BOT (24/7 Cloud)* ⚜️\n\n` +
+    `📸 *Отправь мне скриншоты турнира из EA FC Mobile!*\n` +
+    `Можешь отправить сразу до 4-5 скриншотов турнира (альбомом)!\n` +
+    `Я объединю всех игроков от 1 до 32, обновлю сайт и отправлю отчет в канал!\n\n` +
+    `👥 *Telegram Сообщество (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
+    `💬 *Профиль игрока / Чат:* Напиши имя игрока (например \`DOXIBERO1\`), чтобы увидеть карточку, или задай любой вопрос!\n\n` +
+    `📋 *Главное меню:* Выберите действие ниже 👇`;
+}
+
+function formatMyStatsPrompt(lang = 'ru') {
+  if (lang === 'en') {
+    return `👤 *PERSONAL PLAYER STATS DASHBOARD* 👤\n\n` +
+      `👉 *How to view your personal performance card:*\n` +
+      `Simply type and send your in-game nickname here in chat (e.g.: \`DOXIBERO1\` or \`/player DOXIBERO1\`)!\n\n` +
+      `📊 You'll get your full stats:\n` +
+      `• Total career goals & tournament count\n` +
+      `• Scoring average per match\n` +
+      `• Strike & discipline status (0/3 Safe or Warning)\n` +
+      `• 1-Tap link to your personal interactive web dashboard!\n\n` +
+      `🌐 *Official League Site:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'ar') {
+    return `👤 *لوحة الإحصائيات الشخصية للاعب* 👤\n\n` +
+      `👉 *كيفية عرض بطاقة أدائك وإحصائياتك الشخصية:*\n` +
+      `أرسل ببساطة اسمك في اللعبة هنا في المحادثة (مثال: \`DOXIBERO1\` أو \`/player DOXIBERO1\`)!\n\n` +
+      `📊 ستحصل فوراً على تقريرك الشامل:\n` +
+      `• إجمالي أهدافك وعدد البطولات التي شاركت فيها\n` +
+      `• معدلك التهديفي في كل مباراة\n` +
+      `• حالة الانضباط والإنذارات (0/3 آمن أو إنذار غياب)\n` +
+      `• رابط مباشر بضغطة واحدة لملفك التفاعلي الكامل في الموقع!\n\n` +
+      `🌐 *الموقع الرسمي للدوري:* ${WEBSITE_URL}`;
+  }
+  if (lang === 'es') {
+    return `👤 *PANEL DE RENDIMIENTO PERSONAL* 👤\n\n` +
+      `👉 *Cómo ver tus estadísticas personales:*\n` +
+      `¡Simplemente escribe tu nombre de jugador aquí en el chat (ejemplo: \`DOXIBERO1\` o \`/player DOXIBERO1\`)!\n\n` +
+      `📊 Recibirás al instante:\n` +
+      `• Total de goles y torneos jugados\n` +
+      `• Promedio goleador por partido\n` +
+      `• Estado de disciplina y strikes (0/3 Seguro o Aviso)\n` +
+      `• Enlace directo a tu panel interactivo en la web!\n\n` +
+      `🌐 *Sitio Oficial de la Liga:* ${WEBSITE_URL}`;
+  }
+  return `👤 *ЛИЧНАЯ СТАТИСТИКА ИГРОКА* 👤\n\n` +
+    `👉 *Как посмотреть свою карточку и результаты:*\n` +
+    `Просто напишите ваш игровой никнейм здесь в чате (например: \`DOXIBERO1\` или \`/player DOXIBERO1\`)!\n\n` +
+    `📊 Бот мгновенно выдаст:\n` +
+    `• Всего забитых голов и сыгранных турниров\n` +
+    `• Средняя результативность за матч\n` +
+    `• Статус страйков (0/3 Безопасно или предупреждение)\n` +
+    `• Прямая ссылка на ваш интерактивный профиль на сайте!\n\n` +
+    `🌐 *Официальный сайт Лиги:* ${WEBSITE_URL}`;
 }
 
 function formatKicklist(lang = 'ru') {
@@ -1514,6 +1773,15 @@ export default async function handler(req, res) {
         } else if (category === 'kicklist') {
           updatedText = formatKicklist(targetLang);
           updatedKeyboard = getLanguageKeyboard('kicklist', '0', targetLang, isCbPrivate);
+        } else if (category === 'menu') {
+          updatedText = formatWelcome(targetLang);
+          updatedKeyboard = getMainKeyboard(targetLang);
+        } else if (category === 'mystats') {
+          updatedText = formatMyStatsPrompt(targetLang);
+          updatedKeyboard = getLanguageKeyboard('mystats', '0', targetLang, false);
+        } else if (category === 'player') {
+          updatedText = generatePlayerStatsMessage(param, targetLang);
+          updatedKeyboard = getPlayerKeyboard(param, targetLang);
         }
 
         if (updatedText) {
@@ -1575,7 +1843,7 @@ export default async function handler(req, res) {
             callback_query_id: cb.id,
             text: `📢 ${catName} posted to channel!`
           });
-          await sendTelegramMessage(chatId, `✅ *${catName} broadcasted to ${CHANNEL_ID} with translation buttons!*`, getMainKeyboard());
+          await sendTelegramMessage(chatId, `✅ *${catName} broadcasted to ${CHANNEL_ID} with translation buttons!*`, getMainKeyboard('ru'));
           return sendResponse(res, 200, 'OK');
         }
       }
@@ -1634,6 +1902,20 @@ export default async function handler(req, res) {
       if (data === 'cmd_kicklist') {
         const text = formatKicklist('ru');
         await sendTelegramMessage(chatId, text, getLanguageKeyboard('kicklist', '0', 'ru', true));
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'cmd_mystats') {
+        const statsPrompt = formatMyStatsPrompt('ru');
+        await sendTelegramMessage(chatId, statsPrompt, getLanguageKeyboard('mystats', '0', 'ru', false));
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'cmd_menu') {
+        const welcome = formatWelcome('ru');
+        await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru'));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -1741,7 +2023,7 @@ export default async function handler(req, res) {
       globalLatestTournament = null;
       const items = await getBufferedPhotos(null, chatId);
       await clearBufferedPhotos(items.map(it => it.commentId));
-      await sendTelegramMessage(chatId, '🧹 *Match cache & screenshot buffer reset!* Ready for fresh screenshots.', getMainKeyboard());
+      await sendTelegramMessage(chatId, '🧹 *Match cache & screenshot buffer reset!* Ready for fresh screenshots.', getMainKeyboard('ru'));
       return sendResponse(res, 200, 'OK');
     }
 
@@ -1772,8 +2054,10 @@ export default async function handler(req, res) {
     if (text.startsWith('/player') || text.startsWith('/stats') || text.startsWith('/p ')) {
       const parts = text.split(/\s+/);
       const query = parts.slice(1).join(' ');
-      const pMsg = generatePlayerStatsMessage(query);
-      await sendTelegramMessage(chatId, pMsg, getMainKeyboard());
+      const matched = findPlayerByQuery(query);
+      const pid = matched ? matched.player_id : query;
+      const pMsg = generatePlayerStatsMessage(query, 'ru');
+      await sendTelegramMessage(chatId, pMsg, getPlayerKeyboard(pid, 'ru'));
       return sendResponse(res, 200, 'OK');
     }
 
@@ -1872,19 +2156,23 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/start') || text.startsWith('/help') || text.startsWith('/menu')) {
-      const welcome = `⚜️ *БРАТВА FCM LEAGUE BOT (24/7 Cloud)* ⚜️\n\n` +
-        `📸 *Отправь мне скриншоты турнира из EA FC Mobile!*\n` +
-        `Можешь отправить сразу до 4-5 скриншотов турнира (альбомом)!\n` +
-        `Я объединю всех игроков от 1 до 32, обновлю сайт и отправлю отчет в канал!\n\n` +
-        `👥 *Telegram Сообщество (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
-        `💬 *AI Chat (Private):* Tqder tsowlni direct hna f chat b Darija, English aw Russian!\n\n` +
-        `📋 *Доступные команды:* Выберите кнопку ниже 👇`;
-
-      await sendTelegramMessage(chatId, welcome, getMainKeyboard());
+      const welcome = formatWelcome('ru');
+      await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru'));
       return sendResponse(res, 200, 'OK');
     }
 
-    // 2.3 Private Chat AI Assistant (Gemini 3.6 Flash) - STRICTLY for private 1-on-1 chat!
+    // 2.3 Private Chat Player Name Lookup (Self-service player performance card)
+    if (isPrivate && text && !text.startsWith('/')) {
+      const matched = findPlayerByQuery(text);
+      if (matched) {
+        const pid = matched.player_id;
+        const pMsg = generatePlayerStatsMessage(pid, 'ru');
+        await sendTelegramMessage(chatId, pMsg, getPlayerKeyboard(pid, 'ru'));
+        return sendResponse(res, 200, 'OK');
+      }
+    }
+
+    // 2.4 Private Chat AI Assistant (Gemini 3.6 Flash) - STRICTLY for private 1-on-1 chat!
     if (isPrivate && text) {
       await telegramRequest('sendChatAction', { chat_id: chatId, action: 'typing' });
       try {
@@ -1893,7 +2181,7 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       } catch (chatErr) {
         console.error('Gemini private chat error:', chatErr);
-        await sendTelegramMessage(chatId, `🤖 *AI Assistant:* Samhliya, wqe3 mochkil sghir. Jreb 3awed sewelni!`, getMainKeyboard());
+        await sendTelegramMessage(chatId, `🤖 *AI Assistant:* Samhliya, wqe3 mochkil sghir. Jreb 3awed sewelni!`, getMainKeyboard('ru'));
         return sendResponse(res, 200, 'OK');
       }
     }

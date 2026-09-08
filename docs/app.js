@@ -1306,6 +1306,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await loadData();
   renderAll();
+
+  // Handle URL query deep link: ?player=doxibero1 or ?tab=members
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const playerParam = urlParams.get('player');
+    const tabParam = urlParams.get('tab');
+    if (tabParam) {
+      switchTab(tabParam);
+    }
+    if (playerParam && state.players) {
+      const q = playerParam.trim().toLowerCase();
+      const targetPlayer = state.players.find(p => 
+        (p.player_id && p.player_id.toLowerCase() === q) || 
+        (p.display_name && p.display_name.toLowerCase() === q)
+      );
+      if (targetPlayer) {
+        switchTab('members');
+        setTimeout(() => openPlayerModal(targetPlayer.player_id), 120);
+      }
+    }
+  } catch (e) {
+    console.warn('URL deep link error:', e);
+  }
 });
 
 // --- Language Selector ---
