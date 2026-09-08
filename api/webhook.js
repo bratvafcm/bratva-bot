@@ -661,6 +661,7 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
     rally: 'Rally Reminder',
     mystats: 'Player Search',
     player: 'Player Profile',
+    welcome: 'Welcome Notice',
     menu: 'Main Menu'
   };
   const title = categoryTitles[category] || 'to Channel';
@@ -678,6 +679,12 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
     { text: arLabel, callback_data: `tab_${category}_${param}_ar` },
     { text: esLabel, callback_data: `tab_${category}_${param}_es` }
   ]);
+
+  if (category === 'welcome') {
+    rows.push([
+      { text: '💬 Join Discussion Chat / Чат группы', url: COMMUNITY_URL }
+    ]);
+  }
 
   rows.push([
     { text: '🌐 Open Official League Website', url: WEBSITE_URL }
@@ -1087,6 +1094,43 @@ function formatWelcome(lang = 'ru') {
     `👥 *Telegram Сообщество (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
     `💬 *Профиль игрока / Чат:* Напиши имя игрока (например \`DOXIBERO1\`), чтобы увидеть карточку, или задай любой вопрос!\n\n` +
     `📋 *Главное меню:* Выберите действие ниже 👇`;
+}
+
+function formatChannelWelcome(lang = 'ru') {
+  if (lang === 'en') {
+    return `⚜️ *WELCOME TO BRATVA FCM!* ⚜️\n\n` +
+      `Welcome to our official league community!\n\n` +
+      `📌 *Key info for all members:*\n` +
+      `• Daily tournament lineups, match recaps, and announcements are published here.\n` +
+      `• Every player's performance (goals, turns played, career stats) is tracked live on our website.\n` +
+      `• Make sure you join our squad discussion chat to coordinate tactics and match turns!\n\n` +
+      `⚔️ *Standard rule:* Stay active, complete all 3/3 turns in every match, and let's keep winning together! ⚽`;
+  }
+  if (lang === 'ar') {
+    return `⚜️ *مرحباً بكم في دوري БРАТВА FCM!* ⚜️\n\n` +
+      `أهلاً وسهلاً بجميع الأعضاء في قناتنا الرسمية!\n\n` +
+      `📌 *معلومات أساسية لكل لاعب:*\n` +
+      `• هنا ننشر يومياً تشكيلات البطولات، نتائج المباريات، وجميع إعلانات الفريق.\n` +
+      `• إحصائيات كل لاعب (الأهداف، المحاولات، السجل الكامل) موثقة بشكل مباشر على موقعنا الرسمي.\n` +
+      `• انضموا لمجموعة النقاش الخاصة بالتشكيلة لتنسيق الهجمات، الخطط والتواصل مع الفريق!\n\n` +
+      `⚔️ *القانون الأساسي:* الالتزام التام، لعب 3/3 محاولات دائماً في كل بطولة، والقتال من أجل الفوز معاً! ⚽`;
+  }
+  if (lang === 'es') {
+    return `⚜️ *¡BIENVENIDOS A BRATVA FCM!* ⚜️\n\n` +
+      `¡Bienvenidos a todos los miembros al canal oficial de nuestra liga!\n\n` +
+      `📌 *Información clave del equipo:*\n` +
+      `• Aquí publicamos a diario las alineaciones, resultados de torneos y avisos oficiales.\n` +
+      `• Las estadísticas de cada jugador (goles, turnos jugados, historial) se actualizan en vivo en nuestra web oficial.\n` +
+      `• Uníos al grupo de debate de la plantilla para coordinar tácticas, turnos y comunicaros con el equipo.\n\n` +
+      `⚔️ *Regla fundamental:* Máximo compromiso, jugar siempre los 3/3 turnos y ganar juntos! ⚽`;
+  }
+  return `⚜️ *ДОБРО ПОЖАЛОВАТЬ В БРАТВА FCM!* ⚜️\n\n` +
+    `Приветствуем всех участников в нашем официальном канале!\n\n` +
+    `📌 *Главное о нашей лиге:*\n` +
+    `• Здесь ежедневно выходят составы на турниры, результаты матчей и важные объявления.\n` +
+    `• Вся статистика каждого игрока (голы, сыгранные ходы, рекорды) ведется в реальном времени на нашем сайте.\n` +
+    `• Обязательно вступайте в наш чат обсуждений — там мы обсуждаем тактику, составы и координируем ходы!\n\n` +
+    `⚔️ *Правило простое:* Играем ответственно, всегда забираем свои 3/3 ходов и побеждаем вместе! ⚽`;
 }
 
 function formatMyStatsPrompt(lang = 'ru') {
@@ -1657,6 +1701,18 @@ export default async function handler(req, res) {
             timestamp: new Date().toISOString()
           }, true);
         }
+        if (url.searchParams.get('action') === 'broadcast_welcome') {
+          const wText = formatChannelWelcome('ru');
+          const wKeys = getLanguageKeyboard('welcome', '0', 'ru', false);
+          const bRes = await sendTelegramMessage(CHANNEL_ID, wText, wKeys);
+          return sendResponse(res, 200, {
+            status: 'success',
+            action: 'broadcast_welcome',
+            channel: CHANNEL_ID,
+            result: bRes,
+            timestamp: new Date().toISOString()
+          }, true);
+        }
       } catch (cronErr) {
         console.error('Cron error:', cronErr);
       }
@@ -1833,6 +1889,9 @@ export default async function handler(req, res) {
         } else if (category === 'mystats') {
           updatedText = formatMyStatsPrompt(targetLang);
           updatedKeyboard = getLanguageKeyboard('mystats', '0', targetLang, false);
+        } else if (category === 'welcome') {
+          updatedText = formatChannelWelcome(targetLang);
+          updatedKeyboard = getLanguageKeyboard('welcome', '0', targetLang, false);
         } else if (category === 'player') {
           updatedText = generatePlayerStatsMessage(param, targetLang);
           updatedKeyboard = getPlayerKeyboard(param, targetLang);
@@ -1888,6 +1947,9 @@ export default async function handler(req, res) {
         } else if (cat === 'rally') {
           bcastText = formatRally('ru');
           catName = 'Rally Reminder';
+        } else if (cat === 'welcome') {
+          bcastText = formatChannelWelcome('ru');
+          catName = 'Official Welcome Notice';
         }
 
         if (bcastText) {
@@ -2204,6 +2266,13 @@ export default async function handler(req, res) {
 
       const successKeys = getLanguageKeyboard('rules', '0', 'ru', true);
       await sendTelegramMessage(chatId, successMsg, successKeys);
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/welcome') || text.startsWith('/intro')) {
+      const wText = formatChannelWelcome('ru');
+      const wKeys = getLanguageKeyboard('welcome', '0', 'ru', true);
+      await sendTelegramMessage(chatId, wText, wKeys);
       return sendResponse(res, 200, 'OK');
     }
 
