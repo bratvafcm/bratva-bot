@@ -863,6 +863,9 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
 
   if (category === 'welcome') {
     rows.push([
+      { text: '🤖 Регистрация в боте / Register in Bot', url: 'https://t.me/BratvaFCMBot?start=register' }
+    ]);
+    rows.push([
       { text: '💬 Join Discussion Chat / Чат группы', url: COMMUNITY_URL }
     ]);
   }
@@ -3635,11 +3638,57 @@ export default async function handler(req, res) {
     const isPrivate = !message.chat || message.chat.type === 'private';
     const text = (message.text || '').trim();
 
-    // Strict Policy: The bot ONLY operates in 1-on-1 private DMs with users.
-    // In ALL groups/supergroups (Discussion groups, team chats), the bot is 100% MUTED.
-    // Zero commands, zero replies, zero photo processing in groups.
+    // Group Policy: The bot is muted in groups, EXCEPT for automatically guiding new members to the bot!
     if (!isPrivate) {
-      return sendResponse(res, 200, 'All group messages strictly ignored');
+      // 1. Automatic Group Onboarding: When new members join the group, greet them with direct bot registration link!
+      if (message.new_chat_members && Array.isArray(message.new_chat_members) && message.new_chat_members.length > 0) {
+        const humanMembers = message.new_chat_members.filter(u => !u.is_bot);
+        if (humanMembers.length > 0) {
+          const names = humanMembers.map(u => bidiIsolate(u.first_name || u.username || 'Member')).join(', ');
+          const welcomeGroupMsg = `👋 *Добро пожаловать / Welcome ${names} to БРАТВА FCM!* ⚜️\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n` +
+            `⚠️ *ОБЯЗАТЕЛЬНАЯ РЕГИСТРАЦИЯ (3 ДНЯ) / MANDATORY (3 DAYS):*\n` +
+            `Каждый игрок обязан зарегистрироваться в боте в течение 3 дней, чтобы участвовать в турнирах и избежать кика!\n` +
+            `Each player must register with the bot within 3 days to participate in tournaments and avoid removal.\n` +
+            `────────────────────\n` +
+            `👉 *Нажмите кнопку ниже, чтобы открыть бота и отправить свой ник:*`;
+
+          const groupKeys = {
+            inline_keyboard: [
+              [
+                { text: '🤖 Регистрация в боте / Register in Bot', url: 'https://t.me/BratvaFCMBot?start=register' }
+              ],
+              [
+                { text: '📜 Правила лиги / League Rules', url: 'https://t.me/BratvaFCMBot?start=rules' }
+              ],
+              [
+                { text: '🌐 Официальный сайт лиги', url: WEBSITE_URL }
+              ]
+            ]
+          };
+
+          // Auto-delete Telegram's service message "User joined the group" to keep chat clean
+          deleteTelegramMessage(chatId, message.message_id).catch(() => {});
+
+          await sendTelegramMessage(chatId, welcomeGroupMsg, groupKeys);
+          return sendResponse(res, 200, 'Group new members welcomed with bot link');
+        }
+      }
+
+      // 2. Helpful 1-line guidance if someone asks for bot in group
+      if (text.startsWith('/register') || text.startsWith('/bot') || text === '/start') {
+        const replyText = `🤖 *БРАТВА FCM Official Bot:* [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+          `👉 [Нажмите сюда / Click here to open bot](https://t.me/BratvaFCMBot?start=register) to verify your in-game name!`;
+        const replyKeys = {
+          inline_keyboard: [
+            [{ text: '🤖 Открыть бота / Open Bot', url: 'https://t.me/BratvaFCMBot?start=register' }]
+          ]
+        };
+        await sendTelegramMessage(chatId, replyText, replyKeys);
+        return sendResponse(res, 200, 'Group bot link sent');
+      }
+
+      return sendResponse(res, 200, 'All other group messages strictly ignored');
     }
 
     // 🔒 Admin Security Gate: Players have NO access to the bot.
@@ -3775,8 +3824,13 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'Already registered');
       }
 
-      // 5. New / Unregistered Player -> Show multilingual verification prompt
-      if (!text || text === '/start' || text === '/help' || text === '/verify') {
+      // 5. New / Unregistered Player -> Show multilingual verification prompt (or rules if deep-linked)
+      if (!text || text.startsWith('/start') || text.startsWith('/help') || text.startsWith('/verify')) {
+        if (text.includes('rules')) {
+          const rulesMsg = formatRules('ru');
+          await sendTelegramMessage(chatId, rulesMsg, getLanguageKeyboard('rules', '0', 'ru', false));
+          return sendResponse(res, 200, 'OK');
+        }
         const vPrompt = formatVerificationPrompt('ru');
         const vKeys = getVerificationKeyboard('ru');
         await sendTelegramMessage(chatId, vPrompt, vKeys);
