@@ -616,6 +616,10 @@ function getMainKeyboard(currentLang = 'ru') {
                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный Сайт Лиги';
 
+  const auditLabel = currentLang === 'ar' ? '👥 تدقيق تيليجرام (مهلة 3 أيام)' :
+                     currentLang === 'es' ? '👥 Auditoría Telegram (Plazo 3 Días)' :
+                     currentLang === 'en' ? '👥 Telegram Audit (3-Day Kick Tracker)' : '👥 Аудит Telegram (Контроль 3 дня)';
+
   return {
     inline_keyboard: [
       [
@@ -647,13 +651,83 @@ function getMainKeyboard(currentLang = 'ru') {
         { text: tournLabel, callback_data: 'cmd_tournaments' }
       ],
       [
-        { text: '👥 Telegram Audit (3-Day Kick Tracker)', callback_data: 'cmd_pending' }
+        { text: auditLabel, callback_data: 'cmd_pending' }
       ],
       [
         { text: webLabel, url: WEBSITE_URL }
       ]
     ]
   };
+}
+
+async function syncBotCommands() {
+  const commandsEn = [
+    { command: 'start', description: '⚜️ Main Menu (Dashboard)' },
+    { command: 'mystats', description: '👤 My Stats & Player Card' },
+    { command: 'checkin', description: '⚔️ Pre-Match Check-In (Ready)' },
+    { command: 'lineup', description: '🎯 Smart Lineup (Best 16)' },
+    { command: 'top', description: '🏆 Top Scorers Leaderboard' },
+    { command: 'recap', description: '⭐ Last Match Recap' },
+    { command: 'mvp', description: '👑 MVP Player of the Week' },
+    { command: 'rules', description: '📜 Official Rules (IMPORTANT)' },
+    { command: 'strikes', description: '⛔ Strikes & Debtors List' },
+    { command: 'kicklist', description: '🚨 Kick Review (At Risk)' },
+    { command: 'tournaments', description: '📊 Tournaments History' },
+    { command: 'audit', description: '👥 Telegram Audit (3-Day Kick)' }
+  ];
+
+  const commandsRu = [
+    { command: 'start', description: '⚜️ Главное меню / На главную' },
+    { command: 'mystats', description: '👤 Моя статистика и карточка' },
+    { command: 'checkin', description: '⚔️ Предматчевый сбор (Чек-ин)' },
+    { command: 'lineup', description: '🎯 Состав основы (Топ-16)' },
+    { command: 'top', description: '🏆 Топ бомбардиров лиги' },
+    { command: 'recap', description: '⭐ Последний матч / Итоги' },
+    { command: 'mvp', description: '👑 Лучший игрок недели (MVP)' },
+    { command: 'rules', description: '📜 Правила лиги (ВАЖНО)' },
+    { command: 'strikes', description: '⛔ Страйки и должники' },
+    { command: 'kicklist', description: '🚨 Кандидаты на кик' },
+    { command: 'tournaments', description: '📊 Все турниры лиги' },
+    { command: 'audit', description: '👥 Аудит Telegram (Контроль 3 дня)' }
+  ];
+
+  const commandsAr = [
+    { command: 'start', description: '⚜️ القائمة الرئيسية' },
+    { command: 'mystats', description: '👤 إحصائياتي وبطاقتي الشخصية' },
+    { command: 'checkin', description: '⚔️ تأكيد الجاهزية (Check-In)' },
+    { command: 'lineup', description: '🎯 التشكيلة الأساسية الذكية' },
+    { command: 'top', description: '🏆 قائمة هدافي الدوري' },
+    { command: 'recap', description: '⭐ ملخص آخر مباراة' },
+    { command: 'mvp', description: '👑 أفضل لاعب في الأسبوع (MVP)' },
+    { command: 'rules', description: '📜 قوانين الدوري (هام جداً)' },
+    { command: 'strikes', description: '⛔ سجل الإنذارات والمقصرين' },
+    { command: 'kicklist', description: '🚨 مراجعة المستبعدين من الدوري' },
+    { command: 'tournaments', description: '📊 سجل بطولات الدوري' },
+    { command: 'audit', description: '👥 تدقيق أعضاء تيليجرام (مهلة 3 أيام)' }
+  ];
+
+  const commandsEs = [
+    { command: 'start', description: '⚜️ Menú Principal (Inicio)' },
+    { command: 'mystats', description: '👤 Mis Estadísticas y Tarjeta' },
+    { command: 'checkin', description: '⚔️ Check-In Pre-Partido (Listo)' },
+    { command: 'lineup', description: '🎯 Alineación Titular Inteligente' },
+    { command: 'top', description: '🏆 Tabla de Máximos Goleadores' },
+    { command: 'recap', description: '⭐ Último Resumen del Partido' },
+    { command: 'mvp', description: '👑 Jugador MVP de la Semana' },
+    { command: 'rules', description: '📜 Reglas Oficiales (IMPORTANTE)' },
+    { command: 'strikes', description: '⛔ Lista de Strikes y Deudores' },
+    { command: 'kicklist', description: '🚨 Candidatos a Expulsión' },
+    { command: 'tournaments', description: '📊 Historial de Torneos' },
+    { command: 'audit', description: '👥 Auditoría Telegram (Plazo 3 Días)' }
+  ];
+
+  const resDef = await telegramRequest('setMyCommands', { commands: commandsEn });
+  const resEn = await telegramRequest('setMyCommands', { commands: commandsEn, language_code: 'en' });
+  const resRu = await telegramRequest('setMyCommands', { commands: commandsRu, language_code: 'ru' });
+  const resAr = await telegramRequest('setMyCommands', { commands: commandsAr, language_code: 'ar' });
+  const resEs = await telegramRequest('setMyCommands', { commands: commandsEs, language_code: 'es' });
+
+  return { default: resDef, en: resEn, ru: resRu, ar: resAr, es: resEs };
 }
 
 function getPlayerKeyboard(playerId, currentLang = 'ru') {
@@ -1177,6 +1251,8 @@ async function evaluateAllSquadStrikes() {
     const isLeadership = ['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1'].includes(id.toLowerCase()) ||
       Boolean(regData && regData.registrations && regData.registrations[id] && (regData.registrations[id].is_admin || regData.registrations[id].is_owner || regData.registrations[id].role === 'Owner' || regData.registrations[id].role === 'Admin'));
 
+    const strikeKick = strikesCount >= (rules.maxMissesKick || 3);
+    const consecutiveKick = consecutive0 >= 2;
     const isEligibleForKick = !isExcused && !isLeadership && (consecutiveKick || strikeKick);
 
     const isTelegramVerified = Boolean(isLeadership || (regData && regData.registrations && regData.registrations[id]));
@@ -2371,17 +2447,40 @@ async function formatPendingAudit(lang = 'ru') {
   return msg;
 }
 
-function getPendingKeyboard() {
+function getPendingKeyboard(currentLang = 'ru') {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  const refreshLabel = currentLang === 'ar' ? '🔄 تحديث التدقيق مباشر' :
+                       currentLang === 'es' ? '🔄 Actualizar Auditoría' :
+                       currentLang === 'en' ? '🔄 Refresh Audit Live' : '🔄 Обновить аудит live';
+
+  const bcastLabel = currentLang === 'ar' ? '📢 نشر التنبيه بالقناة' :
+                     currentLang === 'es' ? '📢 Publicar en el Canal' :
+                     currentLang === 'en' ? '📢 Broadcast Notice to Channel' : '📢 Опубликовать в канал';
+
+  const menuLabel = currentLang === 'ar' ? '📋 العودة للقائمة' :
+                    currentLang === 'es' ? '📋 Volver al Menú' :
+                    currentLang === 'en' ? '📋 Back to Menu' : '📋 На главную';
+
   return {
     inline_keyboard: [
       [
-        { text: '🔄 Refresh Audit Live', callback_data: 'cmd_pending' }
+        { text: ruLabel, callback_data: 'tab_audit_0_ru' },
+        { text: enLabel, callback_data: 'tab_audit_0_en' },
+        { text: arLabel, callback_data: 'tab_audit_0_ar' },
+        { text: esLabel, callback_data: 'tab_audit_0_es' }
       ],
       [
-        { text: '📢 Broadcast Welcome to Channel', callback_data: 'bcast_welcome' }
+        { text: refreshLabel, callback_data: 'cmd_pending' }
       ],
       [
-        { text: '📋 Back to Admin Menu', callback_data: 'cmd_menu' }
+        { text: bcastLabel, callback_data: 'bcast_welcome' }
+      ],
+      [
+        { text: menuLabel, callback_data: 'cmd_menu' }
       ]
     ]
   };
@@ -3121,6 +3220,16 @@ export default async function handler(req, res) {
           }, true);
         }
 
+        if (url.searchParams.get('action') === 'sync_commands') {
+          const syncRes = await syncBotCommands();
+          return sendResponse(res, 200, {
+            status: 'success',
+            action: 'sync_commands',
+            result: syncRes,
+            timestamp: new Date().toISOString()
+          }, true);
+        }
+
         if (url.searchParams.get('test_gemini') || url.searchParams.get('list_models')) {
           if (url.searchParams.get('list_models') || url.searchParams.get('test_gemini') === 'list') {
             const listRes = await new Promise((resolve) => {
@@ -3339,7 +3448,7 @@ export default async function handler(req, res) {
       const isPublicAction = data.startsWith('tab_') || data.startsWith('ci_') || data.startsWith('fmt_lineup_') ||
                              data === 'cmd_rules' || data === 'cmd_top' || data === 'cmd_lineup' || data === 'cmd_checkin' ||
                              data === 'cmd_recap' || data === 'cmd_mvp' || data === 'cmd_tournaments' || data === 'cmd_mystats' ||
-                             data === 'cmd_strikes' || data === 'cmd_kicklist' || data === 'cmd_menu';
+                             data === 'cmd_strikes' || data === 'cmd_kicklist' || data === 'cmd_menu' || data === 'cmd_pending';
 
       // If clicked inside a channel or group, allow in-place translation tabs (tab_) and check-in buttons (ci_)
       if (!isCbPrivate && !data.startsWith('tab_') && !data.startsWith('ci_')) {
@@ -3455,6 +3564,9 @@ export default async function handler(req, res) {
         } else if (category === 'mystats') {
           updatedText = formatMyStatsPrompt(targetLang);
           updatedKeyboard = getLanguageKeyboard('mystats', '0', targetLang, false);
+        } else if (category === 'audit' || category === 'pending') {
+          updatedText = await formatPendingAudit(targetLang);
+          updatedKeyboard = getPendingKeyboard(targetLang);
         } else if (category === 'welcome') {
           updatedText = formatChannelWelcome(targetLang);
           updatedKeyboard = getLanguageKeyboard('welcome', '0', targetLang, false);
@@ -3870,7 +3982,7 @@ export default async function handler(req, res) {
 
       if (data === 'cmd_pending') {
         const auditMsg = await formatPendingAudit('ru');
-        await sendTelegramMessage(chatId, auditMsg, getPendingKeyboard());
+        await sendTelegramMessage(chatId, auditMsg, getPendingKeyboard('ru'));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: 'Audit updated!' });
         return sendResponse(res, 200, 'OK');
       }
@@ -3926,8 +4038,20 @@ export default async function handler(req, res) {
       }
 
       if (data === 'cmd_mystats') {
-        const statsPrompt = formatMyStatsPrompt('ru');
-        await sendTelegramMessage(chatId, statsPrompt, getLanguageKeyboard('mystats', '0', 'ru', false));
+        const userId = cb.from ? cb.from.id : chatId;
+        const regData = await getRegisteredPlayers();
+        const userReg = Object.values(regData.registrations || {}).find(r =>
+          String(r.telegram_id) === String(userId) ||
+          (cb.from && cb.from.username && r.telegram_username && r.telegram_username.toLowerCase() === cb.from.username.toLowerCase())
+        );
+        if (userReg) {
+          const pid = userReg.player_id;
+          const statsMsg = generatePlayerStatsMessage(pid, 'ru');
+          await sendTelegramMessage(chatId, statsMsg, getPlayerKeyboard(pid, 'ru'));
+        } else {
+          const statsPrompt = formatMyStatsPrompt('ru');
+          await sendTelegramMessage(chatId, statsPrompt, getLanguageKeyboard('mystats', '0', 'ru', false));
+        }
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -4347,13 +4471,40 @@ export default async function handler(req, res) {
       return sendResponse(res, 200, 'OK');
     }
 
-    if (text.startsWith('/player') || text.startsWith('/stats') || text.startsWith('/p ')) {
+    if (text.startsWith('/mystats') || text.startsWith('/my') || text.startsWith('/me') || text.startsWith('/card') || text.startsWith('/player') || text.startsWith('/stats') || text.startsWith('/p ')) {
       const parts = text.split(/\s+/);
-      const query = parts.slice(1).join(' ');
-      const matched = findPlayerByQuery(query);
-      const pid = matched ? matched.player_id : query;
-      const pMsg = generatePlayerStatsMessage(query, 'ru');
-      await sendTelegramMessage(chatId, pMsg, getPlayerKeyboard(pid, 'ru'));
+      const query = parts.slice(1).join(' ').trim();
+      let pid = '';
+
+      if (query) {
+        const matched = findPlayerByQuery(query);
+        pid = matched ? matched.player_id : query;
+      } else {
+        // No query passed: resolve sender's registered player card
+        const regData = await getRegisteredPlayers();
+        const userReg = Object.values(regData.registrations || {}).find(r =>
+          String(r.telegram_id) === String(userId) ||
+          (message.from && message.from.username && r.telegram_username && r.telegram_username.toLowerCase() === message.from.username.toLowerCase())
+        );
+        if (userReg) {
+          pid = userReg.player_id;
+        }
+      }
+
+      if (pid) {
+        const pMsg = generatePlayerStatsMessage(pid, 'ru');
+        await sendTelegramMessage(chatId, pMsg, getPlayerKeyboard(pid, 'ru'));
+        return sendResponse(res, 200, 'OK');
+      } else {
+        const statsPrompt = formatMyStatsPrompt('ru');
+        await sendTelegramMessage(chatId, statsPrompt, getLanguageKeyboard('mystats', '0', 'ru', false));
+        return sendResponse(res, 200, 'OK');
+      }
+    }
+
+    if (text === '/sync' || text === '/setcommands' || text === '/synccommands') {
+      const syncRes = await syncBotCommands();
+      await sendTelegramMessage(chatId, `✅ *Telegram Bot Menu Commands synced successfully across RU, EN, AR, ES!*`, getMainKeyboard('ru'));
       return sendResponse(res, 200, 'OK');
     }
 
