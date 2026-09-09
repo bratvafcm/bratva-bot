@@ -3871,14 +3871,9 @@ export default async function handler(req, res) {
       try {
         const url = new URL(req.url, `https://${req.headers.host || 'bratva-bot.vercel.app'}`);
         if (url.searchParams.get('cron') === 'daily_rally') {
-          const rallyMsg = formatRally('ru');
-          const rallyKeys = getLanguageKeyboard('rally', '0', 'ru');
-          await sendTelegramMessage(CHANNEL_ID, rallyMsg, rallyKeys);
           return sendResponse(res, 200, {
-            status: 'success',
-            action: 'daily_rally_broadcast',
-            channel: CHANNEL_ID,
-            timestamp: new Date().toISOString()
+            status: 'ignored',
+            message: 'Daily rally cron is deprecated. Rally is dispatched upon lineup validation.'
           }, true);
         }
         if (url.searchParams.get('action') === 'broadcast_welcome') {
@@ -4330,6 +4325,11 @@ export default async function handler(req, res) {
 
           await sendTelegramMessage(CHANNEL_ID, bcastText, channelKeyboard);
 
+          // Post Tournament Rally / Battle Alert right after the Lineup is validated & posted!
+          const rallyText = formatRally('ru');
+          const rallyKeyboard = getLanguageKeyboard('rally', '0', 'ru', false);
+          await sendTelegramMessage(CHANNEL_ID, rallyText, rallyKeyboard);
+
           // Dispatch direct personal DM notifications to all verified players (starters & bench)
           try {
             await notifyVerifiedPlayersLineup(lineupData);
@@ -4339,9 +4339,9 @@ export default async function handler(req, res) {
 
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
-            text: `📢 ${size}v${size} Lineup posted to channel!`
+            text: `📢 ${size}v${size} Lineup & Rally posted to channel!`
           });
-          await sendTelegramMessage(chatId, `✅ *${size}v${size} Starting Lineup posted to ${CHANNEL_ID}!*`, getMainKeyboard('ru'));
+          await sendTelegramMessage(chatId, `✅ *${size}v${size} Starting Lineup & Tournament Rally posted to ${CHANNEL_ID}!*`, getMainKeyboard('ru'));
           return sendResponse(res, 200, 'OK');
         } else if (cat === 'checkin') {
           // Check prerequisite first!
