@@ -3059,6 +3059,30 @@ export default async function handler(req, res) {
             timestamp: new Date().toISOString()
           }, true);
         }
+
+        if (url.searchParams.get('test_gemini')) {
+          const modelToTest = url.searchParams.get('model') || GEMINI_MODEL || 'gemini-2.5-flash';
+          const testRes = await new Promise((resolve) => {
+            const payload = JSON.stringify({ contents: [{ parts: [{ text: 'Respond strictly with JSON: {"status": "ok"}' }] }] });
+            const reqGem = https.request({
+              hostname: 'generativelanguage.googleapis.com',
+              path: `/v1beta/models/${modelToTest}:generateContent?key=${GEMINI_KEY}`,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(payload)
+              }
+            }, resG => {
+              let d = '';
+              resG.on('data', c => d += c);
+              resG.on('end', () => resolve({ status: resG.statusCode, body: d }));
+            });
+            reqGem.on('error', err => resolve({ error: err.message }));
+            reqGem.write(payload);
+            reqGem.end();
+          });
+          return sendResponse(res, 200, { tested_model: modelToTest, response: testRes }, true);
+        }
       } catch (cronErr) {
         console.error('Cron error:', cronErr);
       }
