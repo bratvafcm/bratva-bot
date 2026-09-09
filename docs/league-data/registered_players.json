@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-09T07:51:50.282Z",
+  "lastUpdated": "2026-09-09T17:08:06.571Z",
   "registrations": {
     "doxibero1": {
       "player_id": "doxibero1",
@@ -89,6 +89,17 @@
       "telegram_name": "L1on⚡🏆",
       "is_new_member": true,
       "registered_at": "2026-09-09T07:51:50.282Z"
+    },
+    "mohamed_osama": {
+      "player_id": "mohamed_osama",
+      "display_name": "Mohamed_Osama",
+      "in_game_name": "Mohamed_Osama",
+      "uid": null,
+      "telegram_id": 1464683050,
+      "telegram_username": "MohamedOsama4",
+      "telegram_name": "محمد أسامه",
+      "is_new_member": false,
+      "registered_at": "2026-09-09T17:08:06.571Z"
     }
   },
   "current_checkin": {
