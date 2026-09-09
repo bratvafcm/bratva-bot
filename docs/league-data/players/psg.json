@@ -62,6 +62,18 @@
       "turns_played": 0,
       "player_display_name": "PSG",
       "player_id": "psg"
+    },
+    {
+      "tournament_id": "2026-09-09_zbirna_ukrainy",
+      "match_index_in_tournament": 1,
+      "opponent_display_name": "Збірна України™",
+      "opponent_id": "zbirna_ukrainy",
+      "goals_for": 21,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "PSG",
+      "player_id": "psg"
     }
   ],
   "eligibility_streak": {

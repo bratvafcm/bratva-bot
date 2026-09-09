@@ -50,6 +50,18 @@
       "turns_played": 2,
       "player_display_name": "Real",
       "player_id": "real"
+    },
+    {
+      "tournament_id": "2026-09-09_zbirna_ukrainy",
+      "match_index_in_tournament": 11,
+      "opponent_display_name": "Збірна України™",
+      "opponent_id": "zbirna_ukrainy",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Real",
+      "player_id": "real"
     }
   ]
 }

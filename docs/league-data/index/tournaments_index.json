@@ -108,5 +108,13 @@
     "opponent_total_goals": 220,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-09-09_zbirna_ukrainy": {
+    "date": "2026-09-09",
+    "opponent_league": "Збірна України™",
+    "our_total_goals": 207,
+    "opponent_total_goals": 394,
+    "result": "loss",
+    "status": "complete"
   }
 }

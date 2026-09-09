@@ -62,12 +62,12 @@
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
     "total_goals": 296,
-    "total_matches": 14,
-    "average_goals": 21.1,
-    "last_tournament_date": "2026-09-08",
+    "total_matches": 15,
+    "average_goals": 19.7,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": false
     }
   },
@@ -134,12 +134,12 @@
   "adi": {
     "display_name": "adi",
     "total_goals": 0,
-    "total_matches": 1,
+    "total_matches": 2,
     "average_goals": 0,
-    "last_tournament_date": "2026-08-28",
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-08-28_fc-shibankat-fan",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": false
     }
   },
@@ -181,13 +181,13 @@
   },
   "mike": {
     "display_name": "Mike",
-    "total_goals": 185,
-    "total_matches": 9,
-    "average_goals": 20.6,
-    "last_tournament_date": "2026-09-08",
+    "total_goals": 213,
+    "total_matches": 10,
+    "average_goals": 21.3,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": false
     }
   },
@@ -252,14 +252,14 @@
     }
   },
   "eabngst": {
-    "display_name": "Eabngst",
+    "display_name": "EABNGST",
     "total_goals": 0,
-    "total_matches": 1,
+    "total_matches": 2,
     "average_goals": 0,
-    "last_tournament_date": "2026-08-29",
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-08-29_team-work",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": false
     }
   },
@@ -301,25 +301,25 @@
   },
   "psg": {
     "display_name": "PSG",
-    "total_goals": 71,
-    "total_matches": 5,
-    "average_goals": 14.2,
-    "last_tournament_date": "2026-09-08",
+    "total_goals": 92,
+    "total_matches": 6,
+    "average_goals": 15.3,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": false
     }
   },
   "abirsh07": {
     "display_name": "Abirsh07",
-    "total_goals": 206,
-    "total_matches": 8,
-    "average_goals": 25.8,
-    "last_tournament_date": "2026-09-08",
+    "total_goals": 237,
+    "total_matches": 9,
+    "average_goals": 26.3,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": false
     }
   },
@@ -434,12 +434,12 @@
   "omar": {
     "display_name": "Omar",
     "total_goals": 117,
-    "total_matches": 7,
-    "average_goals": 16.7,
-    "last_tournament_date": "2026-09-08",
+    "total_matches": 8,
+    "average_goals": 14.6,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": false
     }
   },
@@ -458,12 +458,12 @@
   "progamer": {
     "display_name": "ProGamer",
     "total_goals": 29,
-    "total_matches": 6,
-    "average_goals": 4.8,
-    "last_tournament_date": "2026-09-08",
+    "total_matches": 7,
+    "average_goals": 4.1,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 5,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "current_fail_streak": 6,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": true
     }
   },
@@ -481,13 +481,13 @@
   },
   "rogelio": {
     "display_name": "Rogelio",
-    "total_goals": 113,
-    "total_matches": 5,
-    "average_goals": 22.6,
-    "last_tournament_date": "2026-09-08",
+    "total_goals": 135,
+    "total_matches": 6,
+    "average_goals": 22.5,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": false
     }
   },
@@ -506,36 +506,36 @@
   "real": {
     "display_name": "Real",
     "total_goals": 57,
-    "total_matches": 4,
-    "average_goals": 14.3,
-    "last_tournament_date": "2026-09-08",
+    "total_matches": 5,
+    "average_goals": 11.4,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
-      "flagged_for_review": false
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
+      "flagged_for_review": true
     }
   },
   "sushenley": {
     "display_name": "SUSHenley",
-    "total_goals": 22,
-    "total_matches": 3,
-    "average_goals": 7.3,
-    "last_tournament_date": "2026-09-08",
+    "total_goals": 28,
+    "total_matches": 4,
+    "average_goals": 7,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
-      "flagged_for_review": false
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
+      "flagged_for_review": true
     }
   },
   "саня": {
     "display_name": "саня",
-    "total_goals": 0,
-    "total_matches": 1,
-    "average_goals": 0,
-    "last_tournament_date": "2026-09-08",
+    "total_goals": 36,
+    "total_matches": 2,
+    "average_goals": 18,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": false
     }
   },
@@ -553,25 +553,49 @@
   },
   "doxibero": {
     "display_name": "DOXIBÉRO",
-    "total_goals": 0,
-    "total_matches": 1,
-    "average_goals": 0,
-    "last_tournament_date": "2026-09-08",
+    "total_goals": 29,
+    "total_matches": 2,
+    "average_goals": 14.5,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": false
     }
   },
   "тима": {
     "display_name": "Тима",
     "total_goals": 6,
+    "total_matches": 2,
+    "average_goals": 3,
+    "last_tournament_date": "2026-09-09",
+    "eligibility_streak": {
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
+      "flagged_for_review": false
+    }
+  },
+  "x_king_pentax": {
+    "display_name": "X_King_Pentax",
+    "total_goals": 34,
     "total_matches": 1,
-    "average_goals": 6,
-    "last_tournament_date": "2026-09-08",
+    "average_goals": 34,
+    "last_tournament_date": "2026-09-09",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
+      "flagged_for_review": false
+    }
+  },
+  "ashroh": {
+    "display_name": "ashroh",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
       "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
       "flagged_for_review": false
     }
   }
