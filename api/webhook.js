@@ -15,10 +15,10 @@ import https from 'https';
 import fs from 'fs';
 import path from 'path';
 
-const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
-const GEMINI_KEY = process.env.GEMINI_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
-const GITHUB_PAT = process.env.GITHUB_PAT;
+const TELEGRAM_TOKEN = (process.env.TELEGRAM_TOKEN || '').trim();
+const GEMINI_KEY = (process.env.GEMINI_KEY || '').trim();
+const GEMINI_MODEL = (process.env.GEMINI_MODEL || 'gemini-1.5-flash').trim();
+const GITHUB_PAT = (process.env.GITHUB_PAT || '').trim();
 const GITHUB_REPO = process.env.GITHUB_REPO || 'bratvafcm/bratvafcm.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
 const WEBSITE_URL = process.env.WEBSITE_URL || 'https://bratvafcm.github.io/';
@@ -398,8 +398,8 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
     const parts = [{ text: prompt }];
     for (const buf of imageBuffers) {
       parts.push({
-        inline_data: {
-          mime_type: 'image/jpeg',
+        inlineData: {
+          mimeType: 'image/jpeg',
           data: buf.toString('base64')
         }
       });
@@ -407,7 +407,14 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
 
     const payload = JSON.stringify({ contents: [{ parts }] });
 
-    const callModel = (modelName) => {
+    const modelsToTry = [GEMINI_MODEL, 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
+    let attempt = 0;
+
+    const tryNextModel = () => {
+      if (attempt >= modelsToTry.length) {
+        return reject(new Error('All Gemini vision models failed. Please verify API key.'));
+      }
+      const modelName = modelsToTry[attempt++];
       const req = https.request({
         hostname: 'generativelanguage.googleapis.com',
         path: `/v1beta/models/${modelName}:generateContent?key=${GEMINI_KEY}`,
@@ -422,27 +429,34 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
         res.on('end', () => {
           try {
             const parsed = JSON.parse(data);
-            if (parsed.candidates && parsed.candidates[0].content) {
+            if (parsed.candidates && parsed.candidates[0] && parsed.candidates[0].content) {
               let rawText = parsed.candidates[0].content.parts[0].text.trim();
               rawText = rawText.replace(/^\`\`\`json\s*/i, '').replace(/^\`\`\`\s*/i, '').replace(/\`\`\`\s*$/i, '').trim();
-              resolve(JSON.parse(rawText));
-            } else if (modelName !== 'gemini-3.8-flash') {
-              console.warn(`Model ${modelName} returned error, trying fallback gemini-3.8-flash:`, data);
-              callModel('gemini-3.8-flash');
+              return resolve(JSON.parse(rawText));
             } else {
-              reject(new Error(`Gemini API Error: ${data}`));
+              console.warn(`Model ${modelName} returned status ${res.statusCode}:`, data);
+              return tryNextModel();
             }
           } catch (e) {
-            reject(e);
+            console.warn(`Failed to parse response from ${modelName}:`, e.message);
+            return tryNextModel();
           }
         });
       });
-      req.on('error', reject);
+      req.setTimeout(12000, () => {
+        req.destroy();
+        console.warn(`Timeout calling ${modelName}`);
+        tryNextModel();
+      });
+      req.on('error', err => {
+        console.warn(`Network error for ${modelName}:`, err.message);
+        tryNextModel();
+      });
       req.write(payload);
       req.end();
     };
 
-    callModel(GEMINI_MODEL);
+    tryNextModel();
   });
 }
 
@@ -497,7 +511,14 @@ CRITICAL GUIDELINES:
       ]
     });
 
-    const callModel = (modelName) => {
+    const modelsToTry = [GEMINI_MODEL, 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
+    let attempt = 0;
+
+    const tryNextModel = () => {
+      if (attempt >= modelsToTry.length) {
+        return reject(new Error('All Gemini chat models failed.'));
+      }
+      const modelName = modelsToTry[attempt++];
       const req = https.request({
         hostname: 'generativelanguage.googleapis.com',
         path: `/v1beta/models/${modelName}:generateContent?key=${GEMINI_KEY}`,
@@ -512,25 +533,33 @@ CRITICAL GUIDELINES:
         res.on('end', () => {
           try {
             const parsed = JSON.parse(data);
-            if (parsed.candidates && parsed.candidates[0].content) {
+            if (parsed.candidates && parsed.candidates[0] && parsed.candidates[0].content) {
               const answer = parsed.candidates[0].content.parts[0].text.trim();
-              resolve(answer);
-            } else if (modelName !== 'gemini-3.8-flash') {
-              callModel('gemini-3.8-flash');
+              return resolve(answer);
             } else {
-              reject(new Error(`Gemini Chat Error: ${data}`));
+              console.warn(`Chat model ${modelName} returned status ${res.statusCode}:`, data);
+              return tryNextModel();
             }
           } catch (e) {
-            reject(e);
+            console.warn(`Failed to parse chat response from ${modelName}:`, e.message);
+            return tryNextModel();
           }
         });
       });
-      req.on('error', reject);
+      req.setTimeout(8000, () => {
+        req.destroy();
+        console.warn(`Timeout calling chat ${modelName}`);
+        tryNextModel();
+      });
+      req.on('error', err => {
+        console.warn(`Network error for chat ${modelName}:`, err.message);
+        tryNextModel();
+      });
       req.write(payload);
       req.end();
     };
 
-    callModel(GEMINI_MODEL);
+    tryNextModel();
   });
 }
 
@@ -3010,7 +3039,7 @@ async function processBufferedAlbum(albumId, chatId, res = null) {
   }
 
   const count = uniqueFileIds.length;
-  const analyzingRes = await sendTelegramMessage(chatId, `🔍 *Analyzing ${count} tournament screenshot${count > 1 ? 's' : ''} together with Gemini 3.6 Flash...*`);
+  const analyzingRes = await sendTelegramMessage(chatId, `🔍 *Analyzing ${count} tournament screenshot${count > 1 ? 's' : ''} with Gemini Vision AI...*`);
   const analyzingMsgId = analyzingRes?.result?.message_id || null;
 
   // Clear from buffer immediately to avoid duplicate runs
@@ -3060,28 +3089,71 @@ export default async function handler(req, res) {
           }, true);
         }
 
-        if (url.searchParams.get('test_gemini')) {
-          const modelToTest = url.searchParams.get('model') || GEMINI_MODEL || 'gemini-2.5-flash';
-          const testRes = await new Promise((resolve) => {
-            const payload = JSON.stringify({ contents: [{ parts: [{ text: 'Respond strictly with JSON: {"status": "ok"}' }] }] });
-            const reqGem = https.request({
-              hostname: 'generativelanguage.googleapis.com',
-              path: `/v1beta/models/${modelToTest}:generateContent?key=${GEMINI_KEY}`,
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(payload)
-              }
-            }, resG => {
-              let d = '';
-              resG.on('data', c => d += c);
-              resG.on('end', () => resolve({ status: resG.statusCode, body: d }));
+        if (url.searchParams.get('test_gemini') || url.searchParams.get('list_models')) {
+          if (url.searchParams.get('list_models') || url.searchParams.get('test_gemini') === 'list') {
+            const listRes = await new Promise((resolve) => {
+              const reqL = https.request({
+                hostname: 'generativelanguage.googleapis.com',
+                path: `/v1beta/models?key=${encodeURIComponent(GEMINI_KEY)}`,
+                method: 'GET'
+              }, resL => {
+                let d = '';
+                resL.on('data', c => d += c);
+                resL.on('end', () => {
+                  try {
+                    const parsed = JSON.parse(d);
+                    const names = (parsed.models || []).map(m => m.name.replace('models/', ''));
+                    resolve({ status: resL.statusCode, count: names.length, models: names });
+                  } catch (e) {
+                    resolve({ status: resL.statusCode, raw: d });
+                  }
+                });
+              });
+              reqL.setTimeout(7000, () => { reqL.destroy(); resolve({ error: 'Timeout listing models' }); });
+              reqL.on('error', err => resolve({ error: err.message }));
+              reqL.end();
             });
-            reqGem.on('error', err => resolve({ error: err.message }));
-            reqGem.write(payload);
-            reqGem.end();
+            return sendResponse(res, 200, {
+              action: 'list_models',
+              gemini_key_len: GEMINI_KEY ? GEMINI_KEY.length : 0,
+              response: listRes
+            }, true);
+          }
+
+          const modelToTest = (url.searchParams.get('model') || GEMINI_MODEL || 'gemini-1.5-flash').trim();
+          const testRes = await new Promise((resolve) => {
+            try {
+              const payload = JSON.stringify({ contents: [{ parts: [{ text: 'Respond strictly with JSON: {"status": "ok"}' }] }] });
+              const reqGem = https.request({
+                hostname: 'generativelanguage.googleapis.com',
+                path: `/v1beta/models/${modelToTest}:generateContent?key=${encodeURIComponent(GEMINI_KEY)}`,
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Content-Length': Buffer.byteLength(payload)
+                }
+              }, resG => {
+                let d = '';
+                resG.on('data', c => d += c);
+                resG.on('end', () => resolve({ status: resG.statusCode, body: d }));
+              });
+              reqGem.setTimeout(7000, () => {
+                reqGem.destroy();
+                resolve({ error: 'Timeout calling Gemini after 7s' });
+              });
+              reqGem.on('error', err => resolve({ error: err.message }));
+              reqGem.write(payload);
+              reqGem.end();
+            } catch (syncErr) {
+              resolve({ sync_error: syncErr.message });
+            }
           });
-          return sendResponse(res, 200, { tested_model: modelToTest, response: testRes }, true);
+          return sendResponse(res, 200, {
+            tested_model: modelToTest,
+            gemini_key_len: GEMINI_KEY ? GEMINI_KEY.length : 0,
+            gemini_key_preview: GEMINI_KEY ? `${GEMINI_KEY.substring(0, 4)}...${GEMINI_KEY.substring(GEMINI_KEY.length - 4)}` : null,
+            response: testRes
+          }, true);
         }
       } catch (cronErr) {
         console.error('Cron error:', cronErr);
@@ -4133,12 +4205,13 @@ export default async function handler(req, res) {
 
     // 2.1 Photo processing with High-Speed Issue #1 Buffer + Interactive Button + Auto-Debounce
     if (message.photo && message.photo.length > 0) {
-      const largestPhoto = message.photo[message.photo.length - 1];
+      // Select crisp 800-1280px photo (~150-250KB) instead of bloated 4MB raw to prevent serverless timeouts
+      const selectedPhoto = message.photo.length >= 3 ? message.photo[message.photo.length - 2] : message.photo[message.photo.length - 1];
       const mediaGroupId = message.media_group_id;
       const albumId = mediaGroupId || `chat_${chatId}`;
 
       // 1. Buffer this photo to GitHub Issue #1 (Fast 150ms HTTP POST, zero Git conflicts!)
-      await bufferPhoto(albumId, largestPhoto.file_id, chatId);
+      await bufferPhoto(albumId, selectedPhoto.file_id, chatId);
 
       // 2. Fetch current buffer for this album/chat
       const currentItems = await getBufferedPhotos(albumId, chatId);
@@ -4171,16 +4244,6 @@ export default async function handler(req, res) {
       );
       if (statusRes && statusRes.ok && statusRes.result && statusRes.result.message_id) {
         activeBufferStatusMessages.set(chatId, statusRes.result.message_id);
-      }
-
-      // 4. For Albums (media_group_id): The first photo waits 22 seconds for mobile upload lag,
-      // then auto-processes if user hasn't clicked the button yet!
-      if (mediaGroupId && count === 1) {
-        await new Promise(resolve => setTimeout(resolve, 22000));
-        const pending = await getBufferedPhotos(albumId, chatId);
-        if (pending.length > 0) {
-          return await processBufferedAlbum(albumId, chatId, res);
-        }
       }
 
       return sendResponse(res, 200, 'Photo buffered');
