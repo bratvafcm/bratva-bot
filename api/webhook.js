@@ -36,12 +36,16 @@ let latestMvpMessage = null;
 const processedUpdates = new Set();
 const mediaGroupMap = new Map();
 const processingPhotos = new Set();
+const activeBufferStatusMessages = new Map(); // chatId -> messageId
 const currentCheckIn = {
   active: false,
   format: 32,
+  durationMinutes: 60,
+  openedAt: null,
+  expiresAt: null,
+  channelMessageId: null,
   ready: new Set(),
-  away: new Set(),
-  openedAt: null
+  away: new Set()
 };
 
 function clean(str) {
@@ -176,6 +180,24 @@ async function editTelegramMessage(chatId, messageId, text, replyMarkup = null) 
       console.error('editTelegramMessage plain error:', e);
     }
   }
+}
+
+async function deleteTelegramMessage(chatId, messageId) {
+  if (!chatId || !messageId) return null;
+  try {
+    return await telegramRequest('deleteMessage', {
+      chat_id: chatId,
+      message_id: messageId
+    });
+  } catch (err) {
+    console.warn(`deleteTelegramMessage error for ${chatId}/${messageId}:`, err.message);
+    return null;
+  }
+}
+
+async function deleteTelegramMessages(chatId, messageIds) {
+  if (!chatId || !Array.isArray(messageIds) || messageIds.length === 0) return;
+  await Promise.all(messageIds.filter(Boolean).map(mid => deleteTelegramMessage(chatId, mid)));
 }
 
 function downloadTelegramFile(fileId) {
@@ -668,15 +690,36 @@ async function saveLeagueRules(newRules, updatedBy = 'admin') {
   return updated;
 }
 
+function syncCurrentCheckInState(regData) {
+  if (!regData || !regData.current_checkin) return;
+  const cc = regData.current_checkin;
+  if (cc.openedAt) currentCheckIn.openedAt = cc.openedAt;
+  if (cc.expiresAt) currentCheckIn.expiresAt = cc.expiresAt;
+  if (cc.durationMinutes) currentCheckIn.durationMinutes = cc.durationMinutes;
+  if (cc.channel_msg_id) currentCheckIn.channelMessageId = cc.channel_msg_id;
+  if (Array.isArray(cc.ready)) {
+    currentCheckIn.ready = new Set(cc.ready);
+  }
+  if (Array.isArray(cc.away)) {
+    currentCheckIn.away = new Set(cc.away);
+  }
+  const isExpired = currentCheckIn.expiresAt && Date.now() >= currentCheckIn.expiresAt;
+  currentCheckIn.active = Boolean(cc.active) && !isExpired;
+}
+
 let inMemoryRegistered = null;
 
 async function getRegisteredPlayers() {
-  if (inMemoryRegistered) return inMemoryRegistered;
+  if (inMemoryRegistered) {
+    syncCurrentCheckInState(inMemoryRegistered);
+    return inMemoryRegistered;
+  }
   try {
     const localPath = path.join(process.cwd(), 'docs', 'league-data', 'registered_players.json');
     if (fs.existsSync(localPath)) {
       const data = JSON.parse(fs.readFileSync(localPath, 'utf8'));
       inMemoryRegistered = data;
+      syncCurrentCheckInState(data);
       return data;
     }
   } catch (e) {}
@@ -687,15 +730,26 @@ async function getRegisteredPlayers() {
       const content = Buffer.from(file.content, 'base64').toString('utf8');
       const data = JSON.parse(content);
       inMemoryRegistered = data;
+      syncCurrentCheckInState(data);
       return data;
     }
   } catch (e) {}
 
-  return { lastUpdated: new Date().toISOString(), registrations: {}, pending_uids: {} };
+  const defaultData = { lastUpdated: new Date().toISOString(), registrations: {}, pending_uids: {}, current_checkin: { active: false, ready: [], away: [] } };
+  syncCurrentCheckInState(defaultData);
+  return defaultData;
 }
 
 async function saveRegisteredPlayersRaw(data, commitMsg = 'Update registered_players') {
   data.lastUpdated = new Date().toISOString();
+  if (!data.current_checkin) data.current_checkin = {};
+  data.current_checkin.active = currentCheckIn.active;
+  data.current_checkin.openedAt = currentCheckIn.openedAt;
+  data.current_checkin.expiresAt = currentCheckIn.expiresAt;
+  data.current_checkin.durationMinutes = currentCheckIn.durationMinutes || 60;
+  data.current_checkin.channel_msg_id = currentCheckIn.channelMessageId || null;
+  data.current_checkin.ready = Array.from(currentCheckIn.ready);
+  data.current_checkin.away = Array.from(currentCheckIn.away);
   inMemoryRegistered = data;
 
   try {
@@ -1165,17 +1219,10 @@ async function generateSmartLineup(requestedSize = 16) {
   const allSquad = await evaluateAllSquadStrikes();
 
   // Restore check-in state from persisted registered_players.json if memory is cold
-  if (currentCheckIn.ready.size === 0) {
-    try {
-      const regData = await getRegisteredPlayers();
-      if (regData.current_checkin && Array.isArray(regData.current_checkin.ready)) {
-        regData.current_checkin.ready.forEach(id => currentCheckIn.ready.add(id));
-      }
-      if (regData.current_checkin && Array.isArray(regData.current_checkin.away)) {
-        regData.current_checkin.away.forEach(id => currentCheckIn.away.add(id));
-      }
-    } catch (e) {}
-  }
+  try {
+    const regData = await getRegisteredPlayers();
+    syncCurrentCheckInState(regData);
+  } catch (e) {}
 
   const hasReadyCheckIn = currentCheckIn && currentCheckIn.ready && currentCheckIn.ready.size > 0;
   let eligibleCandidates = [];
@@ -1354,6 +1401,45 @@ function formatCheckInPrompt(lang = 'ru') {
   const readyCount = readyNames.length;
   const awayCount = awayNames.length;
 
+  const now = Date.now();
+  const isExpired = !currentCheckIn.active || (currentCheckIn.expiresAt && now >= currentCheckIn.expiresAt);
+  const remainingMs = currentCheckIn.expiresAt ? Math.max(0, currentCheckIn.expiresAt - now) : 0;
+  const remainingMinutes = Math.max(1, Math.ceil(remainingMs / 60000));
+
+  let statusHeader = '';
+  let footerText = '';
+
+  if (lang === 'en') {
+    statusHeader = !isExpired
+      ? `⏳ *STATUS:* 🟢 *OPEN (Closes in: ${remainingMinutes} min | 60 min limit)*`
+      : `🔒 *STATUS:* 🔴 *CLOSED (Time Expired — Lineup Finalized)*`;
+    footerText = !isExpired
+      ? `👉 *Tap a button below to confirm your status:*`
+      : `📋 *Check-in closed. View the confirmed starting lineup below:*`;
+  } else if (lang === 'ar') {
+    statusHeader = !isExpired
+      ? `⏳ *الحالة:* 🟢 *تسجيل الحضور مفتوح (متبقي: ${remainingMinutes} دقيقة | مهلة 60 د)*`
+      : `🔒 *الحالة:* 🔴 *تم إغلاق تسجيل الحضور (انتهى الوقت المحدد — جاري إعلان التشكيلة)*`;
+    footerText = !isExpired
+      ? `👉 *اضغط على الزر بالأسفل لتأكيد حالتك الآن:*`
+      : `📋 *انتهى وقت التسجيل. يمكنك الاطلاع على التشكيلة الأساسية بالأسفل:*`;
+  } else if (lang === 'es') {
+    statusHeader = !isExpired
+      ? `⏳ *ESTADO:* 🟢 *ABIERTO (Cierra en: ${remainingMinutes} min | 60 min límite)*`
+      : `🔒 *ESTADO:* 🔴 *CERRADO (Tiempo agotado — Alineación final)*`;
+    footerText = !isExpired
+      ? `👉 *Toca un botón abajo para confirmar tu estado:*`
+      : `📋 *Check-in finalizado. Consulta la alineación confirmada abajo:*`;
+  } else {
+    // Russian (Default)
+    statusHeader = !isExpired
+      ? `⏳ *СТАТУС:* 🟢 *ИДЁТ ЧЕК-ИН (Осталось: ${remainingMinutes} мин | 60 мин лимит)*`
+      : `🔒 *СТАТУС:* 🔴 *ЧЕК-ИН ЗАКРЫТ (Время истекло — формируется основа)*`;
+    footerText = !isExpired
+      ? `👉 *Нажмите кнопку ниже, чтобы подтвердить участие:*`
+      : `📋 *Чек-ин завершён. Ознакомьтесь с утверждённой основой по кнопке ниже:*`;
+  }
+
   const readyList = readyCount > 0
     ? readyNames.map((n, i) => ` ${i + 1 < 10 ? ' ' : ''}${i + 1}. 🟢 *${n}*`).join('\n')
     : (lang === 'ar' ? '   _لا يوجد لاعبين حتى الآن... اضغط [ أنا جاهز ]!_' : lang === 'es' ? '   _¡Nadie aún... sé el primero!_' : lang === 'en' ? '   _No one checked in yet... Tap [ I\'m Ready ]!_' : '   _Пока никто не нажал... Будь первым!_');
@@ -1365,6 +1451,7 @@ function formatCheckInPrompt(lang = 'ru') {
   if (lang === 'en') {
     return `⚔️ *BRATVA FCM: PRE-MATCH CHECK-IN* ⚔️\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
+      `${statusHeader}\n` +
       `🛡️ *Attention Squad!* Preparing for the next tournament!\n` +
       `Please confirm your availability to play all 3/3 turns!\n` +
       `────────────────────\n` +
@@ -1372,11 +1459,12 @@ function formatCheckInPrompt(lang = 'ru') {
       `────────────────────\n` +
       `🔴 *NOT AVAILABLE (${awayCount}):*\n${awayList}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👉 *Tap a button below to confirm your status:*`;
+      `${footerText}`;
   }
   if (lang === 'ar') {
     return `⚔️ *دوري БРАТВА: نداء الجاهزية والحضور* ⚔️\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
+      `${statusHeader}\n` +
       `🛡️ *إلى جميع أبطال الفريق!* نستعد لبدء البطولة القادمة!\n` +
       `يرجى تأكيد جاهزيتك للعب جميع المحاولات 3/3 كاملة في موعدها!\n` +
       `────────────────────\n` +
@@ -1384,11 +1472,12 @@ function formatCheckInPrompt(lang = 'ru') {
       `────────────────────\n` +
       `🔴 *غير المتاحين حالياً (${awayCount}):*\n${awayList}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👉 *اضغط على الزر بالأسفل لتأكيد حالتك الآن:*`;
+      `${footerText}`;
   }
   if (lang === 'es') {
     return `⚔️ *LIGA BRATVA: PASE DE LISTA Y CHECK-IN* ⚔️\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
+      `${statusHeader}\n` +
       `🛡️ *¡Atención Equipo!* ¡Preparándonos para el próximo torneo!\n` +
       `¡Confirma tu disponibilidad para jugar los 3/3 turnos completos!\n` +
       `────────────────────\n` +
@@ -1396,12 +1485,13 @@ function formatCheckInPrompt(lang = 'ru') {
       `────────────────────\n` +
       `🔴 *NO DISPONIBLES (${awayCount}):*\n${awayList}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👉 *Toca un botón abajo para confirmar tu estado:*`;
+      `${footerText}`;
   }
 
   // Russian (Default)
   return `⚔️ *БРАТВА: ПРЕДМАТЧЕВЫЙ ЧЕК-ИН* ⚔️\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
+    `${statusHeader}\n` +
     `🛡️ *Внимание бойцы!* Готовимся к старту следующего турнира!\n` +
     `Подтвердите вашу готовность сыграть все 3/3 ходов вовремя!\n` +
     `────────────────────\n` +
@@ -1409,7 +1499,7 @@ function formatCheckInPrompt(lang = 'ru') {
     `────────────────────\n` +
     `🔴 *НЕ МОГУТ СЫГРАТЬ (${awayCount}):*\n${awayList}\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `👉 *Нажмите кнопку ниже, чтобы подтвердить участие:*`;
+    `${footerText}`;
 }
 
 function getCheckInKeyboard(currentLang = 'ru', includeBcast = false) {
@@ -1434,24 +1524,34 @@ function getCheckInKeyboard(currentLang = 'ru', includeBcast = false) {
                       currentLang === 'es' ? '🎯 Mejor Alineación' :
                       currentLang === 'en' ? '🎯 Smart Lineup' : '🎯 Основа Лиги';
 
-  const rows = [
-    [
+  const isExpired = !currentCheckIn.active || (currentCheckIn.expiresAt && Date.now() >= currentCheckIn.expiresAt);
+
+  const rows = [];
+
+  if (!isExpired) {
+    rows.push([
       { text: readyLabel, callback_data: 'ci_ready' },
       { text: awayLabel, callback_data: 'ci_away' }
-    ],
-    [
+    ]);
+    rows.push([
       { text: listLabel, callback_data: 'ci_list' },
       { text: lineupLabel, callback_data: 'cmd_lineup' }
-    ],
-    [
-      { text: ruLabel, callback_data: 'tab_checkin_0_ru' },
-      { text: enLabel, callback_data: 'tab_checkin_0_en' },
-      { text: arLabel, callback_data: 'tab_checkin_0_ar' },
-      { text: esLabel, callback_data: 'tab_checkin_0_es' }
-    ]
-  ];
+    ]);
+  } else {
+    rows.push([
+      { text: lineupLabel, callback_data: 'cmd_lineup' },
+      { text: listLabel, callback_data: 'ci_list' }
+    ]);
+  }
 
-  if (includeBcast) {
+  rows.push([
+    { text: ruLabel, callback_data: 'tab_checkin_0_ru' },
+    { text: enLabel, callback_data: 'tab_checkin_0_en' },
+    { text: arLabel, callback_data: 'tab_checkin_0_ar' },
+    { text: esLabel, callback_data: 'tab_checkin_0_es' }
+  ]);
+
+  if (includeBcast && !isExpired) {
     rows.push([
       { text: '📢 Post Check-In Rally to Channel', callback_data: 'bcast_checkin' }
     ]);
@@ -2483,7 +2583,10 @@ function formatLiveAlert(aiResult, lang = 'ru') {
 /**
  * Handle Extracted AI Result (with incremental stitching & caching)
  */
-async function handleTournamentResult(aiResult, chatId, res, isAlbum = false) {
+async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, progMsgId = null) {
+  if (progMsgId) {
+    await deleteTelegramMessage(chatId, progMsgId);
+  }
   if (!aiResult || aiResult.is_tournament_screenshot === false) {
     await sendTelegramMessage(chatId, '⚠️ *Not a valid EA FC Mobile tournament screenshot!*');
     return sendResponse(res, 200, 'OK');
@@ -2547,7 +2650,15 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false) {
 
   const recap = formatRecap(tData, 'ru');
   const channelKeys = getLanguageKeyboard('recap', '0', 'ru', false);
-  const dmKeys = getLanguageKeyboard('recap', '0', 'ru', true);
+  const baseDmKeys = getLanguageKeyboard('recap', '0', 'ru', true);
+  const dmKeys = {
+    inline_keyboard: [
+      ...baseDmKeys.inline_keyboard,
+      [
+        { text: '⚔️ Launch Next Pre-Match Check-In (1h)', callback_data: 'open_checkin_60' }
+      ]
+    ]
+  };
 
   // Send to Channel and User
   await sendTelegramMessage(CHANNEL_ID, recap, channelKeys);
@@ -2693,6 +2804,13 @@ async function processBufferedAlbum(albumId, chatId, res = null) {
     return;
   }
 
+  // Delete previous buffer status message in admin chat to avoid clutter
+  const prevStatusId = activeBufferStatusMessages.get(chatId);
+  if (prevStatusId) {
+    await deleteTelegramMessage(chatId, prevStatusId);
+    activeBufferStatusMessages.delete(chatId);
+  }
+
   // Deduplicate unique file_ids while preserving arrival order
   const uniqueFileIds = [];
   for (const it of items) {
@@ -2702,7 +2820,8 @@ async function processBufferedAlbum(albumId, chatId, res = null) {
   }
 
   const count = uniqueFileIds.length;
-  await sendTelegramMessage(chatId, `🔍 *Analyzing ${count} tournament screenshot${count > 1 ? 's' : ''} together with Gemini 3.6 Flash...*`);
+  const analyzingRes = await sendTelegramMessage(chatId, `🔍 *Analyzing ${count} tournament screenshot${count > 1 ? 's' : ''} together with Gemini 3.6 Flash...*`);
+  const analyzingMsgId = analyzingRes?.result?.message_id || null;
 
   // Clear from buffer immediately to avoid duplicate runs
   const commentIds = items.map(it => it.commentId);
@@ -2711,8 +2830,11 @@ async function processBufferedAlbum(albumId, chatId, res = null) {
   try {
     const buffers = await Promise.all(uniqueFileIds.map(fid => downloadTelegramFile(fid)));
     const aiResult = await analyzeImagesWithGemini(buffers);
-    return await handleTournamentResult(aiResult, chatId, res, true);
+    return await handleTournamentResult(aiResult, chatId, res, true, analyzingMsgId);
   } catch (err) {
+    if (analyzingMsgId) {
+      await deleteTelegramMessage(chatId, analyzingMsgId);
+    }
     console.error('Error in processBufferedAlbum:', err);
     await sendTelegramMessage(chatId, `❌ *Analysis Error:* ${clean(err.message)}`);
     if (res) return sendResponse(res, 200, 'Analysis Error');
@@ -2919,6 +3041,10 @@ export default async function handler(req, res) {
         const albumId = data.replace('clear_', '');
         const items = await getBufferedPhotos(albumId, chatId);
         await clearBufferedPhotos(items.map(it => it.commentId));
+        if (activeBufferStatusMessages.has(chatId)) {
+          await deleteTelegramMessage(chatId, activeBufferStatusMessages.get(chatId));
+          activeBufferStatusMessages.delete(chatId);
+        }
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: 'Buffer cleared!' });
         await sendTelegramMessage(chatId, '🗑️ *Screenshot buffer cleared. Ready for new screenshots!*');
         return sendResponse(res, 200, 'OK');
@@ -2978,6 +3104,8 @@ export default async function handler(req, res) {
           updatedText = await formatSmartLineup(size, targetLang);
           updatedKeyboard = getLineupKeyboard(size, targetLang, isCbPrivate);
         } else if (category === 'checkin') {
+          const regData = await getRegisteredPlayers();
+          syncCurrentCheckInState(regData);
           updatedText = formatCheckInPrompt(targetLang);
           updatedKeyboard = getCheckInKeyboard(targetLang, isCbPrivate);
         } else if (category === 'tournaments') {
@@ -3062,6 +3190,19 @@ export default async function handler(req, res) {
           const size = parseInt(parts[1], 10) || 16;
           bcastText = await formatSmartLineup(size, 'ru');
           const channelKeyboard = getLineupKeyboard(size, 'ru', false);
+
+          // Auto-delete obsolete pre-match check-in from channel if present!
+          const regData = await getRegisteredPlayers();
+          if (regData && regData.current_checkin && regData.current_checkin.channel_msg_id) {
+            await deleteTelegramMessage(CHANNEL_ID, regData.current_checkin.channel_msg_id);
+            regData.current_checkin.channel_msg_id = null;
+          }
+          currentCheckIn.active = false;
+          if (regData && regData.current_checkin) {
+            regData.current_checkin.active = false;
+            await saveRegisteredPlayersRaw(regData, `Finalized ${size}v${size} Starting Lineup`);
+          }
+
           await sendTelegramMessage(CHANNEL_ID, bcastText, channelKeyboard);
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
@@ -3070,16 +3211,58 @@ export default async function handler(req, res) {
           await sendTelegramMessage(chatId, `✅ *${size}v${size} Starting Lineup posted to ${CHANNEL_ID}!*`, getMainKeyboard('ru'));
           return sendResponse(res, 200, 'OK');
         } else if (cat === 'checkin') {
+          // Check prerequisite first!
+          const buffered = await getBufferedPhotos(null, chatId);
+          if (buffered.length > 0) {
+            await telegramRequest('answerCallbackQuery', {
+              callback_query_id: cb.id,
+              text: '⚠️ Finish analyzing last match screenshots first (/done)!',
+              show_alert: true
+            });
+            await sendTelegramMessage(
+              chatId,
+              '⚠️ *Cannot open Pre-Match Check-In yet!*\n\n' +
+              '📸 There are unanalyzed tournament screenshots in the buffer.\n' +
+              '👉 Please run `/done` or `/analyze` first to publish the last match results and update player strikes and averages!'
+            );
+            return sendResponse(res, 200, 'OK');
+          }
+
+          const regData = await getRegisteredPlayers();
+          if (regData && regData.current_checkin && regData.current_checkin.channel_msg_id) {
+            await deleteTelegramMessage(CHANNEL_ID, regData.current_checkin.channel_msg_id);
+          }
+
           currentCheckIn.active = true;
           currentCheckIn.openedAt = Date.now();
+          currentCheckIn.durationMinutes = 60;
+          currentCheckIn.expiresAt = Date.now() + (60 * 60 * 1000);
+          currentCheckIn.ready.clear();
+          currentCheckIn.away.clear();
+
           bcastText = formatCheckInPrompt('ru');
           const channelKeyboard = getCheckInKeyboard('ru', false);
-          await sendTelegramMessage(CHANNEL_ID, bcastText, channelKeyboard);
+          const postRes = await sendTelegramMessage(CHANNEL_ID, bcastText, channelKeyboard);
+          const channelMsgId = postRes?.result?.message_id || null;
+          currentCheckIn.channelMessageId = channelMsgId;
+
+          if (!regData.current_checkin) regData.current_checkin = {};
+          regData.current_checkin = {
+            active: true,
+            openedAt: currentCheckIn.openedAt,
+            expiresAt: currentCheckIn.expiresAt,
+            durationMinutes: 60,
+            channel_msg_id: channelMsgId,
+            ready: [],
+            away: []
+          };
+          await saveRegisteredPlayersRaw(regData, 'Broadcasted 1-hour pre-match check-in to channel');
+
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
-            text: '📢 Check-In rally posted to channel!'
+            text: '📢 1-Hour Check-In rally posted to channel!'
           });
-          await sendTelegramMessage(chatId, `✅ *Pre-Match Check-In posted to ${CHANNEL_ID}!*`, getMainKeyboard('ru'));
+          await sendTelegramMessage(chatId, `✅ *Pre-Match Check-In (1-Hour Timer) posted to ${CHANNEL_ID}!*`, getMainKeyboard('ru'));
           return sendResponse(res, 200, 'OK');
         } else if (cat === 'tournaments') {
           bcastText = formatTournaments('ru');
@@ -3118,9 +3301,84 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
+      if (data === 'open_checkin_60') {
+        if (!isAdmin) {
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: '⛔ Admin only action.',
+            show_alert: true
+          });
+          return sendResponse(res, 200, 'OK');
+        }
+
+        const buffered = await getBufferedPhotos(null, chatId);
+        if (buffered.length > 0) {
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: '⚠️ Finish analyzing last match screenshots first (/done)!',
+            show_alert: true
+          });
+          return sendResponse(res, 200, 'OK');
+        }
+
+        const regData = await getRegisteredPlayers();
+        if (regData && regData.current_checkin && regData.current_checkin.channel_msg_id) {
+          await deleteTelegramMessage(CHANNEL_ID, regData.current_checkin.channel_msg_id);
+        }
+
+        currentCheckIn.active = true;
+        currentCheckIn.openedAt = Date.now();
+        currentCheckIn.durationMinutes = 60;
+        currentCheckIn.expiresAt = Date.now() + (60 * 60 * 1000);
+        currentCheckIn.ready.clear();
+        currentCheckIn.away.clear();
+
+        const bcastText = formatCheckInPrompt('ru');
+        const channelKeyboard = getCheckInKeyboard('ru', false);
+        const postRes = await sendTelegramMessage(CHANNEL_ID, bcastText, channelKeyboard);
+        const channelMsgId = postRes?.result?.message_id || null;
+        currentCheckIn.channelMessageId = channelMsgId;
+
+        if (!regData.current_checkin) regData.current_checkin = {};
+        regData.current_checkin = {
+          active: true,
+          openedAt: currentCheckIn.openedAt,
+          expiresAt: currentCheckIn.expiresAt,
+          durationMinutes: 60,
+          channel_msg_id: channelMsgId,
+          ready: [],
+          away: []
+        };
+        await saveRegisteredPlayersRaw(regData, 'Launched 1-hour pre-match check-in from recap');
+
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: '⚔️ 1-Hour Pre-Match Check-In launched!'
+        });
+        await sendTelegramMessage(chatId, `✅ *Pre-Match Check-In launched!* ⏳ 60-minute timer active.\nBroadcasted to ${CHANNEL_ID}.`, getMainKeyboard('ru'));
+        return sendResponse(res, 200, 'OK');
+      }
+
       if (data === 'ci_ready') {
         const userId = cb.from.id;
         const regData = await getRegisteredPlayers();
+        syncCurrentCheckInState(regData);
+
+        const isExpired = !currentCheckIn.active || (currentCheckIn.expiresAt && Date.now() >= currentCheckIn.expiresAt);
+        if (isExpired) {
+          currentCheckIn.active = false;
+          if (regData.current_checkin) regData.current_checkin.active = false;
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: '🔒 Pre-match check-in is CLOSED! The 1-hour window has expired. Lineup is finalized.',
+            show_alert: true
+          });
+          const updatedCheckInText = formatCheckInPrompt('ru');
+          const updatedCheckInKeys = getCheckInKeyboard('ru', isCbPrivate);
+          await editTelegramMessage(chatId, cb.message.message_id, updatedCheckInText, updatedCheckInKeys);
+          return sendResponse(res, 200, 'OK');
+        }
+
         const matchedReg = Object.values(regData.registrations || {}).find(r => String(r.telegram_id) === String(userId));
 
         if (!matchedReg) {
@@ -3161,6 +3419,23 @@ export default async function handler(req, res) {
       if (data === 'ci_away') {
         const userId = cb.from.id;
         const regData = await getRegisteredPlayers();
+        syncCurrentCheckInState(regData);
+
+        const isExpired = !currentCheckIn.active || (currentCheckIn.expiresAt && Date.now() >= currentCheckIn.expiresAt);
+        if (isExpired) {
+          currentCheckIn.active = false;
+          if (regData.current_checkin) regData.current_checkin.active = false;
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: '🔒 Pre-match check-in is CLOSED! The 1-hour window has expired.',
+            show_alert: true
+          });
+          const updatedCheckInText = formatCheckInPrompt('ru');
+          const updatedCheckInKeys = getCheckInKeyboard('ru', isCbPrivate);
+          await editTelegramMessage(chatId, cb.message.message_id, updatedCheckInText, updatedCheckInKeys);
+          return sendResponse(res, 200, 'OK');
+        }
+
         const matchedReg = Object.values(regData.registrations || {}).find(r => String(r.telegram_id) === String(userId));
 
         if (!matchedReg) {
@@ -3200,6 +3475,7 @@ export default async function handler(req, res) {
 
       if (data === 'ci_list') {
         const regData = await getRegisteredPlayers();
+        syncCurrentCheckInState(regData);
         const readyPids = Array.from(currentCheckIn.ready);
         const awayPids = Array.from(currentCheckIn.away);
         const { pIndex } = loadLeagueData();
@@ -3219,6 +3495,17 @@ export default async function handler(req, res) {
       }
 
       if (data === 'cmd_checkin') {
+        const buffered = await getBufferedPhotos(null, chatId);
+        if (buffered.length > 0) {
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: '⚠️ Finish analyzing last match screenshots first (/done)!',
+            show_alert: true
+          });
+          return sendResponse(res, 200, 'OK');
+        }
+        const regData = await getRegisteredPlayers();
+        syncCurrentCheckInState(regData);
         const text = formatCheckInPrompt('ru');
         await sendTelegramMessage(chatId, text, getCheckInKeyboard('ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
@@ -3588,12 +3875,22 @@ export default async function handler(req, res) {
         ]
       };
 
-      await sendTelegramMessage(
+      // Delete previous buffer status message if any, to avoid clutter
+      const prevStatusId = activeBufferStatusMessages.get(chatId);
+      if (prevStatusId) {
+        await deleteTelegramMessage(chatId, prevStatusId);
+        activeBufferStatusMessages.delete(chatId);
+      }
+
+      const statusRes = await sendTelegramMessage(
         chatId,
         `📸 *Screenshot received!* (Batch: *${count}* screenshot${count > 1 ? 's' : ''})\n` +
         `👉 Send more screenshots, or tap button below when ready:`,
         keyboard
       );
+      if (statusRes && statusRes.ok && statusRes.result && statusRes.result.message_id) {
+        activeBufferStatusMessages.set(chatId, statusRes.result.message_id);
+      }
 
       // 4. For Albums (media_group_id): The first photo waits 22 seconds for mobile upload lag,
       // then auto-processes if user hasn't clicked the button yet!
@@ -3622,6 +3919,10 @@ export default async function handler(req, res) {
       globalLatestTournament = null;
       const items = await getBufferedPhotos(null, chatId);
       await clearBufferedPhotos(items.map(it => it.commentId));
+      if (activeBufferStatusMessages.has(chatId)) {
+        await deleteTelegramMessage(chatId, activeBufferStatusMessages.get(chatId));
+        activeBufferStatusMessages.delete(chatId);
+      }
       await sendTelegramMessage(chatId, '🧹 *Match cache & screenshot buffer reset!* Ready for fresh screenshots.', getMainKeyboard('ru'));
       return sendResponse(res, 200, 'OK');
     }
@@ -3765,11 +4066,58 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/checkin') || text.startsWith('/rally') || text.startsWith('/remind')) {
-      currentCheckIn.active = true;
-      currentCheckIn.openedAt = Date.now();
+      const buffered = await getBufferedPhotos(null, chatId);
+      if (buffered.length > 0) {
+        await sendTelegramMessage(
+          chatId,
+          '⚠️ *Cannot open Pre-Match Check-In yet!*\n\n' +
+          '📸 There are unanalyzed tournament screenshots in the buffer.\n' +
+          '👉 Please run `/done` or `/analyze` first to publish the last match results and update player strikes and averages!'
+        );
+        return sendResponse(res, 200, 'OK');
+      }
+
+      const regData = await getRegisteredPlayers();
+      syncCurrentCheckInState(regData);
+
+      const isExpired = !currentCheckIn.active || (currentCheckIn.expiresAt && Date.now() >= currentCheckIn.expiresAt);
+      if (isExpired) {
+        currentCheckIn.active = true;
+        currentCheckIn.openedAt = Date.now();
+        currentCheckIn.durationMinutes = 60;
+        currentCheckIn.expiresAt = Date.now() + (60 * 60 * 1000);
+        currentCheckIn.ready.clear();
+        currentCheckIn.away.clear();
+
+        if (!regData.current_checkin) regData.current_checkin = {};
+        regData.current_checkin.active = true;
+        regData.current_checkin.openedAt = currentCheckIn.openedAt;
+        regData.current_checkin.expiresAt = currentCheckIn.expiresAt;
+        regData.current_checkin.durationMinutes = 60;
+        regData.current_checkin.ready = [];
+        regData.current_checkin.away = [];
+        await saveRegisteredPlayersRaw(regData, 'Admin opened 1-hour pre-match check-in');
+      }
+
       const ciMsg = formatCheckInPrompt('ru');
       const ciKeys = getCheckInKeyboard('ru', true);
       await sendTelegramMessage(chatId, ciMsg, ciKeys);
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/closecheckin') || text.startsWith('/endcheckin') || text.startsWith('/lockcheckin')) {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⛔ *Admin only command.*');
+        return sendResponse(res, 200, 'OK');
+      }
+      const regData = await getRegisteredPlayers();
+      syncCurrentCheckInState(regData);
+      currentCheckIn.active = false;
+      if (regData.current_checkin) {
+        regData.current_checkin.active = false;
+        await saveRegisteredPlayersRaw(regData, 'Admin manually locked pre-match check-in');
+      }
+      await sendTelegramMessage(chatId, '🔒 *Pre-Match Check-In has been locked manually!* Starting lineup can now be generated with `/lineup`.', getMainKeyboard('ru'));
       return sendResponse(res, 200, 'OK');
     }
 
