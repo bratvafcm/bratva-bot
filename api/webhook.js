@@ -3123,12 +3123,22 @@ export default async function handler(req, res) {
             }, true);
           }
 
-          const modelToTest = (url.searchParams.get('model') || GEMINI_MODEL || 'gemini-3.6-flash').trim();
+          const modelToTest = (url.searchParams.get('model') || GEMINI_MODEL || 'gemini-3.5-flash-lite').trim();
           const timeoutMs = parseInt(url.searchParams.get('timeout') || '20000', 10);
+          const isImageTest = Boolean(url.searchParams.get('test_image'));
           const startTime = Date.now();
           const testRes = await new Promise((resolve) => {
             try {
-              const payload = JSON.stringify({ contents: [{ parts: [{ text: 'Respond strictly with JSON: {"status": "ok"}' }] }] });
+              const parts = [{ text: 'Respond strictly with JSON: {"status": "ok"}' }];
+              if (isImageTest) {
+                parts.unshift({
+                  inlineData: {
+                    mimeType: 'image/jpeg',
+                    data: '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA='
+                  }
+                });
+              }
+              const payload = JSON.stringify({ contents: [{ parts }] });
               const reqGem = https.request({
                 hostname: 'generativelanguage.googleapis.com',
                 path: `/v1beta/models/${modelToTest}:generateContent`,
