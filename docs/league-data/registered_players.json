@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-09T01:30:00.000Z",
+  "lastUpdated": "2026-09-09T02:01:46.366Z",
   "registrations": {
     "doxibero1": {
       "player_id": "doxibero1",
@@ -78,6 +78,17 @@
       "telegram_name": "Rogelio Ramírez",
       "is_new_member": false,
       "registered_at": "2026-09-09T01:17:05.523Z"
+    },
+    "koustav_007": {
+      "player_id": "koustav_007",
+      "display_name": "KOUSTAV_007",
+      "in_game_name": "KOUSTAV_007",
+      "uid": null,
+      "telegram_id": 5708098884,
+      "telegram_username": "",
+      "telegram_name": "K C",
+      "is_new_member": false,
+      "registered_at": "2026-09-09T02:01:46.366Z"
     }
   },
   "current_checkin": {
