@@ -17,7 +17,7 @@ import path from 'path';
 
 const TELEGRAM_TOKEN = (process.env.TELEGRAM_TOKEN || '').trim();
 const GEMINI_KEY = (process.env.GEMINI_KEY || '').trim();
-const GEMINI_MODEL = (process.env.GEMINI_MODEL || 'gemini-3.6-flash').trim();
+const GEMINI_MODEL = (process.env.GEMINI_MODEL || 'gemini-3.7-flash').trim();
 const GITHUB_PAT = (process.env.GITHUB_PAT || '').trim();
 const GITHUB_REPO = process.env.GITHUB_REPO || 'bratvafcm/bratvafcm.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
@@ -407,7 +407,7 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
 
     const payload = JSON.stringify({ contents: [{ parts }] });
 
-    const modelsToTry = [GEMINI_MODEL, 'gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-2.5-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
+    const modelsToTry = [GEMINI_MODEL, 'gemini-3.7-flash', 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.6-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
     let attempt = 0;
 
     const tryNextModel = () => {
@@ -512,7 +512,7 @@ CRITICAL GUIDELINES:
       ]
     });
 
-    const modelsToTry = [GEMINI_MODEL, 'gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-2.5-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
+    const modelsToTry = [GEMINI_MODEL, 'gemini-3.7-flash', 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.6-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
     let attempt = 0;
 
     const tryNextModel = () => {
