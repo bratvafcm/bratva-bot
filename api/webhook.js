@@ -2802,6 +2802,30 @@ function formatLiveAlert(aiResult, lang = 'ru') {
     `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
 }
 
+function slugifyLeague(text) {
+  if (!text) return 'opponent';
+  const cyrillicMap = {
+    'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'y',
+    'і':'i','ї':'yi','є':'ye',
+    'к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f',
+    'х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'
+  };
+  let s = text.toLowerCase().split('').map(c => cyrillicMap[c] || c).join('');
+  s = s.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  if (!s) s = text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '_').replace(/^_+|_+$/g, '');
+  return s || 'opponent';
+}
+
+function slugifyPlayerId(name, idx) {
+  if (!name) return `player_${idx}`;
+  let clean = name.trim();
+  const lower = clean.toLowerCase();
+  if (lower === 'doxibéro' || lower === 'doxibero' || lower === 'doxibro') return 'doxibero';
+  if (lower === 'doxibero1') return 'doxibero1';
+  let pid = lower.replace(/[^\p{L}\p{N}_]+/gu, '_').replace(/^_+|_+$/g, '');
+  return pid || `player_${idx}`;
+}
+
 /**
  * Handle Extracted AI Result (with incremental stitching & caching)
  */
@@ -2826,12 +2850,12 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
   }
 
   const dateStr = new Date().toISOString().split('T')[0];
-  const oppSlug = (aiResult.opponent_league || 'opponent').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const oppSlug = slugifyLeague(aiResult.opponent_league);
   const tId = `${dateStr}_${oppSlug}`;
 
   const extractedMatches = (aiResult.players || []).map((p, idx) => ({
     board_order: p.board_order || (idx + 1),
-    player_id: (p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || `player_${idx}`,
+    player_id: slugifyPlayerId(p.name, idx),
     player_display_name: p.name,
     ovr: p.ovr || 125,
     goals_for: p.goals !== undefined ? p.goals : 0,
@@ -2927,6 +2951,11 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     }
     tData.matches.forEach(m => {
       const prev = pIndexObj[m.player_id] || {};
+      const alreadyEvaluated = prev.eligibility_streak?.last_evaluated_tournament_id === tId;
+      if (alreadyEvaluated) {
+        // Tournament already counted for this player: do NOT double-increment matches or goals!
+        return;
+      }
       const prevMatches = prev.total_matches || 0;
       const prevGoals = prev.total_goals || 0;
       const newMatches = prevMatches + 1;
