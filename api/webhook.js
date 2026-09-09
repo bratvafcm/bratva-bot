@@ -1345,8 +1345,32 @@ async function formatStrikes(lang = 'ru') {
   return msg;
 }
 
-async function generateSmartLineup(requestedSize = 16) {
-  const size = [4, 8, 12, 16, 20, 24, 32].includes(requestedSize) ? requestedSize : 16;
+function calculateOptimalTournamentSize(readyCount, fallbackCount = 0) {
+  const count = readyCount > 0 ? readyCount : fallbackCount;
+  if (count >= 32) return 32;
+  if (count >= 24) return 24;
+  if (count >= 16) return 16;
+  if (count >= 8) return 8;
+  if (count >= 4) return 4;
+  return 4;
+}
+
+function compareLineupCandidates(a, b) {
+  // 1. Clean discipline (0 strikes) first!
+  if (a.strikesIn5 === 0 && b.strikesIn5 > 0) return -1;
+  if (a.strikesIn5 > 0 && b.strikesIn5 === 0) return 1;
+
+  // 2. Fewer strikes if any
+  if (a.strikesIn5 !== b.strikesIn5) return a.strikesIn5 - b.strikesIn5;
+
+  // 3. Highest scoring average in personal last 5 games (last5Avg)
+  if (b.last5Avg !== a.last5Avg) return b.last5Avg - a.last5Avg;
+
+  // 4. Total matches played (experience)
+  return b.totalMatches - a.totalMatches;
+}
+
+async function generateSmartLineup(requestedSize = null) {
   const allSquad = await evaluateAllSquadStrikes();
 
   // Restore check-in state from persisted registered_players.json if memory is cold
@@ -1355,45 +1379,66 @@ async function generateSmartLineup(requestedSize = 16) {
     syncCurrentCheckInState(regData);
   } catch (e) {}
 
-  const hasReadyCheckIn = currentCheckIn && currentCheckIn.ready && currentCheckIn.ready.size > 0;
-  let eligibleCandidates = [];
+  const eligibleCandidates = allSquad.filter(p => !p.isEligibleForKick);
+  const hasReadyCheckIn = Boolean(currentCheckIn && currentCheckIn.ready && currentCheckIn.ready.size > 0);
+
+  const readyPool = hasReadyCheckIn
+    ? eligibleCandidates.filter(p => currentCheckIn.ready.has(p.pid))
+    : eligibleCandidates;
+
+  const unreadyPool = hasReadyCheckIn
+    ? eligibleCandidates.filter(p => !currentCheckIn.ready.has(p.pid))
+    : [];
+
+  readyPool.sort(compareLineupCandidates);
+  unreadyPool.sort(compareLineupCandidates);
+
+  const isAuto = !requestedSize || requestedSize === 'auto';
+  const size = isAuto
+    ? calculateOptimalTournamentSize(readyPool.length, eligibleCandidates.length)
+    : ([4, 8, 12, 16, 20, 24, 32].includes(requestedSize) ? requestedSize : 16);
+
+  let starting = [];
+  let bench = [];
 
   if (hasReadyCheckIn) {
-    eligibleCandidates = allSquad.filter(p => currentCheckIn.ready.has(p.pid) && !p.isEligibleForKick);
-    if (eligibleCandidates.length < size) {
-      const remaining = allSquad.filter(p => !currentCheckIn.ready.has(p.pid) && !p.isEligibleForKick);
-      remaining.sort((a, b) => b.last5Avg - a.last5Avg);
-      eligibleCandidates = eligibleCandidates.concat(remaining);
+    if (readyPool.length >= size) {
+      starting = readyPool.slice(0, size);
+      const readyBench = readyPool.slice(size);
+      const neededReserves = Math.max(0, 8 - readyBench.length);
+      bench = readyBench.concat(unreadyPool.slice(0, neededReserves));
+    } else {
+      starting = [...readyPool];
+      const needed = size - readyPool.length;
+      starting = starting.concat(unreadyPool.slice(0, needed));
+      bench = unreadyPool.slice(needed, needed + 8);
     }
   } else {
-    eligibleCandidates = allSquad.filter(p => !p.isEligibleForKick);
+    starting = readyPool.slice(0, size);
+    bench = readyPool.slice(size, size + 8);
   }
-
-  // Sort: Clean discipline (0 strikes) first, then personal 5-match average goals
-  eligibleCandidates.sort((a, b) => {
-    if (a.strikesIn5 === 0 && b.strikesIn5 > 0) return -1;
-    if (a.strikesIn5 > 0 && b.strikesIn5 === 0) return 1;
-    if (b.last5Avg !== a.last5Avg) return b.last5Avg - a.last5Avg;
-    return b.totalMatches - a.totalMatches;
-  });
-
-  const starting = eligibleCandidates.slice(0, size);
-  const bench = eligibleCandidates.slice(size, size + Math.min(8, Math.max(0, eligibleCandidates.length - size)));
 
   return {
     size,
+    isAuto,
     starting,
     bench,
+    readyCount: hasReadyCheckIn ? readyPool.length : 0,
     totalAvailable: eligibleCandidates.length,
-    isCheckInUsed: hasReadyCheckIn
+    isCheckInUsed: hasReadyCheckIn,
+    isCheckInActive: Boolean(currentCheckIn && currentCheckIn.active),
+    hasInsufficientPlayers: hasReadyCheckIn && readyPool.length < 4
   };
 }
 
-async function formatSmartLineup(requestedSize = 16, lang = 'ru') {
+async function formatSmartLineup(requestedSize = null, lang = 'ru') {
   const lineupData = await generateSmartLineup(requestedSize);
   const size = lineupData.size;
   const starting = lineupData.starting;
   const bench = lineupData.bench;
+  const isAuto = lineupData.isAuto;
+  const readyCount = lineupData.readyCount;
+  const hasReadyCheckIn = lineupData.isCheckInUsed;
 
   const startingLines = starting.map((p, idx) => {
     const num = idx + 1;
@@ -1409,23 +1454,58 @@ async function formatSmartLineup(requestedSize = 16, lang = 'ru') {
     const num = size + idx + 1;
     const padNum = num < 10 ? ` ${num}` : `${num}`;
     const nameIso = bidiIsolate(p.displayName);
-    if (lang === 'en') return `${padNum}. 🟡 *${nameIso}* — avg *${p.last5Avg}*G (Reserve)`;
-    if (lang === 'ar') return `${padNum}. 🟡 *${nameIso}* — معدل *${p.last5Avg}* هدف (احتياط)`;
-    if (lang === 'es') return `${padNum}. 🟡 *${nameIso}* — prom *${p.last5Avg}*G (Reserva)`;
-    return `${padNum}. 🟡 *${nameIso}* — ср. *${p.last5Avg}*Г (Запас)`;
+    const isReadyPlayer = hasReadyCheckIn && currentCheckIn && currentCheckIn.ready && currentCheckIn.ready.has(p.pid);
+    let tag = '';
+    if (lang === 'en') tag = isReadyPlayer ? '(Reserve — Ready)' : '(Backup)';
+    else if (lang === 'ar') tag = isReadyPlayer ? '(احتياط — جاهز)' : '(احتياط غير مؤكد)';
+    else if (lang === 'es') tag = isReadyPlayer ? '(Reserva — Listo)' : '(Reserva)';
+    else tag = isReadyPlayer ? '(Запас — Готов)' : '(Резерв)';
+
+    const dot = isReadyPlayer ? '🟡' : '⚪';
+    if (lang === 'en') return `${padNum}. ${dot} *${nameIso}* — avg *${p.last5Avg}*G ${tag}`;
+    if (lang === 'ar') return `${padNum}. ${dot} *${nameIso}* — معدل *${p.last5Avg}* هدف ${tag}`;
+    if (lang === 'es') return `${padNum}. ${dot} *${nameIso}* — prom *${p.last5Avg}*G ${tag}`;
+    return `${padNum}. ${dot} *${nameIso}* — ср. *${p.last5Avg}*Г ${tag}`;
   });
 
+  // Insufficient players alert banner (< 4 ready)
+  let alertBanner = '';
+  if (lineupData.hasInsufficientPlayers) {
+    if (lang === 'en') alertBanner = `⚠️ *ATTENTION: Only ${readyCount} players ready! Minimum 4 required for tournament!*\n────────────────────\n`;
+    else if (lang === 'ar') alertBanner = `⚠️ *تنبيه: ${readyCount} لاعبين جاهزين فقط! يلزم 4 لاعبين كحد أدنى للبطولة!*\n────────────────────\n`;
+    else if (lang === 'es') alertBanner = `⚠️ *¡ATENCIÓN: Solo ${readyCount} listos! ¡Se requieren mínimo 4 para el torneo!*\n────────────────────\n`;
+    else alertBanner = `⚠️ *ВНИМАНИЕ: Готово только ${readyCount} бойцов! Для турнира нужно минимум 4 игрока!*\n────────────────────\n`;
+  }
+
+  // Auto-status note
+  let statusBanner = '';
+  if (isAuto) {
+    if (hasReadyCheckIn) {
+      if (lang === 'en') statusBanner = `🤖 *Bot Auto-Decision:* Official *${size}v${size}* bracket based on *${readyCount}* ready players!\n`;
+      else if (lang === 'ar') statusBanner = `🤖 *قرار البوت التلقائي:* تنسيق *${size} ضد ${size}* الرسمي بناءً على *${readyCount}* لاعبين جاهزين!\n`;
+      else if (lang === 'es') statusBanner = `🤖 *Decisión Auto del Bot:* Formato *${size}v${size}* oficial basado en *${readyCount}* jugadores listos!\n`;
+      else statusBanner = `🤖 *Авто-выбор Бота:* Формат *${size}x${size}* на основе *${readyCount}* готовых бойцов!\n`;
+    } else {
+      if (lang === 'en') statusBanner = `ℹ️ *Projected ${size}v${size} bracket* (Based on all active members. Run /checkin before match!)\n`;
+      else if (lang === 'ar') statusBanner = `ℹ️ *تشكيلة ${size} ضد ${size} تقديرية* (بناءً على أعضاء الفريق النشطين. أطلق /checkin قبل المباراة!)\n`;
+      else if (lang === 'es') statusBanner = `ℹ️ *Alineación proyectada ${size}v${size}* (Basada en miembros activos. ¡Use /checkin antes del partido!)\n`;
+      else statusBanner = `ℹ️ *Ориентировочный формат ${size}x${size}* (По всем активным игрокам. Запустите /checkin перед матчем!)\n`;
+    }
+  }
+
   if (lang === 'en') {
-    let msg = `🎯 *BRATVA FCM: OFFICIAL LINEUP (${size}v${size})* 🎯\n` +
+    let msg = `🎯 *BRATVA FCM: OFFICIAL SMART LINEUP (${size}v${size})* 🎯\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
+      alertBanner +
+      statusBanner +
       `⚜️ *STARTING SQUAD (TOP ${size}):*\n${startingLines.join('\n')}\n`;
     if (benchLines.length > 0) {
       msg += `────────────────────\n📋 *BENCH & RESERVES:*\n${benchLines.join('\n')}\n`;
     }
     msg += `━━━━━━━━━━━━━━━━━━━━\n` +
-      `⚡ *Selection Criteria:*\n` +
-      `1. Checked in [ 🟢 Ready ] before match\n` +
-      `2. Clean discipline (0 strikes)\n` +
+      `⚡ *Selection Criteria (Auto-Ranked):*\n` +
+      `1. Confirmed [ 🟢 Ready ] during pre-match check-in\n` +
+      `2. Clean discipline (0 strikes priority)\n` +
       `3. Top scoring average in personal last 5 games!\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *Official Website:* ${WEBSITE_URL}`;
@@ -1433,34 +1513,38 @@ async function formatSmartLineup(requestedSize = 16, lang = 'ru') {
   }
 
   if (lang === 'ar') {
-    let msg = `🎯 *دوري БРАТВА: التشكيلة الرسمية (${size} ضد ${size})* 🎯\n` +
+    let msg = `🎯 *دوري БРАТВА: التشكيلة الرسمية الذكية (${size} ضد ${size})* 🎯\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
+      alertBanner +
+      statusBanner +
       `⚜️ *التشكيلة الأساسية (أفضل ${size} لاعبين):*\n${startingLines.join('\n')}\n`;
     if (benchLines.length > 0) {
       msg += `────────────────────\n📋 *دكة البدلاء (الاحتياط):*\n${benchLines.join('\n')}\n`;
     }
     msg += `━━━━━━━━━━━━━━━━━━━━\n` +
-      `⚡ *معايير الاختيار الذكية:*\n` +
-      `1. تأكيد الجاهزية [ 🟢 أنا جاهز ] قبل المباراة\n` +
-      `2. انضباط كامل وسجل نظيف (0 إنذارات)\n` +
-      `3. أعلى معدل تهديفي في آخر 5 مباريات للاعب!\n` +
+      `⚡ *معايير الاختيار الذكية (ترتيب تلقائي):*\n` +
+      `1. تأكيد الجاهزية [ 🟢 أنا جاهز ] قبل موعد المباراة\n` +
+      `2. انضباط كامل وسجل نظيف (أولوية 0 إنذارات أولاً)\n` +
+      `3. أعلى معدل تهديفي للاعب في آخر 5 مباريات لعبها هو شخصياً!\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *الموقع الرسمي للدوري:* ${WEBSITE_URL}`;
     return msg;
   }
 
   if (lang === 'es') {
-    let msg = `🎯 *LIGA BRATVA: ALINEACIÓN OFICIAL (${size}v${size})* 🎯\n` +
+    let msg = `🎯 *LIGA BRATVA: ALINEACIÓN INTELIGENTE (${size}v${size})* 🎯\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
+      alertBanner +
+      statusBanner +
       `⚜️ *TITULARES (TOP ${size}):*\n${startingLines.join('\n')}\n`;
     if (benchLines.length > 0) {
       msg += `────────────────────\n📋 *BANQUILLO Y RESERVAS:*\n${benchLines.join('\n')}\n`;
     }
     msg += `━━━━━━━━━━━━━━━━━━━━\n` +
-      `⚡ *Criterios de Selección:*\n` +
-      `1. Confirmación de disponibilidad [ 🟢 Estoy Listo ]\n` +
-      `2. 0 strikes (disciplina perfecta)\n` +
-      `3. Mayor promedio de goles en sus últimos 5 partidos!\n` +
+      `⚡ *Criterios de Selección Inteligente:*\n` +
+      `1. Confirmación [ 🟢 Estoy Listo ] en el check-in\n` +
+      `2. 0 strikes (disciplina limpia prioritaria)\n` +
+      `3. Mayor promedio de goles en sus propios últimos 5 partidos!\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *Sitio Oficial:* ${WEBSITE_URL}`;
     return msg;
@@ -1469,52 +1553,71 @@ async function formatSmartLineup(requestedSize = 16, lang = 'ru') {
   // Russian (Default)
   let msg = `🎯 *БРАТВА: БОЕВОЙ СОСТАВ НА ТУРНИР (${size}x${size})* 🎯\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
+    alertBanner +
+    statusBanner +
     `⚜️ *ОСНОВНОЙ СОСТАВ (ТОП-${size}):*\n${startingLines.join('\n')}\n`;
   if (benchLines.length > 0) {
     msg += `────────────────────\n📋 *СКАМЕЙКА ЗАПАСНЫХ (РЕЗЕРВ):*\n${benchLines.join('\n')}\n`;
   }
   msg += `━━━━━━━━━━━━━━━━━━━━\n` +
-    `⚡ *Критерии отбора:*\n` +
+    `⚡ *Критерии автоматического отбора:*\n` +
     `1. Чек-ин готовности [ 🟢 Готов к игре ] перед матчем\n` +
-    `2. Безупречная дисциплина (0 страйков)\n` +
+    `2. Безупречная дисциплина (0 страйков в приоритете)\n` +
     `3. Лучшая результативность в своих последних 5 матчах!\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
   return msg;
 }
 
-const formatLineup = (lang = 'ru') => formatSmartLineup(16, lang);
+const formatLineup = (lang = 'ru') => formatSmartLineup(null, lang);
 
-function getLineupKeyboard(size = 16, currentLang = 'ru', isPrivate = false) {
+function getLineupKeyboard(size = 16, currentLang = 'ru', isPrivate = false, isAuto = false) {
   const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
   const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
   const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
   const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
 
+  const autoLabel = currentLang === 'ar' ? '🤖 الحجم التلقائي (البوت)' :
+                    currentLang === 'es' ? '🤖 Tamaño Auto (Bot)' :
+                    currentLang === 'en' ? '🤖 Auto Size (Bot)' : '🤖 Авто-размер (Бот)';
+
+  const autoParam = isAuto ? 'auto' : size;
+
   const rows = [
     [
-      { text: size === 4 ? '• 4v4 •' : '4v4', callback_data: `fmt_lineup_4_${currentLang}` },
-      { text: size === 8 ? '• 8v8 •' : '8v8', callback_data: `fmt_lineup_8_${currentLang}` },
-      { text: size === 16 ? '• 16v16 •' : '16v16', callback_data: `fmt_lineup_16_${currentLang}` },
-      { text: size === 24 ? '• 24v24 •' : '24v24', callback_data: `fmt_lineup_24_${currentLang}` },
-      { text: size === 32 ? '• 32v32 •' : '32v32', callback_data: `fmt_lineup_32_${currentLang}` }
+      { text: isAuto ? `• ${autoLabel} •` : autoLabel, callback_data: `fmt_lineup_auto_${currentLang}` }
     ],
     [
-      { text: ruLabel, callback_data: `tab_lineup_${size}_ru` },
-      { text: enLabel, callback_data: `tab_lineup_${size}_en` },
-      { text: arLabel, callback_data: `tab_lineup_${size}_ar` },
-      { text: esLabel, callback_data: `tab_lineup_${size}_es` }
+      { text: (!isAuto && size === 4) ? '• 4v4 •' : '4v4', callback_data: `fmt_lineup_4_${currentLang}` },
+      { text: (!isAuto && size === 8) ? '• 8v8 •' : '8v8', callback_data: `fmt_lineup_8_${currentLang}` },
+      { text: (!isAuto && size === 16) ? '• 16v16 •' : '16v16', callback_data: `fmt_lineup_16_${currentLang}` },
+      { text: (!isAuto && size === 24) ? '• 24v24 •' : '24v24', callback_data: `fmt_lineup_24_${currentLang}` },
+      { text: (!isAuto && size === 32) ? '• 32v32 •' : '32v32', callback_data: `fmt_lineup_32_${currentLang}` }
+    ],
+    [
+      { text: ruLabel, callback_data: `tab_lineup_${autoParam}_ru` },
+      { text: enLabel, callback_data: `tab_lineup_${autoParam}_en` },
+      { text: arLabel, callback_data: `tab_lineup_${autoParam}_ar` },
+      { text: esLabel, callback_data: `tab_lineup_${autoParam}_es` }
     ]
   ];
 
   if (isPrivate) {
+    const postLabel = currentLang === 'ar' ? `📢 نشر تشكيلة ${size} ضد ${size} في القناة` :
+                      currentLang === 'es' ? `📢 Publicar alineación ${size}v${size} en el Canal` :
+                      currentLang === 'en' ? `📢 Post ${size}v${size} Lineup to Channel` :
+                      `📢 Опубликовать состав ${size}x${size} в канал`;
     rows.push([
-      { text: `📢 Post ${size}v${size} Lineup to Channel`, callback_data: `bcast_lineup_${size}` }
+      { text: postLabel, callback_data: `bcast_lineup_${autoParam}` }
     ]);
   }
 
+  const websiteLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                       currentLang === 'es' ? '🌐 Sitio Oficial de la Liga' :
+                       currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт Лиги';
+
   rows.push([
-    { text: '🌐 Open Official League Website', url: WEBSITE_URL }
+    { text: websiteLabel, url: WEBSITE_URL }
   ]);
 
   return { inline_keyboard: rows };
@@ -1536,36 +1639,45 @@ function formatCheckInPrompt(lang = 'ru') {
   const isExpired = !currentCheckIn.active || (currentCheckIn.expiresAt && now >= currentCheckIn.expiresAt);
   const remainingMs = currentCheckIn.expiresAt ? Math.max(0, currentCheckIn.expiresAt - now) : 0;
   const remainingMinutes = Math.max(1, Math.ceil(remainingMs / 60000));
+  const projectedSize = calculateOptimalTournamentSize(readyCount);
 
   let statusHeader = '';
   let footerText = '';
 
   if (lang === 'en') {
+    const bracketText = readyCount >= 4 ? `${projectedSize}v${projectedSize} (${projectedSize} Starters + ${Math.max(0, readyCount - projectedSize)} Reserves)` : 'Need min 4 ready players';
     statusHeader = !isExpired
-      ? `⏳ *STATUS:* 🟢 *OPEN (Closes in: ${remainingMinutes} min | 60 min limit)*`
-      : `🔒 *STATUS:* 🔴 *CLOSED (Time Expired — Lineup Finalized)*`;
+      ? `⏳ *STATUS:* 🟢 *OPEN (Closes in: ${remainingMinutes} min | 60 min limit)*\n` +
+        `🤖 *Auto-Projected Bracket:* *${bracketText}*`
+      : `🔒 *STATUS:* 🔴 *CLOSED (Time Expired — Final Bracket: ${readyCount >= 4 ? `${projectedSize}v${projectedSize}` : 'Insufficient'})*`;
     footerText = !isExpired
       ? `👉 *Tap a button below to confirm your status:*`
       : `📋 *Check-in closed. View the confirmed starting lineup below:*`;
   } else if (lang === 'ar') {
+    const bracketText = readyCount >= 4 ? `${projectedSize} ضد ${projectedSize} (${projectedSize} أساسي + ${Math.max(0, readyCount - projectedSize)} احتياط)` : 'يلزم 4 لاعبين كحد أدنى';
     statusHeader = !isExpired
-      ? `⏳ *الحالة:* 🟢 *تسجيل الحضور مفتوح (متبقي: ${remainingMinutes} دقيقة | مهلة 60 د)*`
-      : `🔒 *الحالة:* 🔴 *تم إغلاق تسجيل الحضور (انتهى الوقت المحدد — جاري إعلان التشكيلة)*`;
+      ? `⏳ *الحالة:* 🟢 *تسجيل الحضور مفتوح (متبقي: ${remainingMinutes} دقيقة | مهلة 60 د)*\n` +
+        `🤖 *التنسيق التلقائي المتوقع:* *${bracketText}*`
+      : `🔒 *الحالة:* 🔴 *تم إغلاق تسجيل الحضور (التنسيق المعتمد: ${readyCount >= 4 ? `${projectedSize} ضد ${projectedSize}` : 'غير كافٍ'})*`;
     footerText = !isExpired
       ? `👉 *اضغط على الزر بالأسفل لتأكيد حالتك الآن:*`
       : `📋 *انتهى وقت التسجيل. يمكنك الاطلاع على التشكيلة الأساسية بالأسفل:*`;
   } else if (lang === 'es') {
+    const bracketText = readyCount >= 4 ? `${projectedSize}v${projectedSize} (${projectedSize} Titulares + ${Math.max(0, readyCount - projectedSize)} Reservas)` : 'Se requieren mín. 4 listos';
     statusHeader = !isExpired
-      ? `⏳ *ESTADO:* 🟢 *ABIERTO (Cierra en: ${remainingMinutes} min | 60 min límite)*`
-      : `🔒 *ESTADO:* 🔴 *CERRADO (Tiempo agotado — Alineación final)*`;
+      ? `⏳ *ESTADO:* 🟢 *ABIERTO (Cierra en: ${remainingMinutes} min | 60 min límite)*\n` +
+        `🤖 *Formato Auto-Proyectado:* *${bracketText}*`
+      : `🔒 *ESTADO:* 🔴 *CERRADO (Tiempo agotado — Formato final: ${readyCount >= 4 ? `${projectedSize}v${projectedSize}` : 'Insuficiente'})*`;
     footerText = !isExpired
       ? `👉 *Toca un botón abajo para confirmar tu estado:*`
       : `📋 *Check-in finalizado. Consulta la alineación confirmada abajo:*`;
   } else {
     // Russian (Default)
+    const bracketText = readyCount >= 4 ? `${projectedSize}x${projectedSize} (${projectedSize} в основе + ${Math.max(0, readyCount - projectedSize)} в запасе)` : 'Нужно минимум 4 игрока';
     statusHeader = !isExpired
-      ? `⏳ *СТАТУС:* 🟢 *ИДЁТ ЧЕК-ИН (Осталось: ${remainingMinutes} мин | 60 мин лимит)*`
-      : `🔒 *СТАТУС:* 🔴 *ЧЕК-ИН ЗАКРЫТ (Время истекло — формируется основа)*`;
+      ? `⏳ *СТАТУС:* 🟢 *ИДЁТ ЧЕК-ИН (Осталось: ${remainingMinutes} мин | 60 мин лимит)*\n` +
+        `🤖 *Текущий авто-формат Бота:* *${bracketText}*`
+      : `🔒 *СТАТУС:* 🔴 *ЧЕК-ИН ЗАКРЫТ (Время истекло — Формат основы: ${readyCount >= 4 ? `${projectedSize}x${projectedSize}` : 'Недостаточно'})*`;
     footerText = !isExpired
       ? `👉 *Нажмите кнопку ниже, чтобы подтвердить участие:*`
       : `📋 *Чек-ин завершён. Ознакомьтесь с утверждённой основой по кнопке ниже:*`;
@@ -2626,11 +2738,12 @@ function formatRules(lang = 'ru') {
       `• Verify your account in this bot and join the channel & chat within *${rules.telegramDeadlineDays || 3} days* of joining the in-game league.\n` +
       `• Unregistered accounts after 3 days = *KICK*.\n` +
       `────────────────────\n` +
-      `3️⃣ 🎯 *Goal Target (20+) & Starting Lineup Selection:*\n` +
+      `3️⃣ 🎯 *Goal Target (20+) & Bot Auto-Selected Lineup:*\n` +
       `• Minimum benchmark: *${rules.minGoalsPerTournament}+ goals* per tournament.\n` +
-      `• Starting spots (4v4, 8v8, 16v16, 24v24, 32v32) are awarded based on:\n` +
+      `• 🤖 *The Bot automatically determines tournament size* (4v4, 8v8, 16v16, 24v24, 32v32) based on how many players check in [ 🟢 Ready ]!\n` +
+      `• Starting spots are awarded based on 3 criteria:\n` +
       `  1. Checked in as [ 🟢 Ready ] before match start\n` +
-      `  2. Clean discipline (0 strikes)\n` +
+      `  2. Clean discipline (0 strikes priority)\n` +
       `  3. Top scoring average in **your own last 5 matches played**!\n` +
       `────────────────────\n` +
       `4️⃣ 🛡️ *Advance Notice & Excuses:*\n` +
@@ -2654,11 +2767,12 @@ function formatRules(lang = 'ru') {
       `• كل لاعب ملزم بتأكيد حسابه في البوت والانضمام للقناة خلال *${rules.telegramDeadlineDays || 3} أيام* من انضمامه للدوري في اللعبة.\n` +
       `• الحسابات غير المسجلة بعد 3 أيام = *طرد من الدوري*.\n` +
       `────────────────────\n` +
-      `3️⃣ 🎯 *المعدل التهديفي (20+ هدف) واختيار التشكيلة الأساسية:*\n` +
+      `3️⃣ 🎯 *المعدل التهديفي (20+ هدف) وتشكيلة البوت التلقائية:*\n` +
       `• الهدف الأدنى المطلوب: *${rules.minGoalsPerTournament}+ هدف* في البطولة.\n` +
-      `• مقاعد التشكيلة الأساسية (4 ضد 4 حتى 32 ضد 32) تُمنح وفق:\n` +
+      `• 🤖 *البوت هو من يقرر حجم البطولة تلقائياً* (4v4 أو 8v8 أو 16v16 أو 24v24 أو 32v32) بحسب عدد اللاعبين الجاهزين في التشيك-إن!\n` +
+      `• مقاعد التشكيلة الأساسية تُمنح وفق المعايير الثلاثة:\n` +
       `  1. تأكيد الجاهزية [ 🟢 أنا جاهز ] قبل بدء البطولة\n` +
-      `  2. سجل انضباط نظيف (0 إنذارات)\n` +
+      `  2. سجل انضباط نظيف (0 إنذارات أولاً)\n` +
       `  3. أعلى معدل تهديفي للاعب في **آخر 5 مباريات لعبها هو شخصياً**!\n` +
       `────────────────────\n` +
       `4️⃣ 🛡️ *الأعذار والغياب الطارئ:*\n` +
@@ -2682,11 +2796,12 @@ function formatRules(lang = 'ru') {
       `• Es obligatorio verificar tu cuenta en el bot y unirte al canal/grupo en *${rules.telegramDeadlineDays || 3} días*.\n` +
       `• Sin registrar tras 3 días = *EXPULSIÓN* de la liga.\n` +
       `────────────────────\n` +
-      `3️⃣ 🎯 *Objetivo de Goles (20+) y Titularidad:*\n` +
+      `3️⃣ 🎯 *Objetivo de Goles (20+) y Alineación Auto por Bot:*\n` +
       `• Objetivo mínimo: *${rules.minGoalsPerTournament}+ goles* por torneo.\n` +
-      `• La alineación titular (4v4, 8v8, 16v16, 24v24, 32v32) se elige por:\n` +
+      `• 🤖 *El Bot decide automáticamente el tamaño del torneo* (4v4, 8v8, 16v16, 24v24, 32v32) según los jugadores listos en el check-in!\n` +
+      `• La titularidad se otorga por:\n` +
       `  1. Confirmar [ 🟢 Estoy Listo ] antes del partido\n` +
-      `  2. 0 strikes (disciplina perfecta)\n` +
+      `  2. 0 strikes (disciplina limpia prioritaria)\n` +
       `  3. Mayor promedio de goles en **tus propios últimos 5 partidos jugados**!\n` +
       `────────────────────\n` +
       `4️⃣ 🛡️ *Avisos y Justificaciones:*\n` +
@@ -2711,11 +2826,12 @@ function formatRules(lang = 'ru') {
     `• В течение *${rules.telegramDeadlineDays || 3} дней* игрок обязан подтвердить аккаунт в боте и вступить в канал/чат.\n` +
     `• Не зарегистрированные через 3 дня = *КИК* из лиги.\n` +
     `────────────────────\n` +
-    `3️⃣ 🎯 *Планка голов и Основа на турниры:*\n` +
+    `3️⃣ 🎯 *Планка голов и Авто-выбор основы Ботом:*\n` +
     `• Цель лиги: *${rules.minGoalsPerTournament}+ голов* за турнир.\n` +
-    `• Стартовый состав (4v4, 8v8, 16v16, 24v24, 32v32) выбирается по:\n` +
+    `• 🤖 *Бот автоматически определяет формат матча* (4x4, 8x8, 16x16, 24x24, 32x32) по числу готовых игроков в чек-ине!\n` +
+    `• Стартовый состав отбирается строго по критериям:\n` +
     `  1. Чек-ин готовности [ 🟢 Готов к игре ] перед матчем\n` +
-    `  2. 0 страйков (строгая дисциплина)\n` +
+    `  2. 0 страйков (строгая дисциплина в приоритете)\n` +
     `  3. Лучший средний показатель забитых голов в **своих последних 5 матчах**!\n` +
     `────────────────────\n` +
     `4️⃣ 🛡️ *Предупреждения и Уважительные причины:*\n` +
@@ -3544,9 +3660,10 @@ export default async function handler(req, res) {
           updatedText = await formatStrikes(targetLang);
           updatedKeyboard = getLanguageKeyboard('strikes', '0', targetLang, isCbPrivate);
         } else if (category === 'lineup') {
-          const size = parseInt(param, 10) || 16;
-          updatedText = await formatSmartLineup(size, targetLang);
-          updatedKeyboard = getLineupKeyboard(size, targetLang, isCbPrivate);
+          const reqSize = param === 'auto' ? null : (parseInt(param, 10) || null);
+          const lineupData = await generateSmartLineup(reqSize);
+          updatedText = await formatSmartLineup(reqSize, targetLang);
+          updatedKeyboard = getLineupKeyboard(lineupData.size, targetLang, isCbPrivate, lineupData.isAuto);
         } else if (category === 'checkin') {
           const regData = await getRegisteredPlayers();
           syncCurrentCheckInState(regData);
@@ -3634,9 +3751,12 @@ export default async function handler(req, res) {
           catName = 'Strikes & Debtors List';
         } else if (cat.startsWith('lineup')) {
           const parts = cat.split('_');
-          const size = parseInt(parts[1], 10) || 16;
-          bcastText = await formatSmartLineup(size, 'ru');
-          const channelKeyboard = getLineupKeyboard(size, 'ru', false);
+          const rawSize = parts[1];
+          const reqSize = rawSize === 'auto' ? null : (parseInt(rawSize, 10) || null);
+          const lineupData = await generateSmartLineup(reqSize);
+          const size = lineupData.size;
+          bcastText = await formatSmartLineup(reqSize, 'ru');
+          const channelKeyboard = getLineupKeyboard(size, 'ru', false, lineupData.isAuto);
 
           // Auto-delete obsolete pre-match check-in from channel if present!
           const regData = await getRegisteredPlayers();
@@ -3739,12 +3859,17 @@ export default async function handler(req, res) {
 
       if (data.startsWith('fmt_lineup_')) {
         const parts = data.split('_');
-        const size = parseInt(parts[2], 10) || 16;
+        const rawSize = parts[2];
         const lang = parts[3] || 'ru';
-        const updatedText = await formatSmartLineup(size, lang);
-        const updatedKeyboard = getLineupKeyboard(size, lang, isCbPrivate);
+        const reqSize = rawSize === 'auto' ? null : (parseInt(rawSize, 10) || null);
+        const lineupData = await generateSmartLineup(reqSize);
+        const updatedText = await formatSmartLineup(reqSize, lang);
+        const updatedKeyboard = getLineupKeyboard(lineupData.size, lang, isCbPrivate, lineupData.isAuto);
         await editTelegramMessage(chatId, cb.message.message_id, updatedText, updatedKeyboard);
-        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: `✓ ${size}v${size}` });
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: lineupData.isAuto ? `🤖 Auto (${lineupData.size}v${lineupData.size})` : `✓ ${lineupData.size}v${lineupData.size}`
+        });
         return sendResponse(res, 200, 'OK');
       }
 
@@ -3995,8 +4120,9 @@ export default async function handler(req, res) {
       }
 
       if (data === 'cmd_lineup') {
-        const text = await formatSmartLineup(16, 'ru');
-        await sendTelegramMessage(chatId, text, getLineupKeyboard(16, 'ru', true));
+        const lineupData = await generateSmartLineup(null);
+        const text = await formatSmartLineup(null, 'ru');
+        await sendTelegramMessage(chatId, text, getLineupKeyboard(lineupData.size, 'ru', true, lineupData.isAuto));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -4222,10 +4348,11 @@ export default async function handler(req, res) {
 
       if (text.startsWith('/lineup')) {
         const parts = text.split(/\s+/);
-        const requestedSize = parts[1] ? parseInt(parts[1], 10) : 16;
-        const size = [4, 8, 12, 16, 20, 24, 32].includes(requestedSize) ? requestedSize : 16;
-        const lineupMsg = await formatSmartLineup(size, 'ru');
-        await sendTelegramMessage(chatId, lineupMsg, getLineupKeyboard(size, 'ru', false));
+        const rawSize = parts[1];
+        const reqSize = rawSize ? parseInt(rawSize, 10) : null;
+        const lineupData = await generateSmartLineup(reqSize);
+        const lineupMsg = await formatSmartLineup(reqSize, 'ru');
+        await sendTelegramMessage(chatId, lineupMsg, getLineupKeyboard(lineupData.size, 'ru', false, lineupData.isAuto));
         return sendResponse(res, 200, 'OK');
       }
 
@@ -4458,10 +4585,11 @@ export default async function handler(req, res) {
 
     if (text.startsWith('/lineup')) {
       const parts = text.split(/\s+/);
-      const requestedSize = parts[1] ? parseInt(parts[1], 10) : 16;
-      const size = [4, 8, 12, 16, 20, 24, 32].includes(requestedSize) ? requestedSize : 16;
-      const lineupMsg = await formatSmartLineup(size, 'ru');
-      await sendTelegramMessage(chatId, lineupMsg, getLineupKeyboard(size, 'ru', true));
+      const rawSize = parts[1];
+      const reqSize = rawSize ? parseInt(rawSize, 10) : null;
+      const lineupData = await generateSmartLineup(reqSize);
+      const lineupMsg = await formatSmartLineup(reqSize, 'ru');
+      await sendTelegramMessage(chatId, lineupMsg, getLineupKeyboard(lineupData.size, 'ru', true, lineupData.isAuto));
       return sendResponse(res, 200, 'OK');
     }
 
@@ -4741,3 +4869,12 @@ export default async function handler(req, res) {
     return sendResponse(res, 200, 'Error handled: ' + err.message);
   }
 }
+
+export {
+  generateSmartLineup,
+  formatSmartLineup,
+  getLineupKeyboard,
+  calculateOptimalTournamentSize,
+  formatCheckInPrompt,
+  formatRules
+};
