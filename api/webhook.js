@@ -113,14 +113,29 @@ async function isUserAdmin(userId) {
     return cached.isAdmin;
   }
 
-  // 2. ADMIN_USER_IDS environment variable whitelist
+  // 2. Hardcoded super-admin Bilal & ADMIN_USER_IDS environment variable whitelist
+  if (strId === '5414088590') {
+    adminCache.set(strId, { isAdmin: true, expiresAt: Date.now() + 5 * 60 * 1000 });
+    return true;
+  }
   const envAdminIds = (process.env.ADMIN_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
   if (envAdminIds.includes(strId)) {
     adminCache.set(strId, { isAdmin: true, expiresAt: Date.now() + 5 * 60 * 1000 });
     return true;
   }
 
-  // 3. Check Channel Creator or Administrator status on CHANNEL_ID
+  // 3. Registered players with is_admin or is_owner
+  try {
+    const regData = await getRegisteredPlayers();
+    for (const r of Object.values(regData.registrations || {})) {
+      if (String(r.telegram_id) === strId && (r.is_admin || r.is_owner || r.role === 'Admin' || r.role === 'Owner')) {
+        adminCache.set(strId, { isAdmin: true, expiresAt: Date.now() + 5 * 60 * 1000 });
+        return true;
+      }
+    }
+  } catch (e) {}
+
+  // 4. Check Channel Creator or Administrator status on CHANNEL_ID
   try {
     const res = await telegramRequest('getChatMember', {
       chat_id: CHANNEL_ID,
@@ -755,6 +770,10 @@ async function saveRegisteredPlayersRaw(data, commitMsg = 'Update registered_pla
   try {
     const localPath = path.join(process.cwd(), 'docs', 'league-data', 'registered_players.json');
     fs.writeFileSync(localPath, JSON.stringify(data, null, 2), 'utf8');
+    const altPath = path.join(process.cwd(), 'league-data', 'registered_players.json');
+    if (fs.existsSync(path.dirname(altPath))) {
+      fs.writeFileSync(altPath, JSON.stringify(data, null, 2), 'utf8');
+    }
   } catch (e) {}
 
   try {
@@ -1123,11 +1142,12 @@ async function evaluateAllSquadStrikes() {
       consecutive0 = 0;
     }
 
-    const consecutiveKick = consecutive0 >= (rules.consecutiveMissesKick || 2);
-    const strikeKick = strikesCount >= (rules.maxMissesKick || 3);
-    const isEligibleForKick = !isExcused && (consecutiveKick || strikeKick);
+    const isLeadership = ['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1'].includes(id.toLowerCase()) ||
+      Boolean(regData && regData.registrations && regData.registrations[id] && (regData.registrations[id].is_admin || regData.registrations[id].is_owner || regData.registrations[id].role === 'Owner' || regData.registrations[id].role === 'Admin'));
 
-    const isTelegramVerified = Boolean(regData && regData.registrations && regData.registrations[id]);
+    const isEligibleForKick = !isExcused && !isLeadership && (consecutiveKick || strikeKick);
+
+    const isTelegramVerified = Boolean(isLeadership || (regData && regData.registrations && regData.registrations[id]));
 
     return {
       pid: id,
@@ -2083,70 +2103,237 @@ function getPhotoWarningKeyboard(currentLang = 'ru') {
   };
 }
 
+function getCanonicalPlayerKey(pid, displayName) {
+  const normName = (displayName || '').trim().toLowerCase();
+  const normPid = (pid || '').trim().toLowerCase();
+
+  if (normPid === 'sanya' || normPid === 'саня' || normName === 'саня' || normName === 'sanya') {
+    return 'sanya';
+  }
+  if (normPid === 'doxibro' || normPid === 'doxibero' || normName === 'doxibéro' || normName === 'doxibero') {
+    return 'doxibro';
+  }
+  if (normPid === 'doxibero1' || normName === 'doxibero1') {
+    return 'doxibero1';
+  }
+  if (normPid === 'tima' || normPid === 'тима' || normName === 'тима' || normName === 'tima') {
+    return 'tima';
+  }
+  return normName || normPid;
+}
+
 async function formatPendingAudit(lang = 'ru') {
   const regData = await getRegisteredPlayers();
   const registeredMap = regData.registrations || {};
 
   const { pIndex } = loadLeagueData();
 
-  const allPlayersMap = new Map();
+  const playersByKey = new Map();
   for (const [pid, p] of Object.entries(pIndex || {})) {
-    if (p && p.display_name) {
-      allPlayersMap.set(pid, p.display_name);
+    if (!p || !p.display_name) continue;
+    const key = getCanonicalPlayerKey(pid, p.display_name);
+    if (!playersByKey.has(key)) {
+      playersByKey.set(key, {
+        pids: [pid],
+        displayName: p.display_name
+      });
+    } else {
+      const pids = playersByKey.get(key).pids;
+      if (!pids.includes(pid)) pids.push(pid);
     }
   }
 
   if (globalLatestTournament && globalLatestTournament.matches) {
     for (const m of globalLatestTournament.matches) {
       if (m.player_id && m.player_display_name) {
-        allPlayersMap.set(m.player_id, m.player_display_name);
+        const key = getCanonicalPlayerKey(m.player_id, m.player_display_name);
+        if (!playersByKey.has(key)) {
+          playersByKey.set(key, {
+            pids: [m.player_id],
+            displayName: m.player_display_name
+          });
+        } else {
+          const pids = playersByKey.get(key).pids;
+          if (!pids.includes(m.player_id)) pids.push(m.player_id);
+        }
       }
     }
   }
 
   for (const [rId, reg] of Object.entries(registeredMap)) {
-    if (reg && reg.display_name && !allPlayersMap.has(reg.player_id)) {
-      allPlayersMap.set(reg.player_id, reg.display_name);
+    if (reg && reg.display_name) {
+      const key = getCanonicalPlayerKey(reg.player_id || rId, reg.display_name);
+      if (!playersByKey.has(key)) {
+        playersByKey.set(key, {
+          pids: [reg.player_id || rId],
+          displayName: reg.display_name
+        });
+      } else {
+        const pids = playersByKey.get(key).pids;
+        if (reg.player_id && !pids.includes(reg.player_id)) pids.push(reg.player_id);
+      }
     }
   }
 
+  const leadership = [];
   const verified = [];
   const pending = [];
 
-  for (const [pid, name] of allPlayersMap.entries()) {
-    const reg = registeredMap[pid];
-    if (reg) {
-      const tgUser = reg.telegram_username ? `@${reg.telegram_username}` : `ID:${reg.telegram_id}`;
+  for (const [key, pInfo] of playersByKey.entries()) {
+    let reg = null;
+    for (const pid of pInfo.pids) {
+      if (registeredMap[pid]) {
+        reg = registeredMap[pid];
+        break;
+      }
+    }
+    if (!reg && registeredMap[key]) {
+      reg = registeredMap[key];
+    }
+
+    const isOwner = key === 'sanya' || (reg && (reg.is_owner || reg.role === 'Owner'));
+    const isAdmin = key === 'doxibro' || key === 'doxibero1' || (reg && (reg.is_admin || reg.role === 'Admin'));
+
+    if (isOwner) {
+      const tgUser = reg && reg.telegram_username ? ` → @${reg.telegram_username}` : (reg && reg.telegram_id ? ` → ID:${reg.telegram_id}` : '');
+      const ownerLabel = lang === 'ar' ? 'مؤسس ورئيس الدوري' :
+                         lang === 'es' ? 'Creador y Dueño de la Liga' :
+                         lang === 'en' ? 'League Creator & Owner' :
+                         'Создатель и Владелец лиги';
+      leadership.push(`• 👑 *${clean(pInfo.displayName)}* — ${ownerLabel}${tgUser}`);
+    } else if (isAdmin) {
+      const tgUser = reg && reg.telegram_username ? ` → @${reg.telegram_username}` : (reg && reg.telegram_id ? ` → ID:${reg.telegram_id}` : '');
+      const adminLabel = lang === 'ar' ? 'مسؤول الدوري' :
+                         lang === 'es' ? 'Administrador' :
+                         lang === 'en' ? 'League Admin' :
+                         'Администратор лиги';
+      leadership.push(`• 🛡️ *${clean(pInfo.displayName)}* — ${adminLabel}${tgUser}`);
+    } else if (reg) {
+      const tgUser = reg.telegram_username ? `@${reg.telegram_username}` : (reg.telegram_id ? `ID:${reg.telegram_id}` : 'Verified');
       const uidTag = reg.uid ? ` [UID: ${reg.uid}]` : '';
       const newTag = reg.is_new_member ? ' *(New)*' : '';
-      verified.push(`• *${clean(name)}*${uidTag}${newTag} → ${tgUser}`);
+      verified.push(`• *${clean(pInfo.displayName)}*${uidTag}${newTag} → ${tgUser}`);
     } else {
-      pending.push(`• *${clean(name)}*`);
+      pending.push(`• *${clean(pInfo.displayName)}*`);
     }
   }
 
-  const total = allPlayersMap.size;
-  const vCount = verified.length;
+  // Sort leadership so Owner is first
+  leadership.sort((a, b) => {
+    if (a.includes('👑') && !b.includes('👑')) return -1;
+    if (!a.includes('👑') && b.includes('👑')) return 1;
+    return a.localeCompare(b);
+  });
+
+  const total = playersByKey.size;
+  const vCount = leadership.length + verified.length;
   const pCount = pending.length;
   const pct = total > 0 ? Math.round((vCount / total) * 100) : 0;
 
-  let msg = `📋 *БРАТВА FCM — TELEGRAM SQUAD AUDIT* ⚜️\n\n` +
-    `📊 *Registration Status (3-Day Deadline):*\n` +
-    `• Total Roster: *${total}* players\n` +
-    `• ✅ Verified on Telegram: *${vCount}* (${pct}%)\n` +
-    `• ❌ Not Registered (To Kick): *${pCount}* (${100 - pct}%)\n\n`;
+  if (lang === 'en') {
+    let msg = `📋 *БРАТВА FCM — TELEGRAM SQUAD AUDIT* ⚜️\n\n` +
+      `📊 *Registration Status (3-Day Deadline):*\n` +
+      `• Total Roster: *${total}* players\n` +
+      `• 👑 Leadership (Owner & Admins): *${leadership.length}* (100% verified)\n` +
+      `• ✅ Verified on Telegram: *${vCount}* (${pct}%)\n` +
+      `• ❌ Not Registered (To Kick): *${pCount}* (${100 - pct}%)\n\n`;
 
-  if (pCount > 0) {
-    msg += `❌ *PLAYERS NOT YET ON TELEGRAM (${pCount}):*\n` +
-      `${pending.slice(0, 30).join('\n')}\n\n` +
-      `⚠️ *Anyone remaining on this ❌ list after the 3-day deadline will be kicked from the in-game league!*\n\n`;
-  } else {
-    msg += `🎉 *100% SQUAD VERIFIED!* All members have successfully registered on Telegram!\n\n`;
+    if (leadership.length > 0) {
+      msg += `👑 *LEAGUE LEADERSHIP (Admins & Owner):*\n${leadership.join('\n')}\n\n`;
+    }
+
+    if (pCount > 0) {
+      msg += `❌ *PLAYERS NOT YET ON TELEGRAM (${pCount}):*\n` +
+        `${pending.slice(0, 30).join('\n')}${pending.length > 30 ? `\n_...and ${pending.length - 30} more_` : ''}\n\n` +
+        `⚠️ *Anyone remaining on this ❌ list after the 3-day deadline will be kicked from the in-game league!*\n\n`;
+    } else {
+      msg += `🎉 *100% SQUAD VERIFIED!* All members have successfully registered on Telegram!\n\n`;
+    }
+
+    if (verified.length > 0) {
+      msg += `✅ *VERIFIED SQUAD MEMBERS (${verified.length}):*\n` +
+        `${verified.slice(0, 20).join('\n')}${verified.length > 20 ? `\n_...and ${verified.length - 20} more_` : ''}`;
+    }
+    return msg;
   }
 
-  if (vCount > 0) {
-    msg += `✅ *VERIFIED MEMBERS (${vCount}):*\n` +
-      `${verified.slice(0, 20).join('\n')}${verified.length > 20 ? `\n_...and ${verified.length - 20} more_` : ''}`;
+  if (lang === 'ar') {
+    let msg = `📋 *دوري БРАТВА — تدقيق أعضاء تيليجرام* ⚜️\n\n` +
+      `📊 *حالة التسجيل (مهلة 3 أيام):*\n` +
+      `• إجمالي اللاعبين: *${total}* لاعباً\n` +
+      `• 👑 إدارة الدوري (المالك والمسؤولون): *${leadership.length}* (100% موثقون)\n` +
+      `• ✅ المسجلون في تيليجرام: *${vCount}* (${pct}%)\n` +
+      `• ❌ غير مسجلين (عرضة للاستبعاد): *${pCount}* (${100 - pct}%)\n\n`;
+
+    if (leadership.length > 0) {
+      msg += `👑 *إدارة ورئاسة الدوري (المالك والمسؤولون):*\n${leadership.join('\n')}\n\n`;
+    }
+
+    if (pCount > 0) {
+      msg += `❌ *أعضاء لم يسجلوا بعد في تيليجرام (${pCount}):*\n` +
+        `${pending.slice(0, 30).join('\n')}${pending.length > 30 ? `\n_...و ${pending.length - 30} آخرين_` : ''}\n\n` +
+        `⚠️ *كل من يبقى في هذه القائمة ❌ بعد انتهاء مهلة الـ 3 أيام سيتم استبعاده فوراً من الدوري داخل اللعبة!*\n\n`;
+    } else {
+      msg += `🎉 *اكتمل التوثيق 100%!* جميع أعضاء الفريق انضموا وسجلوا بنجاح في تيليجرام!\n\n`;
+    }
+
+    if (verified.length > 0) {
+      msg += `✅ *الأعضاء الموثقون (${verified.length}):*\n` +
+        `${verified.slice(0, 20).join('\n')}${verified.length > 20 ? `\n_...و ${verified.length - 20} آخرين_` : ''}`;
+    }
+    return msg;
+  }
+
+  if (lang === 'es') {
+    let msg = `📋 *БРАТВА FCM — AUDITORÍA DE REGISTRO EN TELEGRAM* ⚜️\n\n` +
+      `📊 *Estado de Registro (Plazo de 3 Días):*\n` +
+      `• Plantilla Total: *${total}* jugadores\n` +
+      `• 👑 Liderazgo (Dueño y Admins): *${leadership.length}* (100% verificados)\n` +
+      `• ✅ Verificados en Telegram: *${vCount}* (${pct}%)\n` +
+      `• ❌ No Registrados (Para Expulsión): *${pCount}* (${100 - pct}%)\n\n`;
+
+    if (leadership.length > 0) {
+      msg += `👑 *LIDERAZGO DE LA LIGA (Dueño y Admins):*\n${leadership.join('\n')}\n\n`;
+    }
+
+    if (pCount > 0) {
+      msg += `❌ *JUGADORES QUE AÚN NO ESTÁN EN TELEGRAM (${pCount}):*\n` +
+        `${pending.slice(0, 30).join('\n')}${pending.length > 30 ? `\n_...y ${pending.length - 30} más_` : ''}\n\n` +
+        `⚠️ *¡Cualquiera que permanezca en esta lista ❌ tras 3 días será expulsado de la liga en el juego!*\n\n`;
+    } else {
+      msg += `🎉 *¡100% DE LA PLANTILLA VERIFICADA!* ¡Todos los miembros están registrados en Telegram!\n\n`;
+    }
+
+    if (verified.length > 0) {
+      msg += `✅ *MIEMBROS VERIFICADOS (${verified.length}):*\n` +
+        `${verified.slice(0, 20).join('\n')}${verified.length > 20 ? `\n_...y ${verified.length - 20} más_` : ''}`;
+    }
+    return msg;
+  }
+
+  // Russian (Default)
+  let msg = `📋 *БРАТВА FCM — TELEGRAM SQUAD AUDIT* ⚜️\n\n` +
+    `📊 *Статус регистрации (Дедлайн 3 дня / 72ч):*\n` +
+    `• Общий состав: *${total}* бойцов\n` +
+    `• 👑 Руководство (Владелец и Админы): *${leadership.length}* (100% подтверждены)\n` +
+    `• ✅ Подтверждено в Telegram: *${vCount}* (${pct}%)\n` +
+    `• ❌ Не зарегистрированы (На кик): *${pCount}* (${100 - pct}%)\n\n`;
+
+  if (leadership.length > 0) {
+    msg += `👑 *РУКОВОДСТВО ЛИГИ (Владелец и Админы):*\n${leadership.join('\n')}\n\n`;
+  }
+
+  if (pCount > 0) {
+    msg += `❌ *ИГРОКИ НЕ В TELEGRAM (${pCount}):*\n` +
+      `${pending.slice(0, 30).join('\n')}${pending.length > 30 ? `\n_...и ещё ${pending.length - 30}_` : ''}\n\n` +
+      `⚠️ *Все, кто останется в этом списке ❌ после 3 дней (72ч), будут исключены из состава Лиги в игре!*\n\n`;
+  } else {
+    msg += `🎉 *100% СОСТАВА В TELEGRAM!* Все бойцы успешно подтвердили регистрацию!\n\n`;
+  }
+
+  if (verified.length > 0) {
+    msg += `✅ *ПОДТВЕРЖДЁННЫЕ УЧАСТНИКИ (${verified.length}):*\n` +
+      `${verified.slice(0, 20).join('\n')}${verified.length > 20 ? `\n_...и ещё ${verified.length - 20}_` : ''}`;
   }
 
   return msg;
@@ -3382,9 +3569,9 @@ export default async function handler(req, res) {
           return sendResponse(res, 200, 'OK');
         }
 
-        const matchedReg = Object.values(regData.registrations || {}).find(r => String(r.telegram_id) === String(userId));
+        const matchedRegs = Object.values(regData.registrations || {}).filter(r => String(r.telegram_id) === String(userId));
 
-        if (!matchedReg) {
+        if (matchedRegs.length === 0) {
           try {
             await telegramRequest('answerCallbackQuery', {
               callback_query_id: cb.id,
@@ -3395,18 +3582,21 @@ export default async function handler(req, res) {
           return sendResponse(res, 200, 'OK');
         }
 
-        currentCheckIn.ready.add(matchedReg.player_id);
-        currentCheckIn.away.delete(matchedReg.player_id);
+        for (const reg of matchedRegs) {
+          currentCheckIn.ready.add(reg.player_id);
+          currentCheckIn.away.delete(reg.player_id);
+        }
 
         if (!regData.current_checkin) regData.current_checkin = { ready: [], away: [] };
         regData.current_checkin.ready = Array.from(currentCheckIn.ready);
         regData.current_checkin.away = Array.from(currentCheckIn.away);
-        saveRegisteredPlayersRaw(regData, `CheckIn: ${matchedReg.display_name} is Ready`);
+        const readyNamesList = matchedRegs.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
+        saveRegisteredPlayersRaw(regData, `CheckIn: ${readyNamesList} is Ready`);
 
         try {
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
-            text: `🟢 ${matchedReg.display_name}: Confirmed READY for tournament!`,
+            text: `🟢 ${readyNamesList}: Confirmed READY for tournament!`,
             show_alert: false
           });
         } catch (e) {}
@@ -3439,9 +3629,9 @@ export default async function handler(req, res) {
           return sendResponse(res, 200, 'OK');
         }
 
-        const matchedReg = Object.values(regData.registrations || {}).find(r => String(r.telegram_id) === String(userId));
+        const matchedRegs = Object.values(regData.registrations || {}).filter(r => String(r.telegram_id) === String(userId));
 
-        if (!matchedReg) {
+        if (matchedRegs.length === 0) {
           try {
             await telegramRequest('answerCallbackQuery', {
               callback_query_id: cb.id,
@@ -3452,18 +3642,21 @@ export default async function handler(req, res) {
           return sendResponse(res, 200, 'OK');
         }
 
-        currentCheckIn.away.add(matchedReg.player_id);
-        currentCheckIn.ready.delete(matchedReg.player_id);
+        for (const reg of matchedRegs) {
+          currentCheckIn.away.add(reg.player_id);
+          currentCheckIn.ready.delete(reg.player_id);
+        }
 
         if (!regData.current_checkin) regData.current_checkin = { ready: [], away: [] };
         regData.current_checkin.ready = Array.from(currentCheckIn.ready);
         regData.current_checkin.away = Array.from(currentCheckIn.away);
-        saveRegisteredPlayersRaw(regData, `CheckIn: ${matchedReg.display_name} is Away`);
+        const awayNamesList = matchedRegs.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
+        saveRegisteredPlayersRaw(regData, `CheckIn: ${awayNamesList} is Away`);
 
         try {
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
-            text: `🔴 ${matchedReg.display_name}: Marked as NOT available.`,
+            text: `🔴 ${awayNamesList}: Marked as NOT available.`,
             show_alert: false
           });
         } catch (e) {}
@@ -3807,19 +4000,22 @@ export default async function handler(req, res) {
       }
 
       // 4. Check if this player is ALREADY verified & registered
-      const existingReg = Object.values(regData.registrations || {}).find(r => String(r.telegram_id) === String(userId));
-      if (existingReg) {
+      const existingRegs = Object.values(regData.registrations || {}).filter(r => String(r.telegram_id) === String(userId));
+      if (existingRegs.length > 0) {
         if (text === '/reset' || text === '/change') {
-          delete regData.registrations[existingReg.player_id];
-          await saveRegisteredPlayersRaw(regData, `Player Reset: TG @${existingReg.telegram_username || userId}`);
+          for (const reg of existingRegs) {
+            delete regData.registrations[reg.player_id];
+          }
+          await saveRegisteredPlayersRaw(regData, `Player Reset: TG @${existingRegs[0].telegram_username || userId}`);
           const vPrompt = formatVerificationPrompt('ru');
           const vKeys = getVerificationKeyboard('ru');
           await sendTelegramMessage(chatId, vPrompt, vKeys);
           return sendResponse(res, 200, 'Registration reset');
         }
 
-        const vSuccessText = formatVerificationSuccess(existingReg.display_name, existingReg.uid, 'ru');
-        const vSuccessKeys = getVerificationSuccessKeyboard(existingReg.player_id, 'ru');
+        const names = existingRegs.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
+        const vSuccessText = formatVerificationSuccess(names, existingRegs[0].uid, 'ru');
+        const vSuccessKeys = getVerificationSuccessKeyboard(existingRegs[0].player_id, 'ru');
         await sendTelegramMessage(chatId, vSuccessText, vSuccessKeys);
         return sendResponse(res, 200, 'Already registered');
       }
@@ -3847,6 +4043,13 @@ export default async function handler(req, res) {
 
       // 6. User submitted their in-game username
       const inputName = text.trim();
+
+      // Protect League Owner / Admins accounts
+      const isTryingOwnerName = ['sanya', 'саня'].includes(inputName.toLowerCase().trim());
+      if (isTryingOwnerName) {
+        await sendTelegramMessage(chatId, '👑 *Этот аккаунт закреплён за Создателем лиги (саня).* Пожалуйста, укажите ваш собственный никнейм в игре.');
+        return sendResponse(res, 200, 'Protected Owner Account');
+      }
 
       // Check if this username is already registered by a DIFFERENT Telegram user (Duplicate Name)
       const existingClaim = Object.values(regData.registrations || {}).find(r => {

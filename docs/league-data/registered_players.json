@@ -1,16 +1,72 @@
 {
-  "lastUpdated": "2026-09-09T01:17:05.523Z",
+  "lastUpdated": "2026-09-09T01:30:00.000Z",
   "registrations": {
-    "member_test1": {
-      "player_id": "member_test1",
-      "display_name": "test1",
-      "in_game_name": "test1",
+    "doxibero1": {
+      "player_id": "doxibero1",
+      "display_name": "DOXIBERO1",
+      "in_game_name": "DOXIBERO1",
       "uid": null,
       "telegram_id": 5414088590,
       "telegram_username": "bilalmorocci",
       "telegram_name": "Bilal",
-      "is_new_member": true,
-      "registered_at": "2026-09-08T20:45:27.180Z"
+      "is_admin": true,
+      "role": "Admin",
+      "is_new_member": false,
+      "registered_at": "2026-09-08T20:00:00.000Z"
+    },
+    "doxibro": {
+      "player_id": "doxibro",
+      "display_name": "DOXIBÉRO",
+      "in_game_name": "DOXIBÉRO",
+      "uid": null,
+      "telegram_id": 5414088590,
+      "telegram_username": "bilalmorocci",
+      "telegram_name": "Bilal",
+      "is_admin": true,
+      "role": "Admin",
+      "is_new_member": false,
+      "registered_at": "2026-09-08T20:00:00.000Z"
+    },
+    "doxibero": {
+      "player_id": "doxibero",
+      "display_name": "DOXIBÉRO",
+      "in_game_name": "DOXIBÉRO",
+      "uid": null,
+      "telegram_id": 5414088590,
+      "telegram_username": "bilalmorocci",
+      "telegram_name": "Bilal",
+      "is_admin": true,
+      "role": "Admin",
+      "is_new_member": false,
+      "registered_at": "2026-09-08T20:00:00.000Z"
+    },
+    "sanya": {
+      "player_id": "sanya",
+      "display_name": "саня",
+      "in_game_name": "саня",
+      "uid": null,
+      "telegram_id": null,
+      "telegram_username": null,
+      "telegram_name": "саня",
+      "is_admin": true,
+      "is_owner": true,
+      "role": "Owner",
+      "is_new_member": false,
+      "registered_at": "2026-08-01T00:00:00.000Z"
+    },
+    "саня": {
+      "player_id": "саня",
+      "display_name": "саня",
+      "in_game_name": "саня",
+      "uid": null,
+      "telegram_id": null,
+      "telegram_username": null,
+      "telegram_name": "саня",
+      "is_admin": true,
+      "is_owner": true,
+      "role": "Owner",
+      "is_new_member": false,
+      "registered_at": "2026-08-01T00:00:00.000Z"
     },
     "rogelio": {
       "player_id": "rogelio",
@@ -25,12 +81,12 @@
     }
   },
   "current_checkin": {
-    "ready": [],
-    "away": [],
     "active": false,
     "openedAt": null,
     "expiresAt": null,
     "durationMinutes": 60,
-    "channel_msg_id": null
+    "channel_msg_id": null,
+    "ready": [],
+    "away": []
   }
 }
