@@ -17,7 +17,8 @@ import path from 'path';
 
 const TELEGRAM_TOKEN = (process.env.TELEGRAM_TOKEN || '').trim();
 const GEMINI_KEY = (process.env.GEMINI_KEY || '').trim();
-const GEMINI_MODEL = (process.env.GEMINI_MODEL || 'gemini-3.7-flash').trim();
+const rawEnvModel = (process.env.GEMINI_MODEL || '').trim();
+const GEMINI_MODEL = (rawEnvModel && rawEnvModel !== 'gemini-3.6-flash' && rawEnvModel !== 'gemini-1.5-flash') ? rawEnvModel : 'gemini-3.7-flash';
 const GITHUB_PAT = (process.env.GITHUB_PAT || '').trim();
 const GITHUB_REPO = process.env.GITHUB_REPO || 'bratvafcm/bratvafcm.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
