@@ -1,0 +1,142 @@
+{
+  "id": "2026-09-09_zbirna_ukrayini",
+  "date": "2026-09-09",
+  "timestamp": 1788965585828,
+  "opponent_league": "Збірна України+",
+  "our_total_goals": 207,
+  "opponent_total_goals": 394,
+  "result": "loss",
+  "status": "complete",
+  "total_turns_played": 22,
+  "max_possible_turns": 48,
+  "matches": [
+    {
+      "board_order": 1,
+      "player_id": "саня",
+      "player_display_name": "саня",
+      "ovr": 128,
+      "goals_for": 36,
+      "turns_played": 3
+    },
+    {
+      "board_order": 2,
+      "player_id": "psg",
+      "player_display_name": "PSG",
+      "ovr": 126,
+      "goals_for": 21,
+      "turns_played": 3
+    },
+    {
+      "board_order": 3,
+      "player_id": "king_pentax",
+      "player_display_name": "King_Pentax",
+      "ovr": 125,
+      "goals_for": 34,
+      "turns_played": 3
+    },
+    {
+      "board_order": 4,
+      "player_id": "mike",
+      "player_display_name": "Mike",
+      "ovr": 125,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "board_order": 5,
+      "player_id": "omar",
+      "player_display_name": "Omar",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 6,
+      "player_id": "abirsh07",
+      "player_display_name": "Abirsh07",
+      "ovr": 125,
+      "goals_for": 31,
+      "turns_played": 3
+    },
+    {
+      "board_order": 7,
+      "player_id": "ema67",
+      "player_display_name": "EMA67",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 8,
+      "player_id": "sarah",
+      "player_display_name": "sarah",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 9,
+      "player_id": "mohamed_osama",
+      "player_display_name": "Mohamed_Osama",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 10,
+      "player_id": "rogelio",
+      "player_display_name": "Rogelio",
+      "ovr": 125,
+      "goals_for": 22,
+      "turns_played": 3
+    },
+    {
+      "board_order": 11,
+      "player_id": "sushenley",
+      "player_display_name": "SUSHenley",
+      "ovr": 125,
+      "goals_for": 6,
+      "turns_played": 1
+    },
+    {
+      "board_order": 12,
+      "player_id": "real",
+      "player_display_name": "Real",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 13,
+      "player_id": "said",
+      "player_display_name": "said",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 14,
+      "player_id": "тима",
+      "player_display_name": "Тима",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 15,
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
+      "ovr": 123,
+      "goals_for": 29,
+      "turns_played": 3
+    },
+    {
+      "board_order": 16,
+      "player_id": "progamer",
+      "player_display_name": "ProGamer",
+      "ovr": 122,
+      "goals_for": 0,
+      "turns_played": 0
+    }
+  ]
+}
