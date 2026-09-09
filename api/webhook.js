@@ -17,7 +17,7 @@ import path from 'path';
 
 const TELEGRAM_TOKEN = (process.env.TELEGRAM_TOKEN || '').trim();
 const GEMINI_KEY = (process.env.GEMINI_KEY || '').trim();
-const GEMINI_MODEL = (process.env.GEMINI_MODEL || 'gemini-1.5-flash').trim();
+const GEMINI_MODEL = (process.env.GEMINI_MODEL || 'gemini-3.6-flash').trim();
 const GITHUB_PAT = (process.env.GITHUB_PAT || '').trim();
 const GITHUB_REPO = process.env.GITHUB_REPO || 'bratvafcm/bratvafcm.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
@@ -407,7 +407,7 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
 
     const payload = JSON.stringify({ contents: [{ parts }] });
 
-    const modelsToTry = [GEMINI_MODEL, 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
+    const modelsToTry = [GEMINI_MODEL, 'gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-2.5-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
     let attempt = 0;
 
     const tryNextModel = () => {
@@ -417,10 +417,11 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
       const modelName = modelsToTry[attempt++];
       const req = https.request({
         hostname: 'generativelanguage.googleapis.com',
-        path: `/v1beta/models/${modelName}:generateContent?key=${GEMINI_KEY}`,
+        path: `/v1beta/models/${modelName}:generateContent`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-goog-api-key': GEMINI_KEY,
           'Content-Length': Buffer.byteLength(payload)
         }
       }, res => {
@@ -511,7 +512,7 @@ CRITICAL GUIDELINES:
       ]
     });
 
-    const modelsToTry = [GEMINI_MODEL, 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
+    const modelsToTry = [GEMINI_MODEL, 'gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-2.5-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
     let attempt = 0;
 
     const tryNextModel = () => {
@@ -521,10 +522,11 @@ CRITICAL GUIDELINES:
       const modelName = modelsToTry[attempt++];
       const req = https.request({
         hostname: 'generativelanguage.googleapis.com',
-        path: `/v1beta/models/${modelName}:generateContent?key=${GEMINI_KEY}`,
+        path: `/v1beta/models/${modelName}:generateContent`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-goog-api-key': GEMINI_KEY,
           'Content-Length': Buffer.byteLength(payload)
         }
       }, res => {
@@ -3120,32 +3122,39 @@ export default async function handler(req, res) {
             }, true);
           }
 
-          const modelToTest = (url.searchParams.get('model') || GEMINI_MODEL || 'gemini-1.5-flash').trim();
+          const modelToTest = (url.searchParams.get('model') || GEMINI_MODEL || 'gemini-3.6-flash').trim();
+          const timeoutMs = parseInt(url.searchParams.get('timeout') || '20000', 10);
+          const startTime = Date.now();
           const testRes = await new Promise((resolve) => {
             try {
               const payload = JSON.stringify({ contents: [{ parts: [{ text: 'Respond strictly with JSON: {"status": "ok"}' }] }] });
               const reqGem = https.request({
                 hostname: 'generativelanguage.googleapis.com',
-                path: `/v1beta/models/${modelToTest}:generateContent?key=${encodeURIComponent(GEMINI_KEY)}`,
+                path: `/v1beta/models/${modelToTest}:generateContent`,
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
+                  'x-goog-api-key': GEMINI_KEY,
                   'Content-Length': Buffer.byteLength(payload)
                 }
               }, resG => {
                 let d = '';
                 resG.on('data', c => d += c);
-                resG.on('end', () => resolve({ status: resG.statusCode, body: d }));
+                resG.on('end', () => resolve({
+                  status: resG.statusCode,
+                  durationMs: Date.now() - startTime,
+                  body: d
+                }));
               });
-              reqGem.setTimeout(7000, () => {
+              reqGem.setTimeout(timeoutMs, () => {
                 reqGem.destroy();
-                resolve({ error: 'Timeout calling Gemini after 7s' });
+                resolve({ error: `Timeout calling Gemini after ${timeoutMs}ms`, durationMs: Date.now() - startTime });
               });
-              reqGem.on('error', err => resolve({ error: err.message }));
+              reqGem.on('error', err => resolve({ error: err.message, durationMs: Date.now() - startTime }));
               reqGem.write(payload);
               reqGem.end();
             } catch (syncErr) {
-              resolve({ sync_error: syncErr.message });
+              resolve({ sync_error: syncErr.message, durationMs: Date.now() - startTime });
             }
           });
           return sendResponse(res, 200, {
