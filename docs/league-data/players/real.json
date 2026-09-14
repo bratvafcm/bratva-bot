@@ -2,12 +2,15 @@
   "player_id": "real",
   "display_name": "Real",
   "known_aliases": [],
+  "total_goals": 132,
+  "total_matches": 10,
+  "average_goals": 13.2,
   "matches": [
     {
       "tournament_id": "2026-09-04_al-afdal-al-riyadi-26",
-      "match_index_in_tournament": 11,
+      "match_index_in_tournament": 12,
       "opponent_display_name": "الافضل الرياضي26",
-      "opponent_id": "26",
+      "opponent_id": "2026-09-04_al-afdal-al-riyadi-26",
       "goals_for": 0,
       "goals_against": 0,
       "result": "win",
@@ -17,9 +20,9 @@
     },
     {
       "tournament_id": "2026-09-06_th-thedemon-fc",
-      "match_index_in_tournament": 12,
+      "match_index_in_tournament": 13,
       "opponent_display_name": "TH'·TheDemon·'FC",
-      "opponent_id": "th_thedemon_fc",
+      "opponent_id": "2026-09-06_th-thedemon-fc",
       "goals_for": 21,
       "goals_against": 0,
       "result": "win",
@@ -29,9 +32,9 @@
     },
     {
       "tournament_id": "2026-09-07_iran-gold",
-      "match_index_in_tournament": 11,
+      "match_index_in_tournament": 12,
       "opponent_display_name": "IRAN. gold",
-      "opponent_id": "iran_gold",
+      "opponent_id": "2026-09-07_iran-gold",
       "goals_for": 17,
       "goals_against": 0,
       "result": "draw",
@@ -41,9 +44,9 @@
     },
     {
       "tournament_id": "2026-09-08_memequis_juniors",
-      "match_index_in_tournament": 11,
+      "match_index_in_tournament": 12,
       "opponent_display_name": "Memequis Juniors",
-      "opponent_id": "memequis_juniors",
+      "opponent_id": "2026-09-08_memequis_juniors",
       "goals_for": 19,
       "goals_against": 0,
       "result": "loss",
@@ -53,15 +56,80 @@
     },
     {
       "tournament_id": "2026-09-09_zbirna_ukrainy",
-      "match_index_in_tournament": 11,
+      "match_index_in_tournament": 12,
       "opponent_display_name": "Збірна України™",
-      "opponent_id": "zbirna_ukrainy",
+      "opponent_id": "2026-09-09_zbirna_ukrainy",
       "goals_for": 0,
       "goals_against": 0,
       "result": "loss",
       "turns_played": 0,
       "player_display_name": "Real",
       "player_id": "real"
+    },
+    {
+      "tournament_id": "2026-09-09_zbirna_ukrayini",
+      "match_index_in_tournament": 12,
+      "opponent_display_name": "Збірна України+",
+      "opponent_id": "2026-09-09_zbirna_ukrayini",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Real",
+      "player_id": "real"
+    },
+    {
+      "tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "match_index_in_tournament": 12,
+      "opponent_display_name": "ED PHOENIX GEN 2",
+      "opponent_id": "2026-09-12_ed_phoenix_gen_2",
+      "goals_for": 22,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Real",
+      "player_id": "real"
+    },
+    {
+      "tournament_id": "2026-09-14_ed_phoenix_gen_2",
+      "match_index_in_tournament": 12,
+      "opponent_display_name": "ED PHOENIX GEN 2",
+      "opponent_id": "2026-09-14_ed_phoenix_gen_2",
+      "goals_for": 22,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Real",
+      "player_id": "real"
+    },
+    {
+      "tournament_id": "2026-09-14_na_legends",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "@NA.LEGENDS",
+      "opponent_id": "2026-09-14_na_legends",
+      "goals_for": 31,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Real",
+      "player_id": "real"
+    },
+    {
+      "tournament_id": "2026-09-14_vse_svoi",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "ВСЕ СВОИ",
+      "opponent_id": "2026-09-14_vse_svoi",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Real",
+      "player_id": "real"
     }
-  ]
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-09-14_na_legends",
+    "flagged_for_review": false
+  }
 }

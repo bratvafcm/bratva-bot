@@ -1,0 +1,27 @@
+{
+  "player_id": "rat",
+  "display_name": "R.ØÇAŇ¡TĄȘ",
+  "known_aliases": [],
+  "total_goals": 27,
+  "total_matches": 1,
+  "average_goals": 27,
+  "matches": [
+    {
+      "tournament_id": "2026-08-11_onsoranje",
+      "match_index_in_tournament": 8,
+      "opponent_display_name": "OnsOranje®",
+      "opponent_id": "2026-08-11_onsoranje",
+      "goals_for": 27,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "R.ØÇAŇ¡TĄȘ",
+      "player_id": "rat"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-08-11_onsoranje",
+    "flagged_for_review": false
+  }
+}

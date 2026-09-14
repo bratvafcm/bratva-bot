@@ -2,12 +2,15 @@
   "player_id": "xxev1lxx",
   "display_name": "XxEv1lxX",
   "known_aliases": [],
+  "total_goals": 0,
+  "total_matches": 2,
+  "average_goals": 0,
   "matches": [
     {
       "tournament_id": "2026-08-28_fc-shibankat-fan",
-      "match_index_in_tournament": 13,
+      "match_index_in_tournament": 14,
       "opponent_display_name": "FC SHIBANKAT FAN",
-      "opponent_id": "fc_shibankat_fan",
+      "opponent_id": "2026-08-28_fc-shibankat-fan",
       "goals_for": 0,
       "goals_against": 0,
       "result": "loss",
@@ -17,12 +20,12 @@
     },
     {
       "tournament_id": "2026-08-29_team-work",
-      "match_index_in_tournament": 17,
+      "match_index_in_tournament": 18,
       "opponent_display_name": "Team Work",
-      "opponent_id": "team_work",
+      "opponent_id": "2026-08-29_team-work",
       "goals_for": 0,
       "goals_against": 0,
-      "result": "draw",
+      "result": "win",
       "turns_played": 3,
       "player_display_name": "XxEv1lxX",
       "player_id": "xxev1lxx"
@@ -32,6 +35,5 @@
     "current_fail_streak": 0,
     "last_evaluated_tournament_id": "2026-08-29_team-work",
     "flagged_for_review": false
-  },
-  "average_goals": 0
+  }
 }

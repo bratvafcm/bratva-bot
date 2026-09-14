@@ -2,27 +2,30 @@
   "player_id": "jeniik_",
   "display_name": "Jeniik_",
   "known_aliases": [],
+  "total_goals": 32,
+  "total_matches": 2,
+  "average_goals": 16,
   "matches": [
     {
       "tournament_id": "2026-08-28_fc-shibankat-fan",
-      "match_index_in_tournament": 5,
+      "match_index_in_tournament": 6,
       "opponent_display_name": "FC SHIBANKAT FAN",
-      "opponent_id": "fc_shibankat_fan",
+      "opponent_id": "2026-08-28_fc-shibankat-fan",
       "goals_for": 32,
       "goals_against": 0,
-      "result": "win",
+      "result": "loss",
       "turns_played": 3,
       "player_display_name": "Jeniik_",
       "player_id": "jeniik_"
     },
     {
       "tournament_id": "2026-08-29_team-work",
-      "match_index_in_tournament": 14,
+      "match_index_in_tournament": 15,
       "opponent_display_name": "Team Work",
-      "opponent_id": "team_work",
+      "opponent_id": "2026-08-29_team-work",
       "goals_for": 0,
       "goals_against": 0,
-      "result": "loss",
+      "result": "win",
       "turns_played": 0,
       "player_display_name": "Jeniik_",
       "player_id": "jeniik_"
@@ -32,6 +35,5 @@
     "current_fail_streak": 1,
     "last_evaluated_tournament_id": "2026-08-29_team-work",
     "flagged_for_review": false
-  },
-  "average_goals": 16
+  }
 }

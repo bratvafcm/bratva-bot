@@ -2,18 +2,98 @@
   "player_id": "саня",
   "display_name": "саня",
   "known_aliases": [],
+  "total_goals": 226,
+  "total_matches": 7,
+  "average_goals": 32.3,
   "matches": [
     {
       "tournament_id": "2026-09-08_memequis_juniors",
-      "match_index_in_tournament": 0,
+      "match_index_in_tournament": 1,
       "opponent_display_name": "Memequis Juniors",
-      "opponent_id": "memequis_juniors",
+      "opponent_id": "2026-09-08_memequis_juniors",
       "goals_for": 0,
       "goals_against": 0,
       "result": "loss",
       "turns_played": 0,
       "player_display_name": "саня",
       "player_id": "саня"
+    },
+    {
+      "tournament_id": "2026-09-09_zbirna_ukrainy",
+      "match_index_in_tournament": 1,
+      "opponent_display_name": "Збірна України™",
+      "opponent_id": "2026-09-09_zbirna_ukrainy",
+      "goals_for": 36,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "саня"
+    },
+    {
+      "tournament_id": "2026-09-09_zbirna_ukrayini",
+      "match_index_in_tournament": 1,
+      "opponent_display_name": "Збірна України+",
+      "opponent_id": "2026-09-09_zbirna_ukrayini",
+      "goals_for": 36,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "саня"
+    },
+    {
+      "tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "match_index_in_tournament": 1,
+      "opponent_display_name": "ED PHOENIX GEN 2",
+      "opponent_id": "2026-09-12_ed_phoenix_gen_2",
+      "goals_for": 40,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "саня"
+    },
+    {
+      "tournament_id": "2026-09-14_ed_phoenix_gen_2",
+      "match_index_in_tournament": 1,
+      "opponent_display_name": "ED PHOENIX GEN 2",
+      "opponent_id": "2026-09-14_ed_phoenix_gen_2",
+      "goals_for": 40,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "саня"
+    },
+    {
+      "tournament_id": "2026-09-14_na_legends",
+      "match_index_in_tournament": 1,
+      "opponent_display_name": "@NA.LEGENDS",
+      "opponent_id": "2026-09-14_na_legends",
+      "goals_for": 38,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "саня"
+    },
+    {
+      "tournament_id": "2026-09-14_vse_svoi",
+      "match_index_in_tournament": 1,
+      "opponent_display_name": "ВСЕ СВОИ",
+      "opponent_id": "2026-09-14_vse_svoi",
+      "goals_for": 36,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "саня"
     }
-  ]
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-09-14_na_legends",
+    "flagged_for_review": false
+  }
 }

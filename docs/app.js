@@ -1449,17 +1449,93 @@ async function loadData() {
     if (tRes.ok) state.tournamentsIndex = await tRes.json();
   } catch (e) {}
 
-  const pIds = Object.keys(state.playersIndex);
-  const pPromises = pIds.map(id => fetch(`${activePath}/players/${id}.json?v=${cb}`).then(r => r.ok ? r.json() : null).catch(() => null));
+  try {
+    const regRes = await fetch(`${activePath}/registered_players.json?v=${cb}`);
+    if (regRes.ok) state.registeredPlayers = await regRes.json();
+  } catch (e) {}
 
-  const tIds = Object.keys(state.tournamentsIndex);
+  const tIds = Object.keys(state.tournamentsIndex || {});
   const tPromises = tIds.map(id => fetch(`${activePath}/tournaments/${id}.json?v=${cb}`).then(r => r.ok ? r.json() : null).catch(() => null));
 
-  const [pResults, tResults] = await Promise.all([Promise.all(pPromises), Promise.all(tPromises)]);
-
-  state.players = pResults.filter(Boolean);
+  const tResults = await Promise.all(tPromises);
   state.tournaments = tResults.filter(Boolean);
   state.tournaments.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  // Build match index by player from all tournaments
+  const matchesByPlayer = {};
+  state.tournaments.forEach(t => {
+    const tId = t.id || t.tournament_id;
+    (t.matches || []).forEach((m, idx) => {
+      const pid = String(m.player_id).toLowerCase();
+      if (!matchesByPlayer[pid]) matchesByPlayer[pid] = [];
+      matchesByPlayer[pid].push({
+        tournament_id: tId,
+        match_index_in_tournament: m.board_order || (idx + 1),
+        opponent_display_name: t.opponent_league,
+        opponent_id: tId,
+        goals_for: m.goals_for !== undefined ? m.goals_for : 0,
+        goals_against: 0,
+        result: t.result || 'win',
+        turns_played: m.turns_played !== undefined ? m.turns_played : (m.goals_for > 0 ? 3 : 0),
+        player_display_name: m.player_display_name,
+        player_id: pid
+      });
+    });
+  });
+
+  const regMap = (state.registeredPlayers && state.registeredPlayers.registrations) ? state.registeredPlayers.registrations : {};
+
+  // Construct complete, real-time player records
+  const allPlayerIds = Array.from(new Set([
+    ...Object.keys(state.playersIndex || {}),
+    ...Object.keys(matchesByPlayer)
+  ]));
+
+  state.players = allPlayerIds.map(id => {
+    const idxData = (state.playersIndex && state.playersIndex[id]) ? state.playersIndex[id] : {};
+    const pMatches = matchesByPlayer[id] || [];
+    pMatches.sort((a, b) => (a.tournament_id || '').slice(0, 10).localeCompare((b.tournament_id || '').slice(0, 10)));
+
+    const regInfo = regMap[id] || Object.values(regMap).find(r => r.player_id === id) || {};
+
+    const totalGoals = idxData.total_goals !== undefined ? idxData.total_goals : (
+      pMatches.reduce((s, m) => s + (m.goals_for || 0), 0)
+    );
+    const totalMatches = idxData.total_matches !== undefined ? idxData.total_matches : pMatches.length;
+    const averageGoals = idxData.average_goals !== undefined ? idxData.average_goals : (
+      totalMatches > 0 ? parseFloat((totalGoals / totalMatches).toFixed(1)) : 0
+    );
+
+    const lastMatch = pMatches.length > 0 ? pMatches[pMatches.length - 1] : null;
+
+    let failStreak = 0;
+    for (let i = pMatches.length - 1; i >= 0; i--) {
+      if (pMatches[i].turns_played < 3) failStreak++;
+      else break;
+    }
+
+    const streakObj = idxData.eligibility_streak || {
+      current_fail_streak: failStreak,
+      last_evaluated_tournament_id: lastMatch ? lastMatch.tournament_id : '',
+      flagged_for_review: failStreak >= 3
+    };
+
+    return {
+      player_id: id,
+      display_name: idxData.display_name || (lastMatch ? lastMatch.player_display_name : id),
+      total_goals: totalGoals,
+      total_matches: totalMatches,
+      average_goals: averageGoals,
+      last_tournament_date: idxData.last_tournament_date || (lastMatch ? lastMatch.tournament_id.slice(0, 10) : ''),
+      eligibility_streak: streakObj,
+      matches: pMatches,
+      telegram: regInfo.telegram_username ? `@${regInfo.telegram_username}` : (regInfo.telegram_name || null),
+      telegram_id: regInfo.telegram_id || null,
+      is_admin: Boolean(regInfo.is_admin),
+      is_owner: Boolean(regInfo.is_owner),
+      role: regInfo.role || null
+    };
+  });
 }
 
 // --- Web Audio Mouse Click Synthesizer ---
@@ -2049,7 +2125,7 @@ function renderDashboard() {
     const oppPct = totalGoals > 0 ? ((tItem.opponent_total_goals / totalGoals) * 100).toFixed(1) : 50;
 
     recentBox.innerHTML = `
-      <div class="ucl-match-box" onclick="openTournamentModal('${tItem.tournament_id}')">
+      <div class="ucl-match-box" onclick="openTournamentModal('${tItem.tournament_id || tItem.id}')">
         <div class="ucl-match-header">
           <span class="stamp ${stampClass}">${tItem.result ? tItem.result.toUpperCase() : 'IN PROGRESS'}</span>
           <span class="hand-text" style="font-size: 0.8rem; font-weight: 600;">${tItem.date}</span>
@@ -2106,7 +2182,7 @@ function renderTournaments() {
   container.innerHTML = state.tournaments.map(tItem => {
     const stampClass = tItem.result === 'win' ? 'stamp-win' : tItem.result === 'loss' ? 'stamp-loss' : 'stamp-draw';
     return `
-      <div class="ucl-match-box" style="margin-bottom: 10px;" onclick="openTournamentModal('${tItem.tournament_id}')">
+      <div class="ucl-match-box" style="margin-bottom: 10px;" onclick="openTournamentModal('${tItem.tournament_id || tItem.id}')">
         <div class="ucl-match-header">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span class="stamp ${stampClass}">${tItem.result ? tItem.result.toUpperCase() : 'IN PROGRESS'}</span>
@@ -2304,6 +2380,16 @@ function openPlayerModal(playerId) {
     eligPill = `<span class="modal-tag-pill modal-tag-yellow">${t('eligibility_warn', { n: streak })}</span>`;
   }
 
+  // Telegram Verification & Role Pill
+  let tgPill = '';
+  if (player.telegram) {
+    tgPill = `<span class="modal-tag-pill" style="background: rgba(0, 136, 204, 0.15); color: #0088cc; border: 1px solid rgba(0, 136, 204, 0.35); font-weight: 700;">✈️ ${escapeHTML(player.telegram)}</span>`;
+  }
+  if (player.is_admin || player.is_owner) {
+    const roleLabel = player.is_owner ? '👑 Owner' : '🛡️ Admin';
+    tgPill += ` <span class="modal-tag-pill" style="background: rgba(212, 175, 55, 0.15); color: #d4af37; border: 1px solid rgba(212, 175, 55, 0.35); font-weight: 700;">${roleLabel}</span>`;
+  }
+
   // 4. Form Columns Data
   const formData = matches.map((m, idx) => {
     const goals = m.goals_for || 0;
@@ -2335,6 +2421,7 @@ function openPlayerModal(playerId) {
         <div class="modal-badge-pills">
           ${rankPill}
           ${eligPill}
+          ${tgPill}
         </div>
       </div>
     </div>
@@ -2453,7 +2540,7 @@ function selectFormMatch(idx) {
 }
 
 function openTournamentModal(tId) {
-  const tItem = state.tournaments.find(t => t.tournament_id === tId);
+  const tItem = state.tournaments.find(t => (t.tournament_id === tId || t.id === tId));
   if (!tItem) return;
 
   const overlay = document.getElementById('player-modal');

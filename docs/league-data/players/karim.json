@@ -2,12 +2,15 @@
   "player_id": "karim",
   "display_name": "KARIM",
   "known_aliases": [],
+  "total_goals": 0,
+  "total_matches": 1,
+  "average_goals": 0,
   "matches": [
     {
       "tournament_id": "2026-09-08_memequis_juniors",
-      "match_index_in_tournament": 10,
+      "match_index_in_tournament": 11,
       "opponent_display_name": "Memequis Juniors",
-      "opponent_id": "memequis_juniors",
+      "opponent_id": "2026-09-08_memequis_juniors",
       "goals_for": 0,
       "goals_against": 0,
       "result": "loss",
@@ -15,5 +18,10 @@
       "player_display_name": "KARIM",
       "player_id": "karim"
     }
-  ]
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 1,
+    "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+    "flagged_for_review": false
+  }
 }

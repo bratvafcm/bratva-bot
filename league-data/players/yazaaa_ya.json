@@ -2,12 +2,15 @@
   "player_id": "yazaaa_ya",
   "display_name": "yazaaa_ya",
   "known_aliases": [],
+  "total_goals": 0,
+  "total_matches": 1,
+  "average_goals": 0,
   "matches": [
     {
       "tournament_id": "2026-08-31_royal-challenger",
-      "match_index_in_tournament": 11,
+      "match_index_in_tournament": 12,
       "opponent_display_name": "ROYAL CHALLENGER",
-      "opponent_id": "royal_challenger",
+      "opponent_id": "2026-08-31_royal-challenger",
       "goals_for": 0,
       "goals_against": 0,
       "result": "loss",
@@ -15,5 +18,10 @@
       "player_display_name": "yazaaa_ya",
       "player_id": "yazaaa_ya"
     }
-  ]
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-08-31_royal-challenger",
+    "flagged_for_review": false
+  }
 }

@@ -2,24 +2,27 @@
   "player_id": "mee",
   "display_name": "MEE",
   "known_aliases": [],
+  "total_goals": 0,
+  "total_matches": 3,
+  "average_goals": 0,
   "matches": [
     {
       "tournament_id": "2026-08-29_team-work",
-      "match_index_in_tournament": 26,
+      "match_index_in_tournament": 27,
       "opponent_display_name": "Team Work",
-      "opponent_id": "team_work",
+      "opponent_id": "2026-08-29_team-work",
       "goals_for": 0,
       "goals_against": 0,
-      "result": "loss",
+      "result": "win",
       "turns_played": 0,
       "player_display_name": "MEE",
       "player_id": "mee"
     },
     {
       "tournament_id": "2026-08-31_royal-challenger",
-      "match_index_in_tournament": 13,
+      "match_index_in_tournament": 14,
       "opponent_display_name": "ROYAL CHALLENGER",
-      "opponent_id": "royal_challenger",
+      "opponent_id": "2026-08-31_royal-challenger",
       "goals_for": 0,
       "goals_against": 0,
       "result": "loss",
@@ -29,9 +32,9 @@
     },
     {
       "tournament_id": "2026-09-04_al-afdal-al-riyadi-26",
-      "match_index_in_tournament": 12,
+      "match_index_in_tournament": 13,
       "opponent_display_name": "الافضل الرياضي26",
-      "opponent_id": "26",
+      "opponent_id": "2026-09-04_al-afdal-al-riyadi-26",
       "goals_for": 0,
       "goals_against": 0,
       "result": "win",
@@ -41,9 +44,8 @@
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 1,
-    "last_evaluated_tournament_id": "2026-08-29_team-work",
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-09-04_al-afdal-al-riyadi-26",
     "flagged_for_review": false
-  },
-  "average_goals": 0
+  }
 }

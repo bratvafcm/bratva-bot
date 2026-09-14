@@ -1946,9 +1946,9 @@ function generatePlayerStatsMessage(query, lang = 'ru') {
   const indexData = pIndex[pid] || found;
   const fullPlayer = players.find(p => p && p.player_id === pid) || found;
 
-  const totalMatches = fullPlayer.matches ? fullPlayer.matches.length : (indexData.total_matches || 0);
-  const totalGoals = fullPlayer.matches ? fullPlayer.matches.reduce((s, m) => s + (m.goals_for || 0), 0) : (indexData.total_goals || 0);
-  const avg = totalMatches > 0 ? (totalGoals / totalMatches).toFixed(1) : (indexData.average_goals || 0);
+  const totalMatches = (indexData.total_matches !== undefined && indexData.total_matches > 0) ? indexData.total_matches : (fullPlayer.matches ? fullPlayer.matches.length : 0);
+  const totalGoals = (indexData.total_goals !== undefined && indexData.total_goals > 0) ? indexData.total_goals : (fullPlayer.matches ? fullPlayer.matches.reduce((s, m) => s + (m.goals_for || 0), 0) : 0);
+  const avg = (indexData.average_goals !== undefined && indexData.average_goals > 0) ? indexData.average_goals : (totalMatches > 0 ? parseFloat((totalGoals / totalMatches).toFixed(1)) : 0);
   const strikes = indexData.eligibility_streak?.current_fail_streak || 0;
   const dName = bidiIsolate(found.display_name || pid);
   const statusIcon = strikes >= 3 ? '🚨' : (strikes > 0 ? '⚠️' : '✅');
@@ -3630,6 +3630,7 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
 
   let tData = {
     id: tId,
+    tournament_id: tId,
     date: dateStr,
     timestamp: Date.now(),
     opponent_league: aiResult.opponent_league || 'OPPONENT',

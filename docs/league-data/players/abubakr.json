@@ -2,12 +2,15 @@
   "player_id": "abubakr",
   "display_name": "Abubakr",
   "known_aliases": [],
+  "total_goals": 30,
+  "total_matches": 3,
+  "average_goals": 10,
   "matches": [
     {
       "tournament_id": "2026-08-14_sudamericana",
       "match_index_in_tournament": 23,
       "opponent_display_name": "SUDAMERICANA",
-      "opponent_id": "sudamericana",
+      "opponent_id": "2026-08-14_sudamericana",
       "goals_for": 30,
       "goals_against": 0,
       "result": "win",
@@ -17,9 +20,9 @@
     },
     {
       "tournament_id": "2026-08-28_fc-shibankat-fan",
-      "match_index_in_tournament": 1,
+      "match_index_in_tournament": 2,
       "opponent_display_name": "FC SHIBANKAT FAN",
-      "opponent_id": "fc_shibankat_fan",
+      "opponent_id": "2026-08-28_fc-shibankat-fan",
       "goals_for": 0,
       "goals_against": 0,
       "result": "loss",
@@ -29,12 +32,12 @@
     },
     {
       "tournament_id": "2026-08-29_team-work",
-      "match_index_in_tournament": 1,
+      "match_index_in_tournament": 2,
       "opponent_display_name": "Team Work",
-      "opponent_id": "team_work",
+      "opponent_id": "2026-08-29_team-work",
       "goals_for": 0,
       "goals_against": 0,
-      "result": "loss",
+      "result": "win",
       "turns_played": 0,
       "player_display_name": "Abubakr",
       "player_id": "abubakr"
@@ -44,6 +47,5 @@
     "current_fail_streak": 2,
     "last_evaluated_tournament_id": "2026-08-29_team-work",
     "flagged_for_review": false
-  },
-  "average_goals": 10
+  }
 }

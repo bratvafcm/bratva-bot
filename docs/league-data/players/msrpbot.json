@@ -1,0 +1,63 @@
+{
+  "player_id": "msrpbot",
+  "display_name": "MSRPBOT",
+  "known_aliases": [],
+  "total_goals": 27,
+  "total_matches": 4,
+  "average_goals": 6.8,
+  "matches": [
+    {
+      "tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "match_index_in_tournament": 7,
+      "opponent_display_name": "ED PHOENIX GEN 2",
+      "opponent_id": "2026-09-12_ed_phoenix_gen_2",
+      "goals_for": 9,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 1,
+      "player_display_name": "MSRPBOT",
+      "player_id": "msrpbot"
+    },
+    {
+      "tournament_id": "2026-09-14_ed_phoenix_gen_2",
+      "match_index_in_tournament": 7,
+      "opponent_display_name": "ED PHOENIX GEN 2",
+      "opponent_id": "2026-09-14_ed_phoenix_gen_2",
+      "goals_for": 9,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 1,
+      "player_display_name": "MSRPBOT",
+      "player_id": "msrpbot"
+    },
+    {
+      "tournament_id": "2026-09-14_na_legends",
+      "match_index_in_tournament": 8,
+      "opponent_display_name": "@NA.LEGENDS",
+      "opponent_id": "2026-09-14_na_legends",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "MSRPBOT",
+      "player_id": "msrpbot"
+    },
+    {
+      "tournament_id": "2026-09-14_vse_svoi",
+      "match_index_in_tournament": 9,
+      "opponent_display_name": "ВСЕ СВОИ",
+      "opponent_id": "2026-09-14_vse_svoi",
+      "goals_for": 9,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 1,
+      "player_display_name": "MSRPBOT",
+      "player_id": "msrpbot"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 4,
+    "last_evaluated_tournament_id": "2026-09-14_na_legends",
+    "flagged_for_review": true
+  }
+}

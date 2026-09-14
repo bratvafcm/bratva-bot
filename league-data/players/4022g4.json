@@ -1,0 +1,27 @@
+{
+  "player_id": "4022g4",
+  "display_name": "4022г4",
+  "known_aliases": [],
+  "total_goals": 24,
+  "total_matches": 1,
+  "average_goals": 24,
+  "matches": [
+    {
+      "tournament_id": "2026-08-09_abtal-al-arab",
+      "match_index_in_tournament": 26,
+      "opponent_display_name": "ابطال العرب",
+      "opponent_id": "2026-08-09_abtal-al-arab",
+      "goals_for": 24,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "4022г4",
+      "player_id": "4022g4"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-08-09_abtal-al-arab",
+    "flagged_for_review": false
+  }
+}

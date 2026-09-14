@@ -1,0 +1,39 @@
+{
+  "player_id": "awukufc",
+  "display_name": "Awukufc",
+  "known_aliases": [],
+  "total_goals": 53,
+  "total_matches": 2,
+  "average_goals": 26.5,
+  "matches": [
+    {
+      "tournament_id": "2026-09-14_na_legends",
+      "match_index_in_tournament": 9,
+      "opponent_display_name": "@NA.LEGENDS",
+      "opponent_id": "2026-09-14_na_legends",
+      "goals_for": 26,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Awukufc",
+      "player_id": "awukufc"
+    },
+    {
+      "tournament_id": "2026-09-14_vse_svoi",
+      "match_index_in_tournament": 10,
+      "opponent_display_name": "ВСЕ СВОИ",
+      "opponent_id": "2026-09-14_vse_svoi",
+      "goals_for": 27,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Awukufc",
+      "player_id": "awukufc"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-09-14_na_legends",
+    "flagged_for_review": false
+  }
+}
