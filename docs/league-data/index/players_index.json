@@ -13,13 +13,13 @@
   },
   "doxibero1": {
     "display_name": "DOXIBERO1",
-    "total_goals": 441,
-    "total_matches": 17,
-    "average_goals": 25.9,
-    "last_tournament_date": "2026-09-12",
+    "total_goals": 470,
+    "total_matches": 18,
+    "average_goals": 26.1,
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
@@ -61,13 +61,13 @@
   },
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
-    "total_goals": 321,
-    "total_matches": 17,
-    "average_goals": 18.9,
-    "last_tournament_date": "2026-09-12",
+    "total_goals": 346,
+    "total_matches": 18,
+    "average_goals": 19.2,
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
@@ -181,13 +181,13 @@
   },
   "mike": {
     "display_name": "Mike",
-    "total_goals": 273,
-    "total_matches": 12,
-    "average_goals": 22.8,
-    "last_tournament_date": "2026-09-12",
+    "total_goals": 305,
+    "total_matches": 13,
+    "average_goals": 23.5,
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
@@ -301,25 +301,25 @@
   },
   "psg": {
     "display_name": "PSG",
-    "total_goals": 135,
-    "total_matches": 8,
-    "average_goals": 16.9,
-    "last_tournament_date": "2026-09-12",
+    "total_goals": 157,
+    "total_matches": 9,
+    "average_goals": 17.4,
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
   "abirsh07": {
     "display_name": "Abirsh07",
     "total_goals": 268,
-    "total_matches": 11,
-    "average_goals": 24.4,
-    "last_tournament_date": "2026-09-12",
+    "total_matches": 12,
+    "average_goals": 22.3,
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
@@ -481,13 +481,13 @@
   },
   "rogelio": {
     "display_name": "Rogelio",
-    "total_goals": 180,
-    "total_matches": 8,
-    "average_goals": 22.5,
-    "last_tournament_date": "2026-09-12",
+    "total_goals": 203,
+    "total_matches": 9,
+    "average_goals": 22.6,
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
@@ -505,37 +505,37 @@
   },
   "real": {
     "display_name": "Real",
-    "total_goals": 79,
-    "total_matches": 7,
-    "average_goals": 11.3,
-    "last_tournament_date": "2026-09-12",
+    "total_goals": 101,
+    "total_matches": 8,
+    "average_goals": 12.6,
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
   "sushenley": {
     "display_name": "SUSHenley",
     "total_goals": 34,
-    "total_matches": 6,
-    "average_goals": 5.7,
-    "last_tournament_date": "2026-09-12",
+    "total_matches": 7,
+    "average_goals": 4.9,
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
-      "current_fail_streak": 5,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "current_fail_streak": 6,
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": true
     }
   },
   "саня": {
     "display_name": "саня",
-    "total_goals": 112,
-    "total_matches": 4,
-    "average_goals": 28,
-    "last_tournament_date": "2026-09-12",
+    "total_goals": 152,
+    "total_matches": 5,
+    "average_goals": 30.4,
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
@@ -601,26 +601,26 @@
   },
   "king_pentax": {
     "display_name": "King_Pentax",
-    "total_goals": 64,
-    "total_matches": 2,
-    "average_goals": 32,
-    "last_tournament_date": "2026-09-12",
+    "total_goals": 94,
+    "total_matches": 3,
+    "average_goals": 31.3,
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
   "ema67": {
     "display_name": "EMA67",
     "total_goals": 0,
-    "total_matches": 2,
+    "total_matches": 3,
     "average_goals": 0,
-    "last_tournament_date": "2026-09-12",
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
-      "flagged_for_review": false
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
+      "flagged_for_review": true
     }
   },
   "sarah": {
@@ -650,60 +650,60 @@
   "papacarlos1234": {
     "display_name": "PapaCarlos1234",
     "total_goals": 0,
-    "total_matches": 1,
+    "total_matches": 2,
     "average_goals": 0,
-    "last_tournament_date": "2026-09-12",
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
   "msrpbot": {
     "display_name": "MSRPBOT",
-    "total_goals": 9,
-    "total_matches": 1,
+    "total_goals": 18,
+    "total_matches": 2,
     "average_goals": 9,
-    "last_tournament_date": "2026-09-12",
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
   "ksfalubaz": {
     "display_name": "KSFALUBAZ",
-    "total_goals": 27,
-    "total_matches": 1,
+    "total_goals": 54,
+    "total_matches": 2,
     "average_goals": 27,
-    "last_tournament_date": "2026-09-12",
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
   "blackmoon11": {
     "display_name": "Blackmoon11",
     "total_goals": 0,
-    "total_matches": 1,
+    "total_matches": 2,
     "average_goals": 0,
-    "last_tournament_date": "2026-09-12",
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
   "l1onchik": {
     "display_name": "L1onchik",
-    "total_goals": 21,
-    "total_matches": 1,
+    "total_goals": 42,
+    "total_matches": 2,
     "average_goals": 21,
-    "last_tournament_date": "2026-09-12",
+    "last_tournament_date": "2026-09-14",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
+      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   }
