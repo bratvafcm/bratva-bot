@@ -620,6 +620,10 @@ function getMainKeyboard(currentLang = 'ru') {
                      currentLang === 'es' ? '👥 Auditoría Telegram (Plazo 3 Días)' :
                      currentLang === 'en' ? '👥 Telegram Audit (3-Day Kick Tracker)' : '👥 Аудит Telegram (Контроль 3 дня)';
 
+  const warnMenuLabel = currentLang === 'ar' ? '🚨 تحذير: اليوم آخر فرصة (تيليجرام)' :
+                        currentLang === 'es' ? '🚨 Aviso: Hoy Última Oportunidad' :
+                        currentLang === 'en' ? '🚨 Warning: Today is Last Chance' : '🚨 Предупреждение: Сегодня последний шанс';
+
   return {
     inline_keyboard: [
       [
@@ -651,6 +655,9 @@ function getMainKeyboard(currentLang = 'ru') {
         { text: tournLabel, callback_data: 'cmd_tournaments' }
       ],
       [
+        { text: warnMenuLabel, callback_data: 'cmd_warning_lastchance' }
+      ],
+      [
         { text: auditLabel, callback_data: 'cmd_pending' }
       ],
       [
@@ -673,6 +680,7 @@ async function syncBotCommands() {
     { command: 'strikes', description: '⛔ Strikes & Debtors List' },
     { command: 'kicklist', description: '🚨 Kick Review (At Risk)' },
     { command: 'tournaments', description: '📊 Tournaments History' },
+    { command: 'warning', description: '🚨 Last Chance Warning (Telegram)' },
     { command: 'audit', description: '👥 Telegram Audit (3-Day Kick)' },
     { command: 'notify', description: '📢 Direct Player Notifications (Admin)' }
   ];
@@ -689,6 +697,7 @@ async function syncBotCommands() {
     { command: 'strikes', description: '⛔ Страйки и должники' },
     { command: 'kicklist', description: '🚨 Кандидаты на кик' },
     { command: 'tournaments', description: '📊 Все турниры лиги' },
+    { command: 'warning', description: '🚨 Предупреждение: Последний шанс' },
     { command: 'audit', description: '👥 Аудит Telegram (Контроль 3 дня)' },
     { command: 'notify', description: '📢 Личные уведомления игрокам (Админ)' }
   ];
@@ -705,6 +714,7 @@ async function syncBotCommands() {
     { command: 'strikes', description: '⛔ سجل الإنذارات والمقصرين' },
     { command: 'kicklist', description: '🚨 مراجعة المستبعدين من الدوري' },
     { command: 'tournaments', description: '📊 سجل بطولات الدوري' },
+    { command: 'warning', description: '🚨 تحذير: اليوم آخر فرصة (تيليجرام)' },
     { command: 'audit', description: '👥 تدقيق أعضاء تيليجرام (مهلة 3 أيام)' },
     { command: 'notify', description: '📢 إرسال إشعارات مباشرة للاعبين (أدمن)' }
   ];
@@ -721,6 +731,7 @@ async function syncBotCommands() {
     { command: 'strikes', description: '⛔ Lista de Strikes y Deudores' },
     { command: 'kicklist', description: '🚨 Candidatos a Expulsión' },
     { command: 'tournaments', description: '📊 Historial de Torneos' },
+    { command: 'warning', description: '🚨 Aviso: Hoy Última Oportunidad' },
     { command: 'audit', description: '👥 Auditoría Telegram (Plazo 3 Días)' },
     { command: 'notify', description: '📢 Notificaciones Directas a Jugadores (Admin)' }
   ];
@@ -2399,7 +2410,6 @@ async function formatPendingAudit(lang = 'ru') {
     }
   }
 
-  const leadership = [];
   const verified = [];
   const pending = [];
 
@@ -2415,152 +2425,327 @@ async function formatPendingAudit(lang = 'ru') {
       reg = registeredMap[key];
     }
 
-    const isOwner = key === 'sanya' || (reg && (reg.is_owner || reg.role === 'Owner'));
-    const isAdmin = key === 'doxibro' || key === 'doxibero1' || (reg && (reg.is_admin || reg.role === 'Admin'));
+    const isOwner = key === 'sanya' || key === 'саня' || (reg && (reg.is_owner || reg.role === 'Owner'));
+    const isAdmin = key === 'doxibro' || key === 'doxibero' || key === 'doxibero1' || (reg && (reg.is_admin || reg.role === 'Admin'));
 
-    if (isOwner) {
-      const tgUser = reg && reg.telegram_username ? ` → @${reg.telegram_username}` : (reg && reg.telegram_id ? ` → ID:${reg.telegram_id}` : '');
-      const ownerLabel = lang === 'ar' ? 'مؤسس ورئيس الدوري' :
-                         lang === 'es' ? 'Creador y Dueño de la Liga' :
-                         lang === 'en' ? 'League Creator & Owner' :
-                         'Создатель и Владелец лиги';
-      leadership.push(`• 👑 *${clean(pInfo.displayName)}* — ${ownerLabel}${tgUser}`);
-    } else if (isAdmin) {
-      const tgUser = reg && reg.telegram_username ? ` → @${reg.telegram_username}` : (reg && reg.telegram_id ? ` → ID:${reg.telegram_id}` : '');
-      const adminLabel = lang === 'ar' ? 'مسؤول الدوري' :
-                         lang === 'es' ? 'Administrador' :
-                         lang === 'en' ? 'League Admin' :
-                         'Администратор лиги';
-      leadership.push(`• 🛡️ *${clean(pInfo.displayName)}* — ${adminLabel}${tgUser}`);
-    } else if (reg) {
-      const tgUser = reg.telegram_username ? `@${reg.telegram_username}` : (reg.telegram_id ? `ID:${reg.telegram_id}` : 'Verified');
-      const uidTag = reg.uid ? ` [UID: ${reg.uid}]` : '';
-      const newTag = reg.is_new_member ? ' *(New)*' : '';
-      verified.push(`• *${clean(pInfo.displayName)}*${uidTag}${newTag} → ${tgUser}`);
+    if (isOwner || isAdmin || reg) {
+      // Clean names ONLY - no @, no ID, no admin labels as requested!
+      verified.push(`• *${clean(pInfo.displayName)}*`);
     } else {
       pending.push(`• *${clean(pInfo.displayName)}*`);
     }
   }
 
-  // Sort leadership so Owner is first
-  leadership.sort((a, b) => {
-    if (a.includes('👑') && !b.includes('👑')) return -1;
-    if (!a.includes('👑') && b.includes('👑')) return 1;
-    return a.localeCompare(b);
-  });
+  const cleanVerified = Array.from(new Set(verified)).sort((a, b) => a.localeCompare(b));
+  const cleanPending = Array.from(new Set(pending)).sort((a, b) => a.localeCompare(b));
 
-  const total = playersByKey.size;
-  const vCount = leadership.length + verified.length;
-  const pCount = pending.length;
+  const total = cleanVerified.length + cleanPending.length;
+  const vCount = cleanVerified.length;
+  const pCount = cleanPending.length;
   const pct = total > 0 ? Math.round((vCount / total) * 100) : 0;
 
   if (lang === 'en') {
     let msg = `📋 *БРАТВА FCM — TELEGRAM SQUAD AUDIT* ⚜️\n\n` +
-      `📊 *Registration Status (3-Day Deadline):*\n` +
+      `📊 *Registration Status (🚨 TODAY IS THE LAST CHANCE!):*\n` +
       `• Total Roster: *${total}* players\n` +
-      `• 👑 Leadership (Owner & Admins): *${leadership.length}* (100% verified)\n` +
-      `• ✅ Verified on Telegram: *${vCount}* (${pct}%)\n` +
+      `• ✅ Joined on Telegram: *${vCount}* (${pct}%)\n` +
       `• ❌ Not Registered (To Kick): *${pCount}* (${100 - pct}%)\n\n`;
-
-    if (leadership.length > 0) {
-      msg += `👑 *LEAGUE LEADERSHIP (Admins & Owner):*\n${leadership.join('\n')}\n\n`;
-    }
 
     if (pCount > 0) {
       msg += `❌ *PLAYERS NOT YET ON TELEGRAM (${pCount}):*\n` +
-        `${pending.slice(0, 30).join('\n')}${pending.length > 30 ? `\n_...and ${pending.length - 30} more_` : ''}\n\n` +
-        `⚠️ *Anyone remaining on this ❌ list after the 3-day deadline will be kicked from the in-game league!*\n\n`;
+        `${cleanPending.slice(0, 50).join('\n')}${cleanPending.length > 50 ? `\n_...and ${cleanPending.length - 50} more_` : ''}\n\n` +
+        `🚨 *WARNING: TODAY IS THE LAST CHANCE! Anyone remaining on this ❌ list will be kicked from the in-game league tonight!*\n\n`;
     } else {
       msg += `🎉 *100% SQUAD VERIFIED!* All members have successfully registered on Telegram!\n\n`;
     }
 
-    if (verified.length > 0) {
-      msg += `✅ *VERIFIED SQUAD MEMBERS (${verified.length}):*\n` +
-        `${verified.slice(0, 20).join('\n')}${verified.length > 20 ? `\n_...and ${verified.length - 20} more_` : ''}`;
+    if (cleanVerified.length > 0) {
+      msg += `✅ *PLAYERS WHO JOINED TELEGRAM (${cleanVerified.length}):*\n` +
+        `${cleanVerified.join('\n')}`;
     }
     return msg;
   }
 
   if (lang === 'ar') {
     let msg = `📋 *دوري БРАТВА — تدقيق أعضاء تيليجرام* ⚜️\n\n` +
-      `📊 *حالة التسجيل (مهلة 3 أيام):*\n` +
+      `📊 *حالة التسجيل (🚨 اليوم هو آخر فرصة!):*\n` +
       `• إجمالي اللاعبين: *${total}* لاعباً\n` +
-      `• 👑 إدارة الدوري (المالك والمسؤولون): *${leadership.length}* (100% موثقون)\n` +
-      `• ✅ المسجلون في تيليجرام: *${vCount}* (${pct}%)\n` +
+      `• ✅ المنضمون لتيليجرام: *${vCount}* (${pct}%)\n` +
       `• ❌ غير مسجلين (عرضة للاستبعاد): *${pCount}* (${100 - pct}%)\n\n`;
 
-    if (leadership.length > 0) {
-      msg += `👑 *إدارة ورئاسة الدوري (المالك والمسؤولون):*\n${leadership.join('\n')}\n\n`;
-    }
-
     if (pCount > 0) {
-      msg += `❌ *أعضاء لم يسجلوا بعد في تيليجرام (${pCount}):*\n` +
-        `${pending.slice(0, 30).join('\n')}${pending.length > 30 ? `\n_...و ${pending.length - 30} آخرين_` : ''}\n\n` +
-        `⚠️ *كل من يبقى في هذه القائمة ❌ بعد انتهاء مهلة الـ 3 أيام سيتم استبعاده فوراً من الدوري داخل اللعبة!*\n\n`;
+      msg += `❌ *أعضاء لم ينضموا بعد إلى تيليجرام (${pCount}):*\n` +
+        `${cleanPending.slice(0, 50).join('\n')}${cleanPending.length > 50 ? `\n_...و ${cleanPending.length - 50} آخرين_` : ''}\n\n` +
+        `🚨 *تنبيه حاسم: اليوم هو آخر فرصة! كل من يبقى في هذه القائمة ❌ سيتم استبعاده فوراً من الدوري داخل اللعبة الليلة!*\n\n`;
     } else {
       msg += `🎉 *اكتمل التوثيق 100%!* جميع أعضاء الفريق انضموا وسجلوا بنجاح في تيليجرام!\n\n`;
     }
 
-    if (verified.length > 0) {
-      msg += `✅ *الأعضاء الموثقون (${verified.length}):*\n` +
-        `${verified.slice(0, 20).join('\n')}${verified.length > 20 ? `\n_...و ${verified.length - 20} آخرين_` : ''}`;
+    if (cleanVerified.length > 0) {
+      msg += `✅ *اللاعبون المنضمون لتيليجرام (${cleanVerified.length}):*\n` +
+        `${cleanVerified.join('\n')}`;
     }
     return msg;
   }
 
   if (lang === 'es') {
-    let msg = `📋 *БРАТВА FCM — AUDITORÍA DE REGISTRO EN TELEGRAM* ⚜️\n\n` +
-      `📊 *Estado de Registro (Plazo de 3 Días):*\n` +
+    let msg = `📋 *БРАТВА FCM — AUDITORÍA DE TELEGRAM* ⚜️\n\n` +
+      `📊 *Estado de Registro (🚨 ¡HOY ES LA ÚLTIMA OPORTUNIDAD!):*\n` +
       `• Plantilla Total: *${total}* jugadores\n` +
-      `• 👑 Liderazgo (Dueño y Admins): *${leadership.length}* (100% verificados)\n` +
-      `• ✅ Verificados en Telegram: *${vCount}* (${pct}%)\n` +
+      `• ✅ Unidos a Telegram: *${vCount}* (${pct}%)\n` +
       `• ❌ No Registrados (Para Expulsión): *${pCount}* (${100 - pct}%)\n\n`;
-
-    if (leadership.length > 0) {
-      msg += `👑 *LIDERAZGO DE LA LIGA (Dueño y Admins):*\n${leadership.join('\n')}\n\n`;
-    }
 
     if (pCount > 0) {
       msg += `❌ *JUGADORES QUE AÚN NO ESTÁN EN TELEGRAM (${pCount}):*\n` +
-        `${pending.slice(0, 30).join('\n')}${pending.length > 30 ? `\n_...y ${pending.length - 30} más_` : ''}\n\n` +
-        `⚠️ *¡Cualquiera que permanezca en esta lista ❌ tras 3 días será expulsado de la liga en el juego!*\n\n`;
+        `${cleanPending.slice(0, 50).join('\n')}${cleanPending.length > 50 ? `\n_...y ${cleanPending.length - 50} más_` : ''}\n\n` +
+        `🚨 *¡AVISO FINAL: HOY ES LA ÚLTIMA OPORTUNIDAD! Quien permanezca en esta lista ❌ será expulsado de la liga esta noche!*\n\n`;
     } else {
-      msg += `🎉 *¡100% DE LA PLANTILLA VERIFICADA!* ¡Todos los miembros están registrados en Telegram!\n\n`;
+      msg += `🎉 *¡100% DE LA PLANTILLA EN TELEGRAM!* ¡Todos los miembros se han unido con éxito!\n\n`;
     }
 
-    if (verified.length > 0) {
-      msg += `✅ *MIEMBROS VERIFICADOS (${verified.length}):*\n` +
-        `${verified.slice(0, 20).join('\n')}${verified.length > 20 ? `\n_...y ${verified.length - 20} más_` : ''}`;
+    if (cleanVerified.length > 0) {
+      msg += `✅ *JUGADORES QUE YA SE UNIERON (${cleanVerified.length}):*\n` +
+        `${cleanVerified.join('\n')}`;
     }
     return msg;
   }
 
   // Russian (Default)
-  let msg = `📋 *БРАТВА FCM — TELEGRAM SQUAD AUDIT* ⚜️\n\n` +
-    `📊 *Статус регистрации (Дедлайн 3 дня / 72ч):*\n` +
+  let msg = `📋 *БРАТВА FCM — АУДИТ СОСТАВА В TELEGRAM* ⚜️\n\n` +
+    `📊 *Статус регистрации (🚨 СЕГОДНЯ ПОСЛЕДНИЙ ШАНС!):*\n` +
     `• Общий состав: *${total}* бойцов\n` +
-    `• 👑 Руководство (Владелец и Админы): *${leadership.length}* (100% подтверждены)\n` +
-    `• ✅ Подтверждено в Telegram: *${vCount}* (${pct}%)\n` +
+    `• ✅ Вступили в Telegram: *${vCount}* (${pct}%)\n` +
     `• ❌ Не зарегистрированы (На кик): *${pCount}* (${100 - pct}%)\n\n`;
-
-  if (leadership.length > 0) {
-    msg += `👑 *РУКОВОДСТВО ЛИГИ (Владелец и Админы):*\n${leadership.join('\n')}\n\n`;
-  }
 
   if (pCount > 0) {
     msg += `❌ *ИГРОКИ НЕ В TELEGRAM (${pCount}):*\n` +
-      `${pending.slice(0, 30).join('\n')}${pending.length > 30 ? `\n_...и ещё ${pending.length - 30}_` : ''}\n\n` +
-      `⚠️ *Все, кто останется в этом списке ❌ после 3 дней (72ч), будут исключены из состава Лиги в игре!*\n\n`;
+      `${cleanPending.slice(0, 50).join('\n')}${cleanPending.length > 50 ? `\n_...и ещё ${cleanPending.length - 50}_` : ''}\n\n` +
+      `🚨 *ВНИМАНИЕ: СЕГОДНЯ ПОСЛЕДНИЙ ШАНС! Все, кто останется в этом списке ❌ до конца дня, будут исключены из Лиги в игре!*\n\n`;
   } else {
     msg += `🎉 *100% СОСТАВА В TELEGRAM!* Все бойцы успешно подтвердили регистрацию!\n\n`;
   }
 
-  if (verified.length > 0) {
-    msg += `✅ *ПОДТВЕРЖДЁННЫЕ УЧАСТНИКИ (${verified.length}):*\n` +
-      `${verified.slice(0, 20).join('\n')}${verified.length > 20 ? `\n_...и ещё ${verified.length - 20}_` : ''}`;
+  if (cleanVerified.length > 0) {
+    msg += `✅ *ИГРОКИ, КОТОРЫЕ УЖЕ В TELEGRAM (${cleanVerified.length}):*\n` +
+      `${cleanVerified.join('\n')}`;
   }
 
   return msg;
+}
+
+/**
+ * Format Dedicated Warning Message: "Today is Last Chance"
+ * Showing clean names of players who joined (no @, no ID, admins as members)
+ * and unjoined players with urgent kick deadline warning!
+ */
+async function formatLastChanceWarning(lang = 'ru') {
+  const regData = await getRegisteredPlayers();
+  const registeredMap = regData.registrations || {};
+  const { pIndex } = loadLeagueData();
+
+  const playersByKey = new Map();
+  for (const [pid, p] of Object.entries(pIndex || {})) {
+    if (!p || !p.display_name) continue;
+    const key = getCanonicalPlayerKey(pid, p.display_name);
+    if (!playersByKey.has(key)) {
+      playersByKey.set(key, { pids: [pid], displayName: p.display_name });
+    } else {
+      const pids = playersByKey.get(key).pids;
+      if (!pids.includes(pid)) pids.push(pid);
+    }
+  }
+
+  if (globalLatestTournament && globalLatestTournament.matches) {
+    for (const m of globalLatestTournament.matches) {
+      if (m.player_id && m.player_display_name) {
+        const key = getCanonicalPlayerKey(m.player_id, m.player_display_name);
+        if (!playersByKey.has(key)) {
+          playersByKey.set(key, { pids: [m.player_id], displayName: m.player_display_name });
+        } else {
+          const pids = playersByKey.get(key).pids;
+          if (!pids.includes(m.player_id)) pids.push(m.player_id);
+        }
+      }
+    }
+  }
+
+  for (const [rId, reg] of Object.entries(registeredMap)) {
+    if (reg && reg.display_name) {
+      const key = getCanonicalPlayerKey(reg.player_id || rId, reg.display_name);
+      if (!playersByKey.has(key)) {
+        playersByKey.set(key, { pids: [reg.player_id || rId], displayName: reg.display_name });
+      } else {
+        const pids = playersByKey.get(key).pids;
+        if (reg.player_id && !pids.includes(reg.player_id)) pids.push(reg.player_id);
+      }
+    }
+  }
+
+  const joined = [];
+  const pending = [];
+
+  for (const [key, pInfo] of playersByKey.entries()) {
+    let reg = null;
+    for (const pid of pInfo.pids) {
+      if (registeredMap[pid]) { reg = registeredMap[pid]; break; }
+    }
+    if (!reg && registeredMap[key]) reg = registeredMap[key];
+
+    const isJoined = Boolean(reg || key === 'sanya' || key === 'саня' || key === 'doxibro' || key === 'doxibero' || key === 'doxibero1');
+
+    if (isJoined) {
+      // Pure clean player name - NO @, NO ID, NO role tags!
+      joined.push(`• *${clean(pInfo.displayName)}*`);
+    } else {
+      pending.push(`• *${clean(pInfo.displayName)}*`);
+    }
+  }
+
+  const uniqueJoined = Array.from(new Set(joined)).sort((a, b) => a.localeCompare(b));
+  const uniquePending = Array.from(new Set(pending)).sort((a, b) => a.localeCompare(b));
+
+  if (lang === 'en') {
+    let msg = `🚨 *БРАТВА FCM: FINAL NOTICE — TODAY IS THE LAST CHANCE!* 🚨\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚠️ *ATTENTION ALL SQUAD MEMBERS!*\n` +
+      `Today is the **FINAL DEADLINE** to register on our official Telegram! All EA FC Mobile league members must verify their in-game nickname.\n\n` +
+      `✅ *PLAYERS WHO ALREADY JOINED TELEGRAM (${uniqueJoined.length}):*\n` +
+      `${uniqueJoined.join('\n')}\n\n`;
+
+    if (uniquePending.length > 0) {
+      const sliceCount = 50;
+      msg += `❌ *NOT YET ON TELEGRAM (${uniquePending.length} players):*\n` +
+        `${uniquePending.slice(0, sliceCount).join('\n')}${uniquePending.length > sliceCount ? `\n_...and ${uniquePending.length - sliceCount} more_` : ''}\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `⛔ *DISCIPLINARY KICK (END OF TODAY):*\n` +
+        `Anyone remaining on this ❌ list by tonight will be **PERMANENTLY KICKED FROM THE IN-GAME LEAGUE**!\n\n` +
+        `📲 *HOW TO KEEP YOUR SPOT RIGHT NOW (Takes 10 seconds):*\n` +
+        `1. Open our official bot: @bratvafcm_bot\n` +
+        `2. Press /start and send your in-game nickname.\n` +
+        `3. Get your ✅ verified status and secure your roster spot!`;
+    } else {
+      msg += `🎉 *100% SQUAD VERIFIED!* All league members have joined Telegram!`;
+    }
+    return msg;
+  }
+
+  if (lang === 'ar') {
+    let msg = `🚨 *دوري БРАТВА: تنبيه أخير وحاسم — اليوم هو آخر فرصة!* 🚨\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚠️ *إلى جميع أعضاء الدوري في اللعبة:*\n` +
+      `اليوم هو **الموعد النهائي والأخير** لإتمام التسجيل في بوت تيليجرام الرسمي! يجب على كل لاعب تأكيد نك نيم حسابه.\n\n` +
+      `✅ *اللاعبون المنضمون حالياً لتيليجرام (${uniqueJoined.length}):*\n` +
+      `${uniqueJoined.join('\n')}\n\n`;
+
+    if (uniquePending.length > 0) {
+      const sliceCount = 50;
+      msg += `❌ *أعضاء لم ينضموا بعد إلى تيليجرام (${uniquePending.length} لاعباً):*\n` +
+        `${uniquePending.slice(0, sliceCount).join('\n')}${uniquePending.length > sliceCount ? `\n_...و ${uniquePending.length - sliceCount} آخرين_` : ''}\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `⛔ *قرار الاستبعاد الإجباري (مع نهاية اليوم):*\n` +
+        `أي لاعب يبقى في هذه القائمة ❌ مع نهاية هذا اليوم سيتم **طرده واستبعاده نهائياً وبلا رجعة** من الدوري داخل اللعبة!\n\n` +
+        `📲 *كيف تحمي مكانك في الدوري الآن فوراً (10 ثوانٍ فقط):*\n` +
+        `1. ادخل لبوت الدوري الرسمي: @bratvafcm_bot\n` +
+        `2. اضغط /start واكتب اسمك أو نك نيم حسابك في اللعبة.\n` +
+        `3. احصل على التوثيق الأخضر ✅ واضمن بقاءك مع الفريق!`;
+    } else {
+      msg += `🎉 *اكتمل الانضمام 100%!* جميع لاعبي الفريق مسجلون في تيليجرام!`;
+    }
+    return msg;
+  }
+
+  if (lang === 'es') {
+    let msg = `🚨 *БРАТВА FCM: AVISO FINAL — ¡HOY ES LA ÚLTIMA OPORTUNIDAD!* 🚨\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚠️ *¡ATENCIÓN A TODOS LOS MIEMBROS DE LA LIGA!*\n` +
+      `¡Hoy es el **PLAZO FINAL DEFINITIVO** para registrarse en nuestro bot oficial de Telegram! Todos deben confirmar su nick del juego.\n\n` +
+      `✅ *JUGADORES QUE YA SE UNIERON A TELEGRAM (${uniqueJoined.length}):*\n` +
+      `${uniqueJoined.join('\n')}\n\n`;
+
+    if (uniquePending.length > 0) {
+      const sliceCount = 50;
+      msg += `❌ *AÚN NO ESTÁN EN TELEGRAM (${uniquePending.length} jugadores):*\n` +
+        `${uniquePending.slice(0, sliceCount).join('\n')}${uniquePending.length > sliceCount ? `\n_...y ${uniquePending.length - sliceCount} más_` : ''}\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `⛔ *MEDIDA DISCIPLINARIA (AL FINAL DEL DÍA):*\n` +
+        `¡Cualquiera que permanezca en la lista ❌ esta noche será **EXPULSADO DEFINITIVAMENTE DE LA LIGA** en el juego!\n\n` +
+        `📲 *CÓMO ASEGURAR TU LUGAR AHORA MISMO (Toma 10 segundos):*\n` +
+        `1. Abre nuestro bot oficial: @bratvafcm_bot\n` +
+        `2. Pulsa /start y envía tu apodo en el juego.\n` +
+        `3. ¡Obtén tu verificación ✅ y asegura tu puesto en el equipo!`;
+    } else {
+      msg += `🎉 *¡100% DE LA PLANTILLA VERIFICADA!* ¡Todos los miembros se han unido a Telegram!`;
+    }
+    return msg;
+  }
+
+  // Russian (Default)
+  let msg = `🚨 *БРАТВА FCM: ПОСЛЕДНЕЕ ПРЕДУПРЕЖДЕНИЕ — СЕГОДНЯ ПОСЛЕДНИЙ ШАНС!* 🚨\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `⚠️ *ВНИМАНИЕ ВСЕМ БОЙЦАМ ЛИГИ!*\n` +
+    `Сегодня наступает **крайний срок регистрации** в нашем Telegram-боте! Все игроки Лиги в EA FC Mobile обязаны подтвердить свой ник.\n\n` +
+    `✅ *ИГРОКИ, КОТОРЫЕ УЖЕ В TELEGRAM (${uniqueJoined.length}):*\n` +
+    `${uniqueJoined.join('\n')}\n\n`;
+
+  if (uniquePending.length > 0) {
+    const sliceCount = 50;
+    msg += `❌ *ИГРОКИ, КОТОРЫХ ЕЩЁ НЕТ В TELEGRAM (${uniquePending.length} бойцов):*\n` +
+      `${uniquePending.slice(0, sliceCount).join('\n')}${uniquePending.length > sliceCount ? `\n_...и ещё ${uniquePending.length - sliceCount}_` : ''}\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⛔ *ДИСЦИПЛИНАРНОЕ ИСКЛЮЧЕНИЕ (СЕГОДНЯ):*\n` +
+      `Все, кто останется в списке ❌ до конца сегодняшнего дня, будут **БЕЗВОЗВРАТНО ИСКЛЮЧЕНЫ ИЗ ЛИГИ** в игре!\n\n` +
+      `📲 *КАК СОХРАНИТЬ МЕСТО В ЛИГЕ ПРЯМО СЕЙЧАС (10 секунд):*\n` +
+      `1. Откройте нашего бота: @bratvafcm_bot\n` +
+      `2. Нажмите /start и напишите свой игровой ник.\n` +
+      `3. Получите зеленую галочку ✅ и оставайтесь в команде!`;
+  } else {
+    msg += `🎉 *100% СОСТАВА В TELEGRAM!* Все бойцы успешно подтвердили регистрацию!`;
+  }
+  return msg;
+}
+
+function getLastChanceWarningKeyboard(currentLang = 'ru') {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  const bcastLabel = currentLang === 'ar' ? '📢 نشر التحذير بالقناة' :
+                     currentLang === 'es' ? '📢 Publicar Aviso en el Canal' :
+                     currentLang === 'en' ? '📢 Broadcast Warning to Channel' : '📢 Опубликовать предупреждение в канал';
+
+  const auditLabel = currentLang === 'ar' ? '👥 تدقيق تيليجرام' :
+                     currentLang === 'es' ? '👥 Auditoría Telegram' :
+                     currentLang === 'en' ? '👥 Telegram Audit' : '👥 Аудит состава';
+
+  const refreshLabel = currentLang === 'ar' ? '🔄 تحديث القائمة' :
+                       currentLang === 'es' ? '🔄 Actualizar Lista' :
+                       currentLang === 'en' ? '🔄 Refresh List' : '🔄 Обновить';
+
+  const menuLabel = currentLang === 'ar' ? '📋 العودة للقائمة' :
+                    currentLang === 'es' ? '📋 Volver al Menú' :
+                    currentLang === 'en' ? '📋 Back to Menu' : '📋 На главную';
+
+  return {
+    inline_keyboard: [
+      [
+        { text: ruLabel, callback_data: 'tab_warn_0_ru' },
+        { text: enLabel, callback_data: 'tab_warn_0_en' },
+        { text: arLabel, callback_data: 'tab_warn_0_ar' },
+        { text: esLabel, callback_data: 'tab_warn_0_es' }
+      ],
+      [
+        { text: bcastLabel, callback_data: 'bcast_lastchance' }
+      ],
+      [
+        { text: auditLabel, callback_data: 'cmd_pending' },
+        { text: refreshLabel, callback_data: 'cmd_warning_lastchance' }
+      ],
+      [
+        { text: menuLabel, callback_data: 'cmd_menu' }
+      ]
+    ]
+  };
 }
 
 function getPendingKeyboard(currentLang = 'ru') {
@@ -2569,13 +2754,17 @@ function getPendingKeyboard(currentLang = 'ru') {
   const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
   const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
 
+  const warnLabel = currentLang === 'ar' ? '🚨 تحذير: اليوم آخر فرصة' :
+                    currentLang === 'es' ? '🚨 Aviso: Hoy Última Oportunidad' :
+                    currentLang === 'en' ? '🚨 Warning: Today is Last Chance' : '🚨 Предупреждение: Последний шанс';
+
   const refreshLabel = currentLang === 'ar' ? '🔄 تحديث التدقيق مباشر' :
                        currentLang === 'es' ? '🔄 Actualizar Auditoría' :
                        currentLang === 'en' ? '🔄 Refresh Audit Live' : '🔄 Обновить аудит live';
 
-  const bcastLabel = currentLang === 'ar' ? '📢 نشر التنبيه بالقناة' :
-                     currentLang === 'es' ? '📢 Publicar en el Canal' :
-                     currentLang === 'en' ? '📢 Broadcast Notice to Channel' : '📢 Опубликовать в канал';
+  const bcastLabel = currentLang === 'ar' ? '📢 نشر التحذير بالقناة' :
+                     currentLang === 'es' ? '📢 Publicar Aviso en el Canal' :
+                     currentLang === 'en' ? '📢 Broadcast Warning to Channel' : '📢 Опубликовать предупреждение в канал';
 
   const menuLabel = currentLang === 'ar' ? '📋 العودة للقائمة' :
                     currentLang === 'es' ? '📋 Volver al Menú' :
@@ -2590,12 +2779,13 @@ function getPendingKeyboard(currentLang = 'ru') {
         { text: esLabel, callback_data: 'tab_audit_0_es' }
       ],
       [
-        { text: refreshLabel, callback_data: 'cmd_pending' }
+        { text: warnLabel, callback_data: 'cmd_warning_lastchance' }
       ],
       [
-        { text: bcastLabel, callback_data: 'bcast_welcome' }
+        { text: bcastLabel, callback_data: 'bcast_lastchance' }
       ],
       [
+        { text: refreshLabel, callback_data: 'cmd_pending' },
         { text: menuLabel, callback_data: 'cmd_menu' }
       ]
     ]
@@ -4214,7 +4404,8 @@ export default async function handler(req, res) {
       const isPublicAction = data.startsWith('tab_') || data.startsWith('ci_') || data.startsWith('fmt_lineup_') ||
                              data === 'cmd_rules' || data === 'cmd_top' || data === 'cmd_lineup' || data === 'cmd_checkin' ||
                              data === 'cmd_recap' || data === 'cmd_mvp' || data === 'cmd_tournaments' || data === 'cmd_mystats' ||
-                             data === 'cmd_strikes' || data === 'cmd_kicklist' || data === 'cmd_menu' || data === 'cmd_pending';
+                             data === 'cmd_strikes' || data === 'cmd_kicklist' || data === 'cmd_menu' || data === 'cmd_pending' ||
+                             data === 'cmd_warning_lastchance';
 
       // If clicked inside a channel or group, allow in-place translation tabs (tab_) and check-in buttons (ci_)
       if (!isCbPrivate && !data.startsWith('tab_') && !data.startsWith('ci_')) {
@@ -4334,6 +4525,9 @@ export default async function handler(req, res) {
         } else if (category === 'audit' || category === 'pending') {
           updatedText = await formatPendingAudit(targetLang);
           updatedKeyboard = getPendingKeyboard(targetLang);
+        } else if (category === 'warn' || category === 'warning') {
+          updatedText = await formatLastChanceWarning(targetLang);
+          updatedKeyboard = getLastChanceWarningKeyboard(targetLang);
         } else if (category === 'welcome') {
           updatedText = formatChannelWelcome(targetLang);
           updatedKeyboard = getLanguageKeyboard('welcome', '0', targetLang, false);
@@ -4786,6 +4980,35 @@ export default async function handler(req, res) {
         const auditMsg = await formatPendingAudit('ru');
         await sendTelegramMessage(chatId, auditMsg, getPendingKeyboard('ru'));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: 'Audit updated!' });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'cmd_warning_lastchance') {
+        const warnMsg = await formatLastChanceWarning('ru');
+        await sendTelegramMessage(chatId, warnMsg, getLastChanceWarningKeyboard('ru'));
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: 'Warning message ready!' });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'bcast_lastchance' || data === 'bcast_welcome') {
+        const warnMsg = await formatLastChanceWarning('ru');
+        const channelKey = {
+          inline_keyboard: [
+            [
+              { text: '📲 Register on Telegram / سجل الآن', url: 'https://t.me/bratvafcm_bot' }
+            ],
+            [
+              { text: '🌐 Official League Website', url: WEBSITE_URL }
+            ]
+          ]
+        };
+        await sendTelegramMessage(CHANNEL_ID, warnMsg, channelKey);
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: '📢 Warning broadcasted to channel!',
+          show_alert: true
+        });
+        await sendTelegramMessage(chatId, `✅ *Last Chance Warning has been published to channel ${CHANNEL_ID}!*`, getLastChanceWarningKeyboard('ru'));
         return sendResponse(res, 200, 'OK');
       }
 
@@ -5423,6 +5646,13 @@ export default async function handler(req, res) {
       const auditMsg = await formatPendingAudit('ru');
       const auditKeys = getPendingKeyboard();
       await sendTelegramMessage(chatId, auditMsg, auditKeys);
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/warning') || text.startsWith('/lastchance')) {
+      const warnMsg = await formatLastChanceWarning('ru');
+      const warnKeys = getLastChanceWarningKeyboard('ru');
+      await sendTelegramMessage(chatId, warnMsg, warnKeys);
       return sendResponse(res, 200, 'OK');
     }
 
