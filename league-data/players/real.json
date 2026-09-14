@@ -2,9 +2,9 @@
   "player_id": "real",
   "display_name": "Real",
   "known_aliases": [],
-  "total_goals": 132,
-  "total_matches": 10,
-  "average_goals": 13.2,
+  "total_goals": 110,
+  "total_matches": 8,
+  "average_goals": 13.8,
   "matches": [
     {
       "tournament_id": "2026-09-04_al-afdal-al-riyadi-26",
@@ -55,18 +55,6 @@
       "player_id": "real"
     },
     {
-      "tournament_id": "2026-09-09_zbirna_ukrainy",
-      "match_index_in_tournament": 12,
-      "opponent_display_name": "Збірна України™",
-      "opponent_id": "2026-09-09_zbirna_ukrainy",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 0,
-      "player_display_name": "Real",
-      "player_id": "real"
-    },
-    {
       "tournament_id": "2026-09-09_zbirna_ukrayini",
       "match_index_in_tournament": 12,
       "opponent_display_name": "Збірна України+",
@@ -91,14 +79,14 @@
       "player_id": "real"
     },
     {
-      "tournament_id": "2026-09-14_ed_phoenix_gen_2",
-      "match_index_in_tournament": 12,
-      "opponent_display_name": "ED PHOENIX GEN 2",
-      "opponent_id": "2026-09-14_ed_phoenix_gen_2",
-      "goals_for": 22,
+      "tournament_id": "2026-09-13_vse_svoi",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "ВСЕ СВОИ",
+      "opponent_id": "2026-09-13_vse_svoi",
+      "goals_for": 0,
       "goals_against": 0,
-      "result": "loss",
-      "turns_played": 3,
+      "result": "win",
+      "turns_played": 0,
       "player_display_name": "Real",
       "player_id": "real"
     },
@@ -111,18 +99,6 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "Real",
-      "player_id": "real"
-    },
-    {
-      "tournament_id": "2026-09-14_vse_svoi",
-      "match_index_in_tournament": 3,
-      "opponent_display_name": "ВСЕ СВОИ",
-      "opponent_id": "2026-09-14_vse_svoi",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 0,
       "player_display_name": "Real",
       "player_id": "real"
     }

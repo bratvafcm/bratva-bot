@@ -2,9 +2,9 @@
   "player_id": "doxibero1",
   "display_name": "DOXIBERO1",
   "known_aliases": [],
-  "total_goals": 522,
-  "total_matches": 20,
-  "average_goals": 26.1,
+  "total_goals": 493,
+  "total_matches": 19,
+  "average_goals": 25.9,
   "matches": [
     {
       "tournament_id": "2026-08-09_abtal-al-arab",
@@ -211,13 +211,13 @@
       "player_id": "doxibero1"
     },
     {
-      "tournament_id": "2026-09-14_ed_phoenix_gen_2",
+      "tournament_id": "2026-09-13_vse_svoi",
       "match_index_in_tournament": 16,
-      "opponent_display_name": "ED PHOENIX GEN 2",
-      "opponent_id": "2026-09-14_ed_phoenix_gen_2",
-      "goals_for": 29,
+      "opponent_display_name": "ВСЕ СВОИ",
+      "opponent_id": "2026-09-13_vse_svoi",
+      "goals_for": 20,
       "goals_against": 0,
-      "result": "loss",
+      "result": "win",
       "turns_played": 3,
       "player_display_name": "DOXIBERO1",
       "player_id": "doxibero1"
@@ -228,18 +228,6 @@
       "opponent_display_name": "@NA.LEGENDS",
       "opponent_id": "2026-09-14_na_legends",
       "goals_for": 32,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
-    },
-    {
-      "tournament_id": "2026-09-14_vse_svoi",
-      "match_index_in_tournament": 16,
-      "opponent_display_name": "ВСЕ СВОИ",
-      "opponent_id": "2026-09-14_vse_svoi",
-      "goals_for": 20,
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,

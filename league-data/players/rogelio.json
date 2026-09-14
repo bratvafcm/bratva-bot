@@ -2,9 +2,9 @@
   "player_id": "rogelio",
   "display_name": "Rogelio",
   "known_aliases": [],
-  "total_goals": 245,
-  "total_matches": 11,
-  "average_goals": 22.3,
+  "total_goals": 200,
+  "total_matches": 9,
+  "average_goals": 22.2,
   "matches": [
     {
       "tournament_id": "2026-09-03_bayern-2-monique",
@@ -67,18 +67,6 @@
       "player_id": "rogelio"
     },
     {
-      "tournament_id": "2026-09-09_zbirna_ukrainy",
-      "match_index_in_tournament": 10,
-      "opponent_display_name": "Збірна України™",
-      "opponent_id": "2026-09-09_zbirna_ukrainy",
-      "goals_for": 22,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 3,
-      "player_display_name": "Rogelio",
-      "player_id": "rogelio"
-    },
-    {
       "tournament_id": "2026-09-09_zbirna_ukrayini",
       "match_index_in_tournament": 10,
       "opponent_display_name": "Збірна України+",
@@ -103,13 +91,13 @@
       "player_id": "rogelio"
     },
     {
-      "tournament_id": "2026-09-14_ed_phoenix_gen_2",
-      "match_index_in_tournament": 10,
-      "opponent_display_name": "ED PHOENIX GEN 2",
-      "opponent_id": "2026-09-14_ed_phoenix_gen_2",
-      "goals_for": 23,
+      "tournament_id": "2026-09-13_vse_svoi",
+      "match_index_in_tournament": 12,
+      "opponent_display_name": "ВСЕ СВОИ",
+      "opponent_id": "2026-09-13_vse_svoi",
+      "goals_for": 21,
       "goals_against": 0,
-      "result": "loss",
+      "result": "win",
       "turns_played": 3,
       "player_display_name": "Rogelio",
       "player_id": "rogelio"
@@ -119,18 +107,6 @@
       "match_index_in_tournament": 11,
       "opponent_display_name": "@NA.LEGENDS",
       "opponent_id": "2026-09-14_na_legends",
-      "goals_for": 21,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "Rogelio",
-      "player_id": "rogelio"
-    },
-    {
-      "tournament_id": "2026-09-14_vse_svoi",
-      "match_index_in_tournament": 12,
-      "opponent_display_name": "ВСЕ СВОИ",
-      "opponent_id": "2026-09-14_vse_svoi",
       "goals_for": 21,
       "goals_against": 0,
       "result": "win",

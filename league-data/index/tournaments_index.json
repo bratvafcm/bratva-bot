@@ -2,56 +2,74 @@
   "2026-08-09_abtal-al-arab": {
     "date": "2026-08-09",
     "opponent_league": "ابطال العرب",
-    "status": "complete",
-    "result": "loss"
+    "our_total_goals": 499,
+    "opponent_total_goals": 566,
+    "result": "loss",
+    "status": "complete"
   },
   "2026-08-11_onsoranje": {
     "date": "2026-08-11",
     "opponent_league": "OnsOranje®",
-    "status": "complete",
-    "result": "win"
+    "our_total_goals": 435,
+    "opponent_total_goals": 307,
+    "result": "win",
+    "status": "complete"
   },
   "2026-08-12_arabs-team": {
     "date": "2026-08-12",
     "opponent_league": "ARAB'S TEAM",
-    "status": "complete",
-    "result": "win"
+    "our_total_goals": 310,
+    "opponent_total_goals": 151,
+    "result": "win",
+    "status": "complete"
   },
   "2026-08-12_warga": {
     "date": "2026-08-12",
     "opponent_league": "Warga +82™",
-    "status": "complete",
-    "result": "loss"
+    "our_total_goals": 130,
+    "opponent_total_goals": 225,
+    "result": "loss",
+    "status": "complete"
   },
   "2026-08-13_free-palestine": {
     "date": "2026-08-13",
     "opponent_league": "FREE PALESTINE",
-    "status": "complete",
-    "result": "loss"
+    "our_total_goals": 299,
+    "opponent_total_goals": 416,
+    "result": "loss",
+    "status": "complete"
   },
   "2026-08-14_sudamericana": {
     "date": "2026-08-14",
     "opponent_league": "SUDAMERICANA",
-    "status": "complete",
-    "result": "win"
+    "our_total_goals": 472,
+    "opponent_total_goals": 376,
+    "result": "win",
+    "status": "complete"
   },
   "2026-08-28_fc-shibankat-fan": {
     "date": "2026-08-28",
     "opponent_league": "FC SHIBANKAT FAN",
-    "status": "complete",
-    "result": "loss"
+    "our_total_goals": 137,
+    "opponent_total_goals": 207,
+    "result": "loss",
+    "status": "complete"
   },
   "2026-08-29_team-work": {
     "date": "2026-08-29",
     "opponent_league": "Team Work",
-    "status": "complete",
-    "result": "win"
+    "our_total_goals": 403,
+    "opponent_total_goals": 269,
+    "result": "win",
+    "status": "complete"
   },
   "2026-08-30_rossiya": {
     "date": "2026-08-30",
     "opponent_league": "РОССИЯ",
-    "status": "complete",
-    "result": "loss"
+    "our_total_goals": 159,
+    "opponent_total_goals": 181,
+    "result": "loss",
+    "status": "complete"
   },
   "2026-08-31_royal-challenger": {
     "date": "2026-08-31",
@@ -107,6 +125,38 @@
     "our_total_goals": 155,
     "opponent_total_goals": 220,
     "result": "loss",
+    "status": "complete"
+  },
+  "2026-09-09_zbirna_ukrayini": {
+    "date": "2026-09-09",
+    "opponent_league": "Збірна України+",
+    "our_total_goals": 207,
+    "opponent_total_goals": 394,
+    "result": "loss",
+    "status": "complete"
+  },
+  "2026-09-12_ed_phoenix_gen_2": {
+    "date": "2026-09-12",
+    "opponent_league": "ED PHOENIX GEN 2",
+    "our_total_goals": 280,
+    "opponent_total_goals": 354,
+    "result": "loss",
+    "status": "complete"
+  },
+  "2026-09-13_vse_svoi": {
+    "date": "2026-09-13",
+    "opponent_league": "ВСЕ СВОИ",
+    "our_total_goals": 314,
+    "opponent_total_goals": 270,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-09-14_na_legends": {
+    "date": "2026-09-14",
+    "opponent_league": "@NA.LEGENDS",
+    "our_total_goals": 328,
+    "opponent_total_goals": 104,
+    "result": "win",
     "status": "complete"
   }
 }

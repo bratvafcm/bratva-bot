@@ -3615,9 +3615,9 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     return sendResponse(res, 200, 'OK');
   }
 
-  const dateStr = new Date().toISOString().split('T')[0];
   const oppSlug = slugifyLeague(aiResult.opponent_league);
-  const tId = `${dateStr}_${oppSlug}`;
+  const ourGoals = aiResult.score_bratva || 0;
+  const oppGoals = aiResult.score_opponent || 0;
 
   const extractedMatches = (aiResult.players || []).map((p, idx) => ({
     board_order: p.board_order || (idx + 1),
@@ -3628,15 +3628,101 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     turns_played: p.turns_played !== undefined ? p.turns_played : (p.limit_remaining === '0/3' ? 3 : (p.limit_remaining === '3/3' ? 0 : 2))
   }));
 
+  // Global Deduplication & Idempotency Guard
+  let tIndexObj = {};
+  let existingTIndex = null;
+  try {
+    existingTIndex = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/tournaments_index.json`);
+    if (existingTIndex && existingTIndex.content) {
+      tIndexObj = JSON.parse(Buffer.from(existingTIndex.content, 'base64').toString('utf8'));
+    }
+  } catch (e) {}
+
+  if (Object.keys(tIndexObj).length === 0) {
+    try {
+      const localTIndexPath = path.join(process.cwd(), 'docs', 'league-data', 'index', 'tournaments_index.json');
+      if (fs.existsSync(localTIndexPath)) {
+        tIndexObj = JSON.parse(fs.readFileSync(localTIndexPath, 'utf8'));
+      }
+    } catch (e) {}
+  }
+
+  function normLeague(s) {
+    return (s || '').toLowerCase().replace(/[\s\-_™+®·'.@]+/g, '');
+  }
+  const normIncoming = normLeague(aiResult.opponent_league);
+
+  let duplicateId = null;
+  let duplicateMeta = null;
+
+  for (const [id, meta] of Object.entries(tIndexObj)) {
+    const normExisting = normLeague(meta.opponent_league);
+    const existingSlug = slugifyLeague(meta.opponent_league);
+    const isOpponentMatch = (normExisting === normIncoming) || (existingSlug === oppSlug) || id.endsWith(`_${oppSlug}`);
+    const isScoreMatch = (meta.our_total_goals === ourGoals) && (meta.opponent_total_goals === oppGoals);
+
+    if (isOpponentMatch && isScoreMatch) {
+      duplicateId = id;
+      duplicateMeta = meta;
+      break;
+    }
+  }
+
+  if (duplicateId) {
+    console.log(`[DEDUPLICATION] Tournament vs "${aiResult.opponent_league}" (${ourGoals}-${oppGoals}) matches existing "${duplicateId}"!`);
+
+    let existingTournament = null;
+    try {
+      const existingFile = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${duplicateId}.json`);
+      if (existingFile && existingFile.content) {
+        existingTournament = JSON.parse(Buffer.from(existingFile.content, 'base64').toString('utf8'));
+      }
+    } catch (e) {}
+
+    if (!existingTournament) {
+      try {
+        const localFile = path.join(process.cwd(), 'docs', 'league-data', 'tournaments', `${duplicateId}.json`);
+        if (fs.existsSync(localFile)) {
+          existingTournament = JSON.parse(fs.readFileSync(localFile, 'utf8'));
+        }
+      } catch (e) {}
+    }
+
+    const existingMatchCount = (existingTournament?.matches || []).length;
+    const incomingMatchCount = extractedMatches.length;
+
+    // If existing tournament already has all players (or as many/more as the upload):
+    if (existingTournament && existingMatchCount >= incomingMatchCount && existingMatchCount >= 16) {
+      const dateRecorded = duplicateMeta?.date || existingTournament.date || duplicateId.slice(0, 10);
+      const dmMsg = `⚠️ *هاد التورنوا مسجل ديجا ف السيستيم!* ⚠️\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `⚔️ *БРАТВА FCM* ${ourGoals} - ${oppGoals} *${clean(duplicateMeta?.opponent_league || aiResult.opponent_league)}*\n` +
+        `📅 *التاريخ / Дата:* ${dateRecorded}\n` +
+        `👥 *اللاعبين المسجلين / Игроков в протоколе:* ${existingMatchCount}\n\n` +
+        `🛡️ *حماية التكرار (Idempotency Guard):*\n` +
+        `البوت تعرف بلي هاد التورنوا داخل ديجا بنفس النتيجة والخصم. تم إلغاء التسجيل التكراري للحفاظ على دقة ترتيب اللاعبين وإحصائياتهم.\n\n` +
+        `_(Дублирование предотвращено. Статистика и рейтинг защищены от повторного учета)._`;
+
+      const baseDmKeys = getLanguageKeyboard('recap', '0', 'ru', true);
+      await sendTelegramMessage(chatId, dmMsg, baseDmKeys);
+      return sendResponse(res, 200, 'Duplicate ignored');
+    }
+
+    console.log(`[DEDUPLICATION] Updating existing tournament "${duplicateId}" on original date...`);
+  }
+
+  let dateStr = duplicateId ? (duplicateMeta?.date || duplicateId.slice(0, 10)) : new Date().toISOString().split('T')[0];
+  let tId = duplicateId || `${dateStr}_${oppSlug}`;
+
   let tData = {
     id: tId,
     tournament_id: tId,
     date: dateStr,
-    timestamp: Date.now(),
+    timestamp: duplicateId ? (duplicateMeta?.timestamp || Date.now()) : Date.now(),
     opponent_league: aiResult.opponent_league || 'OPPONENT',
-    our_total_goals: aiResult.score_bratva || 0,
-    opponent_total_goals: aiResult.score_opponent || 0,
-    result: (aiResult.score_bratva > aiResult.score_opponent) ? 'win' : (aiResult.score_bratva === aiResult.score_opponent ? 'draw' : 'loss'),
+    our_total_goals: ourGoals,
+    opponent_total_goals: oppGoals,
+    result: (ourGoals > oppGoals) ? 'win' : (ourGoals === oppGoals ? 'draw' : 'loss'),
     status: 'complete',
     total_turns_played: aiResult.turns_bratva || 0,
     max_possible_turns: aiResult.turns_max || 48,
@@ -3690,11 +3776,13 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/tournaments/${tId}.json`, 'PUT', commitPayload);
 
     // 2. Update and Commit tournaments_index.json
-    const existingTIndex = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/tournaments_index.json`);
-    let tIndexObj = {};
-    if (existingTIndex && existingTIndex.content) {
-      try { tIndexObj = JSON.parse(Buffer.from(existingTIndex.content, 'base64').toString('utf8')); } catch (e) {}
-    }
+    try {
+      const refreshedTIndex = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/tournaments_index.json`);
+      if (refreshedTIndex && refreshedTIndex.content) {
+        existingTIndex = refreshedTIndex;
+        tIndexObj = JSON.parse(Buffer.from(refreshedTIndex.content, 'base64').toString('utf8'));
+      }
+    } catch (e) {}
     tIndexObj[tId] = {
       date: tData.date,
       opponent_league: tData.opponent_league,
@@ -3709,6 +3797,14 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     };
     if (existingTIndex && existingTIndex.sha) tIndexPayload.sha = existingTIndex.sha;
     await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/tournaments_index.json`, 'PUT', tIndexPayload);
+
+    // Sync to local filesystem if directory exists
+    try {
+      const localTPath = path.join(process.cwd(), 'docs', 'league-data', 'tournaments', `${tId}.json`);
+      if (fs.existsSync(path.dirname(localTPath))) fs.writeFileSync(localTPath, JSON.stringify(tData, null, 2), 'utf8');
+      const localTIPath = path.join(process.cwd(), 'docs', 'league-data', 'index', 'tournaments_index.json');
+      if (fs.existsSync(path.dirname(localTIPath))) fs.writeFileSync(localTIPath, JSON.stringify(tIndexObj, null, 2), 'utf8');
+    } catch (e) {}
 
     // 3. Update and Commit players_index.json
     const existingPIndex = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/players_index.json`);

@@ -1,8 +1,8 @@
 {
-  "id": "2026-09-09_zbirna_ukrainy",
+  "id": "2026-09-09_zbirna_ukrayini",
   "date": "2026-09-09",
-  "timestamp": 1788960000000,
-  "opponent_league": "Збірна України™",
+  "timestamp": 1788965585828,
+  "opponent_league": "Збірна України+",
   "our_total_goals": 207,
   "opponent_total_goals": 394,
   "result": "loss",
@@ -28,8 +28,8 @@
     },
     {
       "board_order": 3,
-      "player_id": "x_king_pentax",
-      "player_display_name": "X_King_Pentax",
+      "player_id": "king_pentax",
+      "player_display_name": "King_Pentax",
       "ovr": 125,
       "goals_for": 34,
       "turns_played": 3
@@ -60,16 +60,16 @@
     },
     {
       "board_order": 7,
-      "player_id": "eabngst",
-      "player_display_name": "EABNGST",
+      "player_id": "ema67",
+      "player_display_name": "EMA67",
       "ovr": 125,
       "goals_for": 0,
       "turns_played": 0
     },
     {
       "board_order": 8,
-      "player_id": "ashroh",
-      "player_display_name": "ashroh",
+      "player_id": "sarah",
+      "player_display_name": "sarah",
       "ovr": 125,
       "goals_for": 0,
       "turns_played": 0
@@ -108,8 +108,8 @@
     },
     {
       "board_order": 13,
-      "player_id": "adi",
-      "player_display_name": "adi",
+      "player_id": "said",
+      "player_display_name": "said",
       "ovr": 124,
       "goals_for": 0,
       "turns_played": 0
@@ -124,8 +124,8 @@
     },
     {
       "board_order": 15,
-      "player_id": "doxibero",
-      "player_display_name": "DOXIBÉRO",
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
       "ovr": 123,
       "goals_for": 29,
       "turns_played": 3

@@ -2,9 +2,9 @@
   "player_id": "king_pentax",
   "display_name": "King_Pentax",
   "known_aliases": [],
-  "total_goals": 146,
-  "total_matches": 5,
-  "average_goals": 29.2,
+  "total_goals": 116,
+  "total_matches": 4,
+  "average_goals": 29,
   "matches": [
     {
       "tournament_id": "2026-09-09_zbirna_ukrayini",
@@ -31,13 +31,13 @@
       "player_id": "king_pentax"
     },
     {
-      "tournament_id": "2026-09-14_ed_phoenix_gen_2",
-      "match_index_in_tournament": 4,
-      "opponent_display_name": "ED PHOENIX GEN 2",
-      "opponent_id": "2026-09-14_ed_phoenix_gen_2",
-      "goals_for": 30,
+      "tournament_id": "2026-09-13_vse_svoi",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "ВСЕ СВОИ",
+      "opponent_id": "2026-09-13_vse_svoi",
+      "goals_for": 25,
       "goals_against": 0,
-      "result": "loss",
+      "result": "win",
       "turns_played": 3,
       "player_display_name": "King_Pentax",
       "player_id": "king_pentax"
@@ -48,18 +48,6 @@
       "opponent_display_name": "@NA.LEGENDS",
       "opponent_id": "2026-09-14_na_legends",
       "goals_for": 27,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "King_Pentax",
-      "player_id": "king_pentax"
-    },
-    {
-      "tournament_id": "2026-09-14_vse_svoi",
-      "match_index_in_tournament": 6,
-      "opponent_display_name": "ВСЕ СВОИ",
-      "opponent_id": "2026-09-14_vse_svoi",
-      "goals_for": 25,
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,

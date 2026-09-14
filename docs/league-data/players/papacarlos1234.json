@@ -3,8 +3,8 @@
   "display_name": "PapaCarlos1234",
   "known_aliases": [],
   "total_goals": 23,
-  "total_matches": 4,
-  "average_goals": 5.8,
+  "total_matches": 3,
+  "average_goals": 7.7,
   "matches": [
     {
       "tournament_id": "2026-09-12_ed_phoenix_gen_2",
@@ -19,14 +19,14 @@
       "player_id": "papacarlos1234"
     },
     {
-      "tournament_id": "2026-09-14_ed_phoenix_gen_2",
-      "match_index_in_tournament": 6,
-      "opponent_display_name": "ED PHOENIX GEN 2",
-      "opponent_id": "2026-09-14_ed_phoenix_gen_2",
-      "goals_for": 0,
+      "tournament_id": "2026-09-13_vse_svoi",
+      "match_index_in_tournament": 8,
+      "opponent_display_name": "ВСЕ СВОИ",
+      "opponent_id": "2026-09-13_vse_svoi",
+      "goals_for": 23,
       "goals_against": 0,
-      "result": "loss",
-      "turns_played": 0,
+      "result": "win",
+      "turns_played": 3,
       "player_display_name": "PapaCarlos1234",
       "player_id": "papacarlos1234"
     },
@@ -39,18 +39,6 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 0,
-      "player_display_name": "PapaCarlos1234",
-      "player_id": "papacarlos1234"
-    },
-    {
-      "tournament_id": "2026-09-14_vse_svoi",
-      "match_index_in_tournament": 8,
-      "opponent_display_name": "ВСЕ СВОИ",
-      "opponent_id": "2026-09-14_vse_svoi",
-      "goals_for": 23,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
       "player_display_name": "PapaCarlos1234",
       "player_id": "papacarlos1234"
     }

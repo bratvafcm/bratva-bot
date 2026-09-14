@@ -1458,8 +1458,18 @@ async function loadData() {
   const tPromises = tIds.map(id => fetch(`${activePath}/tournaments/${id}.json?v=${cb}`).then(r => r.ok ? r.json() : null).catch(() => null));
 
   const tResults = await Promise.all(tPromises);
-  state.tournaments = tResults.filter(Boolean);
-  state.tournaments.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const seenTournaments = new Set();
+  state.tournaments = tResults.filter(Boolean).filter(t => {
+    const key = `${(t.opponent_league || '').trim().toLowerCase()}_${t.our_total_goals}_${t.opponent_total_goals}`;
+    if (seenTournaments.has(key)) return false;
+    seenTournaments.add(key);
+    return true;
+  });
+  state.tournaments.sort((a, b) => {
+    const diff = new Date(b.date) - new Date(a.date);
+    if (diff !== 0) return diff;
+    return (b.timestamp || 0) - (a.timestamp || 0);
+  });
 
   // Build match index by player from all tournaments
   const matchesByPlayer = {};

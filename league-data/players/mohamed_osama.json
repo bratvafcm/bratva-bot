@@ -2,9 +2,9 @@
   "player_id": "mohamed_osama",
   "display_name": "Mohamed_Osama",
   "known_aliases": [],
-  "total_goals": 398,
-  "total_matches": 20,
-  "average_goals": 19.9,
+  "total_goals": 373,
+  "total_matches": 18,
+  "average_goals": 20.7,
   "matches": [
     {
       "tournament_id": "2026-08-09_abtal-al-arab",
@@ -175,18 +175,6 @@
       "player_id": "mohamed_osama"
     },
     {
-      "tournament_id": "2026-09-09_zbirna_ukrainy",
-      "match_index_in_tournament": 9,
-      "opponent_display_name": "Збірна України™",
-      "opponent_id": "2026-09-09_zbirna_ukrainy",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 0,
-      "player_display_name": "Mohamed_Osama",
-      "player_id": "mohamed_osama"
-    },
-    {
       "tournament_id": "2026-09-09_zbirna_ukrayini",
       "match_index_in_tournament": 9,
       "opponent_display_name": "Збірна України+",
@@ -211,13 +199,13 @@
       "player_id": "mohamed_osama"
     },
     {
-      "tournament_id": "2026-09-14_ed_phoenix_gen_2",
-      "match_index_in_tournament": 9,
-      "opponent_display_name": "ED PHOENIX GEN 2",
-      "opponent_id": "2026-09-14_ed_phoenix_gen_2",
-      "goals_for": 25,
+      "tournament_id": "2026-09-13_vse_svoi",
+      "match_index_in_tournament": 11,
+      "opponent_display_name": "ВСЕ СВОИ",
+      "opponent_id": "2026-09-13_vse_svoi",
+      "goals_for": 24,
       "goals_against": 0,
-      "result": "loss",
+      "result": "win",
       "turns_played": 3,
       "player_display_name": "Mohamed_Osama",
       "player_id": "mohamed_osama"
@@ -228,18 +216,6 @@
       "opponent_display_name": "@NA.LEGENDS",
       "opponent_id": "2026-09-14_na_legends",
       "goals_for": 28,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "Mohamed_Osama",
-      "player_id": "mohamed_osama"
-    },
-    {
-      "tournament_id": "2026-09-14_vse_svoi",
-      "match_index_in_tournament": 11,
-      "opponent_display_name": "ВСЕ СВОИ",
-      "opponent_id": "2026-09-14_vse_svoi",
-      "goals_for": 24,
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
