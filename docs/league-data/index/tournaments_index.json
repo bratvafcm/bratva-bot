@@ -148,5 +148,13 @@
     "opponent_total_goals": 270,
     "result": "win",
     "status": "complete"
+  },
+  "2026-09-14_na_legends": {
+    "date": "2026-09-14",
+    "opponent_league": "@NA.LEGENDS",
+    "our_total_goals": 328,
+    "opponent_total_goals": 104,
+    "result": "win",
+    "status": "complete"
   }
 }
