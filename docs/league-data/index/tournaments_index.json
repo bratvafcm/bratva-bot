@@ -158,5 +158,13 @@
     "opponent_total_goals": 104,
     "result": "win",
     "status": "complete"
+  },
+  "2026-09-15_ultras": {
+    "date": "2026-09-15",
+    "opponent_league": "ULTRAS",
+    "our_total_goals": 272,
+    "opponent_total_goals": 317,
+    "result": "loss",
+    "status": "complete"
   }
 }
