@@ -4420,6 +4420,51 @@ export default async function handler(req, res) {
           }, true);
         }
 
+        if (url.searchParams.get('action') === 'check_member') {
+          const targetId = url.searchParams.get('user_id') || '5708098884';
+          const memberRes = await telegramRequest('getChatMember', {
+            chat_id: CHANNEL_ID,
+            user_id: parseInt(targetId, 10)
+          });
+          const approveRes = await telegramRequest('approveChatJoinRequest', {
+            chat_id: CHANNEL_ID,
+            user_id: parseInt(targetId, 10)
+          });
+          return sendResponse(res, 200, {
+            user_id: targetId,
+            channel: CHANNEL_ID,
+            chat_member: memberRes,
+            approve_request: approveRes,
+            timestamp: new Date().toISOString()
+          }, true);
+        }
+
+        if (url.searchParams.get('action') === 'invite_member') {
+          const targetId = url.searchParams.get('user_id') || '5708098884';
+          const inviteText = `👋 *Hello KOUSTAV_007! Welcome to БРАТВА FCM!* ⚜️\n\n` +
+            `Your account has been successfully verified on our official roster!\n\n` +
+            `👉 *Please tap the buttons below to join our official Channel and Squad Chat right now:*`;
+          const inviteKeys = {
+            inline_keyboard: [
+              [
+                { text: '👥 Join Official Channel & Chat', url: COMMUNITY_URL }
+              ],
+              [
+                { text: '📢 Official Channel @BRATVAFCM', url: 'https://t.me/BRATVAFCM' }
+              ],
+              [
+                { text: '🌐 Official League Website', url: WEBSITE_URL }
+              ]
+            ]
+          };
+          const sendRes = await sendTelegramMessage(targetId, inviteText, inviteKeys);
+          return sendResponse(res, 200, {
+            user_id: targetId,
+            result: sendRes,
+            timestamp: new Date().toISOString()
+          }, true);
+        }
+
         if (url.searchParams.get('test_gemini') || url.searchParams.get('list_models')) {
           if (url.searchParams.get('list_models') || url.searchParams.get('test_gemini') === 'list') {
             const listRes = await new Promise((resolve) => {
