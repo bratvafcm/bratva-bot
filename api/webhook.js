@@ -4465,6 +4465,19 @@ export default async function handler(req, res) {
           }, true);
         }
 
+        if (url.searchParams.get('action') === 'delete_msg') {
+          const targetId = url.searchParams.get('user_id') || '5708098884';
+          const msgId = parseInt(url.searchParams.get('msg_id') || '318', 10);
+          const delRes = await deleteTelegramMessage(targetId, msgId);
+          return sendResponse(res, 200, {
+            action: 'delete_msg',
+            target_id: targetId,
+            msg_id: msgId,
+            result: delRes,
+            timestamp: new Date().toISOString()
+          }, true);
+        }
+
         if (url.searchParams.get('test_gemini') || url.searchParams.get('list_models')) {
           if (url.searchParams.get('list_models') || url.searchParams.get('test_gemini') === 'list') {
             const listRes = await new Promise((resolve) => {
