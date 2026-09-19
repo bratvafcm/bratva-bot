@@ -40,6 +40,8 @@ const processedUpdates = new Set();
 const mediaGroupMap = new Map();
 const processingPhotos = new Set();
 const activeBufferStatusMessages = new Map(); // chatId -> messageId
+const waitingRosterSync = new Map(); // chatId -> timestamp
+const activeRosterSessions = new Map(); // sessionId -> { analysis, createdAt }
 const currentCheckIn = {
   active: false,
   format: 32,
@@ -630,6 +632,10 @@ function getMainKeyboard(currentLang = 'ru') {
                         currentLang === 'es' ? '🚨 Aviso: Hoy Última Oportunidad' :
                         currentLang === 'en' ? '🚨 Warning: Today is Last Chance' : '🚨 Предупреждение: Сегодня последний шанс';
 
+  const rosterSyncLabel = currentLang === 'ar' ? '🔄 مزامنة أعضاء اللعبة (فيديو/صور)' :
+                          currentLang === 'es' ? '🔄 Sincronizar Roster (Video/Fotos)' :
+                          currentLang === 'en' ? '🔄 Sync In-Game Roster (Video/Photos)' : '🔄 Синхронизация состава (Видео/Скрины)';
+
   return {
     inline_keyboard: [
       [
@@ -670,6 +676,9 @@ function getMainKeyboard(currentLang = 'ru') {
         { text: auditLabel, callback_data: 'cmd_pending' }
       ],
       [
+        { text: rosterSyncLabel, callback_data: 'cmd_sync_roster' }
+      ],
+      [
         { text: webLabel, url: WEBSITE_URL }
       ]
     ]
@@ -692,6 +701,7 @@ async function syncBotCommands() {
     { command: 'kicked', description: '🚨 Notice: Kicked & Tomorrow Next' },
     { command: 'warning', description: '🚨 Last Chance Warning (Telegram)' },
     { command: 'audit', description: '👥 Telegram Audit (3-Day Kick)' },
+    { command: 'roster', description: '🔄 Sync In-Game Roster (Video/Photos)' },
     { command: 'notify', description: '📢 Direct Player Notifications (Admin)' }
   ];
 
@@ -710,6 +720,7 @@ async function syncBotCommands() {
     { command: 'kicked', description: '🚨 Предупреждение: Завтра очередь остальных' },
     { command: 'warning', description: '🚨 Предупреждение: Последний шанс' },
     { command: 'audit', description: '👥 Аудит Telegram (Контроль 3 дня)' },
+    { command: 'roster', description: '🔄 Синхронизация состава (Видео/Скрины)' },
     { command: 'notify', description: '📢 Личные уведомления игрокам (Админ)' }
   ];
 
@@ -728,6 +739,7 @@ async function syncBotCommands() {
     { command: 'kicked', description: '🚨 تنبيه: المطرودون وغداً الدور عليك' },
     { command: 'warning', description: '🚨 تحذير: اليوم آخر فرصة (تيليجرام)' },
     { command: 'audit', description: '👥 تدقيق أعضاء تيليجرام (مهلة 3 أيام)' },
+    { command: 'roster', description: '🔄 مزامنة أعضاء اللعبة (فيديو/صور)' },
     { command: 'notify', description: '📢 إرسال إشعارات مباشرة للاعبين (أدمن)' }
   ];
 
@@ -746,6 +758,7 @@ async function syncBotCommands() {
     { command: 'kicked', description: '🚨 Aviso: Expulsados y Mañana Te Toca' },
     { command: 'warning', description: '🚨 Aviso: Hoy Última Oportunidad' },
     { command: 'audit', description: '👥 Auditoría Telegram (Plazo 3 Días)' },
+    { command: 'roster', description: '🔄 Sincronizar Roster (Video/Fotos)' },
     { command: 'notify', description: '📢 Notificaciones Directas a Jugadores (Admin)' }
   ];
 
@@ -1029,7 +1042,8 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
     mystats: 'Player Search',
     player: 'Player Profile',
     welcome: 'Welcome Notice',
-    menu: 'Main Menu'
+    menu: 'Main Menu',
+    rosterprompt: 'Roster Sync'
   };
   const title = categoryTitles[category] || 'to Channel';
 
@@ -1272,6 +1286,9 @@ async function evaluateAllSquadStrikes() {
   const regData = await getRegisteredPlayers();
 
   const evaluated = Object.entries(pIndex).map(([id, pData]) => {
+    const isInactive = pData && pData.status === 'inactive';
+    const resetTimeStr = pData && pData.strikes_reset_at ? pData.strikes_reset_at.split('T')[0] : null;
+
     const fullPlayer = (players || []).find(p => p && p.player_id === id) || pData || {};
     const pMatches = fullPlayer.matches || [];
     const horizon = rules.rollingHorizon || 5;
@@ -1283,7 +1300,10 @@ async function evaluateAllSquadStrikes() {
     recentMatches.forEach(m => {
       totalGoalsIn5 += (m.goals_for || 0);
       const turns = m.turns_played !== undefined ? m.turns_played : 0;
-      if (turns < (rules.minTurnsPerTournament || 3)) {
+      const matchDateStr = m.tournament_id ? m.tournament_id.split('_')[0] : null;
+      const isBeforeReset = resetTimeStr && matchDateStr && matchDateStr < resetTimeStr;
+
+      if (!isBeforeReset && turns < (rules.minTurnsPerTournament || 3)) {
         strikesCount += 1;
       }
     });
@@ -1294,9 +1314,14 @@ async function evaluateAllSquadStrikes() {
     let consecutive0 = 0;
     if (pMatches.length >= 2) {
       const last2 = pMatches.slice(-2);
+      const m1Date = last2[0].tournament_id ? last2[0].tournament_id.split('_')[0] : null;
+      const m2Date = last2[1].tournament_id ? last2[1].tournament_id.split('_')[0] : null;
+      const m1BeforeReset = resetTimeStr && m1Date && m1Date < resetTimeStr;
+      const m2BeforeReset = resetTimeStr && m2Date && m2Date < resetTimeStr;
+
       const m1Turns = last2[0].turns_played !== undefined ? last2[0].turns_played : 0;
       const m2Turns = last2[1].turns_played !== undefined ? last2[1].turns_played : 0;
-      if (m1Turns === 0 && m2Turns === 0) {
+      if (!m1BeforeReset && !m2BeforeReset && m1Turns === 0 && m2Turns === 0) {
         consecutive0 = 2;
       }
     }
@@ -1314,7 +1339,7 @@ async function evaluateAllSquadStrikes() {
 
     const strikeKick = strikesCount >= (rules.maxMissesKick || 3);
     const consecutiveKick = consecutive0 >= 2;
-    const isEligibleForKick = !isExcused && !isLeadership && (consecutiveKick || strikeKick);
+    const isEligibleForKick = !isInactive && !isExcused && !isLeadership && (consecutiveKick || strikeKick);
 
     const isTelegramVerified = Boolean(isLeadership || (regData && regData.registrations && regData.registrations[id]));
 
@@ -1324,11 +1349,12 @@ async function evaluateAllSquadStrikes() {
       last5Avg,
       totalMatches: pMatches.length,
       recentMatchesCount: recentMatches.length,
-      strikesIn5: strikesCount,
-      consecutiveMisses: consecutive0,
+      strikesIn5: isInactive ? 0 : strikesCount,
+      consecutiveMisses: isInactive ? 0 : consecutive0,
       consecutiveKick,
       strikeKick,
       isEligibleForKick,
+      isInactive: Boolean(isInactive),
       isExcused,
       isTelegramVerified,
       isDecayed: recentMatches.length >= horizon && strikesCount === 0
@@ -1345,7 +1371,7 @@ async function formatStrikes(lang = 'ru') {
   const critical = [];
   const warnings = [];
 
-  squad.forEach(p => {
+  squad.filter(p => !p.isInactive).forEach(p => {
     const nameIso = bidiIsolate(p.displayName);
     if (p.isEligibleForKick) {
       const reason = p.consecutiveKick ? (lang === 'ar' ? 'غياب بطولتين متتاليتين 0/3' : lang === 'es' ? '2 torneos seguidos 0/3' : lang === 'en' ? '2 consecutive 0/3' : '2 турнира подряд 0/3')
@@ -1440,7 +1466,7 @@ async function generateSmartLineup(requestedSize = null) {
     syncCurrentCheckInState(regData);
   } catch (e) {}
 
-  const eligibleCandidates = allSquad.filter(p => !p.isEligibleForKick);
+  const eligibleCandidates = allSquad.filter(p => !p.isEligibleForKick && !p.isInactive);
   const hasReadyCheckIn = Boolean(currentCheckIn && currentCheckIn.ready && currentCheckIn.ready.size > 0);
 
   const readyPool = hasReadyCheckIn
@@ -2604,6 +2630,7 @@ async function getCleanSquadTelegramStatus() {
   const playersByKey = new Map();
   for (const [pid, p] of Object.entries(pIndex || {})) {
     if (!p || !p.display_name) continue;
+    if (p.status === 'inactive') continue;
     const key = getCanonicalPlayerKey(pid, p.display_name);
     if (!playersByKey.has(key)) {
       playersByKey.set(key, { pids: [pid], displayName: p.display_name });
@@ -3077,7 +3104,7 @@ async function formatKicklist(lang = 'ru') {
   const critical = [];
   const warning = [];
 
-  squad.forEach(p => {
+  squad.filter(p => !p.isInactive).forEach(p => {
     const nameIso = bidiIsolate(p.displayName);
     if (p.isEligibleForKick) {
       let reason = '';
@@ -4386,6 +4413,685 @@ async function processBufferedAlbum(albumId, chatId, res = null) {
   }
 }
 
+async function savePlayersIndexRaw(pIndex, commitMsg = 'Admin: Update players index') {
+  try {
+    const localPath = path.join(process.cwd(), 'docs', 'league-data', 'index', 'players_index.json');
+    fs.writeFileSync(localPath, JSON.stringify(pIndex, null, 2), 'utf8');
+    const rootPath = path.join(process.cwd(), 'league-data', 'index', 'players_index.json');
+    if (fs.existsSync(path.dirname(rootPath))) {
+      fs.writeFileSync(rootPath, JSON.stringify(pIndex, null, 2), 'utf8');
+    }
+  } catch (e) {
+    console.error('Error writing players_index.json locally:', e);
+  }
+
+  try {
+    const existingFile = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/players_index.json`);
+    const fileContent = Buffer.from(JSON.stringify(pIndex, null, 2)).toString('base64');
+    const commitPayload = {
+      message: commitMsg,
+      content: fileContent
+    };
+    if (existingFile && existingFile.sha) commitPayload.sha = existingFile.sha;
+    await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/players_index.json`, 'PUT', commitPayload);
+  } catch (e) {
+    console.error('Failed to commit players_index.json to GitHub:', e);
+  }
+}
+
+async function saveActiveRosterRaw(rosterData, commitMsg = 'Admin: Update active roster') {
+  try {
+    const localPath = path.join(process.cwd(), 'docs', 'league-data', '_active_roster.json');
+    fs.writeFileSync(localPath, JSON.stringify(rosterData, null, 2), 'utf8');
+    const rootPath = path.join(process.cwd(), 'league-data', '_active_roster.json');
+    if (fs.existsSync(path.dirname(rootPath))) {
+      fs.writeFileSync(rootPath, JSON.stringify(rosterData, null, 2), 'utf8');
+    }
+  } catch (e) {
+    console.error('Error writing _active_roster.json locally:', e);
+  }
+
+  try {
+    const existingFile = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/_active_roster.json`);
+    const fileContent = Buffer.from(JSON.stringify(rosterData, null, 2)).toString('base64');
+    const commitPayload = {
+      message: commitMsg,
+      content: fileContent
+    };
+    if (existingFile && existingFile.sha) commitPayload.sha = existingFile.sha;
+    await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/_active_roster.json`, 'PUT', commitPayload);
+  } catch (e) {
+    console.error('Failed to commit _active_roster.json to GitHub:', e);
+  }
+}
+
+async function analyzeRosterMediaWithGemini(mediaBuffers, mimeType = 'video/mp4') {
+  if (!GEMINI_KEY) throw new Error('GEMINI_KEY environment variable is missing');
+
+  const isVideo = mimeType.startsWith('video');
+  const prompt = `You are the master roster auditor for EA Sports FC Mobile league "БРАТВА".
+Analyze the provided in-game league member list (${isVideo ? 'screen recording video scrolling through the roster' : 'screenshots of the member list'}).
+Carefully extract ALL player nicknames present in the league roster.
+
+CRITICAL EXTRACTION RULES:
+1. Extract EVERY unique player display name visible on screen across the entire media.
+2. Maintain exact casing, characters (Latin, Cyrillic, Arabic, special symbols, numbers, underscores, spaces).
+3. Do NOT include role titles (such as "Owner", "Admin", "Member", "Владелец", "Админ", "Участник"), OVR ratings, fan counts, or level numbers in the player name.
+4. Deduplicate: Each player name must appear EXACTLY ONCE in your final list.
+5. If a name has special characters or emoji-like text, preserve the exact characters.
+
+Return STRICT JSON ONLY, no markdown ticks, no commentary:
+{
+  "total_detected": number,
+  "members": [
+    "ExactPlayerName1",
+    "ExactPlayerName2"
+  ]
+}`;
+
+  const parts = [{ text: prompt }];
+  for (const buf of mediaBuffers) {
+    parts.push({
+      inlineData: {
+        mimeType: mimeType,
+        data: buf.toString('base64')
+      }
+    });
+  }
+
+  const payload = JSON.stringify({ contents: [{ parts }] });
+  const modelsToTry = [GEMINI_MODEL, 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.7-flash', 'gemini-2.5-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
+  let attempt = 0;
+
+  return new Promise((resolve, reject) => {
+    const tryNextModel = () => {
+      if (attempt >= modelsToTry.length) {
+        return reject(new Error('All Gemini models failed to process roster media.'));
+      }
+      const modelName = modelsToTry[attempt++];
+      const req = https.request({
+        hostname: 'generativelanguage.googleapis.com',
+        path: `/v1beta/models/${modelName}:generateContent`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': GEMINI_KEY,
+          'Content-Length': Buffer.byteLength(payload)
+        }
+      }, res => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.candidates && parsed.candidates[0] && parsed.candidates[0].content) {
+              let rawText = parsed.candidates[0].content.parts[0].text.trim();
+              rawText = rawText.replace(/^\`\`\`json\s*/i, '').replace(/^\`\`\`\s*/i, '').replace(/\`\`\`\s*$/i, '').trim();
+              const jsonRes = JSON.parse(rawText);
+              if (Array.isArray(jsonRes.members)) {
+                return resolve(jsonRes.members);
+              } else if (Array.isArray(jsonRes)) {
+                return resolve(jsonRes);
+              }
+            }
+            console.warn(`Roster model ${modelName} returned unexpected structure:`, data.substring(0, 300));
+            return tryNextModel();
+          } catch (e) {
+            console.warn(`Failed to parse roster JSON from ${modelName}:`, e.message);
+            return tryNextModel();
+          }
+        });
+      });
+      req.setTimeout(45000, () => {
+        req.destroy();
+        console.warn(`Timeout calling ${modelName} for roster`);
+        tryNextModel();
+      });
+      req.on('error', err => {
+        console.warn(`Network error for roster ${modelName}:`, err.message);
+        tryNextModel();
+      });
+      req.write(payload);
+      req.end();
+    };
+
+    tryNextModel();
+  });
+}
+
+async function analyzeInGameRoster(extractedNames) {
+  const { pIndex } = loadLeagueData();
+  const allStrikes = await evaluateAllSquadStrikes();
+
+  const cleanExtracted = (extractedNames || []).map(n => clean(n)).filter(Boolean);
+  const inGameSet = new Set(cleanExtracted.map(n => n.toLowerCase()));
+
+  const isPlayerInGame = (pid, displayName) => {
+    const dLower = clean(displayName || '').toLowerCase();
+    const pLower = clean(pid || '').toLowerCase();
+    if (inGameSet.has(dLower) || inGameSet.has(pLower)) return true;
+    const cKey = getCanonicalPlayerKey(pid, displayName);
+    return cleanExtracted.some(en => getCanonicalPlayerKey(null, en) === cKey);
+  };
+
+  const mustKickNow = [];
+  const onWarning = [];
+  const safeMembers = [];
+
+  for (const p of allStrikes) {
+    if (p.isInactive) continue;
+    const stillInGame = isPlayerInGame(p.pid, p.displayName);
+
+    if (stillInGame) {
+      if (p.isEligibleForKick) {
+        mustKickNow.push({
+          pid: p.pid,
+          displayName: p.displayName,
+          strikesIn5: p.strikesIn5,
+          consecutiveMisses: p.consecutiveMisses || 0,
+          reason: (p.consecutiveMisses >= 2) ? '2 consecutive 0/3' : `${p.strikesIn5}/5 missed turns`
+        });
+      } else if (p.strikesIn5 > 0) {
+        onWarning.push({
+          pid: p.pid,
+          displayName: p.displayName,
+          strikesIn5: p.strikesIn5
+        });
+      } else {
+        safeMembers.push(p.displayName);
+      }
+    }
+  }
+
+  // Newly Removed: active in pIndex, but absent from in-game list (exclude leadership)
+  const newlyRemoved = [];
+  for (const [pid, pData] of Object.entries(pIndex)) {
+    if (pData.status === 'inactive') continue;
+    if (['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1'].includes(pid.toLowerCase())) continue;
+
+    const stillInGame = isPlayerInGame(pid, pData.display_name);
+    if (!stillInGame) {
+      newlyRemoved.push({
+        pid: pid,
+        displayName: pData.display_name || pid,
+        totalGoals: pData.total_goals || 0,
+        totalMatches: pData.total_matches || 0
+      });
+    }
+  }
+
+  // Rejoined: inactive in pIndex, but now PRESENT in in-game list -> reactivate!
+  const rejoined = [];
+  for (const [pid, pData] of Object.entries(pIndex)) {
+    if (pData.status !== 'inactive') continue;
+
+    const nowInGame = isPlayerInGame(pid, pData.display_name);
+    if (nowInGame) {
+      rejoined.push({
+        pid: pid,
+        displayName: pData.display_name || pid,
+        totalGoals: pData.total_goals || 0,
+        totalMatches: pData.total_matches || 0
+      });
+    }
+  }
+
+  // Brand New Members: in extractedNames, not anywhere in pIndex
+  const newMembers = [];
+  for (const en of cleanExtracted) {
+    const normEn = en.toLowerCase();
+    const existsInIndex = Object.entries(pIndex).some(([pid, pData]) => {
+      return (pData.display_name || '').toLowerCase() === normEn ||
+        pid.toLowerCase() === normEn ||
+        getCanonicalPlayerKey(pid, pData.display_name) === getCanonicalPlayerKey(null, en);
+    });
+    if (!existsInIndex) {
+      newMembers.push(en);
+    }
+  }
+
+  return {
+    timestamp: new Date().toISOString(),
+    totalInGame: cleanExtracted.length,
+    allExtractedMembers: cleanExtracted,
+    mustKickNow,
+    onWarning,
+    safeMembers,
+    newlyRemoved,
+    rejoined,
+    newMembers
+  };
+}
+
+function formatRosterInstructions(lang = 'ru') {
+  if (lang === 'en') {
+    return `📹 *IN-GAME ROSTER SYNC (EA FC MOBILE)* 🔄\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `Send a screen-recording video (15-25s) scrolling smoothly through your in-game League members list, or send scrolling screenshots!\n\n` +
+      `🤖 *What the bot will do:*\n` +
+      `1. 🚨 *Identify In-Game Kick Candidates:* Flag players currently in the game who have 3+ strikes or 2x 0/3 misses so you can kick them immediately.\n` +
+      `2. 📁 *Safe Archiving:* Players who left or were kicked are marked inactive. *Their career goals, match history, and records are NEVER deleted!*\n` +
+      `3. ♻️ *Reactivation:* Inactive players who return have their career resumed and strikes reset to 0/3!\n` +
+      `4. 🆕 *New Recruits:* Brand new players are automatically added to the roster.\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👉 *Please send the video or screenshots now!*`;
+  }
+  if (lang === 'ar') {
+    return `📹 *مزامنة أعضاء الدوري من داخل اللعبة (EA FC MOBILE)* 🔄\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `أرسل فيديو قصير (15-25 ثانية) وأنت تقوم بالتمرير (Scroll) في قائمة أعضاء الدوري داخل اللعبة، أو أرسل سكرينشوتات متتالية!\n\n` +
+      `🤖 *ماذا سيفعل البوت:*\n` +
+      `1. 🚨 *تحديد المستحقين للطرد فوراً:* يعطيك قائمة باللاعبين الموجودين حالياً داخل الدوري ولديهم 3 إنذارات أو غياب 0/3 مرتين لتطردهم من اللعبة.\n` +
+      `2. 📁 *أرشفة آمنة تماماً:* اللاعبون الذين غادروا يتم حفظهم كغير نشطين، مع *حفظ كامل أهدافهم وسجل مبارياتهم 100% بدون أي حذف!*\n` +
+      `3. ♻️ *استعادة اللاعبين العائدين:* إذا رجع لاعب قديم، يستمر سجله التهديفي وتتصفر إنذاراته إلى 0/3!\n` +
+      `4. 🆕 *اكتشاف الأعضاء الجدد:* تسجيل اللاعبين الجدد تلقائياً في قاعدة البيانات.\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👉 *أرسل الفيديو أو الصور الآن!*`;
+  }
+  if (lang === 'es') {
+    return `📹 *SINCRONIZACIÓN DE ROSTER EN EL JUEGO (EA FC MOBILE)* 🔄\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `¡Envía un video corto (15-25s) haciendo scroll en la lista de miembros de la liga en el juego, o envía capturas de pantalla!\n\n` +
+      `🤖 *Lo que hará el bot:*\n` +
+      `1. 🚨 *Identificar candidatos a expulsión:* Jugadores que AÚN están en la liga y tienen 3+ strikes o 2x 0/3 para expulsarlos de inmediato en el juego.\n` +
+      `2. 📁 *Archivado seguro:* Los que ya no están se marcan como inactivos. *¡Sus goles e historial de partidos NUNCA se borran!*\n` +
+      `3. ♻️ *Reincorporaciones:* Si un jugador regresa, su carrera continúa y sus strikes se reinician a 0/3.\n` +
+      `4. 🆕 *Nuevos fichajes:* Detección automática de nuevos miembros.\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👉 *¡Envía el video o las capturas ahora!*`;
+  }
+  return `📹 *СИНХРОНИЗАЦИЯ СОСТАВА ИЗ ИГРЫ (EA FC MOBILE)* 🔄\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `Отправьте видеозапись экрана (15-25 сек) со скроллом списка участников Лиги в игре EA FC Mobile, или отправьте серию скриншотов!\n\n` +
+    `🤖 *Что сделает бот:*\n` +
+    `1. 🚨 *Выявит кандидатов на кик в игре:* Игроки, которые ВСЁ ЕЩЁ в Лиге, но набрали 3 страйка или 2 раза 0/3 подряд. Вы получите список, кого нужно исключить прямо сейчас в игре!\n` +
+    `2. 📁 *Безопасная архивация:* Игроки, покинувшие лигу, переводятся в неактивные. *Их статистика, история голов и матчей сохраняются навсегда!*\n` +
+    `3. ♻️ *Возвращение в строй:* Если игрок вернулся в лигу, его карьера продолжается с сохранением голов, а страйки сбрасываются на 0/3!\n` +
+    `4. 🆕 *Новички:* Новые участники автоматически добавляются в базу данных.\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `👉 *Отправьте видео или скриншоты прямо сейчас!*`;
+}
+
+function formatRosterSyncReport(analysis, lang = 'ru') {
+  const total = analysis.totalInGame || 0;
+  const kickList = analysis.mustKickNow || [];
+  const warnList = analysis.onWarning || [];
+  const removedList = analysis.newlyRemoved || [];
+  const rejoinedList = analysis.rejoined || [];
+  const newList = analysis.newMembers || [];
+
+  if (lang === 'en') {
+    let msg = `🔄 *IN-GAME ROSTER SYNC AUDIT (EA FC MOBILE)* 🔄\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👥 *Detected In-Game:* ${total} members\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n`;
+
+    if (kickList.length > 0) {
+      msg += `🚨 *MUST KICK IN-GAME NOW (${kickList.length}):*\n`;
+      kickList.forEach(p => {
+        msg += `• ⛔ *${bidiIsolate(p.displayName)}* — ${p.reason}\n`;
+      });
+      msg += `👉 *Action:* Open EA FC Mobile and remove these players from the league!\n────────────────────\n`;
+    } else {
+      msg += `✅ *All active members in-game are within strike limits!*\n────────────────────\n`;
+    }
+
+    if (warnList.length > 0) {
+      msg += `⚠️ *ON NOTICE (${warnList.length} players with 1-2 strikes):*\n`;
+      warnList.slice(0, 10).forEach(p => {
+        msg += `• ⚠️ *${bidiIsolate(p.displayName)}* (${p.strikesIn5}/3 strikes)\n`;
+      });
+      if (warnList.length > 10) msg += `_...and ${warnList.length - 10} more_\n`;
+      msg += `────────────────────\n`;
+    }
+
+    if (removedList.length > 0) {
+      msg += `📁 *LEFT LEAGUE / ARCHIVING (${removedList.length}):*\n`;
+      removedList.slice(0, 10).forEach(p => {
+        msg += `• 🚪 *${bidiIsolate(p.displayName)}* (${p.totalGoals} goals, ${p.totalMatches} matches)\n`;
+      });
+      if (removedList.length > 10) msg += `_...and ${removedList.length - 10} more_\n`;
+      msg += `💡 _Career stats & match logs are 100% preserved forever._\n────────────────────\n`;
+    }
+
+    if (rejoinedList.length > 0) {
+      msg += `♻️ *REJOINED PLAYERS (${rejoinedList.length}):*\n`;
+      rejoinedList.forEach(p => {
+        msg += `• 🎉 *${bidiIsolate(p.displayName)}* (Reactivated, strikes reset to 0/3)\n`;
+      });
+      msg += `────────────────────\n`;
+    }
+
+    if (newList.length > 0) {
+      msg += `🆕 *NEW SQUAD MEMBERS (${newList.length}):*\n`;
+      newList.slice(0, 10).forEach(n => {
+        msg += `• 👤 *${bidiIsolate(n)}*\n`;
+      });
+      if (newList.length > 10) msg += `_...and ${newList.length - 10} more_\n`;
+      msg += `────────────────────\n`;
+    }
+
+    msg += `👇 *Review carefully, then click Apply to update the database!*`;
+    return msg;
+  }
+
+  if (lang === 'ar') {
+    let msg = `🔄 *مزامنة تشكيلة الدوري من داخل اللعبة (EA FC MOBILE)* 🔄\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👥 *إجمالي الأعضاء المكتشفين في اللعبة:* ${total} عضو\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n`;
+
+    if (kickList.length > 0) {
+      msg += `🚨 *يجب طردهم من داخل اللعبة فوراً (${kickList.length}):*\n`;
+      kickList.forEach(p => {
+        msg += `• ⛔ *${bidiIsolate(p.displayName)}* — ${p.reason}\n`;
+      });
+      msg += `👉 *مطلوب:* ادخل للعبة واطردهم الآن من قائمة الدوري!\n────────────────────\n`;
+    } else {
+      msg += `✅ *جميع أعضاء الدوري في اللعبة ملتزمون ولا يوجد أي عضو يستحق الطرد!*\n────────────────────\n`;
+    }
+
+    if (warnList.length > 0) {
+      msg += `⚠️ *تحت الملاحظة (${warnList.length} لاعب بإنذار 1-2):*\n`;
+      warnList.slice(0, 10).forEach(p => {
+        msg += `• ⚠️ *${bidiIsolate(p.displayName)}* (${p.strikesIn5}/3 إنذارات)\n`;
+      });
+      if (warnList.length > 10) msg += `_...و ${warnList.length - 10} آخرين_\n`;
+      msg += `────────────────────\n`;
+    }
+
+    if (removedList.length > 0) {
+      msg += `📁 *مغادرون / أرشفة بأمان (${removedList.length}):*\n`;
+      removedList.slice(0, 10).forEach(p => {
+        msg += `• 🚪 *${bidiIsolate(p.displayName)}* (${p.totalGoals} هدف، ${p.totalMatches} مباراة)\n`;
+      });
+      if (removedList.length > 10) msg += `_...و ${removedList.length - 10} آخرين_\n`;
+      msg += `💡 _سجل الأهداف والمباريات محفوظ بالكامل في الموقع للأبد._\n────────────────────\n`;
+    }
+
+    if (rejoinedList.length > 0) {
+      msg += `♻️ *لاعبون عائدون للدوري (${rejoinedList.length}):*\n`;
+      rejoinedList.forEach(p => {
+        msg += `• 🎉 *${bidiIsolate(p.displayName)}* (تم تفعيلهم وتصفير الإنذارات 0/3)\n`;
+      });
+      msg += `────────────────────\n`;
+    }
+
+    if (newList.length > 0) {
+      msg += `🆕 *أعضاء جدد بالدوري (${newList.length}):*\n`;
+      newList.slice(0, 10).forEach(n => {
+        msg += `• 👤 *${bidiIsolate(n)}*\n`;
+      });
+      if (newList.length > 10) msg += `_...و ${newList.length - 10} آخرين_\n`;
+      msg += `────────────────────\n`;
+    }
+
+    msg += `👇 *راجع التقرير ثم اضغط على زر التطبيق لحفظ التغييرات في القاعدة!*`;
+    return msg;
+  }
+
+  if (lang === 'es') {
+    let msg = `🔄 *AUDITORÍA Y SINCRONIZACIÓN DE ROSTER (EA FC MOBILE)* 🔄\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👥 *Detectados en el juego:* ${total} miembros\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n`;
+
+    if (kickList.length > 0) {
+      msg += `🚨 *DEBEN SER EXPULSADOS DEL JUEGO (${kickList.length}):*\n`;
+      kickList.forEach(p => {
+        msg += `• ⛔ *${bidiIsolate(p.displayName)}* — ${p.reason}\n`;
+      });
+      msg += `👉 *Acción:* ¡Abre EA FC Mobile y expúlsalos de la liga ya!\n────────────────────\n`;
+    } else {
+      msg += `✅ *¡Todos los miembros activos están dentro de las normas!*\n────────────────────\n`;
+    }
+
+    if (warnList.length > 0) {
+      msg += `⚠️ *EN AVISO (${warnList.length} jugadores con 1-2 strikes):*\n`;
+      warnList.slice(0, 10).forEach(p => {
+        msg += `• ⚠️ *${bidiIsolate(p.displayName)}* (${p.strikesIn5}/3 strikes)\n`;
+      });
+      if (warnList.length > 10) msg += `_...y ${warnList.length - 10} más_\n`;
+      msg += `────────────────────\n`;
+    }
+
+    if (removedList.length > 0) {
+      msg += `📁 *FUERA DE LA LIGA / ARCHIVO (${removedList.length}):*\n`;
+      removedList.slice(0, 10).forEach(p => {
+        msg += `• 🚪 *${bidiIsolate(p.displayName)}* (${p.totalGoals} goles, ${p.totalMatches} partidos)\n`;
+      });
+      if (removedList.length > 10) msg += `_...y ${removedList.length - 10} más_\n`;
+      msg += `💡 _Historial de goles y partidos 100% preservado para siempre._\n────────────────────\n`;
+    }
+
+    if (rejoinedList.length > 0) {
+      msg += `♻️ *JUGADORES QUE REGRESARON (${rejoinedList.length}):*\n`;
+      rejoinedList.forEach(p => {
+        msg += `• 🎉 *${bidiIsolate(p.displayName)}* (Reactivados, strikes a 0/3)\n`;
+      });
+      msg += `────────────────────\n`;
+    }
+
+    if (newList.length > 0) {
+      msg += `🆕 *NUEVOS MIEMBROS (${newList.length}):*\n`;
+      newList.slice(0, 10).forEach(n => {
+        msg += `• 👤 *${bidiIsolate(n)}*\n`;
+      });
+      if (newList.length > 10) msg += `_...y ${newList.length - 10} más_\n`;
+      msg += `────────────────────\n`;
+    }
+
+    msg += `👇 *¡Revisa con atención y presiona Aplicar para actualizar la base de datos!*`;
+    return msg;
+  }
+
+  // Russian (Default)
+  let msg = `🔄 *СИНХРОНИЗАЦИЯ СОСТАВА ИЗ ИГРЫ (EA FC MOBILE)* 🔄\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `👥 *Обнаружено в игре:* ${total} игроков\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n`;
+
+  if (kickList.length > 0) {
+    msg += `🚨 *НЕОБХОДИМО ИСКЛЮЧИТЬ ИЗ ИГРЫ (${kickList.length}):*\n`;
+    kickList.forEach(p => {
+      msg += `• ⛔ *${bidiIsolate(p.displayName)}* — ${p.reason}\n`;
+    });
+    msg += `👉 *Действие:* Зайдите в EA FC Mobile и исключите этих игроков из Лиги прямо сейчас!\n────────────────────\n`;
+  } else {
+    msg += `✅ *Все игроки в Лиге соблюдают дисциплину, кандидатов на кик нет!*\n────────────────────\n`;
+  }
+
+  if (warnList.length > 0) {
+    msg += `⚠️ *В ЗОНЕ РИСКА (${warnList.length} игроков с 1-2 страйками):*\n`;
+    warnList.slice(0, 10).forEach(p => {
+      msg += `• ⚠️ *${bidiIsolate(p.displayName)}* (${p.strikesIn5}/3 страйка)\n`;
+    });
+    if (warnList.length > 10) msg += `_...и ещё ${warnList.length - 10}_\n`;
+    msg += `────────────────────\n`;
+  }
+
+  if (removedList.length > 0) {
+    msg += `📁 *ВЫБЫЛИ ИЗ ЛИГИ / АРХИВ (${removedList.length}):*\n`;
+    removedList.slice(0, 10).forEach(p => {
+      msg += `• 🚪 *${bidiIsolate(p.displayName)}* (${p.totalGoals} голов, ${p.totalMatches} матчей)\n`;
+    });
+    if (removedList.length > 10) msg += `_...и ещё ${removedList.length - 10}_\n`;
+    msg += `💡 _Статистика и история голов сохранены навсегда._\n────────────────────\n`;
+  }
+
+  if (rejoinedList.length > 0) {
+    msg += `♻️ *ВЕРНУЛИСЬ В ЛИГУ (${rejoinedList.length}):*\n`;
+    rejoinedList.forEach(p => {
+      msg += `• 🎉 *${bidiIsolate(p.displayName)}* (Активирован, страйки сброшены на 0/3)\n`;
+    });
+    msg += `────────────────────\n`;
+  }
+
+  if (newList.length > 0) {
+    msg += `🆕 *НОВЫЕ ИГРОКИ (${newList.length}):*\n`;
+    newList.slice(0, 10).forEach(n => {
+      msg += `• 👤 *${bidiIsolate(n)}*\n`;
+    });
+    if (newList.length > 10) msg += `_...и ещё ${newList.length - 10}_\n`;
+    msg += `────────────────────\n`;
+  }
+
+  msg += `👇 *Проверьте отчет и нажмите Применить, чтобы обновить базу данных!*`;
+  return msg;
+}
+
+function getRosterSyncKeyboard(sessionId, currentLang = 'ru') {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  const applyLabel = currentLang === 'ar' ? '✅ تطبيق التحديث وحفظ التغييرات' :
+                     currentLang === 'es' ? '✅ Aplicar Sincronización y Guardar' :
+                     currentLang === 'en' ? '✅ Apply Roster Sync & Update DB' : '✅ Применить синхронизацию в базу';
+
+  const cancelLabel = currentLang === 'ar' ? '❌ إلغاء' :
+                      currentLang === 'es' ? '❌ Cancelar' :
+                      currentLang === 'en' ? '❌ Cancel' : '❌ Отмена';
+
+  return {
+    inline_keyboard: [
+      [
+        { text: ruLabel, callback_data: `tab_roster_${sessionId}_ru` },
+        { text: enLabel, callback_data: `tab_roster_${sessionId}_en` },
+        { text: arLabel, callback_data: `tab_roster_${sessionId}_ar` },
+        { text: esLabel, callback_data: `tab_roster_${sessionId}_es` }
+      ],
+      [
+        { text: applyLabel, callback_data: `apply_roster_${sessionId}` }
+      ],
+      [
+        { text: cancelLabel, callback_data: `cancel_roster_${sessionId}` }
+      ]
+    ]
+  };
+}
+
+async function applyRosterSync(analysis) {
+  const { pIndex } = loadLeagueData();
+
+  // 1. Archive removed members safely (keep full stats, status = 'inactive')
+  if (Array.isArray(analysis.newlyRemoved)) {
+    for (const p of analysis.newlyRemoved) {
+      if (pIndex[p.pid]) {
+        pIndex[p.pid].status = 'inactive';
+        pIndex[p.pid].status_updated_at = new Date().toISOString();
+      }
+    }
+  }
+
+  // 2. Reactivate returning members (status = 'active', reset strikes to 0/3)
+  if (Array.isArray(analysis.rejoined)) {
+    for (const p of analysis.rejoined) {
+      if (pIndex[p.pid]) {
+        pIndex[p.pid].status = 'active';
+        pIndex[p.pid].status_updated_at = new Date().toISOString();
+        pIndex[p.pid].strikes_reset_at = new Date().toISOString();
+      }
+    }
+  }
+
+  // 3. Add brand new members
+  if (Array.isArray(analysis.newMembers)) {
+    for (const en of analysis.newMembers) {
+      const newPid = getCanonicalPlayerKey(null, en);
+      if (!pIndex[newPid]) {
+        pIndex[newPid] = {
+          display_name: en,
+          total_goals: 0,
+          total_matches: 0,
+          average_goals: 0,
+          status: 'active',
+          status_updated_at: new Date().toISOString(),
+          strikes_reset_at: new Date().toISOString(),
+          last_tournament_date: null,
+          eligibility_streak: {
+            current_fail_streak: 0,
+            last_evaluated_tournament_id: null,
+            flagged_for_review: false
+          }
+        };
+      }
+    }
+  }
+
+  // Save players_index.json locally and commit to GitHub
+  await savePlayersIndexRaw(pIndex, `Roster Sync: Inactive ${analysis.newlyRemoved?.length || 0}, Rejoined ${analysis.rejoined?.length || 0}, New ${analysis.newMembers?.length || 0}`);
+
+  // Build and save _active_roster.json locally and commit to GitHub
+  const rosterPayload = {
+    last_updated: new Date().toISOString(),
+    total_members: analysis.allExtractedMembers?.length || 0,
+    members: analysis.allExtractedMembers || [],
+    kick_list_pending: (analysis.mustKickNow || []).map(p => ({
+      pid: p.pid,
+      display_name: p.displayName,
+      reason: p.reason
+    }))
+  };
+  await saveActiveRosterRaw(rosterPayload, `Roster Sync: ${analysis.allExtractedMembers?.length || 0} in-game members`);
+
+  return { success: true };
+}
+
+async function processBufferedRosterScreenshots(albumId, chatId, res = null) {
+  const items = await getBufferedPhotos(albumId, chatId);
+  if (items.length === 0) {
+    if (res) return sendResponse(res, 200, 'Already processed or empty buffer');
+    return;
+  }
+
+  const prevStatusId = activeBufferStatusMessages.get(chatId);
+  if (prevStatusId) {
+    await deleteTelegramMessage(chatId, prevStatusId);
+    activeBufferStatusMessages.delete(chatId);
+  }
+
+  const uniqueFileIds = [];
+  for (const it of items) {
+    if (it.fileId && !uniqueFileIds.includes(it.fileId)) {
+      uniqueFileIds.push(it.fileId);
+    }
+  }
+
+  const count = uniqueFileIds.length;
+  const analyzingRes = await sendTelegramMessage(chatId, `🔍 *Analyzing ${count} roster screenshot${count > 1 ? 's' : ''} with Gemini Vision AI...*`);
+  const analyzingMsgId = analyzingRes?.result?.message_id || null;
+
+  const commentIds = items.map(it => it.commentId);
+  await clearBufferedPhotos(commentIds);
+
+  try {
+    const buffers = await Promise.all(uniqueFileIds.map(fid => downloadTelegramFile(fid)));
+    const extractedNames = await analyzeRosterMediaWithGemini(buffers, 'image/jpeg');
+    const analysis = await analyzeInGameRoster(extractedNames);
+
+    const sessionId = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+    activeRosterSessions.set(sessionId, { analysis, createdAt: Date.now() });
+
+    if (analyzingMsgId) {
+      await deleteTelegramMessage(chatId, analyzingMsgId);
+    }
+
+    const reportText = formatRosterSyncReport(analysis, 'ru');
+    const reportKeyboard = getRosterSyncKeyboard(sessionId, 'ru');
+    await sendTelegramMessage(chatId, reportText, reportKeyboard);
+    if (res) return sendResponse(res, 200, 'Roster analysis complete');
+  } catch (err) {
+    if (analyzingMsgId) {
+      await deleteTelegramMessage(chatId, analyzingMsgId);
+    }
+    console.error('Error in processBufferedRosterScreenshots:', err);
+    await sendTelegramMessage(chatId, `❌ *Roster Analysis Error:* ${clean(err.message)}`);
+    if (res) return sendResponse(res, 200, 'Roster Analysis Error');
+  }
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
@@ -4685,6 +5391,70 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
+      if (data.startsWith('roster_photo_')) {
+        const albumId = data.replace('roster_photo_', '');
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: 'Analyzing roster screenshots...' });
+        return await processBufferedRosterScreenshots(albumId, chatId, res);
+      }
+
+      if (data.startsWith('apply_roster_')) {
+        const sessionId = data.replace('apply_roster_', '');
+        const session = activeRosterSessions.get(sessionId);
+        if (!session || !session.analysis) {
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: '⚠️ Session expired. Please re-upload media.',
+            show_alert: true
+          });
+          return sendResponse(res, 200, 'Session expired');
+        }
+
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: 'Applying roster sync...'
+        });
+
+        const statusMsg = await sendTelegramMessage(chatId, '⏳ *Applying Roster Sync to Database & GitHub...*');
+
+        await applyRosterSync(session.analysis);
+        activeRosterSessions.delete(sessionId);
+
+        let confirmMsg = `✅ *ROSTER SYNC SUCCESSFULLY APPLIED!* 🏁\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `👥 *Total In-Game Members:* ${session.analysis.totalInGame}\n` +
+          `📁 *Archived (Inactive):* ${session.analysis.newlyRemoved.length} players (Stats 100% preserved)\n` +
+          `♻️ *Reactivated:* ${session.analysis.rejoined.length} returning players (Strikes reset to 0/3)\n` +
+          `🆕 *New Members Added:* ${session.analysis.newMembers.length} players\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n`;
+
+        if (session.analysis.mustKickNow.length > 0) {
+          confirmMsg += `\n🚨 *REMINDER: REMOVE IN-GAME NOW (${session.analysis.mustKickNow.length}):*\n`;
+          session.analysis.mustKickNow.forEach(p => {
+            confirmMsg += `• ⛔ *${bidiIsolate(p.displayName)}* — ${p.reason}\n`;
+          });
+          confirmMsg += `\n⚠️ *Open EA FC Mobile now and remove these players from the league!*\n`;
+        } else {
+          confirmMsg += `\n✨ *No kick candidates in the active squad! All members within allowed limits.*\n`;
+        }
+
+        if (statusMsg && statusMsg.result && statusMsg.result.message_id) {
+          await deleteTelegramMessage(chatId, statusMsg.result.message_id);
+        }
+        await sendTelegramMessage(chatId, confirmMsg, getMainKeyboard('ru'));
+        return sendResponse(res, 200, 'Roster sync applied');
+      }
+
+      if (data.startsWith('cancel_roster_')) {
+        const sessionId = data.replace('cancel_roster_', '');
+        activeRosterSessions.delete(sessionId);
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: 'Roster sync cancelled.'
+        });
+        await sendTelegramMessage(chatId, '❌ *Roster sync cancelled. Database was not modified.*', getMainKeyboard('ru'));
+        return sendResponse(res, 200, 'Roster sync cancelled');
+      }
+
       if (data.startsWith('tab_')) {
         const parts = data.split('_');
         let category = 'recap';
@@ -4790,6 +5560,18 @@ export default async function handler(req, res) {
         } else if (category === 'player') {
           updatedText = generatePlayerStatsMessage(param, targetLang);
           updatedKeyboard = getPlayerKeyboard(param, targetLang);
+        } else if (category === 'roster') {
+          const session = activeRosterSessions.get(param);
+          if (session && session.analysis) {
+            updatedText = formatRosterSyncReport(session.analysis, targetLang);
+            updatedKeyboard = getRosterSyncKeyboard(param, targetLang);
+          } else {
+            updatedText = '⚠️ *Session expired or not found. Please re-upload media.*';
+            updatedKeyboard = getMainKeyboard(targetLang);
+          }
+        } else if (category === 'rosterprompt') {
+          updatedText = formatRosterInstructions(targetLang);
+          updatedKeyboard = getLanguageKeyboard('rosterprompt', '0', targetLang, false);
         }
 
         if (updatedText) {
@@ -5328,9 +6110,10 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
-      if (data === 'cmd_kicklist') {
-        const text = formatKicklist('ru');
-        await sendTelegramMessage(chatId, text, getLanguageKeyboard('kicklist', '0', 'ru', true));
+      if (data === 'cmd_sync_roster') {
+        waitingRosterSync.set(chatId, Date.now());
+        const text = formatRosterInstructions('ru');
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('rosterprompt', '0', 'ru', false));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -5726,6 +6509,55 @@ export default async function handler(req, res) {
       return sendResponse(res, 200, 'Registration successful');
     }
 
+    // 2.0 Video processing (In-Game Roster Screen Recording)
+    const videoObj = message.video || (message.document && (message.document.mime_type || '').startsWith('video/') ? message.document : null);
+    if (videoObj) {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⛔ *Video analysis is reserved for League Administrators.*');
+        return sendResponse(res, 200, 'Non-admin video blocked');
+      }
+
+      const fileSize = videoObj.file_size || 0;
+      if (fileSize > 20 * 1024 * 1024) {
+        const tooBigMsg = `⚠️ *Video File Exceeds 20MB Limit!* (${(fileSize / (1024 * 1024)).toFixed(1)}MB)\n\n` +
+          `Telegram Bot API strictly limits bots to downloading files under 20MB.\n\n` +
+          `💡 *Easy Solutions:*\n` +
+          `1. Send video directly as a regular Telegram video (Telegram auto-compresses it to ~3-8MB).\n` +
+          `2. Keep the screen recording between 15-25 seconds.\n` +
+          `3. Or send scrolling screenshots instead!`;
+        await sendTelegramMessage(chatId, tooBigMsg, getMainKeyboard('ru'));
+        return sendResponse(res, 200, 'Video too large');
+      }
+
+      const analyzingRes = await sendTelegramMessage(chatId, `📹 *Downloading & analyzing in-game roster video with Gemini Vision AI...*\n_Please wait ~15-25 seconds while AI reads all member names..._`);
+      const analyzingMsgId = analyzingRes?.result?.message_id || null;
+
+      try {
+        const videoBuffer = await downloadTelegramFile(videoObj.file_id);
+        const extractedNames = await analyzeRosterMediaWithGemini([videoBuffer], videoObj.mime_type || 'video/mp4');
+        const analysis = await analyzeInGameRoster(extractedNames);
+
+        const sessionId = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+        activeRosterSessions.set(sessionId, { analysis, createdAt: Date.now() });
+
+        if (analyzingMsgId) {
+          await deleteTelegramMessage(chatId, analyzingMsgId);
+        }
+
+        const reportText = formatRosterSyncReport(analysis, 'ru');
+        const reportKeyboard = getRosterSyncKeyboard(sessionId, 'ru');
+        await sendTelegramMessage(chatId, reportText, reportKeyboard);
+        return sendResponse(res, 200, 'Video roster analyzed');
+      } catch (err) {
+        if (analyzingMsgId) {
+          await deleteTelegramMessage(chatId, analyzingMsgId);
+        }
+        console.error('Error analyzing roster video:', err);
+        await sendTelegramMessage(chatId, `❌ *Video Analysis Error:* ${clean(err.message)}`);
+        return sendResponse(res, 200, 'Video analysis error');
+      }
+    }
+
     // 2.1 Photo processing with High-Speed Issue #1 Buffer + Interactive Button + Auto-Debounce
     if (message.photo && message.photo.length > 0) {
       // Select crisp 800-1280px photo (~150-250KB) instead of bloated 4MB raw to prevent serverless timeouts
@@ -5744,7 +6576,10 @@ export default async function handler(req, res) {
       const keyboard = {
         inline_keyboard: [
           [
-            { text: `🚀 Analyze ${count} Screenshot${count > 1 ? 's' : ''} Now`, callback_data: `analyze_${albumId}` }
+            { text: `🚀 Analyze ${count} Match Screenshot${count > 1 ? 's' : ''}`, callback_data: `analyze_${albumId}` }
+          ],
+          [
+            { text: `🔄 Analyze as In-Game Roster (${count})`, callback_data: `roster_photo_${albumId}` }
           ],
           [
             { text: '🗑️ Clear Buffer', callback_data: `clear_${albumId}` }
@@ -5967,6 +6802,13 @@ export default async function handler(req, res) {
       return sendResponse(res, 200, 'OK');
     }
 
+    if (text.startsWith('/roster') || text.startsWith('/sync_roster') || text.startsWith('/syncroster')) {
+      waitingRosterSync.set(chatId, Date.now());
+      const promptText = formatRosterInstructions('ru');
+      await sendTelegramMessage(chatId, promptText, getLanguageKeyboard('rosterprompt', '0', 'ru', false));
+      return sendResponse(res, 200, 'OK');
+    }
+
     if (text.startsWith('/mvp') || text.startsWith('/totw')) {
       const mvpMsg = formatMvp('ru');
       latestMvpMessage = mvpMsg;
@@ -6179,5 +7021,14 @@ export {
   getKickedWarningKeyboard,
   formatLastChanceWarning,
   getLastChanceWarningKeyboard,
-  getCleanSquadTelegramStatus
+  getCleanSquadTelegramStatus,
+  analyzeInGameRoster,
+  formatRosterSyncReport,
+  applyRosterSync,
+  formatRosterInstructions,
+  saveActiveRosterRaw,
+  getRosterSyncKeyboard,
+  evaluateAllSquadStrikes,
+  formatStrikes,
+  formatKicklist
 };
