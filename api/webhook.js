@@ -323,16 +323,129 @@ function loadLeagueData() {
   return { pIndex, tIndex, players, tournaments };
 }
 
-async function getLatestTournament() {
-  if (globalLatestTournament) return globalLatestTournament;
-  const { tournaments } = loadLeagueData();
-  if (tournaments && tournaments.length > 0) return tournaments[0];
-  const tIndex = await fetchGithubJson('docs/league-data/index/tournaments_index.json');
-  if (tIndex) {
-    const ids = Object.keys(tIndex).reverse();
-    if (ids[0]) return await fetchGithubJson(`docs/league-data/tournaments/${ids[0]}.json`);
+let inMemoryLatestTournament = null;
+let lastLatestTournamentFetchTime = 0;
+const tournamentCache = new Map(); // id -> tournamentData
+
+let tournamentsIndexCache = null;
+let lastTournamentsIndexFetchTime = 0;
+
+async function getTournamentsIndex() {
+  const now = Date.now();
+  if (tournamentsIndexCache && (now - lastTournamentsIndexFetchTime < 30000)) {
+    return tournamentsIndexCache;
   }
+  if (GITHUB_PAT) {
+    try {
+      const remoteIndex = await fetchGithubJson('docs/league-data/index/tournaments_index.json');
+      if (remoteIndex && typeof remoteIndex === 'object') {
+        tournamentsIndexCache = remoteIndex;
+        lastTournamentsIndexFetchTime = now;
+        return remoteIndex;
+      }
+    } catch (e) {
+      console.warn('Failed to fetch tournaments_index from GitHub:', e.message);
+    }
+  }
+  const { tIndex } = loadLeagueData();
+  if (tIndex && Object.keys(tIndex).length > 0) {
+    return tIndex;
+  }
+  return {};
+}
+
+async function getLatestTournament() {
+  const now = Date.now();
+  if (globalLatestTournament) {
+    inMemoryLatestTournament = globalLatestTournament;
+    lastLatestTournamentFetchTime = now;
+    return globalLatestTournament;
+  }
+
+  if (inMemoryLatestTournament && (now - lastLatestTournamentFetchTime < 30000)) {
+    return inMemoryLatestTournament;
+  }
+
+  // 1. Fetch from GitHub API first (guarantees fresh multi-instance state on Vercel)
+  if (GITHUB_PAT) {
+    try {
+      const tIndex = await getTournamentsIndex();
+      if (tIndex && typeof tIndex === 'object') {
+        const ids = Object.keys(tIndex);
+        if (ids.length > 0) {
+          ids.sort((a, b) => {
+            const dateA = tIndex[a]?.date || a.slice(0, 10);
+            const dateB = tIndex[b]?.date || b.slice(0, 10);
+            if (dateA !== dateB) return dateA.localeCompare(dateB);
+            const timeA = tIndex[a]?.timestamp || 0;
+            const timeB = tIndex[b]?.timestamp || 0;
+            if (timeA !== timeB) return timeA - timeB;
+            return 0;
+          });
+          const latestId = ids[ids.length - 1];
+          const latestT = await fetchGithubJson(`docs/league-data/tournaments/${latestId}.json`);
+          if (latestT) {
+            inMemoryLatestTournament = latestT;
+            lastLatestTournamentFetchTime = now;
+            tournamentCache.set(latestId, latestT);
+            return latestT;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('GitHub API fetch for latest tournament failed, falling back:', e.message);
+    }
+  }
+
+  // 2. Fallback to local files if GitHub fails or no PAT
+  const { tournaments } = loadLeagueData();
+  if (tournaments && tournaments.length > 0) {
+    return tournaments[0];
+  }
+
   return null;
+}
+
+async function getTournamentById(tId) {
+  if (!tId || tId === '0' || tId === 'latest') {
+    return await getLatestTournament();
+  }
+
+  // 1. Check in-memory globalLatestTournament
+  if (globalLatestTournament && (globalLatestTournament.id === tId || globalLatestTournament.tournament_id === tId)) {
+    return globalLatestTournament;
+  }
+
+  // 2. Check local memory cache
+  if (tournamentCache.has(tId)) {
+    return tournamentCache.get(tId);
+  }
+
+  // 3. Fetch from GitHub API first (always fresh, multi-instance safe!)
+  if (GITHUB_PAT) {
+    try {
+      const remoteT = await fetchGithubJson(`docs/league-data/tournaments/${tId}.json`);
+      if (remoteT) {
+        tournamentCache.set(tId, remoteT);
+        return remoteT;
+      }
+    } catch (e) {
+      console.warn(`GitHub API fetch for tournament ${tId} failed:`, e.message);
+    }
+  }
+
+  // 4. Fallback to local file
+  try {
+    const localPath = path.join(process.cwd(), 'docs', 'league-data', 'tournaments', `${tId}.json`);
+    if (fs.existsSync(localPath)) {
+      const data = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+      tournamentCache.set(tId, data);
+      return data;
+    }
+  } catch (e) {}
+
+  // 5. If specific tournament not found, fallback to latest
+  return await getLatestTournament();
 }
 
 /**
@@ -1049,8 +1162,9 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
 
   const rows = [];
   if (includeBroadcastBtn) {
+    const bcastTarget = (category === 'recap' && param && param !== '0') ? `bcast_recap_${param}` : `bcast_${category}`;
     rows.push([
-      { text: `📢 Post ${title} to Channel`, callback_data: `bcast_${category}` }
+      { text: `📢 Post ${title} to Channel`, callback_data: bcastTarget }
     ]);
   }
 
@@ -1894,9 +2008,21 @@ function getCheckInKeyboard(currentLang = 'ru', includeBcast = false) {
   return { inline_keyboard: rows };
 }
 
-function formatTournaments(lang = 'ru') {
-  const { tournaments } = loadLeagueData();
-  const list = (tournaments || []).slice(0, 5);
+async function formatTournaments(lang = 'ru') {
+  let list = [];
+  try {
+    const tIndex = await getTournamentsIndex();
+    const entries = Object.entries(tIndex || {});
+    if (entries.length > 0) {
+      list = entries.slice(-5).reverse().map(([id, meta]) => ({ id, ...meta }));
+    }
+  } catch (e) {}
+
+  if (list.length === 0) {
+    const { tournaments } = loadLeagueData();
+    list = (tournaments || []).slice(0, 5);
+  }
+
   if (list.length === 0) return 'No tournaments recorded yet.';
 
   const cards = list.map(t => {
@@ -3300,7 +3426,7 @@ function formatRules(lang = 'ru') {
 const generateTopScorersMessage = (lang = 'ru') => formatTopScorers(lang);
 const generateStrikesMessage = (lang = 'ru') => formatStrikes(lang);
 const generateLineupMessage = (lang = 'ru') => formatLineup(lang);
-const generateTournamentsMessage = (lang = 'ru') => formatTournaments(lang);
+const generateTournamentsMessage = async (lang = 'ru') => await formatTournaments(lang);
 const generateKicklistMessage = (lang = 'ru') => formatKicklist(lang);
 const generateRulesMessage = (lang = 'ru') => formatRules(lang);
 
@@ -4154,7 +4280,7 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
         `البوت تعرف بلي هاد التورنوا داخل ديجا بنفس النتيجة والخصم. تم إلغاء التسجيل التكراري للحفاظ على دقة ترتيب اللاعبين وإحصائياتهم.\n\n` +
         `_(Дублирование предотвращено. Статистика и рейтинг защищены от повторного учета)._`;
 
-      const baseDmKeys = getLanguageKeyboard('recap', '0', 'ru', true);
+      const baseDmKeys = getLanguageKeyboard('recap', duplicateId, 'ru', true);
       await sendTelegramMessage(chatId, dmMsg, baseDmKeys);
       return sendResponse(res, 200, 'Duplicate ignored');
     }
@@ -4199,8 +4325,8 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
   globalLatestTournament = tData;
 
   const recap = formatRecap(tData, 'ru');
-  const channelKeys = getLanguageKeyboard('recap', '0', 'ru', false);
-  const baseDmKeys = getLanguageKeyboard('recap', '0', 'ru', true);
+  const channelKeys = getLanguageKeyboard('recap', tId, 'ru', false);
+  const baseDmKeys = getLanguageKeyboard('recap', tId, 'ru', true);
   const dmKeys = {
     inline_keyboard: [
       ...baseDmKeys.inline_keyboard,
@@ -5466,17 +5592,18 @@ export default async function handler(req, res) {
           targetLang = parts[2] || 'ru';
         } else if (parts.length >= 4) {
           category = parts[1];
-          param = parts[2];
-          targetLang = parts[3] || 'ru';
+          targetLang = parts[parts.length - 1] || 'ru';
+          param = parts.slice(2, parts.length - 1).join('_') || '0';
         }
 
         let updatedText = '';
         let updatedKeyboard = null;
 
         if (category === 'recap') {
-          const t = await getLatestTournament();
+          const t = await getTournamentById(param);
+          const tId = t?.id || t?.tournament_id || (param !== '0' ? param : '0');
           updatedText = formatRecap(t, targetLang);
-          updatedKeyboard = getLanguageKeyboard('recap', param, targetLang, isCbPrivate);
+          updatedKeyboard = getLanguageKeyboard('recap', tId, targetLang, isCbPrivate);
         } else if (category === 'rally') {
           updatedText = formatRally(targetLang);
           updatedKeyboard = getLanguageKeyboard('rally', '0', targetLang, isCbPrivate);
@@ -5515,7 +5642,7 @@ export default async function handler(req, res) {
           updatedText = formatCheckInPrompt(targetLang);
           updatedKeyboard = getCheckInKeyboard(targetLang, isCbPrivate);
         } else if (category === 'tournaments') {
-          updatedText = formatTournaments(targetLang);
+          updatedText = await formatTournaments(targetLang);
           updatedKeyboard = getLanguageKeyboard('tournaments', '0', targetLang, isCbPrivate);
         } else if (category === 'kicklist') {
           updatedText = await formatKicklist(targetLang);
@@ -5585,7 +5712,13 @@ export default async function handler(req, res) {
       }
 
       if (data.startsWith('bcast_')) {
-        const cat = data.replace('bcast_', '');
+        const fullCat = data.replace('bcast_', '');
+        let cat = fullCat;
+        let bcastParam = '0';
+        if (cat.startsWith('recap_')) {
+          bcastParam = cat.replace('recap_', '');
+          cat = 'recap';
+        }
         let bcastText = '';
         let catName = 'Update';
 
@@ -5600,7 +5733,8 @@ export default async function handler(req, res) {
           bcastText = formatMvp('ru');
           catName = 'MVP Spotlight';
         } else if (cat === 'recap') {
-          const t = await getLatestTournament();
+          const t = await getTournamentById(bcastParam);
+          bcastParam = t?.id || t?.tournament_id || (bcastParam !== '0' ? bcastParam : '0');
           bcastText = formatRecap(t, 'ru');
           catName = 'Tournament Recap';
         } else if (cat === 'rules') {
@@ -5715,7 +5849,7 @@ export default async function handler(req, res) {
           await sendTelegramMessage(chatId, `✅ *Pre-Match Check-In (1-Hour Timer) posted to ${CHANNEL_ID}!*`, getMainKeyboard('ru'));
           return sendResponse(res, 200, 'OK');
         } else if (cat === 'tournaments') {
-          bcastText = formatTournaments('ru');
+          bcastText = await formatTournaments('ru');
           catName = 'Tournaments Overview';
         } else if (cat === 'kicklist') {
           bcastText = await formatKicklist('ru');
@@ -5729,7 +5863,7 @@ export default async function handler(req, res) {
         }
 
         if (bcastText) {
-          const channelKeyboard = getLanguageKeyboard(cat, '0', 'ru', false);
+          const channelKeyboard = getLanguageKeyboard(cat, bcastParam, 'ru', false);
           await sendTelegramMessage(CHANNEL_ID, bcastText, channelKeyboard);
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
@@ -5989,8 +6123,9 @@ export default async function handler(req, res) {
 
       if (data === 'cmd_recap') {
         const t = await getLatestTournament();
+        const tId = t?.id || t?.tournament_id || '0';
         const recap = formatRecap(t, 'ru');
-        await sendTelegramMessage(chatId, recap, getLanguageKeyboard('recap', '0', 'ru', true));
+        await sendTelegramMessage(chatId, recap, getLanguageKeyboard('recap', tId, 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -6096,7 +6231,7 @@ export default async function handler(req, res) {
       }
 
       if (data === 'cmd_tournaments') {
-        const text = formatTournaments('ru');
+        const text = await formatTournaments('ru');
         await sendTelegramMessage(chatId, text, getLanguageKeyboard('tournaments', '0', 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
@@ -6363,7 +6498,7 @@ export default async function handler(req, res) {
       }
 
       if (text.startsWith('/tournaments')) {
-        const tMsg = formatTournaments('ru');
+        const tMsg = await formatTournaments('ru');
         await sendTelegramMessage(chatId, tMsg, getLanguageKeyboard('tournaments', '0', 'ru', false));
         return sendResponse(res, 200, 'OK');
       }
@@ -6652,7 +6787,7 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/tournaments')) {
-      const tMsg = formatTournaments('ru');
+      const tMsg = await formatTournaments('ru');
       await sendTelegramMessage(chatId, tMsg, getLanguageKeyboard('tournaments', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
     }
@@ -6790,8 +6925,9 @@ export default async function handler(req, res) {
 
     if (text.startsWith('/recap') || text.startsWith('/broadcast')) {
       const t = await getLatestTournament();
+      const tId = t?.id || t?.tournament_id || '0';
       const recap = formatRecap(t, 'ru');
-      const keys = getTabsKeyboard('ru', 0, true);
+      const keys = getTabsKeyboard('ru', tId, true);
       await sendTelegramMessage(chatId, recap, keys);
       return sendResponse(res, 200, 'OK');
     }
