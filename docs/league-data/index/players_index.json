@@ -13,13 +13,13 @@
   },
   "doxibero1": {
     "display_name": "DOXIBERO1",
-    "total_goals": 575,
-    "total_matches": 22,
-    "average_goals": 26.1,
-    "last_tournament_date": "2026-09-19",
+    "total_goals": 605,
+    "total_matches": 23,
+    "average_goals": 26.3,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
@@ -61,13 +61,13 @@
   },
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
-    "total_goals": 445,
-    "total_matches": 21,
-    "average_goals": 21.2,
-    "last_tournament_date": "2026-09-19",
+    "total_goals": 471,
+    "total_matches": 22,
+    "average_goals": 21.4,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
@@ -181,13 +181,13 @@
   },
   "mike": {
     "display_name": "Mike",
-    "total_goals": 378,
-    "total_matches": 16,
-    "average_goals": 23.6,
-    "last_tournament_date": "2026-09-19",
+    "total_goals": 408,
+    "total_matches": 17,
+    "average_goals": 24,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
@@ -313,13 +313,13 @@
   },
   "abirsh07": {
     "display_name": "Abirsh07",
-    "total_goals": 333,
-    "total_matches": 15,
-    "average_goals": 22.2,
-    "last_tournament_date": "2026-09-19",
+    "total_goals": 364,
+    "total_matches": 16,
+    "average_goals": 22.8,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
@@ -361,13 +361,13 @@
   },
   "koustav_007": {
     "display_name": "KOUSTAV_007",
-    "total_goals": 205,
-    "total_matches": 8,
-    "average_goals": 25.6,
-    "last_tournament_date": "2026-09-19",
+    "total_goals": 232,
+    "total_matches": 9,
+    "average_goals": 25.8,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
@@ -529,13 +529,13 @@
   },
   "саня": {
     "display_name": "саня",
-    "total_goals": 258,
-    "total_matches": 8,
-    "average_goals": 32.3,
-    "last_tournament_date": "2026-09-19",
+    "total_goals": 295,
+    "total_matches": 9,
+    "average_goals": 32.8,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
@@ -566,13 +566,13 @@
   "тима": {
     "display_name": "Тима",
     "total_goals": 63,
-    "total_matches": 7,
-    "average_goals": 9,
-    "last_tournament_date": "2026-09-19",
+    "total_matches": 8,
+    "average_goals": 7.9,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
-      "flagged_for_review": true
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
+      "flagged_for_review": false
     }
   },
   "x_king_pentax": {
@@ -601,13 +601,13 @@
   },
   "king_pentax": {
     "display_name": "King_Pentax",
-    "total_goals": 205,
-    "total_matches": 7,
+    "total_goals": 234,
+    "total_matches": 8,
     "average_goals": 29.3,
-    "last_tournament_date": "2026-09-19",
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
@@ -649,37 +649,37 @@
   },
   "papacarlos1234": {
     "display_name": "PapaCarlos1234",
-    "total_goals": 23,
-    "total_matches": 5,
-    "average_goals": 4.6,
-    "last_tournament_date": "2026-09-19",
+    "total_goals": 31,
+    "total_matches": 6,
+    "average_goals": 5.2,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "current_fail_streak": 4,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": true
     }
   },
   "msrpbot": {
     "display_name": "MSRPBOT",
-    "total_goals": 110,
-    "total_matches": 6,
-    "average_goals": 18.3,
-    "last_tournament_date": "2026-09-19",
+    "total_goals": 139,
+    "total_matches": 7,
+    "average_goals": 19.9,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
   "ksfalubaz": {
     "display_name": "KSFALUBAZ",
     "total_goals": 150,
-    "total_matches": 6,
-    "average_goals": 25,
-    "last_tournament_date": "2026-09-19",
+    "total_matches": 7,
+    "average_goals": 21.4,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
@@ -722,12 +722,12 @@
   "awukufc": {
     "display_name": "Awukufc",
     "total_goals": 53,
-    "total_matches": 4,
-    "average_goals": 13.3,
-    "last_tournament_date": "2026-09-19",
+    "total_matches": 5,
+    "average_goals": 10.6,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-09-19_store12",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
@@ -1274,24 +1274,24 @@
   "aidar0911": {
     "display_name": "Aidar0911",
     "total_goals": 0,
-    "total_matches": 1,
+    "total_matches": 2,
     "average_goals": 0,
-    "last_tournament_date": "2026-09-19",
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
   "sahil": {
     "display_name": "sahil",
-    "total_goals": 0,
-    "total_matches": 1,
-    "average_goals": 0,
-    "last_tournament_date": "2026-09-19",
+    "total_goals": 22,
+    "total_matches": 2,
+    "average_goals": 11,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   },
@@ -1304,6 +1304,30 @@
     "eligibility_streak": {
       "current_fail_streak": 1,
       "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "flagged_for_review": false
+    }
+  },
+  "th7_prime": {
+    "display_name": "TH7 PRIME",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-21",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
+      "flagged_for_review": false
+    }
+  },
+  "auto999": {
+    "display_name": "AUTO999",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-21",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
       "flagged_for_review": false
     }
   }
