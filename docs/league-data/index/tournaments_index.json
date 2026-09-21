@@ -190,5 +190,13 @@
     "opponent_total_goals": 150,
     "result": "win",
     "status": "complete"
+  },
+  "2026-09-21_apex_reapers": {
+    "date": "2026-09-21",
+    "opponent_league": "Apex Reapers",
+    "our_total_goals": 213,
+    "opponent_total_goals": 414,
+    "result": "loss",
+    "status": "complete"
   }
 }
