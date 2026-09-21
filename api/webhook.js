@@ -484,12 +484,14 @@ CRITICAL RULES & SCREEN LAYOUT:
    - "name": Player's exact display name (top line in row). Do NOT translate or modify.
    - "ovr": OVR rating number shown below player name (e.g. 124, 125, 128).
    - "goals": The number next to the football icon under "GOALS".
-   - "limit_remaining": Text under "LIMIT" column: "0/3", "1/3", "2/3", or "3/3".
-   - "turns_played":
-     * "0/3" = 3 turns played (0 left) -> 3
-     * "1/3" = 2 turns played (1 left) -> 2
-     * "2/3" = 1 turn played (2 left) -> 1
-     * "3/3" = 0 turns played (3 left, STRIKE) -> 0
+    - "limit_remaining": Exact string under "LIMIT" column: "0/3", "1/3", "2/3", or "3/3".
+    - "turns_played":
+      * CRITICAL: In EA FC Mobile, the "LIMIT" column displays TURNS REMAINING (available to attack), NOT turns played!
+      * "0/3" limit = 0 turns remaining -> exactly 3 turns played (turns_played = 3)
+      * "1/3" limit = 1 turn remaining  -> exactly 2 turns played (turns_played = 2)
+      * "2/3" limit = 2 turns remaining -> exactly 1 turn played (turns_played = 1)
+      * "3/3" limit = 3 turns remaining -> 0 turns played (turns_played = 0, STRIKE!)
+      * SANITY CHECK: If a player scored goals (goals > 0), their turns_played is ALWAYS 3 (or at least 1-3). NEVER output turns_played: 0 for a player who scored goals!
 
 Return STRICT JSON ONLY, no markdown ticks, no commentary:
 {
@@ -1399,12 +1401,36 @@ async function evaluateAllSquadStrikes() {
   const rules = getLeagueRules();
   const regData = await getRegisteredPlayers();
 
+  // Build a complete, chronological map of player matches directly from tournaments
+  const playerMatchesMap = new Map();
+  const sortedTournaments = (tournaments || []).slice().sort((a, b) => {
+    const dateA = a.date || (a.id ? a.id.slice(0, 10) : '');
+    const dateB = b.date || (b.id ? b.id.slice(0, 10) : '');
+    if (dateA !== dateB) return dateA.localeCompare(dateB);
+    return (a.timestamp || 0) - (b.timestamp || 0);
+  });
+
+  sortedTournaments.forEach(t => {
+    (t.matches || []).forEach(m => {
+      if (!m.player_id) return;
+      if (!playerMatchesMap.has(m.player_id)) {
+        playerMatchesMap.set(m.player_id, []);
+      }
+      playerMatchesMap.get(m.player_id).push({
+        tournament_id: t.id || t.tournament_id,
+        date: t.date,
+        goals_for: m.goals_for || 0,
+        turns_played: m.turns_played !== undefined ? m.turns_played : (m.goals_for > 0 ? 3 : 0)
+      });
+    });
+  });
+
   const evaluated = Object.entries(pIndex).map(([id, pData]) => {
     const isInactive = pData && pData.status === 'inactive';
     const resetTimeStr = pData && pData.strikes_reset_at ? pData.strikes_reset_at.split('T')[0] : null;
 
     const fullPlayer = (players || []).find(p => p && p.player_id === id) || pData || {};
-    const pMatches = fullPlayer.matches || [];
+    const pMatches = playerMatchesMap.get(id) || fullPlayer.matches || [];
     const horizon = rules.rollingHorizon || 5;
     const recentMatches = pMatches.slice(-horizon);
 
@@ -3553,15 +3579,57 @@ function formatRally(lang = 'ru') {
 
 const generateRallyMessage = (lang = 'ru') => formatRally(lang);
 
+function resolveTurnsPlayed(p) {
+  if (!p) return 0;
+  const limit = typeof p.limit_remaining === 'string' ? p.limit_remaining.trim() : '';
+  const goals = typeof p.goals === 'number' ? p.goals : (parseInt(p.goals, 10) || 0);
+
+  // 1. Authoritative ground truth from "LIMIT" column in screenshot:
+  // In EA FC Mobile tournaments, LIMIT indicates turns REMAINING (available to attack):
+  // "0/3" = 0 turns left -> played all 3 turns
+  // "1/3" = 1 turn left  -> played 2 turns
+  // "2/3" = 2 turns left -> played 1 turn
+  // "3/3" = 3 turns left -> played 0 turns (has not played yet)
+  if (limit === '0/3') return 3;
+  if (limit === '3/3') return 0;
+  if (limit === '1/3') return 2;
+  if (limit === '2/3') return 1;
+
+  if (limit.includes('/3')) {
+    const rem = parseInt(limit.split('/')[0], 10);
+    if (!isNaN(rem) && rem >= 0 && rem <= 3) {
+      return 3 - rem;
+    }
+  }
+
+  // 2. Physical impossibility check with goals:
+  // In EA FC Mobile, a player CANNOT score goals without playing turns!
+  // If player scored goals (> 0), they must have played turns!
+  if (goals > 0) {
+    if (typeof p.turns_played === 'number' && p.turns_played > 0 && p.turns_played <= 3) {
+      return p.turns_played;
+    }
+    return 3;
+  }
+
+  // 3. If 0 goals:
+  if (goals === 0) {
+    if (limit === '0/3') return 3;
+    return 0;
+  }
+
+  return typeof p.turns_played === 'number' && p.turns_played >= 0 && p.turns_played <= 3 ? p.turns_played : 0;
+}
+
 function formatLiveAlert(aiResult, lang = 'ru') {
   if (!aiResult) return 'No active live match data.';
   const opp = clean(aiResult.opponent_league || 'OPPONENT');
   const ourG = aiResult.score_bratva || 0;
   const oppG = aiResult.score_opponent || 0;
   const timeInfo = clean(aiResult.time_info || 'Live in progress');
-  const unplayed = (aiResult.players || []).filter(p => (p.turns_played !== undefined && p.turns_played < 3) || p.limit_remaining === '3/3');
+  const unplayed = (aiResult.players || []).filter(p => resolveTurnsPlayed(p) < 3);
   const pLines = unplayed.length > 0
-    ? unplayed.map(p => `⌛ | ${clean(p.name)} | ${p.turns_played ?? 0}/3`).join('\n')
+    ? unplayed.map(p => `⌛ | ${clean(p.name)} | ${resolveTurnsPlayed(p)}/3`).join('\n')
     : '✅ All squad members have completed their turns!';
 
   if (lang === 'en') {
@@ -4202,8 +4270,23 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     player_display_name: p.name,
     ovr: p.ovr || 125,
     goals_for: p.goals !== undefined ? p.goals : 0,
-    turns_played: p.turns_played !== undefined ? p.turns_played : (p.limit_remaining === '0/3' ? 3 : (p.limit_remaining === '3/3' ? 0 : 2))
+    turns_played: resolveTurnsPlayed(p)
   }));
+
+  // Robust Turn Verification against Header Banner Total:
+  const teamTurnsFromBanner = aiResult.turns_bratva || 0;
+  const currentTurnsSum = extractedMatches.reduce((acc, m) => acc + m.turns_played, 0);
+  if (teamTurnsFromBanner > 0 && currentTurnsSum !== teamTurnsFromBanner) {
+    // Check if inverted turns match teamTurnsFromBanner (AI confusion guard)
+    const invertedSum = extractedMatches.reduce((acc, m) => acc + (m.goals_for > 0 ? 3 : (3 - m.turns_played)), 0);
+    if (invertedSum === teamTurnsFromBanner) {
+      console.warn(`[SAFETY] Detected AI turn inversion! Auto-correcting turns to match banner total (${teamTurnsFromBanner})`);
+      extractedMatches.forEach(m => {
+        if (m.goals_for > 0) m.turns_played = 3;
+        else m.turns_played = 0;
+      });
+    }
+  }
 
   // Global Deduplication & Idempotency Guard
   let tIndexObj = {};
