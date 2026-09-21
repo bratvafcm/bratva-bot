@@ -1,0 +1,143 @@
+{
+  "id": "2026-09-21_apex_reapers",
+  "tournament_id": "2026-09-21_apex_reapers",
+  "date": "2026-09-21",
+  "timestamp": 1790004312717,
+  "opponent_league": "Apex Reapers",
+  "our_total_goals": 213,
+  "opponent_total_goals": 414,
+  "result": "loss",
+  "status": "complete",
+  "total_turns_played": 24,
+  "max_possible_turns": 48,
+  "matches": [
+    {
+      "board_order": 1,
+      "player_id": "саня",
+      "player_display_name": "саня",
+      "ovr": 128,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 2,
+      "player_id": "th7_prime",
+      "player_display_name": "TH7 PRIME",
+      "ovr": 126,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 3,
+      "player_id": "aidar0911",
+      "player_display_name": "Aidar0911",
+      "ovr": 126,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 4,
+      "player_id": "papacarlos1234",
+      "player_display_name": "PapaCarlos1234",
+      "ovr": 125,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "board_order": 5,
+      "player_id": "koustav_007",
+      "player_display_name": "KOUSTAV_007",
+      "ovr": 125,
+      "goals_for": 32,
+      "turns_played": 3
+    },
+    {
+      "board_order": 6,
+      "player_id": "ksfalubaz",
+      "player_display_name": "KSFALUBAZ",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 7,
+      "player_id": "mike",
+      "player_display_name": "Mike",
+      "ovr": 125,
+      "goals_for": 22,
+      "turns_played": 3
+    },
+    {
+      "board_order": 8,
+      "player_id": "msrpbot",
+      "player_display_name": "MSRPBOT",
+      "ovr": 125,
+      "goals_for": 33,
+      "turns_played": 3
+    },
+    {
+      "board_order": 9,
+      "player_id": "awukufc",
+      "player_display_name": "Awukufc",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 10,
+      "player_id": "sahil",
+      "player_display_name": "sahil",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 11,
+      "player_id": "mohamed_osama",
+      "player_display_name": "Mohamed_Osama",
+      "ovr": 125,
+      "goals_for": 23,
+      "turns_played": 3
+    },
+    {
+      "board_order": 12,
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
+      "ovr": 125,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "board_order": 13,
+      "player_id": "king_pentax",
+      "player_display_name": "King_Pentax",
+      "ovr": 124,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "board_order": 14,
+      "player_id": "auto999",
+      "player_display_name": "AUTO999",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 15,
+      "player_id": "shreyash",
+      "player_display_name": "shreyash",
+      "ovr": 124,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 16,
+      "player_id": "тима",
+      "player_display_name": "Тима",
+      "ovr": 124,
+      "goals_for": 19,
+      "turns_played": 3
+    }
+  ]
+}
