@@ -198,5 +198,14 @@
     "opponent_total_goals": 414,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-09-22_fc_the_conqueror": {
+    "date": "2026-09-22",
+    "timestamp": 1790109344245,
+    "opponent_league": "FC.The Conqueror",
+    "our_total_goals": 131,
+    "opponent_total_goals": 106,
+    "result": "win",
+    "status": "complete"
   }
 }
