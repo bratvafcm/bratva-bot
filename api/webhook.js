@@ -23,7 +23,7 @@ const GEMINI_KEYS = [
 ].filter((k, i, a) => k && a.indexOf(k) === i);
 const GEMINI_KEY = GEMINI_KEYS[0];
 const rawEnvModel = (process.env.GEMINI_MODEL || '').trim();
-const GEMINI_MODEL = (rawEnvModel && rawEnvModel !== 'gemini-1.5-flash' && rawEnvModel !== 'gemini-2.5-flash') ? rawEnvModel : 'gemini-3.6-flash';
+const GEMINI_MODEL = (rawEnvModel && rawEnvModel !== 'gemini-1.5-flash' && rawEnvModel !== 'gemini-2.5-flash') ? rawEnvModel : 'gemini-3.1-flash-lite-preview';
 const GITHUB_PAT = (process.env.GITHUB_PAT || '').trim();
 const GITHUB_REPO = process.env.GITHUB_REPO || 'bratvafcm/bratvafcm.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
@@ -532,7 +532,14 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
 
     const payload = JSON.stringify({ contents: [{ parts }] });
 
-    const modelsToTry = [GEMINI_MODEL, 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'].filter((m, i, a) => m && a.indexOf(m) === i);
+    const modelsToTry = [
+      GEMINI_MODEL,
+      'gemini-3.1-flash-lite-preview',
+      'gemini-3.5-flash-lite',
+      'gemini-3.6-flash',
+      'gemini-3.5-flash',
+      'gemini-flash-latest'
+    ].filter((m, i, a) => m && a.indexOf(m) === i);
     let keyIdx = 0;
     let modelIdx = 0;
 
@@ -575,7 +582,7 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
           }
         });
       });
-      req.setTimeout(12000, () => {
+      req.setTimeout(35000, () => {
         req.destroy();
         console.warn(`Timeout calling ${modelName}`);
         tryNextModel();
@@ -643,7 +650,14 @@ CRITICAL GUIDELINES:
       ]
     });
 
-    const modelsToTry = [GEMINI_MODEL, 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'].filter((m, i, a) => m && a.indexOf(m) === i);
+    const modelsToTry = [
+      GEMINI_MODEL,
+      'gemini-3.1-flash-lite-preview',
+      'gemini-3.5-flash-lite',
+      'gemini-3.6-flash',
+      'gemini-3.5-flash',
+      'gemini-flash-latest'
+    ].filter((m, i, a) => m && a.indexOf(m) === i);
     let keyIdx = 0;
     let modelIdx = 0;
 
@@ -685,7 +699,7 @@ CRITICAL GUIDELINES:
           }
         });
       });
-      req.setTimeout(8000, () => {
+      req.setTimeout(25000, () => {
         req.destroy();
         console.warn(`Timeout calling chat ${modelName}`);
         tryNextModel();
@@ -4738,8 +4752,14 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
     });
   }
 
-  const payload = JSON.stringify({ contents: [{ parts }] });
-  const modelsToTry = [GEMINI_MODEL, 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'].filter((m, i, a) => m && a.indexOf(m) === i);
+  const modelsToTry = [
+    GEMINI_MODEL,
+    'gemini-3.1-flash-lite-preview',
+    'gemini-3.5-flash-lite',
+    'gemini-3.6-flash',
+    'gemini-3.5-flash',
+    'gemini-flash-latest'
+  ].filter((m, i, a) => m && a.indexOf(m) === i);
   let keyIdx = 0;
   let modelIdx = 0;
 
