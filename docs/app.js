@@ -1539,6 +1539,7 @@ async function loadData() {
       last_tournament_date: idxData.last_tournament_date || (lastMatch ? lastMatch.tournament_id.slice(0, 10) : ''),
       eligibility_streak: streakObj,
       matches: pMatches,
+      status: idxData.status || 'active',
       telegram: regInfo.telegram_username ? `@${regInfo.telegram_username}` : (regInfo.telegram_name || null),
       telegram_id: regInfo.telegram_id || null,
       is_admin: Boolean(regInfo.is_admin),
@@ -2225,10 +2226,11 @@ function setupSearch() {
 
 function renderRoster() {
   const cardsContainer = document.getElementById('roster-cards-container');
-  let list = [...state.players];
+  let list = state.players.filter(p => p.status !== 'inactive');
 
   if (state.searchQuery) {
-    list = list.filter(p => p.display_name.toLowerCase().includes(state.searchQuery));
+    const q = state.searchQuery.toLowerCase();
+    list = state.players.filter(p => p.display_name.toLowerCase().includes(q));
   }
   list.sort((a, b) => a.display_name.localeCompare(b.display_name));
 

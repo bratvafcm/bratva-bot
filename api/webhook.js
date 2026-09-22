@@ -385,7 +385,7 @@ async function getLatestTournament() {
             const timeA = tIndex[a]?.timestamp || 0;
             const timeB = tIndex[b]?.timestamp || 0;
             if (timeA !== timeB) return timeA - timeB;
-            return 0;
+            return a.localeCompare(b);
           });
           const latestId = ids[ids.length - 1];
           const latestT = await fetchGithubJson(`docs/league-data/tournaments/${latestId}.json`);
@@ -1339,13 +1339,16 @@ function formatRecap(t, lang = 'ru') {
 
 function formatTopScorers(lang = 'ru') {
   const { pIndex } = loadLeagueData();
-  const list = Object.entries(pIndex).map(([id, data]) => ({
-    id,
-    name: bidiIsolate(data.display_name || id),
-    goals: data.total_goals || 0,
-    matches: data.total_matches || 0,
-    avg: data.average_goals || 0
-  })).sort((a, b) => b.goals - a.goals);
+  const list = Object.entries(pIndex)
+    .filter(([_, data]) => data && data.status !== 'inactive')
+    .map(([id, data]) => ({
+      id,
+      name: bidiIsolate(data.display_name || id),
+      goals: data.total_goals || 0,
+      matches: data.total_matches || 0,
+      avg: data.average_goals || 0
+    }))
+    .sort((a, b) => b.goals - a.goals);
 
   if (list.length === 0) return 'No player stats recorded yet.';
 
@@ -4471,6 +4474,7 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     } catch (e) {}
     tIndexObj[tId] = {
       date: tData.date,
+      timestamp: tData.timestamp || Date.now(),
       opponent_league: tData.opponent_league,
       our_total_goals: tData.our_total_goals,
       opponent_total_goals: tData.opponent_total_goals,
