@@ -325,7 +325,55 @@ function loadLeagueData() {
     }
   } catch (e) {}
 
-  return { pIndex, tIndex, players, tournaments };
+  let regData = { registrations: {} };
+  try {
+    const regPath = path.join(root, 'docs', 'league-data', 'registered_players.json');
+    if (fs.existsSync(regPath)) regData = JSON.parse(fs.readFileSync(regPath, 'utf8'));
+  } catch (e) {}
+
+  return { pIndex, tIndex, players, tournaments, regData };
+}
+
+/**
+ * Format Player Tag using their exact IN-GAME NAME and Telegram ping link
+ * If registered with telegram_id, outputs: [IGN](tg://user?id=123456789)
+ * If registered with username, outputs: @username (IGN)
+ * If leadership, outputs: 👑 саня (Owner) or [DOXIBERO1](tg://user?id=...)
+ */
+function formatPlayerTag(identifier, regData = null) {
+  if (!identifier) return 'Member';
+  const cleanId = String(identifier).trim();
+  const lower = cleanId.toLowerCase();
+  const normalized = lower.replace(/[\s_\-]+/g, '');
+
+  const registrations = (regData && regData.registrations) ? regData.registrations : (loadLeagueData().regData?.registrations || {});
+
+  let matchedReg = registrations[cleanId] || registrations[lower] || registrations[normalized];
+  if (!matchedReg) {
+    matchedReg = Object.values(registrations).find(r => {
+      const rIgn = (r.in_game_name || '').toLowerCase().replace(/[\s_\-]+/g, '');
+      const rDisp = (r.display_name || '').toLowerCase().replace(/[\s_\-]+/g, '');
+      const rPid = (r.player_id || '').toLowerCase().replace(/[\s_\-]+/g, '');
+      return rIgn === normalized || rDisp === normalized || rPid === normalized;
+    });
+  }
+
+  const ign = matchedReg ? (matchedReg.in_game_name || matchedReg.display_name || cleanId) : cleanId;
+
+  if (matchedReg && (matchedReg.is_owner || matchedReg.role === 'Owner')) {
+    if (matchedReg.telegram_id) return `👑 [${ign}](tg://user?id=${matchedReg.telegram_id}) (Owner)`;
+    return `👑 ${ign} (Owner)`;
+  }
+
+  if (matchedReg && matchedReg.telegram_id) {
+    return `[${ign}](tg://user?id=${matchedReg.telegram_id})`;
+  }
+
+  if (matchedReg && matchedReg.telegram_username) {
+    return `[${ign}](https://t.me/${matchedReg.telegram_username})`;
+  }
+
+  return ign;
 }
 
 let inMemoryLatestTournament = null;
@@ -1512,6 +1560,7 @@ async function evaluateAllSquadStrikes() {
       isInactive: Boolean(isInactive),
       isExcused,
       isTelegramVerified,
+      isLeadership,
       isDecayed: recentMatches.length >= horizon && strikesCount === 0
     };
   });
@@ -1522,18 +1571,19 @@ async function evaluateAllSquadStrikes() {
 async function formatStrikes(lang = 'ru') {
   const squad = await evaluateAllSquadStrikes();
   const rules = getLeagueRules();
+  const regData = await getRegisteredPlayers();
 
   const critical = [];
   const warnings = [];
 
-  squad.filter(p => !p.isInactive).forEach(p => {
-    const nameIso = bidiIsolate(p.displayName);
+  squad.filter(p => !p.isInactive && !p.isLeadership).forEach(p => {
+    const playerTag = formatPlayerTag(p.displayName || p.pid, regData);
     if (p.isEligibleForKick) {
       const reason = p.consecutiveKick ? (lang === 'ar' ? 'غياب بطولتين متتاليتين 0/3' : lang === 'es' ? '2 torneos seguidos 0/3' : lang === 'en' ? '2 consecutive 0/3' : '2 турнира подряд 0/3')
-                                      : `${p.strikesIn5}/${rules.rollingHorizon} ${lang === 'ar' ? 'إنذارات' : lang === 'es' ? 'strikes' : lang === 'en' ? 'strikes' : 'страйка'}`;
-      critical.push(`• 🚨 *${nameIso}* — ${reason} ⛔`);
+                                      : `${p.strikesIn5}/${rules.rollingHorizon || 5} ${lang === 'ar' ? 'إنذارات' : lang === 'es' ? 'strikes' : lang === 'en' ? 'strikes' : 'страйка'}`;
+      critical.push(`• 🚨 *${playerTag}* — ${reason} ⛔`);
     } else if (p.strikesIn5 > 0) {
-      warnings.push(`• ⚠️ *${nameIso}* — ${p.strikesIn5}/${rules.maxMissesKick} ${lang === 'ar' ? 'إنذارات (آخر 5)' : lang === 'es' ? 'strikes (últimos 5)' : lang === 'en' ? 'strikes (last 5)' : 'страйка (посл. 5)'}`);
+      warnings.push(`• ⚠️ *${playerTag}* — ${p.strikesIn5}/${rules.maxMissesKick} ${lang === 'ar' ? 'إنذارات (آخر 5)' : lang === 'es' ? 'strikes (últimos 5)' : lang === 'en' ? 'strikes (last 5)' : 'страйка (посл. 5)'}`);
     }
   });
 
@@ -1544,7 +1594,8 @@ async function formatStrikes(lang = 'ru') {
     if (warnings.length > 0) msg += `⚠️ *ACTIVE WARNINGS (1-2 STRIKES):*\n${warnings.join('\n')}\n────────────────────\n`;
     if (critical.length === 0 && warnings.length === 0) msg += `✅ *100% CLEAN DISCIPLINE!*\nAll active squad members have 0 strikes!\n────────────────────\n`;
     msg += `⚖️ *Rules:* 3 strikes in 5 matches OR 2 consecutive 0/3 = Kick.\n` +
-      `🟢 *Decay:* 5 consecutive clean matches (3/3) clears past strikes!\n` +
+      `🟢 *Decay:* 3 clean matches (3/3) clears 1 strike!\n` +
+      `🛡️ *Leadership:* Owner & Admins are protected by leadership immunity.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *Website:* ${WEBSITE_URL}`;
     return msg;
@@ -1556,7 +1607,8 @@ async function formatStrikes(lang = 'ru') {
     if (warnings.length > 0) msg += `⚠️ *إنذارات نشطة (1-2 إنذار):*\n${warnings.join('\n')}\n────────────────────\n`;
     if (critical.length === 0 && warnings.length === 0) msg += `✅ *انضباط مثالي 100%!*\nجميع أعضاء الفريق بسجل نظيف (0 إنذارات) في آخر 5 بطولات!\n────────────────────\n`;
     msg += `⚖️ *القانون:* 3 إنذارات في 5 بطولات أو تفويت بطولتين متتاليتين (0/3) = طرد.\n` +
-      `🟢 *إسقاط الإنذارات:* لعب 5 بطولات متتالية بـ 3/3 يمسح جميع الإنذارات السابقة!\n` +
+      `🟢 *إسقاط الإنذارات:* لعب 3 بطولات متتالية بـ 3/3 يمسح سترايك واحد تلقائياً!\n` +
+      `🛡️ *حصانة الإدارة:* الأونر والمسؤولون معفون من العقوبات التلقائية.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *الموقع الرسمي:* ${WEBSITE_URL}`;
     return msg;
@@ -1568,7 +1620,8 @@ async function formatStrikes(lang = 'ru') {
     if (warnings.length > 0) msg += `⚠️ *AVISOS ACTIVOS (1-2 STRIKES):*\n${warnings.join('\n')}\n────────────────────\n`;
     if (critical.length === 0 && warnings.length === 0) msg += `✅ *¡DISCIPLINA PERFECTA 100%!* Todos los miembros tienen 0 strikes.\n────────────────────\n`;
     msg += `⚖️ *Reglas:* 3 strikes en 5 partidos o 2 seguidos 0/3 = Expulsión.\n` +
-      `🟢 *Limpieza:* ¡5 partidos limpios consecutivos (3/3) eliminan strikes!\n` +
+      `🟢 *Limpieza:* ¡3 partidos limpios seguidos (3/3) eliminan 1 strike!\n` +
+      `🛡️ *Inmunidad:* El Owner y los Admins tienen inmunidad de liderazgo.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *Sitio Oficial:* ${WEBSITE_URL}`;
     return msg;
@@ -1578,12 +1631,13 @@ async function formatStrikes(lang = 'ru') {
   let msg = `⛔ *БРАТВА: ОТЧЕТ ПО СТРАЙКАМ (ПОСЛЕДНИЕ 5 ТУРНИРОВ)* ⛔\n` +
     `━━━━━━━━━━━━━━━━━━━━\n`;
   if (critical.length > 0) msg += `🚨 *КАНДИДАТЫ НА КИК (3 страйка / 0/3 x2):*\n${critical.join('\n')}\n────────────────────\n`;
-  if (warnings.length > 0) msg += `⚠️ *ПРЕДУПРЕЖДЕНИЯ (1-2 СТРАЙКА):*\n${warnings.join('\n')}\n────────────────────\n`;
-  if (critical.length === 0 && warnings.length === 0) msg += `✅ *100% ИДЕАЛЬНАЯ ДИСЦИПЛИНА!*\nУ всех игроков основы 0 страйков за последние 5 турниров!\n────────────────────\n`;
-  msg += `⚖️ *Правила:* 3 страйка из 5 или 2 матча подряд 0/3 = Кик.\n` +
-    `🟢 *Сгорание:* 5 чистых матчей подряд (3/3) полностью сжигают страйки!\n` +
+  if (warnings.length > 0) msg += `⚠️ *ПРЕДУПРЕЖДЕНИЕ (1-2 СТРАЙКА):*\n${warnings.join('\n')}\n────────────────────\n`;
+  if (critical.length === 0 && warnings.length === 0) msg += `✅ *100% ЧИСТАЯ ДИСЦИПЛИНА!*\nУ всех активных бойцов 0 страйков!\n────────────────────\n`;
+  msg += `⚖️ *Правила:* 3 страйка из 5 или 2 пропуска 0/3 подряд = кик.\n` +
+    `🟢 *Сгорание:* 3 чистых матча подряд снимают 1 страйк!\n` +
+    `🛡️ *Иммунитет:* Владелец и Админы защищены иммунитетом руководства.\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
+    `🌐 *Сайт:* ${WEBSITE_URL}`;
   return msg;
 }
 
@@ -1681,21 +1735,22 @@ async function formatSmartLineup(requestedSize = null, lang = 'ru') {
   const isAuto = lineupData.isAuto;
   const readyCount = lineupData.readyCount;
   const hasReadyCheckIn = lineupData.isCheckInUsed;
+  const regData = await getRegisteredPlayers();
 
   const startingLines = starting.map((p, idx) => {
     const num = idx + 1;
     const padNum = num < 10 ? ` ${num}` : `${num}`;
-    const nameIso = bidiIsolate(p.displayName);
-    if (lang === 'en') return `${padNum}. 🟢 *${nameIso}* — avg *${p.last5Avg}*G`;
-    if (lang === 'ar') return `${padNum}. 🟢 *${nameIso}* — معدل *${p.last5Avg}* هدف`;
-    if (lang === 'es') return `${padNum}. 🟢 *${nameIso}* — prom *${p.last5Avg}*G`;
-    return `${padNum}. 🟢 *${nameIso}* — ср. *${p.last5Avg}*Г`;
+    const playerTag = formatPlayerTag(p.displayName || p.pid, regData);
+    if (lang === 'en') return `${padNum}. 🟢 *${playerTag}* — avg *${p.last5Avg}*G`;
+    if (lang === 'ar') return `${padNum}. 🟢 *${playerTag}* — معدل *${p.last5Avg}* هدف`;
+    if (lang === 'es') return `${padNum}. 🟢 *${playerTag}* — prom *${p.last5Avg}*G`;
+    return `${padNum}. 🟢 *${playerTag}* — ср. *${p.last5Avg}*Г`;
   });
 
   const benchLines = bench.map((p, idx) => {
     const num = size + idx + 1;
     const padNum = num < 10 ? ` ${num}` : `${num}`;
-    const nameIso = bidiIsolate(p.displayName);
+    const playerTag = formatPlayerTag(p.displayName || p.pid, regData);
     const isReadyPlayer = hasReadyCheckIn && currentCheckIn && currentCheckIn.ready && currentCheckIn.ready.has(p.pid);
     let tag = '';
     if (lang === 'en') tag = isReadyPlayer ? '(Reserve — Ready)' : '(Backup)';
@@ -1704,10 +1759,10 @@ async function formatSmartLineup(requestedSize = null, lang = 'ru') {
     else tag = isReadyPlayer ? '(Запас — Готов)' : '(Резерв)';
 
     const dot = isReadyPlayer ? '🟡' : '⚪';
-    if (lang === 'en') return `${padNum}. ${dot} *${nameIso}* — avg *${p.last5Avg}*G ${tag}`;
-    if (lang === 'ar') return `${padNum}. ${dot} *${nameIso}* — معدل *${p.last5Avg}* هدف ${tag}`;
-    if (lang === 'es') return `${padNum}. ${dot} *${nameIso}* — prom *${p.last5Avg}*G ${tag}`;
-    return `${padNum}. ${dot} *${nameIso}* — ср. *${p.last5Avg}*Г ${tag}`;
+    if (lang === 'en') return `${padNum}. ${dot} *${playerTag}* — avg *${p.last5Avg}*G ${tag}`;
+    if (lang === 'ar') return `${padNum}. ${dot} *${playerTag}* — معدل *${p.last5Avg}* هدف ${tag}`;
+    if (lang === 'es') return `${padNum}. ${dot} *${playerTag}* — prom *${p.last5Avg}*G ${tag}`;
+    return `${padNum}. ${dot} *${playerTag}* — ср. *${p.last5Avg}*Г ${tag}`;
   });
 
   // Insufficient players alert banner (< 4 ready)
@@ -1871,8 +1926,8 @@ function formatCheckInPrompt(lang = 'ru') {
   const { pIndex } = loadLeagueData();
   const regData = inMemoryRegistered || { registrations: {} };
 
-  const readyNames = readyPids.map(id => bidiIsolate(regData.registrations?.[id]?.display_name || pIndex[id]?.display_name || id));
-  const awayNames = awayPids.map(id => bidiIsolate(regData.registrations?.[id]?.display_name || pIndex[id]?.display_name || id));
+  const readyNames = readyPids.map(id => formatPlayerTag(id, regData));
+  const awayNames = awayPids.map(id => formatPlayerTag(id, regData));
 
   const readyCount = readyNames.length;
   const awayCount = awayNames.length;
@@ -3327,11 +3382,12 @@ function formatMyStatsPrompt(lang = 'ru') {
 async function formatKicklist(lang = 'ru') {
   const squad = await evaluateAllSquadStrikes();
   const rules = getLeagueRules();
+  const regData = await getRegisteredPlayers();
   const critical = [];
   const warning = [];
 
-  squad.filter(p => !p.isInactive).forEach(p => {
-    const nameIso = bidiIsolate(p.displayName);
+  squad.filter(p => !p.isInactive && !p.isLeadership).forEach(p => {
+    const playerTag = formatPlayerTag(p.displayName || p.pid, regData);
     if (p.isEligibleForKick) {
       let reason = '';
       if (p.consecutiveKick) {
@@ -3344,12 +3400,12 @@ async function formatKicklist(lang = 'ru') {
       const kickTag = lang === 'ar' ? 'مؤهل للاستبعاد الفوري ⛔' :
                       lang === 'es' ? 'APTO PARA EXPULSIÓN ⛔' :
                       lang === 'en' ? 'ELIGIBLE FOR KICK ⛔' : 'КАНДИДАТ НА КИК ⛔';
-      critical.push(`• 🚨 *${nameIso}* — ${reason} (${kickTag})`);
+      critical.push(`• 🚨 *${playerTag}* — ${reason} (${kickTag})`);
     } else if (p.strikesIn5 > 0) {
       const warnTag = lang === 'ar' ? 'إنذار سترايك ❌' :
                       lang === 'es' ? 'Strike de aviso ❌' :
                       lang === 'en' ? 'Warning strike ❌' : 'Предупреждение ❌';
-      warning.push(`• ⚠️ *${nameIso}* — ${p.strikesIn5}/${rules.maxMissesKick} (${warnTag})`);
+      warning.push(`• ⚠️ *${playerTag}* — ${p.strikesIn5}/${rules.maxMissesKick} (${warnTag})`);
     }
   });
 
@@ -3360,7 +3416,8 @@ async function formatKicklist(lang = 'ru') {
     if (warning.length > 0) msg += `⚠️ *ON NOTICE (1-${rules.maxMissesKick - 1} STRIKES):*\n${warning.join('\n')}\n────────────────────\n`;
     if (critical.length === 0 && warning.length === 0) msg += `✅ *PERFECT SQUAD DISCIPLINE!*\nAll active members have 0 strikes. Squad is 100% active!\n────────────────────\n`;
     msg += `⚖️ *Official Rule:* 3 strikes in 5 matches OR 2 consecutive 0/3 = automatic kick.\n` +
-      `🟢 *Decay:* 5 clean matches clears past strikes!\n` +
+      `🟢 *Decay:* Playing 3 consecutive clean matches (3/3) clears 1 strike!\n` +
+      `🛡️ *Leadership Immunity:* Owner & Admins are exempt from automated sanctions.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *Full Standings:* ${WEBSITE_URL}`;
     return msg;
@@ -3372,7 +3429,8 @@ async function formatKicklist(lang = 'ru') {
     if (warning.length > 0) msg += `⚠️ *تحت الملاحظة (1-${rules.maxMissesKick - 1} إنذار):*\n${warning.join('\n')}\n────────────────────\n`;
     if (critical.length === 0 && warning.length === 0) msg += `✅ *انضباط مثالي! جميع أعضاء الفريق بدون أي إنذار.*\n────────────────────\n`;
     msg += `⚖️ *القانون الرسمي:* 3 إنذارات في آخر 5 بطولات أو غياب مرتين متتاليتين (0/3) = استبعاد فوري.\n` +
-      `🟢 *سقوط الإنذارات:* لعب 5 بطولات متتالية بـ 3/3 يمسح الإنذارات السابقة!\n` +
+      `🟢 *سقوط الإنذارات:* لعب 3 بطولات متتالية بـ 3/3 يمسح سترايك واحد تلقائياً!\n` +
+      `🛡️ *حصانة الإدارة:* الأونر والمسؤولون معفون من عقوبات الاستبعاد التلقائية.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *الترتيب الكامل:* ${WEBSITE_URL}`;
     return msg;
@@ -3384,7 +3442,8 @@ async function formatKicklist(lang = 'ru') {
     if (warning.length > 0) msg += `⚠️ *BAJO AVISO (1-${rules.maxMissesKick - 1} STRIKES):*\n${warning.join('\n')}\n────────────────────\n`;
     if (critical.length === 0 && warning.length === 0) msg += `✅ *¡DISCIPLINA PERFECTA! Todos los miembros tienen 0 strikes.*\n────────────────────\n`;
     msg += `⚖️ *Regla oficial:* 3 strikes en 5 torneos o 2 seguidos 0/3 = expulsión automática.\n` +
-      `🟢 *Limpieza:* ¡5 partidos limpios eliminan los strikes!\n` +
+      `🟢 *Limpieza:* ¡3 partidos limpios seguidos (3/3) eliminan 1 strike!\n` +
+      `🛡️ *Inmunidad:* El Owner y Admins están exentos de sanciones automáticas.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *Clasificación:* ${WEBSITE_URL}`;
     return msg;
@@ -3397,7 +3456,8 @@ async function formatKicklist(lang = 'ru') {
   if (warning.length > 0) msg += `⚠️ *НА ПРЕДУПРЕЖДЕНИИ (1-${rules.maxMissesKick - 1} СТРАЙКА):*\n${warning.join('\n')}\n────────────────────\n`;
   if (critical.length === 0 && warning.length === 0) msg += `✅ *ИДЕАЛЬНАЯ ДИСЦИПЛИНА! У всех бойцов 0 страйков. Состав 100% активен!*\n────────────────────\n`;
   msg += `⚖️ *Правило лиги:* 3 страйка из 5 или 2 пропуска подряд 0/3 = автоматический кик.\n` +
-    `🟢 *Сгорание:* 5 чистых матчей подряд сжигают страйки!\n` +
+    `🟢 *Сгорание:* 3 чистых матча подряд снимают 1 страйк!\n` +
+    `🛡️ *Иммунитет:* Владелец и Админы защищены иммунитетом руководства.\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `🌐 *Полная таблица:* ${WEBSITE_URL}`;
   return msg;
@@ -3408,29 +3468,31 @@ function formatRules(lang = 'ru') {
   if (lang === 'en') {
     return `📜 *OFFICIAL BRATVA FCM LEAGUE RULEBOOK* 📜\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `1️⃣ ⚽ *Attendance & Turns (Mandatory 3/3):*\n` +
-      `• Every member selected in the lineup must complete all *${rules.minTurnsPerTournament}/3* turns.\n` +
-      `• Unplayed turns (<3) = *1 Strike*.\n` +
-      `• 🚨 *3 strikes in your last 5 tournaments* = *AUTOMATIC KICK*.\n` +
-      `• ⛔ *2 consecutive 0/3 tournaments* = *IMMEDIATE KICK*.\n` +
-      `• 🟢 *Strike Decay:* Playing 3 consecutive clean matches (3/3) clears 1 strike!\n` +
+      `1️⃣ ⚽ *Attendance & Sanction Matrix (Mandatory 3/3):*\n` +
+      `• *Partial Miss (1/3 or 2/3 turns):* Warning + *1-Match Temporary Bench Suspension* (remains in the league).\n` +
+      `• *Total Ghost (0/3 turns):* Red Strike + *2-Match Temporary Bench Suspension* (remains in the league).\n` +
+      `• 🚨 *Permanent League Kick:* Occurs ONLY in two specific cases:\n` +
+      `   ① 2 consecutive 0/3 missed tournaments.\n` +
+      `   ② Accumulating 3 strikes within the last 5 tournaments.\n` +
+      `• 🟢 *Strike Decay:* Playing 3 consecutive clean matches (3/3) automatically clears 1 strike!\n` +
       `────────────────────\n` +
-      `2️⃣ 📱 *Telegram Verification (Mandatory for LvL):*\n` +
-      `• Every member must verify their account in [@BratvaFCMBot](https://t.me/BratvaFCMBot) and join the official community.\n` +
-      `• 🚫 *No Telegram = Strictly Benched.* Unverified players cannot be selected for LvL tournament lineups.\n` +
-      `• Inactive accounts without Telegram verification are subject to removal to keep the squad active.\n` +
+      `2️⃣ 👑 *Leadership & Admin Immunity:*\n` +
+      `• The League Owner and Admins manage the squad, tournaments, and communication.\n` +
+      `• 🛡️ *Immunity:* Leadership is strictly exempt from automated bot strikes, benching, or kicks.\n` +
       `────────────────────\n` +
-      `3️⃣ 🎯 *Performance & Smart Lineup Selection:*\n` +
-      `• 🤖 *The Bot automatically determines tournament size* (4v4, 8v8, 16v16, 24v24, 32v32) based on active check-ins!\n` +
-      `• Starting spots are awarded based on 3 criteria:\n` +
-      `  1. Checked in as [ 🟢 Ready ] before match start\n` +
-      `  2. Clean discipline (0 strikes priority)\n` +
-      `  3. Top scoring average in **your own last 5 matches played**!\n` +
-      `• 🔄 *Tactical Bench Rotation:* Players with temporary low scoring are rotated to the bench to regain form (not a disciplinary kick).\n` +
+      `3️⃣ 🎯 *Scoring Performance vs Discipline:*\n` +
+      `• Low goals with full turns (3/3) is *NEVER penalized with strikes or kicks*.\n` +
+      `• 🔄 *Tactical Bench Rotation:* Players struggling with form are temporarily placed on the bench to practice and regain sharpness.\n` +
+      `• Starters are chosen by: ① Check-in readiness, ② 0 strikes, ③ Highest 5-match scoring average!\n` +
       `────────────────────\n` +
-      `4️⃣ 🛡️ *Advance Notice & Excuses:*\n` +
-      `• If an emergency occurs, notify admins in the chat before check-in closes.\n` +
-      `• Admins can excuse an absence via \`/forgive <player>\`.\n` +
+      `4️⃣ 📱 *Telegram Verification & In-Game Tagging:*\n` +
+      `• Every member must register in [@BratvaFCMBot](https://t.me/BratvaFCMBot).\n` +
+      `• 🏷️ *In-Game Tagging:* All mentions and notifications use your exact **In-Game Nickname** linked to your Telegram account.\n` +
+      `• 🚫 *Unverified Players:* Strictly restricted to the bench and cannot participate in LvL tournaments.\n` +
+      `────────────────────\n` +
+      `5️⃣ 🛡️ *Advance Notice & Excused Absences:*\n` +
+      `• If an emergency arises, inform leadership in the chat BEFORE check-in closes.\n` +
+      `• An Admin can excuse the absence via \`/forgive <player>\`, granting zero strikes.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `👥 *Telegram Community (Channel + Group):*\n${COMMUNITY_URL}\n\n` +
       `🌐 *Official Website:* ${WEBSITE_URL}`;
@@ -3438,29 +3500,31 @@ function formatRules(lang = 'ru') {
   if (lang === 'ar') {
     return `📜 *دستور وقوانين دوري БРАТВА FCM الرسمية* 📜\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `1️⃣ ⚽ *الحضور وإكمال الهجمات (إلزامي 3/3):*\n` +
-      `• يجب على كل لاعب مشارك في التشكيلة لعب جميع *${rules.minTurnsPerTournament}/3* محاولات.\n` +
-      `• أي تفويت للمحاولات (<3) = *إنذار (سترايك)*.\n` +
-      `• 🚨 *3 إنذارات خلال آخر 5 بطولات* = *طرد نهائي واستبعاد* من الدوري.\n` +
-      `• ⛔ *تفويت بطولتين متتاليتين (0/3 مرتين)* = *طرد فوري ومباشر*.\n` +
-      `• 🟢 *إلغاء الإنذارات:* لعب 3 بطولات متتالية بـ 3/3 يمسح إنذاراً واحداً تلقائياً!\n` +
+      `1️⃣ ⚽ *مصفوفة الحضور والعقوبات المتدرجة (إلزامي 3/3):*\n` +
+      `• *نقص الهجمات (1/3 أو 2/3):* إنذار أصفر + *حظر مؤقت لمباراة واحدة* (احتياط لمباراة واحدة لتدارك الأمر مع البقاء في الدوري).\n` +
+      `• *الغياب التام (0/3):* سترايك أحمر مباشر + *حظر مؤقت لمباراتين متتاليتين* (احتياط لمباراتين لإثبات الجدية مع البقاء في الدوري).\n` +
+      `• 🚨 *الطرد النهائي من الدوري:* يُطرد العضو نهائياً في حالتين فقط:\n` +
+      `   ① تفويت بطولتين متتاليتين بالكامل (0/3 مرتين متتاليتين).\n` +
+      `   ② تراكم 3 إنذارات حمراء في آخر 5 بطولات.\n` +
+      `• 🟢 *إسقاط الإنذارات:* لعب 3 بطولات متتالية بهجمات كاملة 3/3 يمسح سترايك واحداً تلقائياً!\n` +
       `────────────────────\n` +
-      `2️⃣ 📱 *التسجيل في تيليجرام (شرط إلزامي للبطولات):*\n` +
-      `• كل عضو ملزم بتوثيق حسابه في البوت [@BratvaFCMBot](https://t.me/BratvaFCMBot) والانضمام للقناة والمجموعة.\n` +
-      `• 🚫 *غير مسجل في البوت = في الاحتياط التام.* لا يدخل أي لاعب غير موثق إلى التشكيلة الأساسية للبطولات نهائياً.\n` +
-      `• الحسابات غير المسجلة داخل اللعبة معرضة للاستبعاد عند امتلاء الدوري لإفساح المجال للاعبين النشطين.\n` +
+      `2️⃣ 👑 *حصانة الإدارة والمسؤولين:*\n` +
+      `• الأونر ومسؤولو الدوري يتولون إدارة الدوري وتنظيم البطولات وضبط الشات.\n` +
+      `• 🛡️ *حصانة تامة:* الإدارة معفاة تماماً من أي نظام إنذارات أو طرد تلقائي من البوت.\n` +
       `────────────────────\n` +
-      `3️⃣ 🎯 *المستوى التهديفي والتشكيلة الذكية:*\n` +
-      `• 🤖 *البوت هو من يقرر حجم البطولة تلقائياً* (4v4 أو 8v8 أو 16v16 أو 24v24 أو 32v32) بحسب الجاهزين في التشيك-إن!\n` +
-      `• مقاعد التشكيلة الأساسية تُمنح وفق المعايير الثلاثة:\n` +
-      `  1. تأكيد الجاهزية [ 🟢 أنا جاهز ] قبل بدء البطولة\n` +
-      `  2. سجل انضباط نظيف (0 إنذارات أولاً)\n` +
-      `  3. أعلى معدل تهديفي للاعب في **آخر 5 مباريات لعبها هو شخصياً**!\n` +
-      `• 🔄 *المداورة التكتيكية:* تراجع معدل التهديف يضع اللاعب في الاحتياط لاستعادة مستواه (وليس طرداً عقابياً).\n` +
+      `3️⃣ 🎯 *المستوى التهديفي والمداورة التكتيكية:*\n` +
+      `• ضعف التهديف مع لعب الهجمات كاملة (3/3) *ليس مخالفة ولا يستوجب أي سترايك أو طرد نهائياً*.\n` +
+      `• 🔄 *المداورة التكتيكية:* تراجع معدل التهديف يضع اللاعب في الاحتياط لاستعادة مستواه وتجهيز نفسه.\n` +
+      `• مقاعد الأساسيين تُمنح تلقائياً حسب: ① الجاهزية بالتشيك-إن، ② نظافة السجل من الإنذارات، ③ أعلى معدل تهديفي بآخر 5 مباريات لعبها العضو!\n` +
       `────────────────────\n` +
-      `4️⃣ 🛡️ *الأعذار والغياب الطارئ:*\n` +
-      `• في حال وجود ظرف طارئ، يجب إبلاغ الإدارة في شات الفريق قبل إغلاق التشيك-إن.\n` +
-      `• يمكن للإدارة إسقاط الإنذار عبر أمر \`/forgive <اسم_اللاعب>\`.\n` +
+      `4️⃣ 📱 *التوثيق في تيليجرام والمناداة باسم اللعبة:*\n` +
+      `• كل عضو ملزم بتوثيق حسابه في البوت [@BratvaFCMBot](https://t.me/BratvaFCMBot).\n` +
+      `• 🏷️ *المناداة باسم اللعبة:* جميع التنبيهات والتاغات تظهر بـ **اسم اللاعب داخل اللعبة (IGN)** لسهولة التعرف عليه والتواصل معه مباشرة.\n` +
+      `• 🚫 *غير المسجلين في البوت:* احتياط دائم وممنوعون من دخول تشكيلة البطولات LvL.\n` +
+      `────────────────────\n` +
+      `5️⃣ 🛡️ *الأعذار المسبقة وحالات الطوارئ:*\n` +
+      `• في حال وجود ظرف طارئ، يجب إبلاغ الإدارة في الشات قبل إغلاق التشيك-إن.\n` +
+      `• يمكن للأدمن إعفاء اللاعب عبر أمر \`/forgive <اسم_اللاعب>\` دون احتساب أي عقوبة أو إنذار.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `👥 *مجتمع تيليجرام الرسمي (القناة + المجموعة):*\n${COMMUNITY_URL}\n\n` +
       `🌐 *الموقع الرسمي للدوري:* ${WEBSITE_URL}`;
@@ -3468,29 +3532,31 @@ function formatRules(lang = 'ru') {
   if (lang === 'es') {
     return `📜 *REGLAMENTO OFICIAL DE LA LIGA BRATVA FCM* 📜\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `1️⃣ ⚽ *Asistencia y Turnos (Obligatorio 3/3):*\n` +
-      `• Todo jugador en la alineación debe completar sus *${rules.minTurnsPerTournament}/3* turnos.\n` +
-      `• Turnos incompletos (<3) = *1 Strike*.\n` +
-      `• 🚨 *3 strikes en tus últimos 5 torneos* = *EXPULSIÓN AUTOMÁTICA*.\n` +
-      `• ⛔ *2 torneos consecutivos con 0/3* = *EXPULSIÓN DIRECTA*.\n` +
-      `• 🟢 *Limpieza:* ¡3 partidos consecutivos limpios (3/3) eliminan 1 strike!\n` +
+      `1️⃣ ⚽ *Matriz de Asistencia y Sanciones (Obligatorio 3/3):*\n` +
+      `• *Turnos incompletos (1/3 o 2/3):* Aviso + *Suspensión temporal de 1 partido* (banquillo por 1 partido, permanece en la liga).\n` +
+      `• *Ausencia total (0/3):* Strike rojo + *Suspensión temporal de 2 partidos* (banquillo por 2 partidos, permanece en la liga).\n` +
+      `• 🚨 *Expulsión Definitiva:* Ocurre ÚNICAMENTE en dos situaciones:\n` +
+      `   ① 2 torneos consecutivos con 0/3 turnos jugados.\n` +
+      `   ② Acumular 3 strikes en tus últimos 5 torneos.\n` +
+      `• 🟢 *Limpieza:* ¡Jugar 3 partidos consecutivos con 3/3 elimina 1 strike automáticamente!\n` +
       `────────────────────\n` +
-      `2️⃣ 📱 *Verificación en Telegram (Obligatorio para LvL):*\n` +
-      `• Es obligatorio verificar tu cuenta en [@BratvaFCMBot](https://t.me/BratvaFCMBot) y unirte a la comunidad oficial.\n` +
-      `• 🚫 *Sin Telegram = Banquillo Estricto.* Los jugadores sin verificar no jugarán torneos LvL.\n` +
-      `• Las cuentas inactivas sin verificar podrán ser expulsadas al llenarse la liga para dar espacio a miembros activos.\n` +
+      `2️⃣ 👑 *Inmunidad de Liderazgo y Admins:*\n` +
+      `• El Owner y los Administradores gestionan la liga y la organización.\n` +
+      `• 🛡️ *Inmunidad:* El liderazgo está totalmente exento de strikes y expulsiones automáticas del bot.\n` +
       `────────────────────\n` +
-      `3️⃣ 🎯 *Rendimiento y Alineación Inteligente:*\n` +
-      `• 🤖 *El Bot decide automáticamente el tamaño del torneo* (4v4, 8v8, 16v16, 24v24, 32v32) según el check-in!\n` +
-      `• La titularidad se otorga por:\n` +
-      `  1. Confirmar [ 🟢 Estoy Listo ] antes del partido\n` +
-      `  2. 0 strikes (disciplina limpia prioritaria)\n` +
-      `  3. Mayor promedio de goles en **tus propios últimos 5 partidos jugados**!\n` +
-      `• 🔄 *Rotación Táctica:* Un bajón goleador sitúa al jugador en el banquillo para recuperar forma (no es sanción de expulsión).\n` +
+      `3️⃣ 🎯 *Rendimiento Goleador y Rotación Táctica:*\n` +
+      `• La baja cuota goleadora jugando los 3/3 turnos *NUNCA se sanciona con strikes ni expulsión*.\n` +
+      `• 🔄 *Rotación Táctica:* Jugadores con baja forma pasan al banquillo para recuperar ritmo.\n` +
+      `• La titularidad se define por: ① Check-in listo, ② 0 strikes, ③ Mayor promedio en sus últimos 5 partidos.\n` +
       `────────────────────\n` +
-      `4️⃣ 🛡️ *Avisos y Justificaciones:*\n` +
-      `• En caso de emergencia, avisa a los administradores antes del cierre del check-in.\n` +
-      `• Los administradores pueden justificar con \`/forgive <jugador>\`.\n` +
+      `4️⃣ 📱 *Verificación en Telegram y Etiquetas por IGN:*\n` +
+      `• Todo miembro debe verificar su cuenta en [@BratvaFCMBot](https://t.me/BratvaFCMBot).\n` +
+      `• 🏷️ *Etiquetas por Nombre de Juego:* Los avisos muestran tu **Nombre exacto en FC Mobile (IGN)** enlazado a tu Telegram.\n` +
+      `• 🚫 *Sin Telegram:* Banquillo estricto sin acceso a torneos LvL.\n` +
+      `────────────────────\n` +
+      `5️⃣ 🛡️ *Avisos Previos y Justificaciones:*\n` +
+      `• Avisa a los administradores en el chat ANTES del cierre del check-in.\n` +
+      `• Los administradores pueden justificar la ausencia con \`/forgive <jugador>\` sin penalizaciones.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `👥 *Comunidad de Telegram (Canal + Grupo):*\n${COMMUNITY_URL}\n\n` +
       `🌐 *Sitio Oficial:* ${WEBSITE_URL}`;
@@ -3499,29 +3565,31 @@ function formatRules(lang = 'ru') {
   // Russian (Default)
   return `📜 *ОФИЦИАЛЬНЫЙ СВОД ПРАВИЛ БРАТВА FCM* 📜\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `1️⃣ ⚽ *Явка и Ходы (Обязательно 3/3):*\n` +
-    `• Каждый участник основы обязан сыграть все *${rules.minTurnsPerTournament}/3* ходов.\n` +
-    `• Несыгранные ходы (<3) = *1 Страйк*.\n` +
-    `• 🚨 *3 страйка в последних 5 турнирах* = *АВТОМАТИЧЕСКИЙ КИК*.\n` +
-    `• ⛔ *2 турнира подряд по 0/3* = *ПРЯМОЙ КИК*.\n` +
-    `• 🟢 *Сгорание:* 3 чистых матча подряд с 3/3 снимают 1 страйк!\n` +
+    `1️⃣ ⚽ *Матрица дисциплины и ходов (Обязательно 3/3):*\n` +
+    `• *Неполные ходы (1/3 или 2/3):* Желтая карточка + *Временный бан на 1 матч* (скамейка запасных на 1 игру, игрок остается в лиге).\n` +
+    `• *Полный пропуск (0/3):* Красный страйк + *Временный бан на 2 матча* (скамейка запасных на 2 игры для подтверждения формы, игрок остается в лиге).\n` +
+    `• 🚨 *Окончательный кик из лиги:* Наступает ТОЛЬКО в двух случаях:\n` +
+    `   ① 2 турнира подряд по 0/3 ходов.\n` +
+    `   ② 3 страйка за последние 5 турниров.\n` +
+    `• 🟢 *Сгорание:* 3 чистых турнира подряд (3/3) автоматически снимают 1 страйк!\n` +
     `────────────────────\n` +
-    `2️⃣ 📱 *Верификация в Telegram (Обязательно для LvL):*\n` +
-    `• Каждый участник обязан подтвердить аккаунт в боте [@BratvaFCMBot](https://t.me/BratvaFCMBot) и вступить в сообщество.\n` +
-    `• 🚫 *Нет в Telegram = Строго в запасе.* Неверифицированные игроки не допускаются в основу на турниры LvL.\n` +
-    `• Неактивные аккаунты без верификации подлежат исключению при заполнении лиги для освобождения мест активным бойцам.\n` +
+    `2️⃣ 👑 *Иммунитет Руководства (Владелец и Админы):*\n` +
+    `• Владелец лиги и Администраторы управляют составом, турнирами и чатом.\n` +
+    `• 🛡️ *Иммунитет:* Руководство полностью освобождено от автоматических страйков и киков бота.\n` +
     `────────────────────\n` +
-    `3️⃣ 🎯 *Результативность и Умный выбор основы:*\n` +
-    `• 🤖 *Бот автоматически определяет формат матча* (4x4, 8x8, 16x16, 24x24, 32x32) по числу готовых в чек-ине!\n` +
-    `• Стартовый состав отбирается строго по критериям:\n` +
-    `  1. Чек-ин готовности [ 🟢 Готов к игре ] перед матчем\n` +
-    `  2. 0 страйков (строгая дисциплина в приоритете)\n` +
-    `  3. Лучший средний показатель забитых голов в **своих последних 5 матчах**!\n` +
-    `• 🔄 *Тактическая ротация:* Спад результативности переводит игрока на банку для набора формы (без штрафного кика).\n` +
+    `3️⃣ 🎯 *Результативность и тактическая ротация:*\n` +
+    `• Спад голов при сыгранных 3/3 ходах *НЕ является нарушением и НЕ наказывается страйками*.\n` +
+    `• 🔄 *Тактическая ротация:* Игрок переводится на банку для набора формы и тренировок.\n` +
+    `• Основа отбирается по: ① Чек-ин готовности, ② 0 страйков, ③ Лучший средний результат за свои последние 5 матчей!\n` +
     `────────────────────\n` +
-    `4️⃣ 🛡️ *Предупреждения и Уважительные причины:*\n` +
-    `• Предупредите админов в чате ДО закрытия чек-ина.\n` +
-    `• Админ может аннулировать страйк командой \`/forgive <игрок>\`.\n` +
+    `4️⃣ 📱 *Верификация в Telegram и теги по нику в игре:*\n` +
+    `• Каждый боец обязан привязать аккаунт в боте [@BratvaFCMBot](https://t.me/BratvaFCMBot).\n` +
+    `• 🏷️ *Тег по игровому нику:* Все уведомления и теги отображают ваш **Никнейм в FC Mobile (IGN)** со ссылкой на ваш Telegram профиль.\n` +
+    `• 🚫 *Без Telegram:* Строгий резерв без допуска к матчам LvL.\n` +
+    `────────────────────\n` +
+    `5️⃣ 🛡️ *Предупреждения и уважительные причины:*\n` +
+    `• Предупредите руководство в чате ДО закрытия чек-ина.\n` +
+    `• Админ может аннулировать пропуск командой \`/forgive <игрок>\` без начисления страйков.\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `👥 *Сообщество лиги (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
     `🌐 *Официальный сайт:* ${WEBSITE_URL}`;
@@ -3699,7 +3767,7 @@ function resolveTurnsPlayed(p) {
   return typeof p.turns_played === 'number' && p.turns_played >= 0 && p.turns_played <= 3 ? p.turns_played : 0;
 }
 
-function formatLiveAlert(aiResult, lang = 'ru') {
+function formatLiveAlert(aiResult, lang = 'ru', regData = null) {
   if (!aiResult) return 'No active live match data.';
   const opp = clean(aiResult.opponent_league || 'OPPONENT');
   const ourG = aiResult.score_bratva || 0;
@@ -3707,7 +3775,7 @@ function formatLiveAlert(aiResult, lang = 'ru') {
   const timeInfo = clean(aiResult.time_info || 'Live in progress');
   const unplayed = (aiResult.players || []).filter(p => resolveTurnsPlayed(p) < 3);
   const pLines = unplayed.length > 0
-    ? unplayed.map(p => `⌛ | ${clean(p.name)} | ${resolveTurnsPlayed(p)}/3`).join('\n')
+    ? unplayed.map(p => `⌛ | ${formatPlayerTag(p.name, regData)} | ${resolveTurnsPlayed(p)}/3`).join('\n')
     : '✅ All squad members have completed their turns!';
 
   if (lang === 'en') {
@@ -7387,5 +7455,6 @@ export {
   getRosterSyncKeyboard,
   evaluateAllSquadStrikes,
   formatStrikes,
-  formatKicklist
+  formatKicklist,
+  formatPlayerTag
 };

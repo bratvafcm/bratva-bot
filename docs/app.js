@@ -109,7 +109,10 @@ const I18N = {
     swipe_to_edit: 'Slide to unlock edit mode',
     edit_mode_active: 'Edit Mode Active (Unlocked)',
     rules_btn_title: 'League Rules',
-    news_btn_title: 'League Updates'
+    news_btn_title: 'League Updates',
+    s1_concluded_title: 'SEASON 1 CONCLUDED • 27 TOURNAMENTS',
+    s1_concluded_subtitle: '13W - 1D - 13L (7,285 Goals) • Champion: DOXIBERO1 (695G)',
+    s2_launch_tag: 'SEASON 2 (FC 27) KICKOFF TONIGHT 1:00 AM'
   },
   ar: {
     dir: 'rtl',
@@ -220,7 +223,10 @@ const I18N = {
     swipe_to_edit: 'اسحب لفتح التعديل',
     edit_mode_active: 'وضع التعديل مفعّل (مفتوح)',
     rules_btn_title: 'قوانين الدوري',
-    news_btn_title: 'تحديثات الدوري'
+    news_btn_title: 'تحديثات الدوري',
+    s1_concluded_title: 'ختام الموسم الأول (Season 1) • 27 بطولة',
+    s1_concluded_subtitle: '13 فوز - 1 تعادل - 13 خسارة (7,285 هدف) • الهداف التاريخي: DOXIBERO1 (695 هدف)',
+    s2_launch_tag: 'انطلاق الموسم الثاني (FC 27) الليلة الساعة 1:00 صباحاً'
   },
   ru: {
     dir: 'ltr',
@@ -331,7 +337,10 @@ const I18N = {
     swipe_to_edit: 'Проведите для разблокировки',
     edit_mode_active: 'Режим редактирования активен',
     rules_btn_title: 'Правила лиги',
-    news_btn_title: 'Новости лиги'
+    news_btn_title: 'Новости лиги',
+    s1_concluded_title: 'ФИНАЛ 1 СЕЗОНА • 27 ТУРНИРОВ',
+    s1_concluded_subtitle: '13В - 1Н - 13П (7 285 голов) • Чемпион: DOXIBERO1 (695Г)',
+    s2_launch_tag: 'СТАРТ 2 СЕЗОНА (FC 27) СЕГОДНЯ В 1:00 МСК'
   },
   es: {
     dir: 'ltr',
@@ -443,7 +452,10 @@ const I18N = {
     swipe_to_edit: 'Desliza para desbloquear edición',
     edit_mode_active: 'Modo edición activo (Desbloqueado)',
     rules_btn_title: 'Reglas de la Liga',
-    news_btn_title: 'Noticias de la Liga'
+    news_btn_title: 'Noticias de la Liga',
+    s1_concluded_title: 'TEMPORADA 1 FINALIZADA • 27 TORNEOS',
+    s1_concluded_subtitle: '13V - 1E - 13D (7.285 Goles) • Campeón: DOXIBERO1 (695G)',
+    s2_launch_tag: 'TEMPORADA 2 (FC 27) COMIENZA ESTA NOCHE 1:00 AM'
   }
 };
 
