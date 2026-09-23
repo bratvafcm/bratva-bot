@@ -934,31 +934,77 @@ function getMainKeyboard(currentLang = 'ru', isAdmin = false) {
     ]
   ];
 
-  // 🔒 ADMIN-ONLY ROWS (Strictly reserved for verified administrators):
+  // 🔒 ADMIN-ONLY ROW (Unified single VIP button for verified administrators):
   if (isAdmin) {
     const adminPanelLabel = currentLang === 'ar' ? '👑 لوحة تحكم الإدارة (Admin Panel)' :
                             currentLang === 'es' ? '👑 Panel de Administración' :
                             currentLang === 'en' ? '👑 Admin Control Panel' : '👑 Панель Администратора';
 
-    const kickLabel = currentLang === 'ar' ? '🚨 مراجعة المستبعدين' :
-                      currentLang === 'es' ? '🚨 Revisión Expulsión' :
-                      currentLang === 'en' ? '🚨 Kick Review' : '🚨 Кандидаты на Кик';
+    rows.push([
+      { text: adminPanelLabel, callback_data: 'cmd_admin_panel' }
+    ]);
+  }
 
-    const strikesLabel = currentLang === 'ar' ? '⛔ الإنذارات' :
-                         currentLang === 'es' ? '⛔ Strikes' :
-                         currentLang === 'en' ? '⛔ Strikes' : '⛔ Страйки';
+  return { inline_keyboard: rows };
+}
 
-    const auditLabel = currentLang === 'ar' ? '👥 تدقيق الأعضاء' :
-                       currentLang === 'es' ? '👥 Auditoría Miembros' :
-                       currentLang === 'en' ? '👥 Roster Audit' : '👥 Аудит Базы';
+function getAdminPanelKeyboard(currentLang = 'ru') {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
 
-    const syncLabel = currentLang === 'ar' ? '🔄 مزامنة التشكيلة' :
-                      currentLang === 'es' ? '🔄 Sincronizar Plantilla' :
-                      currentLang === 'en' ? '🔄 Sync Roster' : '🔄 Синхронизация';
+  const lineupLabel = currentLang === 'ar' ? '⚔️ إرسال التشكيلة' :
+                      currentLang === 'es' ? '⚔️ Notificar Alineación' :
+                      currentLang === 'en' ? '⚔️ Notify Lineup' : '⚔️ Оповестить состав';
 
-    rows.push(
+  const debriefLabel = currentLang === 'ar' ? '📊 تقارير المباريات' :
+                       currentLang === 'es' ? '📊 Enviar Informes' :
+                       currentLang === 'en' ? '📊 Send Debriefs' : '📊 Отправить разборы';
+
+  const checkinLabel = currentLang === 'ar' ? '⏳ بدء تأكيد الجاهزية' :
+                       currentLang === 'es' ? '⏳ Iniciar Check-In' :
+                       currentLang === 'en' ? '⏳ Launch Check-In' : '⏳ Запустить Check-In';
+
+  const warningLabel = currentLang === 'ar' ? '⚠️ إنذار المقصرين' :
+                       currentLang === 'es' ? '⚠️ Alertar Infractores' :
+                       currentLang === 'en' ? '⚠️ Warn Debtors' : '⚠️ Предупредить должников';
+
+  const kickLabel = currentLang === 'ar' ? '🚨 مراجعة المستبعدين' :
+                    currentLang === 'es' ? '🚨 Revisión Expulsión' :
+                    currentLang === 'en' ? '🚨 Kick Review' : '🚨 Кандидаты на Кик';
+
+  const strikesLabel = currentLang === 'ar' ? '⛔ سجل الإنذارات' :
+                       currentLang === 'es' ? '⛔ Strikes y Faltas' :
+                       currentLang === 'en' ? '⛔ Strikes & Debts' : '⛔ Страйки и Должники';
+
+  const auditLabel = currentLang === 'ar' ? '👥 تدقيق الأعضاء' :
+                     currentLang === 'es' ? '👥 Auditoría Miembros' :
+                     currentLang === 'en' ? '👥 Member Audit' : '👥 Аудит базы игроков';
+
+  const syncLabel = currentLang === 'ar' ? '🔄 مزامنة التشكيلة' :
+                    currentLang === 'es' ? '🔄 Sincronizar Plantilla' :
+                    currentLang === 'en' ? '🔄 Sync Roster' : '🔄 Синхронизация состава';
+
+  const menuLabel = currentLang === 'ar' ? '📋 العودة للقائمة الرئيسية' :
+                    currentLang === 'es' ? '📋 Volver al Menú Principal' :
+                    currentLang === 'en' ? '📋 Back to Main Menu' : '📋 Главное меню';
+
+  return {
+    inline_keyboard: [
       [
-        { text: adminPanelLabel, callback_data: 'cmd_admin_panel' }
+        { text: ruLabel, callback_data: 'tab_admin_panel_ru' },
+        { text: enLabel, callback_data: 'tab_admin_panel_en' },
+        { text: arLabel, callback_data: 'tab_admin_panel_ar' },
+        { text: esLabel, callback_data: 'tab_admin_panel_es' }
+      ],
+      [
+        { text: lineupLabel, callback_data: 'bcast_lineup_auto' },
+        { text: debriefLabel, callback_data: 'cmd_notify_debrief' }
+      ],
+      [
+        { text: checkinLabel, callback_data: 'cmd_notify_checkin' },
+        { text: warningLabel, callback_data: 'cmd_notify_warning' }
       ],
       [
         { text: kickLabel, callback_data: 'cmd_kicklist' },
@@ -967,11 +1013,12 @@ function getMainKeyboard(currentLang = 'ru', isAdmin = false) {
       [
         { text: auditLabel, callback_data: 'cmd_pending' },
         { text: syncLabel, callback_data: 'cmd_sync_roster' }
+      ],
+      [
+        { text: menuLabel, callback_data: 'cmd_menu' }
       ]
-    );
-  }
-
-  return { inline_keyboard: rows };
+    ]
+  };
 }
 
 async function syncBotCommands() {
@@ -2495,6 +2542,71 @@ function formatWelcome(lang = 'ru') {
     `• 🌐 *Сайт лиги:* Полная история всех матчей и рекордов команды\n\n` +
     `👥 *Telegram Сообщество (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
     `📋 *Выберите действие в меню ниже 👇*`;
+}
+
+function formatAdminPanel(lang = 'ru') {
+  if (lang === 'ar') {
+    return `👑 *لوحة تحكم الإدارة — دوري БРАТВА FCM* ⚜️\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `📸 *تسجيل نتائج البطولة:*\n` +
+      `أرسل 4-5 لقطات شاشة (Screenshots) للبطولة من لعبة EA FC Mobile مباشرة هنا كألبوم صور.\n` +
+      `سيقوم البوت تلقائياً بدمج اللاعبين (#1-#32)، تحديث الموقع، وإنشاء ملخص رسمي.\n\n` +
+      `📹 *مزامنة التشكيلة من اللعبة:*\n` +
+      `أرسل فيديو قصير لسحب قائمة أعضاء الفريق في اللعبة لمطابقة الأعضاء واكتشاف المنضمين والمستبعدين.\n\n` +
+      `📢 *إشعارات سريعة للاعبين (في الخاص):*\n` +
+      `• \`/notify lineup\` — إرسال التشكيلة للأساسيين\n` +
+      `• \`/notify debrief\` — إرسال التحليل الفردي لكل لاعب\n` +
+      `• \`/notify checkin\` — إرسال تأكيد الجاهزية للمباراة\n` +
+      `• \`/notify warning\` — إرسال تحذيرات للمقصرين\n\n` +
+      `👥 *تدقيق الأعضاء والمسجلين:* \`/audit\` أو \`/pending\`\n` +
+      `⚙️ *تعديل قوانين الدوري:* \`/setrules <أهداف> <إنذارات> <هجمات>\``;
+  }
+  if (lang === 'en') {
+    return `👑 *ADMIN CONTROL PANEL — BRATVA FCM LEAGUE* ⚜️\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `📸 *Upload Tournament Results:*\n` +
+      `Send 4-5 tournament screenshots from EA FC Mobile directly to this chat as a photo album.\n` +
+      `AI will automatically merge players (#1-#32), update the website, and generate reports.\n\n` +
+      `📹 *Roster Video Sync:*\n` +
+      `Send a screen recording video of the in-game league members list to detect departures and new recruits.\n\n` +
+      `📢 *Instant Player Broadcasts (Private DM):*\n` +
+      `• \`/notify lineup\` — Send lineup cards to players\n` +
+      `• \`/notify debrief\` — Send personalized match debriefs\n` +
+      `• \`/notify checkin\` — Launch pre-match attendance check-in\n` +
+      `• \`/notify warning\` — Send warning notices to offenders\n\n` +
+      `👥 *Roster Audit:* \`/audit\` or \`/pending\`\n` +
+      `⚙️ *Rules Manager:* \`/setrules <min_goals> <max_strikes> <turns>\``;
+  }
+  if (lang === 'es') {
+    return `👑 *PANEL DE ADMINISTRACIÓN — LIGA BRATVA FCM* ⚜️\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `📸 *Subir Resultados de Torneo:*\n` +
+      `Envía 4-5 capturas de pantalla de EA FC Mobile a este chat como álbum.\n` +
+      `La IA unificará los jugadores (#1-#32), actualizará la web y creará el reporte oficial.\n\n` +
+      `📹 *Sincronización por Video:*\n` +
+      `Envía un video de la lista de miembros del juego para detectar expulsados y nuevos miembros.\n\n` +
+      `📢 *Transmisiones Rápidas a Jugadores (MD Privado):*\n` +
+      `• \`/notify lineup\` — Enviar alineación a los titulares\n` +
+      `• \`/notify debrief\` — Enviar análisis individual\n` +
+      `• \`/notify checkin\` — Iniciar Check-In previo al partido\n` +
+      `• \`/notify warning\` — Enviar avisos de sanción\n\n` +
+      `👥 *Auditoría de Miembros:* \`/audit\` o \`/pending\`\n` +
+      `⚙️ *Reglas de Liga:* \`/setrules <goles> <strikes> <turnos>\``;
+  }
+  return `👑 *ПАНЕЛЬ УПРАВЛЕНИЯ АДМИНИСТРАТОРА (BRATVA FCM)* ⚜️\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `📸 *Загрузка результатов турнира:*\n` +
+    `Отправьте 4-5 скриншотов турнира из EA FC Mobile прямо в этот чат (альбомом).\n` +
+    `Бот автоматически объединит игроков (#1-#32), обновит сайт и сформирует отчет.\n\n` +
+    `📹 *Синхронизация состава из игры:*\n` +
+    `Отправьте видео скролла участников лиги в EA FC Mobile (/sync) для выявления исключенных, вернувшихся и новичков.\n\n` +
+    `📢 *Быстрые рассылки игрокам:*\n` +
+    `• \`/notify lineup\` — рассылка состава в ЛС\n` +
+    `• \`/notify debrief\` — персональный разбор матча в ЛС\n` +
+    `• \`/notify checkin\` — предматчевый сбор готовности\n` +
+    `• \`/notify warning\` — предупреждения нарушителям\n\n` +
+    `👥 *Аудит базы игроков:* \`/audit\` или \`/pending\`\n` +
+    `⚙️ *Настройка правил:* \`/setrules <цель_голов> <макс_страйков> <ходов>\``;
 }
 
 function formatChannelWelcome(lang = 'ru') {
@@ -6870,59 +6982,39 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
-      if (data === 'cmd_admin_panel') {
+      if (data === 'cmd_admin_panel' || data.startsWith('tab_admin_panel_')) {
         const isUserAdm = await isUserAdmin(cb.from?.id, cb.from?.username);
         if (!isUserAdm) {
           await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: '⛔ Admin only.', show_alert: true });
           return sendResponse(res, 200, 'Blocked');
         }
-        const adminHelpMsg = `👑 *ПАНЕЛЬ УПРАВЛЕНИЯ АДМИНИСТРАТОРА (BRATVA FCM)* ⚜️\n` +
-          `━━━━━━━━━━━━━━━━━━━━\n` +
-          `📸 *Загрузка результатов турнира:*\n` +
-          `Отправьте 4-5 скриншотов турнира из EA FC Mobile прямо в этот чат (альбомом).\n` +
-          `Бот автоматически объединит игроков (#1-#32), обновит сайт и сформирует отчет.\n\n` +
-          `📹 *Синхронизация состава из игры:*\n` +
-          `Отправьте видео скролла участников лиги в EA FC Mobile (/sync) для выявления исключенных, вернувшихся и новичков.\n\n` +
-          `📢 *Быстрые рассылки игрокам:*\n` +
-          `• \`/notify lineup\` — рассылка состава в ЛС\n` +
-          `• \`/notify debrief\` — персональный разбор матча в ЛС\n` +
-          `• \`/notify checkin\` — предматчевый сбор готовности\n` +
-          `• \`/notify warning\` — предупреждения нарушителям\n\n` +
-          `👥 *Аудит базы игроков:* \`/audit\` или \`/pending\`\n` +
-          `⚙️ *Настройка правил:* \`/setrules <цель_голов> <макс_страйков> <ходов>\``;
+        let targetLang = 'ru';
+        if (data.startsWith('tab_admin_panel_')) {
+          targetLang = data.split('_')[3] || 'ru';
+        } else {
+          targetLang = detectUserLang(cb.from, 'ru');
+        }
+        const adminHelpMsg = formatAdminPanel(targetLang);
+        const adminKeys = getAdminPanelKeyboard(targetLang);
 
-        const adminKeys = {
-          inline_keyboard: [
-            [
-              { text: '⚔️ Оповестить состав', callback_data: 'bcast_lineup_auto' },
-              { text: '📊 Отправить разборы матча', callback_data: 'cmd_notify_debrief' }
-            ],
-            [
-              { text: '⏳ Запустить Check-In', callback_data: 'cmd_notify_checkin' },
-              { text: '⚠️ Предупредить должников', callback_data: 'cmd_notify_warning' }
-            ],
-            [
-              { text: '🚨 Кандидаты на Кик', callback_data: 'cmd_kicklist' },
-              { text: '⛔ Страйки и Должники', callback_data: 'cmd_strikes' }
-            ],
-            [
-              { text: '👥 Аудит базы игроков', callback_data: 'cmd_pending' },
-              { text: '🔄 Синхронизация состава', callback_data: 'cmd_sync_roster' }
-            ],
-            [
-              { text: '📋 Главное меню', callback_data: 'cmd_menu' }
-            ]
-          ]
-        };
-        await sendTelegramMessage(chatId, adminHelpMsg, adminKeys);
+        if (cb.message && cb.message.message_id) {
+          await editTelegramMessage(chatId, cb.message.message_id, adminHelpMsg, adminKeys);
+        } else {
+          await sendTelegramMessage(chatId, adminHelpMsg, adminKeys);
+        }
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
 
       if (data === 'cmd_menu') {
         const isUserAdm = await isUserAdmin(cb.from?.id, cb.from?.username);
-        const welcome = formatWelcome('ru');
-        await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru', isUserAdm));
+        const userLang = detectUserLang(cb.from, 'ru');
+        const welcome = formatWelcome(userLang);
+        if (cb.message && cb.message.message_id) {
+          await editTelegramMessage(chatId, cb.message.message_id, welcome, getMainKeyboard(userLang, isUserAdm));
+        } else {
+          await sendTelegramMessage(chatId, welcome, getMainKeyboard(userLang, isUserAdm));
+        }
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -7949,37 +8041,9 @@ export default async function handler(req, res) {
         await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
         return sendResponse(res, 200, 'Admin only command');
       }
-      const adminHelpMsg = `👑 *ПАНЕЛЬ УПРАВЛЕНИЯ АДМИНИСТРАТОРА (BRATVA FCM)* ⚜️\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n` +
-        `📸 *Загрузка результатов турнира:*\n` +
-        `Отправьте 4-5 скриншотов турнира из EA FC Mobile прямо в этот чат (альбомом).\n` +
-        `Бот автоматически объединит игроков (#1-#32), обновит сайт и сформирует отчет для канала.\n\n` +
-        `📹 *Синхронизация состава из игры:*\n` +
-        `Отправьте видео скролла участников лиги в EA FC Mobile (/sync) для выявления исключенных, вернувшихся и новичков.\n\n` +
-        `📢 *Быстрые рассылки игрокам:*\n` +
-        `• \`/notify lineup\` — рассылка состава в ЛС\n` +
-        `• \`/notify debrief\` — персональный разбор матча в ЛС\n` +
-        `• \`/notify checkin\` — предматчевый сбор готовности\n` +
-        `• \`/notify warning\` — предупреждения нарушителям\n\n` +
-        `👥 *Аудит базы игроков:* \`/audit\` или \`/pending\`\n` +
-        `⚙️ *Настройка правил:* \`/setrules <цель_голов> <макс_страйков> <ходов>\``;
-
-      const adminKeys = {
-        inline_keyboard: [
-          [
-            { text: '⚔️ Оповестить состав', callback_data: 'bcast_lineup_auto' },
-            { text: '📊 Отправить разборы матча', callback_data: 'cmd_notify_debrief' }
-          ],
-          [
-            { text: '⏳ Запустить Check-In', callback_data: 'cmd_notify_checkin' },
-            { text: '⚠️ Предупредить должников', callback_data: 'cmd_notify_warning' }
-          ],
-          [
-            { text: '👥 Аудит игроков', callback_data: 'cmd_pending' },
-            { text: '📋 Главное меню', callback_data: 'cmd_menu' }
-          ]
-        ]
-      };
+      const userLang = detectUserLang(message.from);
+      const adminHelpMsg = formatAdminPanel(userLang);
+      const adminKeys = getAdminPanelKeyboard(userLang);
       await sendTelegramMessage(chatId, adminHelpMsg, adminKeys);
       return sendResponse(res, 200, 'OK');
     }
