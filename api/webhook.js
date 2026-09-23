@@ -1407,16 +1407,19 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
   }
 
   if (category === 'rules') {
-    const checkLabel = currentLang === 'ar' ? '2️⃣ تأكيد الانضمام والمتابعة' :
-                       currentLang === 'es' ? '2️⃣ Verificar suscripción y continuar' :
-                       currentLang === 'en' ? '2️⃣ Check Membership & Continue' : '2️⃣ Проверить подписку и продолжить';
+    const menuLabel = currentLang === 'ar' ? '📋 العودة للقائمة الرئيسية' :
+                      currentLang === 'es' ? '📋 Volver al Menú Principal' :
+                      currentLang === 'en' ? '📋 Back to Main Menu' : '📋 Главное Меню';
     rows.push([
-      { text: checkLabel, callback_data: `verify_sub_${currentLang}` }
+      { text: menuLabel, callback_data: 'cmd_menu' }
     ]);
   }
 
+  const siteLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
+                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
   rows.push([
-    { text: '🌐 Open Official League Website', url: WEBSITE_URL }
+    { text: siteLabel, url: WEBSITE_URL }
   ]);
 
   return { inline_keyboard: rows };
@@ -2275,8 +2278,11 @@ function getCheckInKeyboard(currentLang = 'ru', includeBcast = false) {
     ]);
   }
 
+  const siteLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
+                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
   rows.push([
-    { text: '🌐 Official League Website', url: WEBSITE_URL }
+    { text: siteLabel, url: WEBSITE_URL }
   ]);
 
   return { inline_keyboard: rows };
@@ -2825,6 +2831,10 @@ function getVerificationKeyboard(currentLang = 'ru') {
   const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
   const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
 
+  const siteLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
+                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
+
   return {
     inline_keyboard: [
       [
@@ -2834,7 +2844,7 @@ function getVerificationKeyboard(currentLang = 'ru') {
         { text: esLabel, callback_data: 'tab_verify_0_es' }
       ],
       [
-        { text: '🌐 Official League Website', url: WEBSITE_URL }
+        { text: siteLabel, url: WEBSITE_URL }
       ]
     ]
   };
@@ -2982,6 +2992,10 @@ function getUidPromptKeyboard(encodedName, currentLang = 'ru') {
   const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
   const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
 
+  const siteLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
+                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
+
   return {
     inline_keyboard: [
       [
@@ -2991,7 +3005,7 @@ function getUidPromptKeyboard(encodedName, currentLang = 'ru') {
         { text: esLabel, callback_data: `tab_veruid_${encodedName}_es` }
       ],
       [
-        { text: '🌐 Official League Website', url: WEBSITE_URL }
+        { text: siteLabel, url: WEBSITE_URL }
       ]
     ]
   };
@@ -3028,6 +3042,10 @@ function getPhotoWarningKeyboard(currentLang = 'ru') {
   const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
   const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
 
+  const siteLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
+                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
+
   return {
     inline_keyboard: [
       [
@@ -3037,7 +3055,7 @@ function getPhotoWarningKeyboard(currentLang = 'ru') {
         { text: esLabel, callback_data: 'tab_verphoto_0_es' }
       ],
       [
-        { text: '🌐 Official League Website', url: WEBSITE_URL }
+        { text: siteLabel, url: WEBSITE_URL }
       ]
     ]
   };
@@ -4423,13 +4441,17 @@ async function notifyVerifiedPlayersLineup(lineupData) {
                           lang === 'es' ? '🎯 Ver Alineación Completa' :
                           lang === 'en' ? '🎯 View Full Lineup' : '🎯 Посмотреть состав основы';
 
+    const siteLabel = lang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                      lang === 'es' ? '🌐 Web Oficial de la Liga' :
+                      lang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
+
     const keys = {
       inline_keyboard: [
         [
           { text: lineupBtnText, callback_data: `fmt_lineup_auto_${lang}` }
         ],
         [
-          { text: '🌐 Official League Website', url: WEBSITE_URL }
+          { text: siteLabel, url: WEBSITE_URL }
         ]
       ]
     };
@@ -4613,13 +4635,17 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
                         lang === 'es' ? '👤 Ver Mi Tarjeta' :
                         lang === 'en' ? '👤 View My Player Card' : '👤 Моя карточка игрока';
 
+    const siteLabel = lang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                      lang === 'es' ? '🌐 Web Oficial de la Liga' :
+                      lang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
+
     const keys = {
       inline_keyboard: [
         [
           { text: cardBtnText, callback_data: `cmd_mystats` }
         ],
         [
-          { text: '🌐 Official League Website', url: WEBSITE_URL }
+          { text: siteLabel, url: WEBSITE_URL }
         ]
       ]
     };
@@ -4685,6 +4711,10 @@ async function notifyVerifiedPlayersCheckIn() {
                      lang === 'es' ? '🔴 No Disponible' :
                      lang === 'en' ? '🔴 Not Available' : '🔴 Не могу сыграть';
 
+    const siteLabel = lang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                      lang === 'es' ? '🌐 Web Oficial de la Liga' :
+                      lang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
+
     const keys = {
       inline_keyboard: [
         [
@@ -4692,7 +4722,7 @@ async function notifyVerifiedPlayersCheckIn() {
           { text: awayText, callback_data: 'ci_away' }
         ],
         [
-          { text: '🌐 Official League Website', url: WEBSITE_URL }
+          { text: siteLabel, url: WEBSITE_URL }
         ]
       ]
     };
@@ -4767,13 +4797,20 @@ async function notifyVerifiedPlayersDisciplineWarning() {
         `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
     }
 
+    const rulesBtnText = lang === 'ar' ? '📜 قراءة قوانين الدوري' :
+                         lang === 'es' ? '📜 Leer Reglas de la Liga' :
+                         lang === 'en' ? '📜 Read League Rules' : '📜 Читать правила лиги';
+    const siteLabel = lang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                      lang === 'es' ? '🌐 Web Oficial de la Liga' :
+                      lang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
+
     const keys = {
       inline_keyboard: [
         [
-          { text: '📜 Read Rules / اقرأ القوانين', callback_data: `tab_rules_0_${lang}` }
+          { text: rulesBtnText, callback_data: `tab_rules_0_${lang}` }
         ],
         [
-          { text: '🌐 Official League Website', url: WEBSITE_URL }
+          { text: siteLabel, url: WEBSITE_URL }
         ]
       ]
     };
