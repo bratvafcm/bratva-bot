@@ -112,10 +112,25 @@ function telegramRequest(method, params = {}) {
 }
 
 const adminCache = new Map(); // userId -> { isAdmin: boolean, expiresAt: number }
+const sandboxTesterIds = new Set();
+const sandboxSessions = new Map(); // strId -> { player_id, display_name, in_game_name, ... }
 
-async function isUserAdmin(userId) {
+function isSandboxTester(userId, username = '') {
+  const u = (username || '').toLowerCase().replace('@', '').trim();
+  if (u === 'bilalmorocci') return true;
+  if (userId && sandboxTesterIds.has(String(userId))) return true;
+  return false;
+}
+
+async function isUserAdmin(userId, username = '') {
   if (!userId) return false;
   const strId = String(userId);
+
+  // 0. Sandbox Tester Override: Force NON-ADMIN for tester account @bilalmorocci so Bilal can test normal member experience!
+  if (isSandboxTester(userId, username)) {
+    sandboxTesterIds.add(strId);
+    return false;
+  }
 
   // 1. In-memory cache (5 min TTL)
   const cached = adminCache.get(strId);
@@ -793,15 +808,23 @@ CRITICAL GUIDELINES:
   });
 }
 
-function getMainKeyboard(currentLang = 'ru') {
+function getMainKeyboard(currentLang = 'ru', isAdmin = false) {
   const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
   const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
   const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
   const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
 
-  const myStatsLabel = currentLang === 'ar' ? '👤 إحصائياتي الشخصية (أرسل اسمك)' :
-                       currentLang === 'es' ? '👤 Mis Estadísticas (Escribe tu Nick)' :
-                       currentLang === 'en' ? '👤 My Stats / Player Card' : '👤 Моя Статистика (Напиши ник)';
+  const myStatsLabel = currentLang === 'ar' ? '👤 إحصائياتي وبطاقتي كلاعب' :
+                       currentLang === 'es' ? '👤 Mis Estadísticas / Tarjeta' :
+                       currentLang === 'en' ? '👤 My Stats / Player Card' : '👤 Моя Статистика / Карточка';
+
+  const checkinLabel = currentLang === 'ar' ? '⚔️ تأكيد الجاهزية (Check-In)' :
+                       currentLang === 'es' ? '⚔️ Check-In Pre-Partido' :
+                       currentLang === 'en' ? '⚔️ Pre-Match Check-In' : '⚔️ Предматчевый Сбор';
+
+  const lineupLabel = currentLang === 'ar' ? '🎯 التشكيلة الأساسية' :
+                      currentLang === 'es' ? '🎯 Alineación Oficial' :
+                      currentLang === 'en' ? '🎯 Smart Lineup' : '🎯 Основа Лиги';
 
   const topLabel = currentLang === 'ar' ? '🏆 الهدافون' :
                    currentLang === 'es' ? '🏆 Goleadores' :
@@ -815,25 +838,9 @@ function getMainKeyboard(currentLang = 'ru') {
                    currentLang === 'es' ? '👑 Jugador MVP' :
                    currentLang === 'en' ? '👑 MVP Spotlight' : '👑 Лучший Игрок';
 
-  const lineupLabel = currentLang === 'ar' ? '🎯 التشكيلة الذكية' :
-                      currentLang === 'es' ? '🎯 Mejor Alineación' :
-                      currentLang === 'en' ? '🎯 Smart Lineup' : '🎯 Основа Лиги';
-
-  const checkinLabel = currentLang === 'ar' ? '⚔️ تأكيد الجاهزية (Check-In)' :
-                       currentLang === 'es' ? '⚔️ Check-In Pre-Partido' :
-                       currentLang === 'en' ? '⚔️ Pre-Match Check-In' : '⚔️ Предматчевый Сбор';
-
-  const strikesLabel = currentLang === 'ar' ? '⛔ الإنذارات والمقصرون' :
-                       currentLang === 'es' ? '⛔ Strikes y Deudores' :
-                       currentLang === 'en' ? '⛔ Strikes & Debtors' : '⛔ Страйки и Должники';
-
-  const kickLabel = currentLang === 'ar' ? '🚨 مراجعة الاستبعاد' :
-                    currentLang === 'es' ? '🚨 Revisión Expulsión' :
-                    currentLang === 'en' ? '🚨 Kick Review' : '🚨 Кандидаты на Кик';
-
-  const rulesLabel = currentLang === 'ar' ? '📜 القوانين (هام جداً)' :
-                     currentLang === 'es' ? '📜 Reglas (IMPORTANTE)' :
-                     currentLang === 'en' ? '📜 Rules (IMPORTANT)' : '📜 Правила Лиги (ВАЖНО)';
+  const rulesLabel = currentLang === 'ar' ? '📜 القوانين والالتزام (هام)' :
+                     currentLang === 'es' ? '📜 Reglas de la Liga (IMPORTANTE)' :
+                     currentLang === 'en' ? '📜 League Rules (IMPORTANT)' : '📜 Правила Лиги (ВАЖНО)';
 
   const tournLabel = currentLang === 'ar' ? '📊 سجل البطولات' :
                      currentLang === 'es' ? '📊 Torneos' :
@@ -843,48 +850,75 @@ function getMainKeyboard(currentLang = 'ru') {
                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный Сайт Лиги';
 
-  const tgNoticeLabel = currentLang === 'ar' ? '📢 تنبيه: التسجيل في تيليجرام' :
-                        currentLang === 'es' ? '📢 Registro en Telegram' :
-                        currentLang === 'en' ? '📢 Join Telegram Notice' : '📢 Регистрация в Telegram';
-
-  return {
-    inline_keyboard: [
-      [
-        { text: ruLabel, callback_data: 'tab_menu_0_ru' },
-        { text: enLabel, callback_data: 'tab_menu_0_en' },
-        { text: arLabel, callback_data: 'tab_menu_0_ar' },
-        { text: esLabel, callback_data: 'tab_menu_0_es' }
-      ],
-      [
-        { text: myStatsLabel, callback_data: 'cmd_mystats' }
-      ],
-      [
-        { text: checkinLabel, callback_data: 'cmd_checkin' },
-        { text: lineupLabel, callback_data: 'cmd_lineup' }
-      ],
-      [
-        { text: topLabel, callback_data: 'cmd_top' },
-        { text: recapLabel, callback_data: 'cmd_recap' }
-      ],
-      [
-        { text: mvpLabel, callback_data: 'cmd_mvp' },
-        { text: rulesLabel, callback_data: 'cmd_rules' }
-      ],
-      [
-        { text: strikesLabel, callback_data: 'cmd_strikes' },
-        { text: kickLabel, callback_data: 'cmd_kicklist' }
-      ],
-      [
-        { text: tournLabel, callback_data: 'cmd_tournaments' }
-      ],
-      [
-        { text: tgNoticeLabel, callback_data: 'cmd_tg_notice' }
-      ],
-      [
-        { text: webLabel, url: WEBSITE_URL }
-      ]
+  // Base rows accessible to ALL members:
+  const rows = [
+    [
+      { text: ruLabel, callback_data: 'tab_menu_0_ru' },
+      { text: enLabel, callback_data: 'tab_menu_0_en' },
+      { text: arLabel, callback_data: 'tab_menu_0_ar' },
+      { text: esLabel, callback_data: 'tab_menu_0_es' }
+    ],
+    [
+      { text: myStatsLabel, callback_data: 'cmd_mystats' }
+    ],
+    [
+      { text: checkinLabel, callback_data: 'cmd_checkin' },
+      { text: lineupLabel, callback_data: 'cmd_lineup' }
+    ],
+    [
+      { text: topLabel, callback_data: 'cmd_top' },
+      { text: recapLabel, callback_data: 'cmd_recap' }
+    ],
+    [
+      { text: mvpLabel, callback_data: 'cmd_mvp' },
+      { text: rulesLabel, callback_data: 'cmd_rules' }
+    ],
+    [
+      { text: tournLabel, callback_data: 'cmd_tournaments' }
+    ],
+    [
+      { text: webLabel, url: WEBSITE_URL }
     ]
-  };
+  ];
+
+  // 🔒 ADMIN-ONLY ROWS (Strictly reserved for verified administrators):
+  if (isAdmin) {
+    const adminPanelLabel = currentLang === 'ar' ? '👑 لوحة تحكم الإدارة (Admin Panel)' :
+                            currentLang === 'es' ? '👑 Panel de Administración' :
+                            currentLang === 'en' ? '👑 Admin Control Panel' : '👑 Панель Администратора';
+
+    const kickLabel = currentLang === 'ar' ? '🚨 مراجعة المستبعدين' :
+                      currentLang === 'es' ? '🚨 Revisión Expulsión' :
+                      currentLang === 'en' ? '🚨 Kick Review' : '🚨 Кандидаты на Кик';
+
+    const strikesLabel = currentLang === 'ar' ? '⛔ الإنذارات' :
+                         currentLang === 'es' ? '⛔ Strikes' :
+                         currentLang === 'en' ? '⛔ Strikes' : '⛔ Страйки';
+
+    const auditLabel = currentLang === 'ar' ? '👥 تدقيق الأعضاء' :
+                       currentLang === 'es' ? '👥 Auditoría Miembros' :
+                       currentLang === 'en' ? '👥 Roster Audit' : '👥 Аудит Базы';
+
+    const syncLabel = currentLang === 'ar' ? '🔄 مزامنة التشكيلة' :
+                      currentLang === 'es' ? '🔄 Sincronizar Plantilla' :
+                      currentLang === 'en' ? '🔄 Sync Roster' : '🔄 Синхронизация';
+
+    rows.push(
+      [
+        { text: adminPanelLabel, callback_data: 'cmd_admin_panel' }
+      ],
+      [
+        { text: kickLabel, callback_data: 'cmd_kicklist' },
+        { text: strikesLabel, callback_data: 'cmd_strikes' }
+      ],
+      [
+        { text: auditLabel, callback_data: 'cmd_pending' },
+        { text: syncLabel, callback_data: 'cmd_sync_roster' }
+      ]
+    );
+  }
+
+  return { inline_keyboard: rows };
 }
 
 async function syncBotCommands() {
@@ -1066,9 +1100,24 @@ function syncCurrentCheckInState(regData) {
 let inMemoryRegistered = null;
 let lastRegisteredFetchTime = 0;
 
+function cleanRegisteredData(data) {
+  if (data && data.registrations) {
+    for (const [key, reg] of Object.entries(data.registrations)) {
+      const u = (reg.telegram_username || '').toLowerCase();
+      const ign = (reg.in_game_name || reg.display_name || '').toLowerCase();
+      const pid = (key || '').toLowerCase();
+      if (u === 'bilalmorocci' || ign === 'test' || pid === 'test' || pid === 'member_test') {
+        delete data.registrations[key];
+      }
+    }
+  }
+  return data;
+}
+
 async function getRegisteredPlayers() {
   const now = Date.now();
   if (inMemoryRegistered && (now - lastRegisteredFetchTime < 30000)) {
+    cleanRegisteredData(inMemoryRegistered);
     syncCurrentCheckInState(inMemoryRegistered);
     return inMemoryRegistered;
   }
@@ -1079,7 +1128,7 @@ async function getRegisteredPlayers() {
       const file = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/registered_players.json`);
       if (file && file.content) {
         const content = Buffer.from(file.content, 'base64').toString('utf8');
-        const data = JSON.parse(content);
+        const data = cleanRegisteredData(JSON.parse(content));
         inMemoryRegistered = data;
         lastRegisteredFetchTime = now;
         syncCurrentCheckInState(data);
@@ -1094,7 +1143,7 @@ async function getRegisteredPlayers() {
   try {
     const localPath = path.join(process.cwd(), 'docs', 'league-data', 'registered_players.json');
     if (fs.existsSync(localPath)) {
-      const data = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+      const data = cleanRegisteredData(JSON.parse(fs.readFileSync(localPath, 'utf8')));
       inMemoryRegistered = data;
       lastRegisteredFetchTime = now;
       syncCurrentCheckInState(data);
@@ -5842,8 +5891,7 @@ export default async function handler(req, res) {
       const isPublicAction = data.startsWith('tab_') || data.startsWith('ci_') || data.startsWith('fmt_lineup_') || data.startsWith('verify_sub_') ||
                              data === 'cmd_rules' || data === 'cmd_top' || data === 'cmd_lineup' || data === 'cmd_checkin' ||
                              data === 'cmd_recap' || data === 'cmd_mvp' || data === 'cmd_tournaments' || data === 'cmd_mystats' ||
-                             data === 'cmd_strikes' || data === 'cmd_kicklist' || data === 'cmd_menu' || data === 'cmd_tg_notice' ||
-                             data === 'cmd_pending' || data === 'cmd_warning_lastchance' || data === 'cmd_warning_kicked';
+                             data === 'cmd_menu';
 
       // If clicked inside a channel or group, allow in-place translation tabs (tab_) and check-in buttons (ci_)
       if (!isCbPrivate && !data.startsWith('tab_') && !data.startsWith('ci_')) {
@@ -5856,10 +5904,10 @@ export default async function handler(req, res) {
       }
 
       // Security Gate: Check-in, language tabs, lineup views, and general stats are public.
-      // Admin-only actions (buffer analysis, clearing, broadcast to channel, rules editing, audits) require Admin!
+      // Admin-only actions (buffer analysis, clearing, broadcast to channel, rules editing, audits, kick lists) require Admin!
       if (!isPublicAction) {
         const userId = cb.from ? cb.from.id : null;
-        const isAdmin = await isUserAdmin(userId);
+        const isAdmin = await isUserAdmin(userId, cb.from?.username);
         if (!isAdmin) {
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
@@ -6020,8 +6068,9 @@ export default async function handler(req, res) {
           updatedText = await formatKicklist(targetLang);
           updatedKeyboard = getLanguageKeyboard('kicklist', '0', targetLang, isCbPrivate);
         } else if (category === 'menu') {
+          const isUserAdm = await isUserAdmin(cb.from?.id, cb.from?.username);
           updatedText = formatWelcome(targetLang);
-          updatedKeyboard = getMainKeyboard(targetLang);
+          updatedKeyboard = getMainKeyboard(targetLang, isUserAdm);
         } else if (category === 'mystats') {
           updatedText = formatMyStatsPrompt(targetLang);
           updatedKeyboard = getLanguageKeyboard('mystats', '0', targetLang, false);
@@ -6694,11 +6743,14 @@ export default async function handler(req, res) {
 
       if (data === 'cmd_mystats') {
         const userId = cb.from ? cb.from.id : chatId;
+        const isTester = isSandboxTester(userId, cb.from?.username);
         const regData = await getRegisteredPlayers();
-        const userReg = Object.values(regData.registrations || {}).find(r =>
-          String(r.telegram_id) === String(userId) ||
-          (cb.from && cb.from.username && r.telegram_username && r.telegram_username.toLowerCase() === cb.from.username.toLowerCase())
-        );
+        const userReg = isTester
+          ? (sandboxSessions.get(String(userId)) || null)
+          : Object.values(regData.registrations || {}).find(r =>
+              String(r.telegram_id) === String(userId) ||
+              (cb.from && cb.from.username && r.telegram_username && r.telegram_username.toLowerCase() === cb.from.username.toLowerCase())
+            );
         if (userReg) {
           const pid = userReg.player_id;
           const statsMsg = generatePlayerStatsMessage(pid, 'ru');
@@ -6711,9 +6763,59 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
+      if (data === 'cmd_admin_panel') {
+        const isUserAdm = await isUserAdmin(cb.from?.id, cb.from?.username);
+        if (!isUserAdm) {
+          await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id, text: '⛔ Admin only.', show_alert: true });
+          return sendResponse(res, 200, 'Blocked');
+        }
+        const adminHelpMsg = `👑 *ПАНЕЛЬ УПРАВЛЕНИЯ АДМИНИСТРАТОРА (BRATVA FCM)* ⚜️\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `📸 *Загрузка результатов турнира:*\n` +
+          `Отправьте 4-5 скриншотов турнира из EA FC Mobile прямо в этот чат (альбомом).\n` +
+          `Бот автоматически объединит игроков (#1-#32), обновит сайт и сформирует отчет.\n\n` +
+          `📹 *Синхронизация состава из игры:*\n` +
+          `Отправьте видео скролла участников лиги в EA FC Mobile (/sync) для выявления исключенных, вернувшихся и новичков.\n\n` +
+          `📢 *Быстрые рассылки игрокам:*\n` +
+          `• \`/notify lineup\` — рассылка состава в ЛС\n` +
+          `• \`/notify debrief\` — персональный разбор матча в ЛС\n` +
+          `• \`/notify checkin\` — предматчевый сбор готовности\n` +
+          `• \`/notify warning\` — предупреждения нарушителям\n\n` +
+          `👥 *Аудит базы игроков:* \`/audit\` или \`/pending\`\n` +
+          `⚙️ *Настройка правил:* \`/setrules <цель_голов> <макс_страйков> <ходов>\``;
+
+        const adminKeys = {
+          inline_keyboard: [
+            [
+              { text: '⚔️ Оповестить состав', callback_data: 'bcast_lineup_auto' },
+              { text: '📊 Отправить разборы матча', callback_data: 'cmd_notify_debrief' }
+            ],
+            [
+              { text: '⏳ Запустить Check-In', callback_data: 'cmd_notify_checkin' },
+              { text: '⚠️ Предупредить должников', callback_data: 'cmd_notify_warning' }
+            ],
+            [
+              { text: '🚨 Кандидаты на Кик', callback_data: 'cmd_kicklist' },
+              { text: '⛔ Страйки и Должники', callback_data: 'cmd_strikes' }
+            ],
+            [
+              { text: '👥 Аудит базы игроков', callback_data: 'cmd_pending' },
+              { text: '🔄 Синхронизация состава', callback_data: 'cmd_sync_roster' }
+            ],
+            [
+              { text: '📋 Главное меню', callback_data: 'cmd_menu' }
+            ]
+          ]
+        };
+        await sendTelegramMessage(chatId, adminHelpMsg, adminKeys);
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
       if (data === 'cmd_menu') {
+        const isUserAdm = await isUserAdmin(cb.from?.id, cb.from?.username);
         const welcome = formatWelcome('ru');
-        await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru'));
+        await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru', isUserAdm));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
       }
@@ -6850,7 +6952,7 @@ export default async function handler(req, res) {
     // 🔒 Admin Security Gate: Players have NO access to the bot.
     // Only verified Administrators / Creator of the league can access bot features.
     const userId = message.from ? message.from.id : null;
-    const isAdmin = await isUserAdmin(userId);
+    const isAdmin = await isUserAdmin(userId, message.from ? message.from.username : '');
 
     // ==========================================
     // 🔒 NON-ADMIN FLOW: 1-on-1 Player Verification & Onboarding
@@ -6864,6 +6966,7 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'Non-admin photo rejected with tabs');
       }
 
+      const isTester = isSandboxTester(userId, message.from ? message.from.username : '');
       const regData = await getRegisteredPlayers();
       const pendingMap = regData.pending_uids || {};
       const pendingEntry = pendingMap[String(userId)];
@@ -6963,10 +7066,12 @@ export default async function handler(req, res) {
           const matched = findPlayerByQuery(query);
           pid = matched ? matched.player_id : query;
         } else {
-          const userReg = Object.values(regData.registrations || {}).find(r =>
-            String(r.telegram_id) === String(userId) ||
-            (message.from && message.from.username && r.telegram_username && r.telegram_username.toLowerCase() === message.from.username.toLowerCase())
-          );
+          const userReg = isTester
+            ? (sandboxSessions.get(String(userId)) || null)
+            : Object.values(regData.registrations || {}).find(r =>
+                String(r.telegram_id) === String(userId) ||
+                (message.from && message.from.username && r.telegram_username && r.telegram_username.toLowerCase() === message.from.username.toLowerCase())
+              );
           if (userReg) {
             pid = userReg.player_id;
           }
@@ -7001,13 +7106,20 @@ export default async function handler(req, res) {
       }
 
       // 4. Check if this player is ALREADY verified & registered
-      const existingRegs = Object.values(regData.registrations || {}).filter(r => String(r.telegram_id) === String(userId));
+      const existingRegs = isTester
+        ? (sandboxSessions.has(String(userId)) ? [sandboxSessions.get(String(userId))] : [])
+        : Object.values(regData.registrations || {}).filter(r => String(r.telegram_id) === String(userId));
+
       if (existingRegs.length > 0) {
-        if (text === '/reset' || text === '/change') {
-          for (const reg of existingRegs) {
-            delete regData.registrations[reg.player_id];
+        if (text === '/reset' || text === '/change' || (isTester && (text === '/restart' || text === '/test'))) {
+          if (isTester) {
+            sandboxSessions.delete(String(userId));
+          } else {
+            for (const reg of existingRegs) {
+              delete regData.registrations[reg.player_id];
+            }
+            await saveRegisteredPlayersRaw(regData, `Player Reset: TG @${existingRegs[0].telegram_username || userId}`);
           }
-          await saveRegisteredPlayersRaw(regData, `Player Reset: TG @${existingRegs[0].telegram_username || userId}`);
           const vPrompt = formatVerificationPrompt('ru');
           const vKeys = getVerificationKeyboard('ru');
           await sendTelegramMessage(chatId, vPrompt, vKeys);
@@ -7016,7 +7128,7 @@ export default async function handler(req, res) {
 
         if (text.startsWith('/start') || text.startsWith('/menu') || text.startsWith('/help')) {
           const welcome = formatWelcome('ru');
-          await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru'));
+          await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru', false));
           return sendResponse(res, 200, 'OK');
         }
 
@@ -7040,7 +7152,7 @@ export default async function handler(req, res) {
         }
 
         const welcome = formatWelcome('ru');
-        await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru'));
+        await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru', false));
         return sendResponse(res, 200, 'OK');
       }
 
@@ -7124,16 +7236,30 @@ export default async function handler(req, res) {
         isNew = true;
       }
 
-      await savePlayerRegistration({
-        player_id: playerId,
-        display_name: displayName,
-        in_game_name: displayName,
-        uid: null,
-        telegram_id: userId,
-        telegram_username: message.from ? (message.from.username || '') : '',
-        telegram_name: `${message.from ? (message.from.first_name || '') : ''} ${message.from ? (message.from.last_name || '') : ''}`.trim(),
-        is_new_member: isNew
-      });
+      if (isTester) {
+        // 🧪 SANDBOX TESTER: Store in-memory session only, do NOT commit fake registration to GitHub!
+        sandboxSessions.set(String(userId), {
+          player_id: playerId,
+          display_name: displayName,
+          in_game_name: displayName,
+          uid: null,
+          telegram_id: userId,
+          telegram_username: message.from ? (message.from.username || '') : '',
+          telegram_name: `${message.from ? (message.from.first_name || '') : ''} ${message.from ? (message.from.last_name || '') : ''}`.trim(),
+          is_new_member: isNew
+        });
+      } else {
+        await savePlayerRegistration({
+          player_id: playerId,
+          display_name: displayName,
+          in_game_name: displayName,
+          uid: null,
+          telegram_id: userId,
+          telegram_username: message.from ? (message.from.username || '') : '',
+          telegram_name: `${message.from ? (message.from.first_name || '') : ''} ${message.from ? (message.from.last_name || '') : ''}`.trim(),
+          is_new_member: isNew
+        });
+      }
 
       const vSuccessText = formatVerificationSuccess(displayName, null, 'ru');
       const vSuccessKeys = getVerificationSuccessKeyboard(playerId, 'ru');
