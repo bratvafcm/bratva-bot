@@ -165,6 +165,35 @@ async function isUserAdmin(userId) {
   return false;
 }
 
+const subCache = new Map();
+
+async function isUserSubscribedToCommunity(userId) {
+  if (!userId) return false;
+  const strId = String(userId);
+  if (['5414088590'].includes(strId)) return true;
+
+  const cached = subCache.get(strId);
+  if (cached && Date.now() < cached.expiresAt) return cached.isSub;
+
+  try {
+    const res = await telegramRequest('getChatMember', {
+      chat_id: CHANNEL_ID,
+      user_id: userId
+    });
+    if (res && res.ok && res.result) {
+      const st = res.result.status;
+      const isSub = ['creator', 'administrator', 'member', 'restricted'].includes(st);
+      subCache.set(strId, { isSub, expiresAt: Date.now() + 60 * 1000 });
+      return isSub;
+    }
+  } catch (err) {
+    console.warn('isUserSubscribedToCommunity check failed:', err.message);
+  }
+
+  subCache.set(strId, { isSub: false, expiresAt: Date.now() + 30 * 1000 });
+  return false;
+}
+
 async function sendTelegramMessage(chatId, text, replyMarkup = null) {
   try {
     const params = { chat_id: chatId, text: text, parse_mode: 'Markdown' };
@@ -2386,33 +2415,107 @@ function formatChannelWelcome(lang = 'ru') {
     `⚔️ *Правило простое:* Играем ответственно, всегда забираем свои 3/3 ходов и побеждаем вместе! ⚽`;
 }
 
-function formatVerificationPrompt(lang = 'ru') {
-  if (lang === 'en') {
-    return `⚜️ *BRATVA FCM — SQUAD ENTRY* ⚜️\n\n` +
-      `Welcome to our league! Joining our official channel and team chat is mandatory for all members.\n\n` +
-      `👉 *Please send your EA FC Mobile username here in chat*\n` +
-      `_(Type it exactly as it appears in the game)_\n\n` +
-      `⚡ Once sent, the bot will immediately give you your link to join our official channel & squad chat!`;
-  }
+function formatJoinRequiredPrompt(lang = 'ru') {
   if (lang === 'ar') {
-    return `⚜️ *دوري БРАТВА FCM — الانضمام للقناة والفريق* ⚜️\n\n` +
-      `أهلاً بك في الفريق! الانضمام إلى القناة الرسمية ومجموعة الفريق إلزامي لجميع اللاعبين.\n\n` +
-      `👉 *أرسل اسم المستخدم (username) الخاص بك في EA FC Mobile هنا في المحادثة*\n` +
-      `_(اكتب اسمك تماماً كما يظهر داخل اللعبة)_\n\n` +
-      `⚡ بمجرد إرسال اسمك، ستحصل فوراً على رابط الدخول إلى القناة والمجموعة الرسمية!`;
+    return `📢 *تنبيه إلزامي: الانضمام لمجتمع الفريق أولاً!* 📢\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚠️ للمشاركة في دوري **БРАТВА FCM** والظهور في تشكيلة البطولات، يجب أولاً الانضمام إلى القناة الرسمية ومجموعة الفريق!\n\n` +
+      `📲 *خطوات التسجيل الإلزامية:*\n` +
+      `1️⃣ اضغط على الزر بالأسفل وانضم للقناة والمجموعة عبر الرابط.\n` +
+      `2️⃣ بعد الانضمام، اضغط على زر [ ✅ تأكيد الانضمام ] بالأسفل.\n` +
+      `3️⃣ سيرحب بك البوت ويطلب منك إرسال اسم حسابك في اللعبة (In-Game Nickname) لربطه بحسابك وتفعيل ملفك!\n\n` +
+      `🚫 *ملاحظة:* لن يتم قبول أي تسجيل دون الانضمام الفعلي لمجتمع الفريق.`;
+  }
+  if (lang === 'en') {
+    return `📢 *MANDATORY: JOIN OUR OFFICIAL COMMUNITY FIRST!* 📢\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚠️ To participate in **BRATVA FCM** tournaments, you must first join our official Channel and Discussion Group!\n\n` +
+      `📲 *Mandatory Steps to Register:*\n` +
+      `1️⃣ Tap the button below to join both our Channel and Group Chat.\n` +
+      `2️⃣ After joining, tap [ ✅ Check Membership ] below.\n` +
+      `3️⃣ The bot will verify your membership and ask for your exact In-Game Nickname to complete registration!\n\n` +
+      `🚫 *Note:* Registration is locked until you join our official community.`;
   }
   if (lang === 'es') {
-    return `⚜️ *BRATVA FCM — ACCESO AL EQUIPO* ⚜️\n\n` +
-      `¡Bienvenido a la liga! Unirse al canal oficial y al chat del equipo es obligatorio para todos los participantes.\n\n` +
-      `👉 *Envía tu nombre de usuario de EA FC Mobile aquí en el chat*\n` +
-      `_(Escríbelo exactamente como aparece en el juego)_\n\n` +
-      `⚡ ¡Una vez enviado, el bot te dará de inmediato el enlace para unirte a nuestro canal y chat privado!`;
+    return `📢 *¡OBLIGATORIO: ÚNETE PRIMERO A LA COMUNIDAD!* 📢\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚠️ Para participar en los torneos de **BRATVA FCM**, ¡primero debes unirte a nuestro Canal y Grupo oficial!\n\n` +
+      `📲 *Pasos obligatorios:*\n` +
+      `1️⃣ Toca el botón de abajo para unirte al Canal y Grupo oficial.\n` +
+      `2️⃣ Tras unirte, pulsa en [ ✅ Verificar Suscripción ].\n` +
+      `3️⃣ El bot confirmará tu entrada y te pedirá tu nombre exacto en el juego (IGN).\n\n` +
+      `🚫 *Nota:* No se permite registrar el nombre sin unirse a la comunidad.`;
   }
-  return `⚜️ *БРАТВА FCM — ВХОД В КАНАЛ И ЧАТ* ⚜️\n\n` +
-    `Приветствуем в нашей лиге! Вход в официальный канал и чат команды обязателен для всех участников.\n\n` +
-    `👉 *Напиши свое имя пользователя (username) в EA FC Mobile сюда в чат*\n` +
-    `_(В точности так, как в игре)_\n\n` +
-    `⚡ Бот сразу выдаст тебе ссылку для входа в наш закрытый канал и чат лиги!`;
+  // Russian (Default)
+  return `📢 *ОБЯЗАТЕЛЬНО: ВСТУПИТЕ В КАНАЛ И ЧАТ ЛИГИ!* 📢\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `⚠️ Для участия в турнирах **БРАТВА FCM** необходимо сначала вступить в наш официальный Канал и Чат команды!\n\n` +
+    `📲 *Обязательные шаги для допуска:*\n` +
+    `1️⃣ Нажмите кнопку ниже и вступите в Канал и Чат лиги по ссылке.\n` +
+    `2️⃣ После вступления нажмите кнопку [ ✅ Проверить подписку ].\n` +
+    `3️⃣ Бот подтвердит вход и запросит ваш точный игровой никнейм (IGN) в FC Mobile!\n\n` +
+    `🚫 *Важно:* Регистрация игрового ника заблокирована до вступления в сообщество.`;
+}
+
+function getJoinRequiredKeyboard(currentLang = 'ru') {
+  const joinLabel = currentLang === 'ar' ? '🚀 1. اضغط هنا للانضمام للقناة والمجموعة' :
+                    currentLang === 'es' ? '🚀 1. Unirse al Canal y Grupo' :
+                    currentLang === 'en' ? '🚀 1. Join Channel & Group Chat' : '🚀 1. Вступить в Канал и Чат';
+
+  const checkLabel = currentLang === 'ar' ? '✅ 2. تأكيد الانضمام والاشتراك' :
+                     currentLang === 'es' ? '✅ 2. Verificar suscripción' :
+                     currentLang === 'en' ? '✅ 2. Check Membership & Continue' : '✅ 2. Я вступил (Проверить)';
+
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  return {
+    inline_keyboard: [
+      [
+        { text: joinLabel, url: COMMUNITY_URL }
+      ],
+      [
+        { text: checkLabel, callback_data: `verify_sub_${currentLang}` }
+      ],
+      [
+        { text: ruLabel, callback_data: 'tab_joinreq_0_ru' },
+        { text: enLabel, callback_data: 'tab_joinreq_0_en' },
+        { text: arLabel, callback_data: 'tab_joinreq_0_ar' },
+        { text: esLabel, callback_data: 'tab_joinreq_0_es' }
+      ]
+    ]
+  };
+}
+
+function formatVerificationPrompt(lang = 'ru') {
+  if (lang === 'en') {
+    return `⚜️ *BRATVA FCM — IN-GAME REGISTRATION* ⚜️\n\n` +
+      `✅ *Community Membership Confirmed!* Welcome to BRATVA!\n\n` +
+      `👉 *Now please send your exact EA FC Mobile In-Game Nickname here in chat:*\n` +
+      `_(Type it exactly as it appears in the game roster)_\n\n` +
+      `⚡ The bot will immediately activate your player profile, match history, and lineup eligibility!`;
+  }
+  if (lang === 'ar') {
+    return `⚜️ *دوري БРАТВА FCM — تسجيل اسم اللعبة* ⚜️\n\n` +
+      `✅ *تم تأكيد عضويتك في القناة والمجموعة بنجاح!* مرحباً بك في الفريق!\n\n` +
+      `👉 *أرسل الآن اسمك في لعبة EA FC Mobile (In-Game Nickname) هنا في المحادثة:*\n` +
+      `_(اكتب اسمك تماماً كما يظهر داخل اللعبة)_\n\n` +
+      `⚡ سيقوم البوت فوراً بربط حسابك وتفعيل إحصائياتك وأهليتك لدخول تشكيلة البطولات!`;
+  }
+  if (lang === 'es') {
+    return `⚜️ *BRATVA FCM — REGISTRO DE JUGADOR* ⚜️\n\n` +
+      `✅ *¡Suscripción a la comunidad confirmada!* ¡Bienvenido a BRATVA!\n\n` +
+      `👉 *Ahora envía tu nombre exacto de EA FC Mobile (IGN) aquí en el chat:*\n` +
+      `_(Escríbelo exactamente como aparece en el juego)_\n\n` +
+      `⚡ ¡El bot activará de inmediato tu perfil, estadísticas y elegibilidad en torneos!`;
+  }
+  return `⚜️ *БРАТВА FCM — РЕГИСТРАЦИЯ ИГРОВОГО НИКА* ⚜️\n\n` +
+    `✅ *Подписка на канал и чат подтверждена!* Добро пожаловать в БРАТВА!\n\n` +
+    `👉 *Теперь напишите свой точный никнейм в EA FC Mobile (IGN) сюда в чат:*\n` +
+    `_(В точности так, как написано в игре)_\n\n` +
+    `⚡ Бот мгновенно активирует ваш профиль игрока, статистику и допуск к турнирам!`;
 }
 
 function getVerificationKeyboard(currentLang = 'ru') {
@@ -5709,7 +5812,7 @@ export default async function handler(req, res) {
       const isCbPrivate = !cb.message || !cb.message.chat || cb.message.chat.type === 'private';
 
       // Actions accessible to all squad members:
-      const isPublicAction = data.startsWith('tab_') || data.startsWith('ci_') || data.startsWith('fmt_lineup_') ||
+      const isPublicAction = data.startsWith('tab_') || data.startsWith('ci_') || data.startsWith('fmt_lineup_') || data.startsWith('verify_sub_') ||
                              data === 'cmd_rules' || data === 'cmd_top' || data === 'cmd_lineup' || data === 'cmd_checkin' ||
                              data === 'cmd_recap' || data === 'cmd_mvp' || data === 'cmd_tournaments' || data === 'cmd_mystats' ||
                              data === 'cmd_strikes' || data === 'cmd_kicklist' || data === 'cmd_menu' || data === 'cmd_tg_notice' ||
@@ -5913,6 +6016,9 @@ export default async function handler(req, res) {
         } else if (category === 'verify') {
           updatedText = formatVerificationPrompt(targetLang);
           updatedKeyboard = getVerificationKeyboard(targetLang);
+        } else if (category === 'joinreq') {
+          updatedText = formatJoinRequiredPrompt(targetLang);
+          updatedKeyboard = getJoinRequiredKeyboard(targetLang);
         } else if (category === 'versuccess') {
           const regData = await getRegisteredPlayers();
           const reg = (regData.registrations || {})[param] || {};
@@ -5954,6 +6060,35 @@ export default async function handler(req, res) {
           });
           return sendResponse(res, 200, 'OK');
         }
+      }
+
+      if (data.startsWith('verify_sub_')) {
+        const targetLang = data.replace('verify_sub_', '') || 'ru';
+        const isSub = await isUserSubscribedToCommunity(userId);
+
+        if (!isSub) {
+          let alertMsg = '❌ You haven\'t joined yet! Please tap button 1 to join our Channel & Group first.';
+          if (targetLang === 'ar') alertMsg = '❌ لم تنضم بعد! اضغط على الزر رقم 1 وانضم أولاً للقناة والمجموعة.';
+          else if (targetLang === 'es') alertMsg = '❌ ¡Aún no te has unido! Pulsa el botón 1 y únete al Canal y Grupo primero.';
+          else if (targetLang === 'ru') alertMsg = '❌ Вы еще не вступили! Нажмите кнопку 1 и вступите в Канал и Чат лиги.';
+
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: alertMsg,
+            show_alert: true
+          });
+          return sendResponse(res, 200, 'Not joined yet');
+        }
+
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: targetLang === 'ar' ? '✅ تم تأكيد عضويتك بنجاح!' : '✅ Membership verified!'
+        });
+
+        const vPrompt = formatVerificationPrompt(targetLang);
+        const vKeys = getVerificationKeyboard(targetLang);
+        await editTelegramMessage(chatId, cb.message.message_id, vPrompt, vKeys);
+        return sendResponse(res, 200, 'Subscription verified');
       }
 
       if (data.startsWith('bcast_')) {
@@ -6840,7 +6975,17 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'Already registered');
       }
 
-      // 5. New / Unregistered Player -> Show multilingual verification prompt (or rules if deep-linked)
+      // 5. Community Membership Gatekeeper:
+      // Users MUST join the official Channel and Group before they can register their IGN!
+      const isSubscribed = await isUserSubscribedToCommunity(userId);
+      if (!isSubscribed) {
+        const joinMsg = formatJoinRequiredPrompt('ru');
+        const joinKeys = getJoinRequiredKeyboard('ru');
+        await sendTelegramMessage(chatId, joinMsg, joinKeys);
+        return sendResponse(res, 200, 'Community subscription required');
+      }
+
+      // 6. User is confirmed subscribed: Show in-game name registration prompt
       if (!text || text.startsWith('/start') || text.startsWith('/help') || text.startsWith('/verify')) {
         if (text.includes('rules')) {
           const rulesMsg = formatRules('ru');
@@ -7203,6 +7348,31 @@ export default async function handler(req, res) {
     if (text.startsWith('/rules')) {
       const rules = formatRules('ru');
       await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', 'ru', true));
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/invite_pentax') || text.startsWith('/dm_pentax')) {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⛔ *Admin only command.*');
+        return sendResponse(res, 200, 'OK');
+      }
+      const pentaxMsg = `👋 *Hello Fernando (King_Pentax)!* ⚽\n\n` +
+        `You are in our official FC Mobile League squad, but you haven't joined our Telegram Channel & Discussion Group yet!\n\n` +
+        `Joining the official community is **MANDATORY** to be selected in Season 2 tournament starting lineups.\n\n` +
+        `👉 *Please join now via this direct link:*\n${COMMUNITY_URL}\n\n` +
+        `After joining, open this bot and confirm your in-game nickname! 🏆`;
+
+      const pKeys = {
+        inline_keyboard: [
+          [{ text: '🚀 Join BRATVA Channel & Group Chat', url: COMMUNITY_URL }]
+        ]
+      };
+      const resPentax = await sendTelegramMessage(6577572183, pentaxMsg, pKeys);
+      if (resPentax && resPentax.ok) {
+        await sendTelegramMessage(chatId, `✅ *Invite sent successfully to Fernando (King_Pentax)!*\nThe bot delivered the invitation and link directly to his private chat (ID: \`6577572183\`).`, getMainKeyboard('ru'));
+      } else {
+        await sendTelegramMessage(chatId, `⚠️ Could not DM Fernando. Details: ${resPentax?.description || 'Error'}\nManual Profile link: [Fernando](tg://user?id=6577572183)`, getMainKeyboard('ru'));
+      }
       return sendResponse(res, 200, 'OK');
     }
 
