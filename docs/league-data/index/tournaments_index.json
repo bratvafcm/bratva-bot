@@ -207,5 +207,14 @@
     "opponent_total_goals": 106,
     "result": "win",
     "status": "complete"
+  },
+  "2026-09-23_x_elite_legends": {
+    "date": "2026-09-23",
+    "timestamp": 1790186810394,
+    "opponent_league": "X Elite Legends",
+    "our_total_goals": 217,
+    "opponent_total_goals": 162,
+    "result": "win",
+    "status": "complete"
   }
 }
