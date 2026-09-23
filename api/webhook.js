@@ -2542,9 +2542,9 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ للمشاركة في دوري **БРАТВА FCM** والظهور في تشكيلة البطولات، يجب أولاً الانضمام إلى القناة الرسمية ومجموعة الفريق!\n\n` +
       `📲 *خطوات التسجيل الإلزامية:*\n` +
-      `1️⃣ اضغط على الزر بالأسفل وانضم للقناة والمجموعة عبر الرابط.\n` +
-      `2️⃣ بعد الانضمام، اضغط على زر [ 2️⃣ تأكيد الانضمام والمتابعة ] بالأسفل.\n` +
-      `3️⃣ سيرحب بك البوت ويطلب منك إرسال اسم حسابك في اللعبة (In-Game Nickname) لربطه بحسابك وتفعيل ملفك!\n\n` +
+      `**1.** اضغط على زر [ 1️⃣ اضغط هنا للانضمام للقناة والمجموعة ] بالأسفل.\n` +
+      `**2.** بعد الانضمام، اضغط على زر [ 2️⃣ تأكيد الانضمام والمتابعة ].\n` +
+      `**3.** سيرحب بك البوت ويطلب منك إرسال اسم حسابك في اللعبة (IGN) لتفعيله!\n\n` +
       `🚫 *ملاحظة:* لن يتم قبول أي تسجيل دون الانضمام الفعلي لمجتمع الفريق.`;
   }
   if (lang === 'en') {
@@ -2552,9 +2552,9 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ To participate in **BRATVA FCM** tournaments, you must first join our official Channel and Discussion Group!\n\n` +
       `📲 *Mandatory Steps to Register:*\n` +
-      `1️⃣ Tap the button below to join both our Channel and Group Chat.\n` +
-      `2️⃣ After joining, tap [ 2️⃣ Check Membership & Continue ] below.\n` +
-      `3️⃣ The bot will verify your membership and ask for your exact In-Game Nickname to complete registration!\n\n` +
+      `**1.** Tap the [ 1️⃣ Join Channel & Group Chat ] button below.\n` +
+      `**2.** Once joined, tap [ 2️⃣ Check Membership & Continue ] to verify.\n` +
+      `**3.** The bot will confirm your entry and request your EA FC Mobile In-Game Nickname!\n\n` +
       `🚫 *Note:* Registration is locked until you join our official community.`;
   }
   if (lang === 'es') {
@@ -2562,9 +2562,9 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ Para participar en los torneos de **BRATVA FCM**, ¡primero debes unirte a nuestro Canal y Grupo oficial!\n\n` +
       `📲 *Pasos obligatorios:*\n` +
-      `1️⃣ Toca el botón de abajo para unirte al Canal y Grupo oficial.\n` +
-      `2️⃣ Tras unirte, pulsa en [ 2️⃣ Verificar suscripción y continuar ] abajo.\n` +
-      `3️⃣ El bot confirmará tu entrada y te pedirá tu nombre exacto en el juego (IGN).\n\n` +
+      `**1.** Toca el botón [ 1️⃣ Unirse al Canal y Grupo ] abajo para entrar.\n` +
+      `**2.** Tras unirte, pulsa en [ 2️⃣ Verificar suscripción y continuar ].\n` +
+      `**3.** ¡El bot confirmará tu entrada y te pedirá tu nombre exacto en el juego (IGN)!\n\n` +
       `🚫 *Nota:* No se permite registrar el nombre sin unirse a la comunidad.`;
   }
   // Russian (Default)
@@ -2572,9 +2572,9 @@ function formatJoinRequiredPrompt(lang = 'ru') {
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `⚠️ Для участия в турнирах **БРАТВА FCM** необходимо сначала вступить в наш официальный Канал и Чат команды!\n\n` +
     `📲 *Обязательные шаги для допуска:*\n` +
-    `1️⃣ Нажмите кнопку ниже и вступите в Канал и Чат лиги по ссылке.\n` +
-    `2️⃣ После вступления нажмите кнопку [ 2️⃣ Проверить подписку и продолжить ] ниже.\n` +
-    `3️⃣ Бот подтвердит вход и запросит ваш точный игровой никнейм (IGN) в FC Mobile!\n\n` +
+    `**1.** Нажмите кнопку [ 1️⃣ Вступить в Канал и Чат ] ниже по ссылке.\n` +
+    `**2.** После вступления нажмите кнопку [ 2️⃣ Проверить подписку и продолжить ].\n` +
+    `**3.** Бот подтвердит вход и запросит ваш точный игровой никнейм (IGN) в FC Mobile!\n\n` +
     `🚫 *Важно:* Регистрация игрового ника заблокирована до вступления в сообщество.`;
 }
 
@@ -2605,6 +2605,73 @@ function getJoinRequiredKeyboard(currentLang = 'ru') {
         { text: enLabel, callback_data: 'tab_joinreq_0_en' },
         { text: arLabel, callback_data: 'tab_joinreq_0_ar' },
         { text: esLabel, callback_data: 'tab_joinreq_0_es' }
+      ]
+    ]
+  };
+}
+
+function formatCommunityJoinedPrompt(lang = 'ru') {
+  if (lang === 'ar') {
+    return `👋 *مرحباً بك في مجتمع БРАТВА FCM!* ⚜️\n\n` +
+      `🎉 *لقد انضممت بنجاح إلى القناة الرسمية ومجموعة الفريق!*\n\n` +
+      `👉 *الخطوة التالية — تفعيل ملفك ودخول تشكيلة البطولات:*\n` +
+      `اضغط على الزر بالأسفل لتأكيد عضويتك وربط اسم حسابك في لعبة EA FC Mobile!\n\n` +
+      `⚠️ *تنبيه هام:* يرجى قراءة قوانين الفريق بالأسفل (إلزامية لعب 3/3 جولات في كل بطولة) لتفادي العقوبات أو الاستبعاد!`;
+  }
+  if (lang === 'en') {
+    return `👋 *Welcome to the BRATVA FCM Community!* ⚜️\n\n` +
+      `🎉 *You have successfully joined our official Channel and Squad Chat!*\n\n` +
+      `👉 *Next Step — Activate your In-Game Tournament Profile:*\n` +
+      `Tap the button below to confirm your membership and link your EA FC Mobile In-Game Nickname!\n\n` +
+      `⚠️ *Important:* Please read our official League Rules below (play all 3/3 turns in tournaments) to avoid strikes and removal!`;
+  }
+  if (lang === 'es') {
+    return `👋 *¡Bienvenido a la comunidad de BRATVA FCM!* ⚜️\n\n` +
+      `🎉 *¡Te has unido con éxito a nuestro Canal y Grupo oficial!*\n\n` +
+      `👉 *Siguiente paso — Activar tu perfil en el juego:*\n` +
+      `¡Pulsa el botón de abajo para confirmar tu membresía y vincular tu nombre de EA FC Mobile!\n\n` +
+      `⚠️ *Importante:* Lee el reglamento oficial abajo (jugar los 3/3 turnos en cada torneo) para evitar sanciones y expulsión.`;
+  }
+  // Russian (Default)
+  return `👋 *Добро пожаловать в сообщество БРАТВА FCM!* ⚜️\n\n` +
+    `🎉 *Вы успешно вступили в наш официальный Канал и Чат команды!*\n\n` +
+    `👉 *Следующий шаг — Активация профиля и допуск к турнирам:*\n` +
+    `Нажмите кнопку ниже, чтобы подтвердить подписку и привязать свой игровой никнейм в EA FC Mobile!\n\n` +
+    `⚠️ *Важно:* Обязательно прочитайте правила лиги ниже (забирать все 3/3 ходов в каждом турнире), чтобы избежать штрафов!`;
+}
+
+function getCommunityJoinedKeyboard(currentLang = 'ru') {
+  const checkLabel = currentLang === 'ar' ? '2️⃣ تأكيد الانضمام والمتابعة' :
+                     currentLang === 'es' ? '2️⃣ Verificar suscripción y continuar' :
+                     currentLang === 'en' ? '2️⃣ Check Membership & Continue' : '2️⃣ Проверить подписку и продолжить';
+
+  const rulesLabel = currentLang === 'ar' ? '📜 قراءة قوانين الفريق' :
+                     currentLang === 'es' ? '📜 Leer Reglamento de la Liga' :
+                     currentLang === 'en' ? '📜 Read League Rules' : '📜 Правила лиги';
+
+  const siteLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للفريق' :
+                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
+                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
+
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  return {
+    inline_keyboard: [
+      [
+        { text: checkLabel, callback_data: `verify_sub_${currentLang}` }
+      ],
+      [
+        { text: rulesLabel, callback_data: `tab_rules_0_${currentLang}` },
+        { text: siteLabel, url: WEBSITE_URL }
+      ],
+      [
+        { text: ruLabel, callback_data: `tab_cmjoined_0_ru` },
+        { text: enLabel, callback_data: `tab_cmjoined_0_en` },
+        { text: arLabel, callback_data: `tab_cmjoined_0_ar` },
+        { text: esLabel, callback_data: `tab_cmjoined_0_es` }
       ]
     ]
   };
@@ -5880,22 +5947,9 @@ export default async function handler(req, res) {
       const targetUser = cm.new_chat_member ? cm.new_chat_member.user : null;
 
       if (targetUser && targetUser.id && (newStatus === 'member' || newStatus === 'administrator') && oldStatus !== 'member') {
-        const welcomeDm = `👋 *Welcome to BRATVA FCM!* ⚜️\n\n` +
-          `⚠️ *IMPORTANT TO READ (هام جداً للقراءة / ВАЖНО К ПРОЧТЕНИЮ):*\n` +
-          `Please read our official League Rules to avoid strikes and removal from the team!\n\n` +
-          `⚽ *Core Rules:* Complete all 3/3 turns in tournaments & register your in-game name within 3 days.\n\n` +
-          `👉 *Tap button below to read the complete rulebook:*`;
-
-        const dmKeys = {
-          inline_keyboard: [
-            [
-              { text: '📜 Read League Rules (IMPORTANT) / اقرأ القوانين', callback_data: 'tab_rules_0_en' }
-            ],
-            [
-              { text: '🌐 Official League Website', url: WEBSITE_URL }
-            ]
-          ]
-        };
+        const userLang = detectUserLang(targetUser);
+        const welcomeDm = formatCommunityJoinedPrompt(userLang);
+        const dmKeys = getCommunityJoinedKeyboard(userLang);
         try {
           await sendTelegramMessage(targetUser.id, welcomeDm, dmKeys);
         } catch (dmErr) {
@@ -5909,22 +5963,9 @@ export default async function handler(req, res) {
       const cjr = update.chat_join_request;
       const targetUser = cjr.from;
       if (targetUser && targetUser.id) {
-        const welcomeDm = `👋 *Welcome to BRATVA FCM!* ⚜️\n\n` +
-          `⚠️ *IMPORTANT TO READ (هام جداً للقراءة / ВАЖНО К ПРОЧТЕНИЮ):*\n` +
-          `Please read our official League Rules to avoid strikes and removal from the team!\n\n` +
-          `⚽ *Core Rules:* Complete all 3/3 turns in tournaments & verify your account in this bot.\n\n` +
-          `👉 *Tap button below to read the complete rulebook:*`;
-
-        const dmKeys = {
-          inline_keyboard: [
-            [
-              { text: '📜 Read League Rules (IMPORTANT) / اقرأ القوانين', callback_data: 'tab_rules_0_en' }
-            ],
-            [
-              { text: '🌐 Official League Website', url: WEBSITE_URL }
-            ]
-          ]
-        };
+        const userLang = detectUserLang(targetUser);
+        const welcomeDm = formatCommunityJoinedPrompt(userLang);
+        const dmKeys = getCommunityJoinedKeyboard(userLang);
         try {
           await sendTelegramMessage(targetUser.id, welcomeDm, dmKeys);
         } catch (e) {}
@@ -6148,6 +6189,9 @@ export default async function handler(req, res) {
         } else if (category === 'joinreq') {
           updatedText = formatJoinRequiredPrompt(targetLang);
           updatedKeyboard = getJoinRequiredKeyboard(targetLang);
+        } else if (category === 'cmjoined') {
+          updatedText = formatCommunityJoinedPrompt(targetLang);
+          updatedKeyboard = getCommunityJoinedKeyboard(targetLang);
         } else if (category === 'versuccess') {
           const regData = await getRegisteredPlayers();
           const reg = (regData.registrations || {})[param] || {};
