@@ -2552,9 +2552,10 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `⚠️ للمشاركة في دوري **БРАТВА FCM** والظهور في تشكيلة البطولات، يجب أولاً الانضمام إلى القناة الرسمية ومجموعة الفريق!\n\n` +
       `📲 *خطوات التسجيل الإلزامية:*\n` +
       `**1.** انضم إلى القناة الرسمية ومجموعة الفريق عبر الزر بالأسفل.\n` +
-      `**2.** فور انضمامك، سيرسل لك البوت تلقائياً رسالة تأكيد العضوية وتفعيل الحساب.\n` +
-      `**3.** أرسل اسمك الدقيق في لعبة EA FC Mobile لتفعيل ملفك ودخول التشكيلة!\n\n` +
-      `🚫 *ملاحظة:* لن يتم قبول أي تسجيل دون الانضمام الفعلي لمجتمع الفريق.`;
+      `**2.** فور انضمامك، سيرسل لك البوت تلقائياً رسالة المتابعة لتسجيل اسمك في قائمة الفريق.\n` +
+      `**3.** أرسل اسمك المستعار فقط في EA FC Mobile لتعقب أهدافك ودخول تشكيلة البطولات!\n\n` +
+      `🔒 *توضيح هام:* نطلب فقط اسمك المستعار الظاهر في اللعبة (Nickname) لتنزيلك في التشكيلة — لا نطلب أي كلمة مرور أو بيانات خاصة نهائياً!\n` +
+      `🚫 *ملاحظة:* التسجيل في التشكيلة يتطلب الانضمام المسبق لمجتمع الفريق.`;
   }
   if (lang === 'en') {
     return `📢 *MANDATORY: JOIN OUR OFFICIAL COMMUNITY FIRST!* 📢\n` +
@@ -2562,9 +2563,10 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `⚠️ To participate in **BRATVA FCM** tournaments, you must first join our official Channel and Discussion Group!\n\n` +
       `📲 *Mandatory Steps to Register:*\n` +
       `**1.** Join our official Channel and Discussion Group via the button below.\n` +
-      `**2.** Once joined, the bot will automatically send you the confirmation message to activate your profile.\n` +
-      `**3.** Send your exact EA FC Mobile In-Game Nickname to complete registration!\n\n` +
-      `🚫 *Note:* Registration is locked until you join our official community.`;
+      `**2.** Once joined, the bot will automatically prompt you to enter your player nickname.\n` +
+      `**3.** Send your public EA FC Mobile In-Game Nickname to enter our tournament roster!\n\n` +
+      `🔒 *100% Safe:* We only ask for your public in-game nickname to track your match goals — no logins or passwords needed!\n` +
+      `🚫 *Note:* Roster registration requires joining our official community first.`;
   }
   if (lang === 'es') {
     return `📢 *¡OBLIGATORIO: ÚNETE PRIMERO A LA COMUNIDAD!* 📢\n` +
@@ -2572,9 +2574,10 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `⚠️ Para participar en los torneos de **BRATVA FCM**, ¡primero debes unirte a nuestro Canal y Grupo oficial!\n\n` +
       `📲 *Pasos obligatorios:*\n` +
       `**1.** Únete a nuestro Canal y Grupo oficial mediante el botón de abajo.\n` +
-      `**2.** Una vez dentro, el bot te enviará automáticamente el mensaje de confirmación para activar tu perfil.\n` +
-      `**3.** Envía tu nombre exacto de EA FC Mobile para entrar en la plantilla del equipo.\n\n` +
-      `🚫 *Nota:* El registro está bloqueado hasta que te unas a la comunidad.`;
+      `**2.** Una vez dentro, el bot te enviará automáticamente el mensaje para registrar tu nombre de jugador.\n` +
+      `**3.** Envía tu nombre público de EA FC Mobile (IGN) para entrar en la plantilla del equipo.\n\n` +
+      `🔒 *100% Seguro:* Solo solicitamos tu nombre público del juego para registrar goles y alineaciones — ¡sin contraseñas!\n` +
+      `🚫 *Nota:* El registro en plantilla requiere unirse a la comunidad primero.`;
   }
   // Russian (Default)
   return `📢 *ОБЯЗАТЕЛЬНО: ВСТУПИТЕ В КАНАЛ И ЧАТ ЛИГИ!* 📢\n` +
@@ -2582,9 +2585,10 @@ function formatJoinRequiredPrompt(lang = 'ru') {
     `⚠️ Для участия в турнирах **БРАТВА FCM** необходимо сначала вступить в наш официальный Канал и Чат команды!\n\n` +
     `📲 *Обязательные шаги для допуска:*\n` +
     `**1.** Вступите в наш официальный Канал и Чат по кнопке ниже.\n` +
-    `**2.** После вступления бот автоматически пришлет вам сообщение с подтверждением для активации профиля.\n` +
-    `**3.** Отправьте точный игровой никнейм в EA FC Mobile для допуска к составу!\n\n` +
-    `🚫 *Важно:* Регистрация игрового ника заблокирована до вступления в сообщество.`;
+    `**2.** После вступления бот автоматически пришлет сообщение для записи вашего игрового ника в состав.\n` +
+    `**3.** Отправьте свой игровой никнейм в EA FC Mobile для допуска к составу на турниры!\n\n` +
+    `🔒 *Безопасно:* Мы просим только публичный никнейм из игры для учета голов в турнирах — пароли и логины не нужны!\n` +
+    `🚫 *Важно:* Запись в состав доступна только участникам нашего сообщества.`;
 }
 
 function getJoinRequiredKeyboard(currentLang = 'ru') {
@@ -2616,29 +2620,33 @@ function formatCommunityJoinedPrompt(lang = 'ru') {
   if (lang === 'ar') {
     return `👋 *مرحباً بك في مجتمع БРАТВА FCM!* ⚜️\n\n` +
       `🎉 *لقد انضممت بنجاح إلى القناة الرسمية ومجموعة الفريق!*\n\n` +
-      `👉 *الخطوة التالية — تفعيل ملفك ودخول تشكيلة البطولات:*\n` +
-      `اضغط على الزر بالأسفل لتأكيد عضويتك وربط اسم حسابك في لعبة EA FC Mobile!\n\n` +
+      `👉 *الخطوة التالية — تسجيل اسمك في تشكيلة البطولات:*\n` +
+      `اضغط على الزر بالأسفل لتأكيد عضويتك وإرسال اسمك المستعار في لعبة EA FC Mobile!\n\n` +
+      `🔒 *آمن 100%:* نطلب فقط اسمك المستعار الظاهر في اللعبة (Nickname) لحساب أهدافك وإدراجك في تشكيلة المباريات — لا نطلب أي كلمة مرور أو دخول لحسابك نهائياً!\n\n` +
       `⚠️ *تنبيه هام:* يرجى قراءة قوانين الفريق بالأسفل (إلزامية لعب 3/3 جولات في كل بطولة) لتفادي العقوبات أو الاستبعاد!`;
   }
   if (lang === 'en') {
     return `👋 *Welcome to the BRATVA FCM Community!* ⚜️\n\n` +
       `🎉 *You have successfully joined our official Channel and Squad Chat!*\n\n` +
-      `👉 *Next Step — Activate your In-Game Tournament Profile:*\n` +
-      `Tap the button below to confirm your membership and link your EA FC Mobile In-Game Nickname!\n\n` +
+      `👉 *Next Step — Enter Tournament Squad Roster:*\n` +
+      `Tap the button below to confirm your membership and submit your public EA FC Mobile In-Game Nickname!\n\n` +
+      `🔒 *100% Safe:* We only ask for your public in-game nickname to record your match goals and lineup selection — no passwords or account logins ever!\n\n` +
       `⚠️ *Important:* Please read our official League Rules below (play all 3/3 turns in tournaments) to avoid strikes and removal!`;
   }
   if (lang === 'es') {
     return `👋 *¡Bienvenido a la comunidad de BRATVA FCM!* ⚜️\n\n` +
       `🎉 *¡Te has unido con éxito a nuestro Canal y Grupo oficial!*\n\n` +
-      `👉 *Siguiente paso — Activar tu perfil en el juego:*\n` +
-      `¡Pulsa el botón de abajo para confirmar tu membresía y vincular tu nombre de EA FC Mobile!\n\n` +
+      `👉 *Siguiente paso — Registro en la plantilla de torneos:*\n` +
+      `¡Pulsa el botón de abajo para confirmar tu membresía y registrar tu nombre de EA FC Mobile!\n\n` +
+      `🔒 *100% Seguro:* Solo necesitamos tu nombre público del juego para registrar tus goles en torneos y convocarte en la alineación — ¡sin contraseñas!\n\n` +
       `⚠️ *Importante:* Lee el reglamento oficial abajo (jugar los 3/3 turnos en cada torneo) para evitar sanciones y expulsión.`;
   }
   // Russian (Default)
   return `👋 *Добро пожаловать в сообщество БРАТВА FCM!* ⚜️\n\n` +
     `🎉 *Вы успешно вступили в наш официальный Канал и Чат команды!*\n\n` +
-    `👉 *Следующий шаг — Активация профиля и допуск к турнирам:*\n` +
-    `Нажмите кнопку ниже, чтобы подтвердить подписку и привязать свой игровой никнейм в EA FC Mobile!\n\n` +
+    `👉 *Следующий шаг — Запись в состав лиги на турниры:*\n` +
+    `Нажмите кнопку ниже, чтобы подтвердить участие и записать свой игровой никнейм EA FC Mobile в состав команды!\n\n` +
+    `🔒 *100% Безопасно:* Бот просит только ваш публичный игровой никнейм для учета забитых голов и расстановки в турнирах — пароли не требуются!\n\n` +
     `⚠️ *Важно:* Обязательно прочитайте правила лиги ниже (забирать все 3/3 ходов в каждом турнире), чтобы избежать штрафов!`;
 }
 
@@ -2680,32 +2688,36 @@ function getCommunityJoinedKeyboard(currentLang = 'ru') {
 }
 
 function formatVerificationPrompt(lang = 'ru') {
-  if (lang === 'en') {
-    return `⚜️ *BRATVA FCM — IN-GAME REGISTRATION* ⚜️\n\n` +
-      `✅ *Community Membership Confirmed!* Welcome to BRATVA!\n\n` +
-      `👉 *Now please send your exact EA FC Mobile In-Game Nickname here in chat:*\n` +
-      `_(Type it exactly as it appears in the game roster)_\n\n` +
-      `⚡ The bot will immediately activate your player profile, match history, and lineup eligibility!`;
-  }
   if (lang === 'ar') {
-    return `⚜️ *دوري БРАТВА FCM — تسجيل اسم اللعبة* ⚜️\n\n` +
-      `✅ *تم تأكيد عضويتك في القناة والمجموعة بنجاح!* مرحباً بك في الفريق!\n\n` +
-      `👉 *أرسل الآن اسمك في لعبة EA FC Mobile (In-Game Nickname) هنا في المحادثة:*\n` +
-      `_(اكتب اسمك تماماً كما يظهر داخل اللعبة)_\n\n` +
-      `⚡ سيقوم البوت فوراً بربط حسابك وتفعيل إحصائياتك وأهليتك لدخول تشكيلة البطولات!`;
+    return `⚜️ *دوري БРАТВА FCM — تسجيل اسم اللاعب* ⚜️\n\n` +
+      `✅ *تم تأكيد عضويتك بنجاح! مرحباً بك في الفريق!*\n\n` +
+      `👉 *أرسل الآن اسمك المستعار في لعبة EA FC Mobile (In-Game Nickname) هنا في المحادثة:*\n` +
+      `_(اكتب اسمك تماماً كما يظهر في قائمة الفريق باللعبة)_\n\n` +
+      `🔒 *آمن ومبسط 100%:*\n` +
+      `نحتاج فقط لاسمك الظاهر في اللعبة لحساب أهدافك في البطولات وتنزيلك في التشكيلة الأساسية — لا نحتاج لأي كلمة مرور أو دخول لحسابك نهائياً!`;
+  }
+  if (lang === 'en') {
+    return `⚜️ *BRATVA FCM — SQUAD ROSTER REGISTRATION* ⚜️\n\n` +
+      `✅ *Community Membership Confirmed! Welcome to the squad!*\n\n` +
+      `👉 *Simply send your public EA FC Mobile In-Game Nickname (IGN) here in chat:*\n` +
+      `_(Type it exactly as it appears in the game squad roster)_\n\n` +
+      `🔒 *100% Safe & Simple:*\n` +
+      `We only use your public in-game name to record tournament goals and include you in starting lineups — no passwords or account logins ever!`;
   }
   if (lang === 'es') {
-    return `⚜️ *BRATVA FCM — REGISTRO DE JUGADOR* ⚜️\n\n` +
-      `✅ *¡Suscripción a la comunidad confirmada!* ¡Bienvenido a BRATVA!\n\n` +
-      `👉 *Ahora envía tu nombre exacto de EA FC Mobile (IGN) aquí en el chat:*\n` +
-      `_(Escríbelo exactamente como aparece en el juego)_\n\n` +
-      `⚡ ¡El bot activará de inmediato tu perfil, estadísticas y elegibilidad en torneos!`;
+    return `⚜️ *BRATVA FCM — REGISTRO EN LA PLANTILLA* ⚜️\n\n` +
+      `✅ *¡Membresía confirmada con éxito! ¡Bienvenido al equipo!*\n\n` +
+      `👉 *Simplemente escribe aquí en el chat tu nombre de EA FC Mobile (IGN):*\n` +
+      `_(Escríbelo exactamente como aparece en la plantilla del juego)_\n\n` +
+      `🔒 *100% Seguro y sencillo:*\n` +
+      `Solo necesitamos tu nombre público del juego para registrar tus goles en torneos y convocarte en la alineación — ¡sin contraseñas ni accesos!`;
   }
-  return `⚜️ *БРАТВА FCM — РЕГИСТРАЦИЯ ИГРОВОГО НИКА* ⚜️\n\n` +
-    `✅ *Подписка на канал и чат подтверждена!* Добро пожаловать в БРАТВА!\n\n` +
-    `👉 *Теперь напишите свой точный никнейм в EA FC Mobile (IGN) сюда в чат:*\n` +
-    `_(В точности так, как написано в игре)_\n\n` +
-    `⚡ Бот мгновенно активирует ваш профиль игрока, статистику и допуск к турнирам!`;
+  return `⚜️ *БРАТВА FCM — ЗАПИСЬ В СОСТАВ КОМАНДЫ* ⚜️\n\n` +
+    `✅ *Подписка на сообщество подтверждена! Добро пожаловать в команду!*\n\n` +
+    `👉 *Просто отправьте сюда в чат ваш игровой никнейм EA FC Mobile (IGN):*\n` +
+    `_(Напишите его в точности так, как он указан в списке состава в игре)_\n\n` +
+    `🔒 *100% Безопасно и просто:*\n` +
+    `Бот использует только ваш публичный никнейм для подсчета голов в турнирах и допуска к основе — никаких паролей и входов в аккаунт!`;
 }
 
 function getVerificationKeyboard(currentLang = 'ru') {
@@ -2732,43 +2744,43 @@ function getVerificationKeyboard(currentLang = 'ru') {
 function formatVerificationSuccess(matchedName, uid = null, lang = 'ru') {
   const uidText = uid ? ` (UID: \`${clean(uid)}\`)` : '';
   const nameIso = bidiIsolate(matchedName);
-  if (lang === 'en') {
-    return `✅ *ACCOUNT CONFIRMED!* ⚜️\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👤 *Player:* *${nameIso}*${uidText}\n` +
-      `🔰 *Status:* Active Squad Member\n` +
-      `────────────────────\n` +
-      `⚠️ *IMPORTANT TO READ (MANDATORY):*\n` +
-      `Please read our official League Rules by tapping [ 📜 Read League Rules (IMPORTANT) ] below to avoid strikes and removal from the team!\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👉 *Next Step:* Tap buttons below to join our community and read the rules:`;
-  }
   if (lang === 'ar') {
-    return `✅ *تم تأكيد حسابك بنجاح!* ⚜️\n` +
+    return `✅ *تم تسجيلك في قائمة الفريق بنجاح!* ⚜️\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👤 *اللاعب:* *${nameIso}*${uidText}\n` +
-      `🔰 *الحالة:* عضو نشط في الفريق\n` +
+      `👤 *اسم اللاعب في اللعبة:* *${nameIso}*${uidText}\n` +
+      `🔰 *الحالة:* مسجل في تشكيلة الفريق الرسمية\n` +
       `────────────────────\n` +
       `⚠️ *تنبيه هام جداً (إلزامي للقراءة):*\n` +
       `يرجى قراءة قوانين الدوري الرسمية بالضغط على [ 📜 اقرأ قوانين الدوري (هام جداً) ] بالأسفل لتجنب الإنذارات والاستبعاد!\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `👉 *الخطوة التالية:* اضغط على الأزرار بالأسفل للانضمام للقناة وقراءة القوانين:`;
   }
-  if (lang === 'es') {
-    return `✅ *¡CUENTA CONFIRMADA CON ÉXITO!* ⚜️\n` +
+  if (lang === 'en') {
+    return `✅ *REGISTERED IN SQUAD ROSTER!* ⚜️\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👤 *Jugador:* *${nameIso}*${uidText}\n` +
-      `🔰 *Estado:* Miembro Activo del Equipo\n` +
+      `👤 *In-Game Nickname:* *${nameIso}*${uidText}\n` +
+      `🔰 *Squad Status:* Active Roster Member\n` +
+      `────────────────────\n` +
+      `⚠️ *IMPORTANT TO READ (MANDATORY):*\n` +
+      `Please read our official League Rules by tapping [ 📜 Read League Rules (IMPORTANT) ] below to avoid strikes and removal from the team!\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👉 *Next Step:* Tap buttons below to join our community and read the rules:`;
+  }
+  if (lang === 'es') {
+    return `✅ *¡REGISTRADO EN LA PLANTILLA!* ⚜️\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 *Nombre en el juego:* *${nameIso}*${uidText}\n` +
+      `🔰 *Estado:* Miembro Activo en Plantilla\n` +
       `────────────────────\n` +
       `⚠️ *AVISO IMPORTANTE (LECTURA OBLIGATORIA):*\n` +
       `¡Lee las reglas oficiales de la liga pulsando [ 📜 Leer Reglas (IMPORTANTE) ] abajo para evitar strikes y expulsión!\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `👉 *Siguiente paso:* Toca los botones de abajo para unirte al canal y leer las reglas:`;
   }
-  return `✅ *АККАУНТ УСПЕШНО ПОДТВЕРЖДЕН!* ⚜️\n` +
+  return `✅ *ИГРОК УСПЕШНО ЗАПИСАН В СОСТАВ!* ⚜️\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `👤 *Игрок:* *${nameIso}*${uidText}\n` +
-    `🔰 *Статус:* В составе лиги (Active)\n` +
+    `👤 *Игровой ник:* *${nameIso}*${uidText}\n` +
+    `🔰 *Статус в лиге:* Активный игрок состава\n` +
     `────────────────────\n` +
     `⚠️ *ВАЖНО К ПРОЧТЕНИЮ (ОБЯЗАТЕЛЬНО):*\n` +
     `Обязательно ознакомься с правилами лиги, нажав [ 📜 Читать Правила (ВАЖНО) ] ниже, чтобы избежать страйков и кика из команды!\n` +
@@ -3477,7 +3489,7 @@ async function formatKickedWarning(lang = 'ru') {
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📢 *بيان رسمي وتوضيح لجميع أعضاء الدوري:*\n` +
       `اللاعبون الذين تم طردهم مؤخراً من الدوري داخل اللعبة تم استبعادهم **فقط وحصرياً لأنهم لم ينضموا إلى تيليجرام**!\n` +
-      `لم يقوموا بالتسجيل في البوت ولم يربطوا حساباتهم لتنسيق المباريات والتشكيلات.\n\n` +
+      `لم يقوموا بالتسجيل في البوت ولم يثبتوا أسماءهم في قائمة الفريق لتنسيق المباريات والتشكيلات.\n\n` +
       `⛔ *غداً ستبدأ الدفعة القادمة من الطرد — غداً الدور عليك إذا لم تنضم!*:\n` +
       `أي لاعب يظل اسمه في قائمة غير المنضمين ❌ حتى الغد، **سيكون هو التالي في الطرد النهائي والاستبعاد من الدوري** بلا رجعة!\n\n` +
       `✅ *اللاعبون المنضمون حالياً لتيليجرام (${uniqueJoined.length}):*\n` +
@@ -3492,7 +3504,7 @@ async function formatKickedWarning(lang = 'ru') {
         `1. ادخل لبوت الدوري الرسمي: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
         `2. اضغط /start واكتب اسمك أو نك نيم حسابك داخل اللعبة.\n` +
         `3. انضم لمجموعة الفريق والقناة الرسمية.\n\n` +
-        `⚠️ *ملاحظة هامة جداً:* حتى لو كنت موجوداً في المجموعة أو القناة، يجب عليك **حتماً** الدخول لبوت [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register) وإرسال نكك لتوثيق حسابك في السيستم!`;
+        `⚠️ *ملاحظة هامة جداً:* حتى لو كنت موجوداً في المجموعة أو القناة، يجب عليك **حتماً** الدخول لبوت [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register) وإرسال اسمك المستعار لتسجيلك في قائمة الفريق!`;
     } else {
       msg += `🎉 *اكتمل الانضمام 100%!* جميع لاعبي الفريق مسجلون في تيليجرام!`;
     }
@@ -7250,9 +7262,10 @@ export default async function handler(req, res) {
         }
 
         if (text.startsWith('/status') || text.startsWith('/verify')) {
+          const userLang = detectUserLang(message.from);
           const names = existingRegs.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
-          const vSuccessText = formatVerificationSuccess(names, existingRegs[0].uid, 'ru');
-          const vSuccessKeys = getVerificationSuccessKeyboard(existingRegs[0].player_id, 'ru');
+          const vSuccessText = formatVerificationSuccess(names, existingRegs[0].uid, userLang);
+          const vSuccessKeys = getVerificationSuccessKeyboard(existingRegs[0].player_id, userLang);
           await sendTelegramMessage(chatId, vSuccessText, vSuccessKeys);
           return sendResponse(res, 200, 'Already registered');
         }
@@ -7425,8 +7438,8 @@ export default async function handler(req, res) {
         });
       }
 
-      const vSuccessText = formatVerificationSuccess(displayName, null, 'ru');
-      const vSuccessKeys = getVerificationSuccessKeyboard(playerId, 'ru');
+      const vSuccessText = formatVerificationSuccess(displayName, null, userLang);
+      const vSuccessKeys = getVerificationSuccessKeyboard(playerId, userLang);
       await sendTelegramMessage(chatId, vSuccessText, vSuccessKeys);
       return sendResponse(res, 200, 'Registration successful');
     }
