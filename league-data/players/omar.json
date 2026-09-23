@@ -104,7 +104,7 @@
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 3,
+    "current_fail_streak": 2,
     "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrayini",
     "flagged_for_review": true
   }

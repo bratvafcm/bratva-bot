@@ -1,6 +1,6 @@
 {
   "player_id": "eabngst",
-  "display_name": "EABNGST",
+  "display_name": "Eabngst",
   "known_aliases": [],
   "total_goals": 0,
   "total_matches": 1,
@@ -20,8 +20,8 @@
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 2,
-    "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
+    "current_fail_streak": 1,
+    "last_evaluated_tournament_id": "2026-08-29_team-work",
     "flagged_for_review": false
   }
 }

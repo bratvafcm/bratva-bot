@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-09T01:30:00.000Z",
+  "lastUpdated": "2026-09-17T04:44:42.450Z",
   "registrations": {
     "doxibero1": {
       "player_id": "doxibero1",
@@ -89,6 +89,39 @@
       "telegram_name": "K C",
       "is_new_member": false,
       "registered_at": "2026-09-09T02:01:46.366Z"
+    },
+    "member_l1onchik": {
+      "player_id": "member_l1onchik",
+      "display_name": "L1onchik",
+      "in_game_name": "L1onchik",
+      "uid": null,
+      "telegram_id": 5644393489,
+      "telegram_username": "L1onchik_7",
+      "telegram_name": "L1on⚡🏆",
+      "is_new_member": true,
+      "registered_at": "2026-09-09T07:51:50.282Z"
+    },
+    "mohamed_osama": {
+      "player_id": "mohamed_osama",
+      "display_name": "Mohamed_Osama",
+      "in_game_name": "Mohamed_Osama",
+      "uid": null,
+      "telegram_id": 1464683050,
+      "telegram_username": "MohamedOsama4",
+      "telegram_name": "محمد أسامه",
+      "is_new_member": false,
+      "registered_at": "2026-09-09T17:08:06.571Z"
+    },
+    "mike": {
+      "player_id": "mike",
+      "display_name": "Mike",
+      "in_game_name": "Mike",
+      "uid": null,
+      "telegram_id": 5847653261,
+      "telegram_username": "Josue1698",
+      "telegram_name": "Josue",
+      "is_new_member": false,
+      "registered_at": "2026-09-10T14:32:10.130Z"
     }
   },
   "current_checkin": {

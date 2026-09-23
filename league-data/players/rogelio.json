@@ -2,9 +2,9 @@
   "player_id": "rogelio",
   "display_name": "Rogelio",
   "known_aliases": [],
-  "total_goals": 200,
-  "total_matches": 9,
-  "average_goals": 22.2,
+  "total_goals": 246,
+  "total_matches": 11,
+  "average_goals": 22.4,
   "matches": [
     {
       "tournament_id": "2026-09-03_bayern-2-monique",
@@ -113,11 +113,35 @@
       "turns_played": 3,
       "player_display_name": "Rogelio",
       "player_id": "rogelio"
+    },
+    {
+      "tournament_id": "2026-09-15_ultras",
+      "match_index_in_tournament": 13,
+      "opponent_display_name": "ULTRAS",
+      "opponent_id": "2026-09-15_ultras",
+      "goals_for": 24,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Rogelio",
+      "player_id": "rogelio"
+    },
+    {
+      "tournament_id": "2026-09-23_x_elite_legends",
+      "match_index_in_tournament": 2,
+      "opponent_display_name": "X Elite Legends",
+      "opponent_id": "2026-09-23_x_elite_legends",
+      "goals_for": 22,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Rogelio",
+      "player_id": "rogelio"
     }
   ],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-09-14_na_legends",
+    "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
     "flagged_for_review": false
   }
 }

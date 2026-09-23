@@ -2,9 +2,9 @@
   "player_id": "ksfalubaz",
   "display_name": "KSFALUBAZ",
   "known_aliases": [],
-  "total_goals": 79,
-  "total_matches": 3,
-  "average_goals": 26.3,
+  "total_goals": 160,
+  "total_matches": 9,
+  "average_goals": 17.8,
   "matches": [
     {
       "tournament_id": "2026-09-12_ed_phoenix_gen_2",
@@ -41,11 +41,83 @@
       "turns_played": 3,
       "player_display_name": "KSFALUBAZ",
       "player_id": "ksfalubaz"
+    },
+    {
+      "tournament_id": "2026-09-15_ultras",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "ULTRAS",
+      "opponent_id": "2026-09-15_ultras",
+      "goals_for": 26,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "KSFALUBAZ",
+      "player_id": "ksfalubaz"
+    },
+    {
+      "tournament_id": "2026-09-19_best_liga",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "BEST LIGA",
+      "opponent_id": "2026-09-19_best_liga",
+      "goals_for": 21,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KSFALUBAZ",
+      "player_id": "ksfalubaz"
+    },
+    {
+      "tournament_id": "2026-09-19_store12",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "STORE12",
+      "opponent_id": "2026-09-19_store12",
+      "goals_for": 24,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "KSFALUBAZ",
+      "player_id": "ksfalubaz"
+    },
+    {
+      "tournament_id": "2026-09-21_apex_reapers",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "Apex Reapers",
+      "opponent_id": "2026-09-21_apex_reapers",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "KSFALUBAZ",
+      "player_id": "ksfalubaz"
+    },
+    {
+      "tournament_id": "2026-09-21_los_viciados",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "Los+Viciados",
+      "opponent_id": "2026-09-21_los_viciados",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "KSFALUBAZ",
+      "player_id": "ksfalubaz"
+    },
+    {
+      "tournament_id": "2026-09-22_fc_the_conqueror",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "FC.The Conqueror",
+      "opponent_id": "2026-09-22_fc_the_conqueror",
+      "goals_for": 10,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 1,
+      "player_display_name": "KSFALUBAZ",
+      "player_id": "ksfalubaz"
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-09-14_na_legends",
-    "flagged_for_review": false
+    "current_fail_streak": 3,
+    "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
+    "flagged_for_review": true
   }
 }

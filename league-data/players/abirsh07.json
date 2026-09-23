@@ -2,9 +2,9 @@
   "player_id": "abirsh07",
   "display_name": "Abirsh07",
   "known_aliases": [],
-  "total_goals": 237,
-  "total_matches": 12,
-  "average_goals": 19.8,
+  "total_goals": 364,
+  "total_matches": 16,
+  "average_goals": 22.8,
   "matches": [
     {
       "tournament_id": "2026-08-29_team-work",
@@ -149,11 +149,59 @@
       "turns_played": 0,
       "player_display_name": "Abirsh07",
       "player_id": "abirsh07"
+    },
+    {
+      "tournament_id": "2026-09-15_ultras",
+      "match_index_in_tournament": 10,
+      "opponent_display_name": "ULTRAS",
+      "opponent_id": "2026-09-15_ultras",
+      "goals_for": 29,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Abirsh07",
+      "player_id": "abirsh07"
+    },
+    {
+      "tournament_id": "2026-09-19_best_liga",
+      "match_index_in_tournament": 10,
+      "opponent_display_name": "BEST LIGA",
+      "opponent_id": "2026-09-19_best_liga",
+      "goals_for": 32,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Abirsh07",
+      "player_id": "abirsh07"
+    },
+    {
+      "tournament_id": "2026-09-19_store12",
+      "match_index_in_tournament": 9,
+      "opponent_display_name": "STORE12",
+      "opponent_id": "2026-09-19_store12",
+      "goals_for": 35,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Abirsh07",
+      "player_id": "abirsh07"
+    },
+    {
+      "tournament_id": "2026-09-21_los_viciados",
+      "match_index_in_tournament": 9,
+      "opponent_display_name": "Los+Viciados",
+      "opponent_id": "2026-09-21_los_viciados",
+      "goals_for": 31,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Abirsh07",
+      "player_id": "abirsh07"
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 4,
-    "last_evaluated_tournament_id": "2026-09-14_na_legends",
-    "flagged_for_review": true
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-09-21_los_viciados",
+    "flagged_for_review": false
   }
 }

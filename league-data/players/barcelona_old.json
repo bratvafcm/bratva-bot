@@ -1,0 +1,27 @@
+{
+  "player_id": "barcelona_old",
+  "display_name": "BARCELONA_OLD",
+  "known_aliases": [],
+  "total_goals": 27,
+  "total_matches": 1,
+  "average_goals": 27,
+  "matches": [
+    {
+      "tournament_id": "2026-09-19_store12",
+      "match_index_in_tournament": 12,
+      "opponent_display_name": "STORE12",
+      "opponent_id": "2026-09-19_store12",
+      "goals_for": 27,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "BARCELONA_OLD",
+      "player_id": "barcelona_old"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-09-19_store12",
+    "flagged_for_review": false
+  }
+}

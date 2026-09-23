@@ -114,12 +114,15 @@ function telegramRequest(method, params = {}) {
 
 const adminCache = new Map(); // userId -> { isAdmin: boolean, expiresAt: number }
 const sandboxTesterIds = new Set();
+const sandboxAdminOverrides = new Set();
 const sandboxSessions = new Map(); // strId -> { player_id, display_name, in_game_name, ... }
 
 function isSandboxTester(userId, username = '') {
+  const strId = String(userId || '');
+  if (sandboxAdminOverrides.has(strId)) return false;
   const u = (username || '').toLowerCase().replace('@', '').trim();
   if (u === 'bilalmorocci') return true;
-  if (userId && sandboxTesterIds.has(String(userId))) return true;
+  if (userId && sandboxTesterIds.has(strId)) return true;
   return false;
 }
 
@@ -7151,7 +7154,29 @@ export default async function handler(req, res) {
     // 🔒 Admin Security Gate: Players have NO access to the bot.
     // Only verified Administrators / Creator of the league can access bot features.
     const userId = message.from ? message.from.id : null;
-    const isAdmin = await isUserAdmin(userId, message.from ? message.from.username : '');
+    const strId = String(userId || '');
+    const username = message.from ? (message.from.username || '') : '';
+
+    // 🧪 Sandbox Mode Toggle (Exclusive for Bilal / Tester):
+    // Allows switching on-the-fly between tester member mode and administrator mode!
+    if (strId === '5414088590' || username.toLowerCase() === 'bilalmorocci') {
+      if (text === '/admin_mode' || text === '/mode admin') {
+        sandboxAdminOverrides.add(strId);
+        sandboxTesterIds.delete(strId);
+        adminCache.delete(strId);
+        await sendTelegramMessage(chatId, '👑 *[ADMIN MODE ACTIVATED]*\nYou now have full Administrator access! Type /start or /admin to access the unified Admin Control Panel.');
+        return sendResponse(res, 200, 'Admin mode on');
+      }
+      if (text === '/tester_mode' || text === '/mode tester' || text === '/mode member') {
+        sandboxAdminOverrides.delete(strId);
+        sandboxTesterIds.add(strId);
+        adminCache.delete(strId);
+        await sendTelegramMessage(chatId, '🧪 *[TESTER MODE ACTIVATED]*\nYou are now simulating a regular league member (non-admin)! Type /restart or /reset to test onboarding.');
+        return sendResponse(res, 200, 'Tester mode on');
+      }
+    }
+
+    const isAdmin = await isUserAdmin(userId, username);
 
     // ==========================================
     // 🔒 NON-ADMIN FLOW: 1-on-1 Player Verification & Onboarding

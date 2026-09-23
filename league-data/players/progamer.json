@@ -3,8 +3,8 @@
   "display_name": "ProGamer",
   "known_aliases": [],
   "total_goals": 29,
-  "total_matches": 7,
-  "average_goals": 4.1,
+  "total_matches": 9,
+  "average_goals": 3.2,
   "matches": [
     {
       "tournament_id": "2026-08-31_royal-challenger",
@@ -89,11 +89,35 @@
       "turns_played": 0,
       "player_display_name": "ProGamer",
       "player_id": "progamer"
+    },
+    {
+      "tournament_id": "2026-09-19_best_liga",
+      "match_index_in_tournament": 16,
+      "opponent_display_name": "BEST LIGA",
+      "opponent_id": "2026-09-19_best_liga",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "ProGamer",
+      "player_id": "progamer"
+    },
+    {
+      "tournament_id": "2026-09-19_store12",
+      "match_index_in_tournament": 16,
+      "opponent_display_name": "STORE12",
+      "opponent_id": "2026-09-19_store12",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "ProGamer",
+      "player_id": "progamer"
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 7,
-    "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrayini",
+    "current_fail_streak": 8,
+    "last_evaluated_tournament_id": "2026-09-19_best_liga",
     "flagged_for_review": true
   }
 }

@@ -8,18 +8,18 @@
     "eligibility_streak": {
       "current_fail_streak": 2,
       "last_evaluated_tournament_id": "2026-08-29_team-work",
-      "flagged_for_review": false
+      "flagged_for_review": true
     }
   },
   "doxibero1": {
     "display_name": "DOXIBERO1",
-    "total_goals": 493,
-    "total_matches": 19,
-    "average_goals": 25.9,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 695,
+    "total_matches": 26,
+    "average_goals": 26.7,
+    "last_tournament_date": "2026-09-23",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
+      "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
       "flagged_for_review": false
     }
   },
@@ -56,18 +56,18 @@
     "eligibility_streak": {
       "current_fail_streak": 2,
       "last_evaluated_tournament_id": "2026-08-29_team-work",
-      "flagged_for_review": false
+      "flagged_for_review": true
     }
   },
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
-    "total_goals": 373,
-    "total_matches": 18,
-    "average_goals": 20.7,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 542,
+    "total_matches": 25,
+    "average_goals": 21.7,
+    "last_tournament_date": "2026-09-23",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
+      "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
       "flagged_for_review": false
     }
   },
@@ -138,8 +138,8 @@
     "average_goals": 0,
     "last_tournament_date": "2026-08-28",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-08-28_fc-shibankat-fan",
       "flagged_for_review": false
     }
   },
@@ -168,7 +168,7 @@
     }
   },
   "jordan": {
-    "display_name": "jordan",
+    "display_name": "Jordan",
     "total_goals": 0,
     "total_matches": 2,
     "average_goals": 0,
@@ -181,13 +181,13 @@
   },
   "mike": {
     "display_name": "Mike",
-    "total_goals": 299,
-    "total_matches": 13,
-    "average_goals": 23,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 450,
+    "total_matches": 20,
+    "average_goals": 22.5,
+    "last_tournament_date": "2026-09-23",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
+      "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
       "flagged_for_review": false
     }
   },
@@ -252,14 +252,14 @@
     }
   },
   "eabngst": {
-    "display_name": "EABNGST",
+    "display_name": "Eabngst",
     "total_goals": 0,
     "total_matches": 1,
     "average_goals": 0,
     "last_tournament_date": "2026-08-29",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-08-29_team-work",
       "flagged_for_review": false
     }
   },
@@ -307,20 +307,20 @@
     "last_tournament_date": "2026-09-12",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
+      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
       "flagged_for_review": false
     }
   },
   "abirsh07": {
     "display_name": "Abirsh07",
-    "total_goals": 237,
-    "total_matches": 12,
-    "average_goals": 19.8,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 364,
+    "total_matches": 16,
+    "average_goals": 22.8,
+    "last_tournament_date": "2026-09-21",
     "eligibility_streak": {
-      "current_fail_streak": 4,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
-      "flagged_for_review": true
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-21_los_viciados",
+      "flagged_for_review": false
     }
   },
   "vadormirea": {
@@ -361,13 +361,13 @@
   },
   "koustav_007": {
     "display_name": "KOUSTAV_007",
-    "total_goals": 173,
-    "total_matches": 7,
-    "average_goals": 24.7,
-    "last_tournament_date": "2026-09-08",
+    "total_goals": 320,
+    "total_matches": 12,
+    "average_goals": 26.7,
+    "last_tournament_date": "2026-09-23",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+      "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
       "flagged_for_review": false
     }
   },
@@ -390,7 +390,7 @@
     "average_goals": 12,
     "last_tournament_date": "2026-08-29",
     "eligibility_streak": {
-      "current_fail_streak": 0,
+      "current_fail_streak": 1,
       "last_evaluated_tournament_id": "2026-08-29_team-work",
       "flagged_for_review": false
     }
@@ -438,7 +438,7 @@
     "average_goals": 14.6,
     "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 3,
+      "current_fail_streak": 2,
       "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrayini",
       "flagged_for_review": true
     }
@@ -458,12 +458,12 @@
   "progamer": {
     "display_name": "ProGamer",
     "total_goals": 29,
-    "total_matches": 7,
-    "average_goals": 4.1,
-    "last_tournament_date": "2026-09-09",
+    "total_matches": 9,
+    "average_goals": 3.2,
+    "last_tournament_date": "2026-09-19",
     "eligibility_streak": {
-      "current_fail_streak": 7,
-      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrayini",
+      "current_fail_streak": 8,
+      "last_evaluated_tournament_id": "2026-09-19_best_liga",
       "flagged_for_review": true
     }
   },
@@ -481,13 +481,13 @@
   },
   "rogelio": {
     "display_name": "Rogelio",
-    "total_goals": 200,
-    "total_matches": 9,
-    "average_goals": 22.2,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 246,
+    "total_matches": 11,
+    "average_goals": 22.4,
+    "last_tournament_date": "2026-09-23",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
+      "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
       "flagged_for_review": false
     }
   },
@@ -506,36 +506,36 @@
   "real": {
     "display_name": "Real",
     "total_goals": 110,
-    "total_matches": 8,
-    "average_goals": 13.8,
-    "last_tournament_date": "2026-09-14",
+    "total_matches": 10,
+    "average_goals": 11,
+    "last_tournament_date": "2026-09-19",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
+      "last_evaluated_tournament_id": "2026-09-19_store12",
       "flagged_for_review": false
     }
   },
   "sushenley": {
     "display_name": "SUSHenley",
-    "total_goals": 28,
-    "total_matches": 7,
+    "total_goals": 32,
+    "total_matches": 8,
     "average_goals": 4,
-    "last_tournament_date": "2026-09-14",
+    "last_tournament_date": "2026-09-15",
     "eligibility_streak": {
-      "current_fail_streak": 8,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
-      "flagged_for_review": true
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-15_ultras",
+      "flagged_for_review": false
     }
   },
   "саня": {
     "display_name": "саня",
-    "total_goals": 150,
-    "total_matches": 5,
-    "average_goals": 30,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 363,
+    "total_matches": 12,
+    "average_goals": 30.3,
+    "last_tournament_date": "2026-09-23",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
+      "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
       "flagged_for_review": false
     }
   },
@@ -558,56 +558,58 @@
     "average_goals": 0,
     "last_tournament_date": "2026-09-08",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
       "flagged_for_review": false
     }
   },
   "тима": {
     "display_name": "Тима",
-    "total_goals": 50,
-    "total_matches": 4,
-    "average_goals": 12.5,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 94,
+    "total_matches": 10,
+    "average_goals": 9.4,
+    "last_tournament_date": "2026-09-22",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
       "flagged_for_review": false
     }
   },
   "x_king_pentax": {
     "display_name": "X_King_Pentax",
-    "total_goals": 34,
-    "total_matches": 1,
-    "average_goals": 34,
+    "total_goals": 0,
+    "total_matches": 0,
+    "average_goals": 0,
     "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
+      "last_evaluated_tournament_id": null,
       "flagged_for_review": false
-    }
+    },
+    "status": "active"
   },
   "ashroh": {
     "display_name": "ashroh",
     "total_goals": 0,
-    "total_matches": 1,
+    "total_matches": 0,
     "average_goals": 0,
     "last_tournament_date": "2026-09-09",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": null,
       "flagged_for_review": false
-    }
+    },
+    "status": "active"
   },
   "king_pentax": {
     "display_name": "King_Pentax",
-    "total_goals": 116,
-    "total_matches": 4,
-    "average_goals": 29,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 285,
+    "total_matches": 11,
+    "average_goals": 25.9,
+    "last_tournament_date": "2026-09-23",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
+      "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
       "flagged_for_review": false
     }
   },
@@ -618,8 +620,8 @@
     "average_goals": 0,
     "last_tournament_date": "2026-09-12",
     "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
       "flagged_for_review": true
     }
   },
@@ -649,86 +651,86 @@
   },
   "papacarlos1234": {
     "display_name": "PapaCarlos1234",
-    "total_goals": 23,
-    "total_matches": 3,
-    "average_goals": 7.7,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 59,
+    "total_matches": 8,
+    "average_goals": 7.4,
+    "last_tournament_date": "2026-09-22",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
       "flagged_for_review": false
     }
   },
   "msrpbot": {
     "display_name": "MSRPBOT",
-    "total_goals": 18,
-    "total_matches": 3,
-    "average_goals": 6,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 172,
+    "total_matches": 9,
+    "average_goals": 19.1,
+    "last_tournament_date": "2026-09-22",
     "eligibility_streak": {
-      "current_fail_streak": 4,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
-      "flagged_for_review": true
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
+      "flagged_for_review": false
     }
   },
   "ksfalubaz": {
     "display_name": "KSFALUBAZ",
-    "total_goals": 79,
-    "total_matches": 3,
-    "average_goals": 26.3,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 160,
+    "total_matches": 9,
+    "average_goals": 17.8,
+    "last_tournament_date": "2026-09-22",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
-      "flagged_for_review": false
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
+      "flagged_for_review": true
     }
   },
   "blackmoon11": {
     "display_name": "Blackmoon11",
     "total_goals": 0,
-    "total_matches": 1,
+    "total_matches": 2,
     "average_goals": 0,
-    "last_tournament_date": "2026-09-12",
+    "last_tournament_date": "2026-09-19",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-19_store12",
       "flagged_for_review": false
     }
   },
   "l1onchik": {
     "display_name": "L1onchik",
-    "total_goals": 62,
-    "total_matches": 3,
-    "average_goals": 20.7,
-    "last_tournament_date": "2026-09-14",
+    "total_goals": 119,
+    "total_matches": 6,
+    "average_goals": 19.8,
+    "last_tournament_date": "2026-09-23",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
       "flagged_for_review": false
     }
   },
   "madara_09": {
     "display_name": "MADARA.09",
     "total_goals": 63,
-    "total_matches": 2,
-    "average_goals": 31.5,
-    "last_tournament_date": "2026-09-14",
+    "total_matches": 4,
+    "average_goals": 15.8,
+    "last_tournament_date": "2026-09-19",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
+      "last_evaluated_tournament_id": "2026-09-19_store12",
       "flagged_for_review": false
     }
   },
   "awukufc": {
     "display_name": "Awukufc",
     "total_goals": 53,
-    "total_matches": 2,
-    "average_goals": 26.5,
-    "last_tournament_date": "2026-09-14",
+    "total_matches": 7,
+    "average_goals": 7.6,
+    "last_tournament_date": "2026-09-22",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-14_na_legends",
-      "flagged_for_review": false
+      "current_fail_streak": 5,
+      "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
+      "flagged_for_review": true
     }
   },
   "parisamjd": {
@@ -896,7 +898,7 @@
     "eligibility_streak": {
       "current_fail_streak": 2,
       "last_evaluated_tournament_id": "2026-08-12_warga",
-      "flagged_for_review": false
+      "flagged_for_review": true
     }
   },
   "thuner": {
@@ -908,7 +910,7 @@
     "eligibility_streak": {
       "current_fail_streak": 2,
       "last_evaluated_tournament_id": "2026-08-12_warga",
-      "flagged_for_review": false
+      "flagged_for_review": true
     }
   },
   "legendrutu18": {
@@ -1124,7 +1126,7 @@
     "eligibility_streak": {
       "current_fail_streak": 2,
       "last_evaluated_tournament_id": "2026-08-14_sudamericana",
-      "flagged_for_review": false
+      "flagged_for_review": true
     }
   },
   "mohamedhamden123": {
@@ -1136,7 +1138,7 @@
     "eligibility_streak": {
       "current_fail_streak": 2,
       "last_evaluated_tournament_id": "2026-08-14_sudamericana",
-      "flagged_for_review": false
+      "flagged_for_review": true
     }
   },
   "riztian": {
@@ -1148,7 +1150,7 @@
     "eligibility_streak": {
       "current_fail_streak": 2,
       "last_evaluated_tournament_id": "2026-08-12_warga",
-      "flagged_for_review": false
+      "flagged_for_review": true
     }
   },
   "matadoricon": {
@@ -1244,6 +1246,102 @@
     "eligibility_streak": {
       "current_fail_streak": 1,
       "last_evaluated_tournament_id": "2026-08-14_sudamericana",
+      "flagged_for_review": false
+    }
+  },
+  "barcelona_old": {
+    "display_name": "BARCELONA_OLD",
+    "total_goals": 27,
+    "total_matches": 1,
+    "average_goals": 27,
+    "last_tournament_date": "2026-09-19",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-19_store12",
+      "flagged_for_review": false
+    }
+  },
+  "jasur": {
+    "display_name": "jasur",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-19",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-19_best_liga",
+      "flagged_for_review": false
+    }
+  },
+  "aidar0911": {
+    "display_name": "Aidar0911",
+    "total_goals": 0,
+    "total_matches": 3,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-21",
+    "eligibility_streak": {
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-09-21_apex_reapers",
+      "flagged_for_review": true
+    }
+  },
+  "sahil": {
+    "display_name": "sahil",
+    "total_goals": 22,
+    "total_matches": 4,
+    "average_goals": 5.5,
+    "last_tournament_date": "2026-09-22",
+    "eligibility_streak": {
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
+      "flagged_for_review": false
+    }
+  },
+  "shreyash": {
+    "display_name": "shreyash",
+    "total_goals": 0,
+    "total_matches": 3,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-22",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
+      "flagged_for_review": false
+    }
+  },
+  "th7_prime": {
+    "display_name": "TH7 PRIME",
+    "total_goals": 0,
+    "total_matches": 3,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-22",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
+      "flagged_for_review": false
+    }
+  },
+  "auto999": {
+    "display_name": "AUTO999",
+    "total_goals": 0,
+    "total_matches": 3,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-22",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
+      "flagged_for_review": false
+    }
+  },
+  "bachata": {
+    "display_name": "Bachata",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-09-22",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
       "flagged_for_review": false
     }
   }

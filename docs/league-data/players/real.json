@@ -3,8 +3,8 @@
   "display_name": "Real",
   "known_aliases": [],
   "total_goals": 110,
-  "total_matches": 8,
-  "average_goals": 13.8,
+  "total_matches": 10,
+  "average_goals": 11,
   "matches": [
     {
       "tournament_id": "2026-09-04_al-afdal-al-riyadi-26",
@@ -101,11 +101,35 @@
       "turns_played": 3,
       "player_display_name": "Real",
       "player_id": "real"
+    },
+    {
+      "tournament_id": "2026-09-15_ultras",
+      "match_index_in_tournament": 2,
+      "opponent_display_name": "ULTRAS",
+      "opponent_id": "2026-09-15_ultras",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Real",
+      "player_id": "real"
+    },
+    {
+      "tournament_id": "2026-09-19_store12",
+      "match_index_in_tournament": 2,
+      "opponent_display_name": "STORE12",
+      "opponent_id": "2026-09-19_store12",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Real",
+      "player_id": "real"
     }
   ],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-09-14_na_legends",
+    "last_evaluated_tournament_id": "2026-09-19_store12",
     "flagged_for_review": false
   }
 }

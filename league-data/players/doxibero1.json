@@ -2,9 +2,9 @@
   "player_id": "doxibero1",
   "display_name": "DOXIBERO1",
   "known_aliases": [],
-  "total_goals": 493,
-  "total_matches": 19,
-  "average_goals": 25.9,
+  "total_goals": 695,
+  "total_matches": 26,
+  "average_goals": 26.7,
   "matches": [
     {
       "tournament_id": "2026-08-09_abtal-al-arab",
@@ -233,11 +233,95 @@
       "turns_played": 3,
       "player_display_name": "DOXIBERO1",
       "player_id": "doxibero1"
+    },
+    {
+      "tournament_id": "2026-09-15_ultras",
+      "match_index_in_tournament": 16,
+      "opponent_display_name": "ULTRAS",
+      "opponent_id": "2026-09-15_ultras",
+      "goals_for": 32,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "DOXIBERO1",
+      "player_id": "doxibero1"
+    },
+    {
+      "tournament_id": "2026-09-19_best_liga",
+      "match_index_in_tournament": 15,
+      "opponent_display_name": "BEST LIGA",
+      "opponent_id": "2026-09-19_best_liga",
+      "goals_for": 29,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "DOXIBERO1",
+      "player_id": "doxibero1"
+    },
+    {
+      "tournament_id": "2026-09-19_store12",
+      "match_index_in_tournament": 15,
+      "opponent_display_name": "STORE12",
+      "opponent_id": "2026-09-19_store12",
+      "goals_for": 21,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "DOXIBERO1",
+      "player_id": "doxibero1"
+    },
+    {
+      "tournament_id": "2026-09-21_apex_reapers",
+      "match_index_in_tournament": 12,
+      "opponent_display_name": "Apex Reapers",
+      "opponent_id": "2026-09-21_apex_reapers",
+      "goals_for": 28,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "DOXIBERO1",
+      "player_id": "doxibero1"
+    },
+    {
+      "tournament_id": "2026-09-21_los_viciados",
+      "match_index_in_tournament": 13,
+      "opponent_display_name": "Los+Viciados",
+      "opponent_id": "2026-09-21_los_viciados",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "DOXIBERO1",
+      "player_id": "doxibero1"
+    },
+    {
+      "tournament_id": "2026-09-22_fc_the_conqueror",
+      "match_index_in_tournament": 12,
+      "opponent_display_name": "FC.The Conqueror",
+      "opponent_id": "2026-09-22_fc_the_conqueror",
+      "goals_for": 29,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "DOXIBERO1",
+      "player_id": "doxibero1"
+    },
+    {
+      "tournament_id": "2026-09-23_x_elite_legends",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "X Elite Legends",
+      "opponent_id": "2026-09-23_x_elite_legends",
+      "goals_for": 33,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "DOXIBERO1",
+      "player_id": "doxibero1"
     }
   ],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-09-14_na_legends",
+    "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
     "flagged_for_review": false
   }
 }

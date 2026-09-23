@@ -20,8 +20,8 @@
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-09-09_zbirna_ukrainy",
+    "current_fail_streak": 1,
+    "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
     "flagged_for_review": false
   }
 }

@@ -2,9 +2,9 @@
   "player_id": "koustav_007",
   "display_name": "KOUSTAV_007",
   "known_aliases": [],
-  "total_goals": 173,
-  "total_matches": 7,
-  "average_goals": 24.7,
+  "total_goals": 320,
+  "total_matches": 12,
+  "average_goals": 26.7,
   "matches": [
     {
       "tournament_id": "2026-08-29_team-work",
@@ -89,11 +89,71 @@
       "turns_played": 3,
       "player_display_name": "KOUSTAV_007",
       "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-19_best_liga",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "BEST LIGA",
+      "opponent_id": "2026-09-19_best_liga",
+      "goals_for": 32,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-21_apex_reapers",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "Apex Reapers",
+      "opponent_id": "2026-09-21_apex_reapers",
+      "goals_for": 32,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-21_los_viciados",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "Los+Viciados",
+      "opponent_id": "2026-09-21_los_viciados",
+      "goals_for": 27,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-22_fc_the_conqueror",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "FC.The Conqueror",
+      "opponent_id": "2026-09-22_fc_the_conqueror",
+      "goals_for": 26,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-23_x_elite_legends",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "X Elite Legends",
+      "opponent_id": "2026-09-23_x_elite_legends",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
     }
   ],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-09-08_memequis_juniors",
+    "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
     "flagged_for_review": false
   }
 }

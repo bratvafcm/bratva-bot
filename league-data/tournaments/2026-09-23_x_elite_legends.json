@@ -1,0 +1,79 @@
+{
+  "id": "2026-09-23_x_elite_legends",
+  "tournament_id": "2026-09-23_x_elite_legends",
+  "date": "2026-09-23",
+  "timestamp": 1790186810394,
+  "opponent_league": "X Elite Legends",
+  "our_total_goals": 217,
+  "opponent_total_goals": 162,
+  "result": "win",
+  "status": "complete",
+  "total_turns_played": 24,
+  "max_possible_turns": 24,
+  "matches": [
+    {
+      "board_order": 1,
+      "player_id": "саня",
+      "player_display_name": "саня",
+      "ovr": 128,
+      "goals_for": 34,
+      "turns_played": 3
+    },
+    {
+      "board_order": 2,
+      "player_id": "rogelio",
+      "player_display_name": "Rogelio",
+      "ovr": 125,
+      "goals_for": 22,
+      "turns_played": 3
+    },
+    {
+      "board_order": 3,
+      "player_id": "koustav_007",
+      "player_display_name": "KOUSTAV_007",
+      "ovr": 125,
+      "goals_for": 30,
+      "turns_played": 3
+    },
+    {
+      "board_order": 4,
+      "player_id": "mohamed_osama",
+      "player_display_name": "Mohamed_Osama",
+      "ovr": 125,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "board_order": 5,
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
+      "ovr": 125,
+      "goals_for": 33,
+      "turns_played": 3
+    },
+    {
+      "board_order": 6,
+      "player_id": "mike",
+      "player_display_name": "Mike",
+      "ovr": 125,
+      "goals_for": 20,
+      "turns_played": 3
+    },
+    {
+      "board_order": 7,
+      "player_id": "king_pentax",
+      "player_display_name": "King_Pentax",
+      "ovr": 125,
+      "goals_for": 23,
+      "turns_played": 3
+    },
+    {
+      "board_order": 8,
+      "player_id": "l1onchik",
+      "player_display_name": "L1onchik",
+      "ovr": 125,
+      "goals_for": 27,
+      "turns_played": 3
+    }
+  ]
+}

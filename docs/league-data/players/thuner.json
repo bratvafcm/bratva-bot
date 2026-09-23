@@ -46,6 +46,6 @@
   "eligibility_streak": {
     "current_fail_streak": 2,
     "last_evaluated_tournament_id": "2026-08-12_warga",
-    "flagged_for_review": false
+    "flagged_for_review": true
   }
 }

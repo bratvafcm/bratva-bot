@@ -32,8 +32,8 @@
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 3,
-    "last_evaluated_tournament_id": "2026-09-14_ed_phoenix_gen_2",
+    "current_fail_streak": 2,
+    "last_evaluated_tournament_id": "2026-09-12_ed_phoenix_gen_2",
     "flagged_for_review": true
   }
 }

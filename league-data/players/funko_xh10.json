@@ -20,7 +20,7 @@
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 0,
+    "current_fail_streak": 1,
     "last_evaluated_tournament_id": "2026-08-29_team-work",
     "flagged_for_review": false
   }
