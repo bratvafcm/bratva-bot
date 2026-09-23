@@ -2343,39 +2343,59 @@ function generatePlayerStatsMessage(query, lang = 'ru') {
 
 function formatWelcome(lang = 'ru') {
   if (lang === 'en') {
-    return `⚜️ *BRATVA FCM LEAGUE BOT (24/7 Cloud)* ⚜️\n\n` +
-      `📸 *Send tournament screenshots from EA FC Mobile!*\n` +
-      `Upload 4-5 screenshots together as an album!\n` +
-      `I merge all players (#1 to #32), update the live website, and broadcast recaps to the channel!\n\n` +
+    return `⚜️ *BRATVA FCM LEAGUE* ⚜️\n` +
+      `🏆 *Official League Portal & Squad Companion*\n\n` +
+      `Welcome to the official **BRATVA FCM** League Bot!\n` +
+      `All squad tracking, tournament lineups, and player performance in one place:\n\n` +
+      `• 👤 *Player Profile:* View your goals, matches played, and career card\n` +
+      `• ⚔️ *Pre-Match Check-In:* Confirm your availability for the next tournament\n` +
+      `• 🎯 *Smart Lineup:* View today's official starting squad & rotation\n` +
+      `• 🏆 *Top Scorers:* Check the squad's leading goalscorers\n` +
+      `• 📜 *League Rules:* Mandatory 3/3 turns policy & discipline standards\n` +
+      `• 🌐 *Official Website:* Full match archive, live standings & player records\n\n` +
       `👥 *Telegram Community (Channel + Group):*\n${COMMUNITY_URL}\n\n` +
-      `💬 *Player Profile / AI Chat:* Type any player name (e.g. \`DOXIBERO1\`) for their instant card, or ask any question!\n\n` +
-      `📋 *Main Menu:* Choose an option below 👇`;
+      `📋 *Choose an option from the menu below 👇*`;
   }
   if (lang === 'ar') {
-    return `⚜️ *بوت دوري براتفا FCM LEAGUE (سحابي 24/7)* ⚜️\n\n` +
-      `📸 *أرسل لقطات شاشة (Screenshots) لنتائج بطولة EA FC Mobile!*\n` +
-      `يمكنك إرسال حتى 4-5 لقطات شاشة معاً دفعة واحدة كألبوم!\n` +
-      `سأقوم بدمج جميع اللاعبين (#1 إلى #32)، وتحديث الموقع الرسمي، وبث التقرير في القناة!\n\n` +
+    return `⚜️ *دوري БРАТВА FCM LEAGUE* ⚜️\n` +
+      `🏆 *البوابة الرسمية لدوري براتفا*\n\n` +
+      `مرحباً بك في البوت الرسمي لفريق ودوري **БРАТВА FCM**!\n` +
+      `كل ما يخص الفريق وإحصائيات اللاعبين في مكان واحد:\n\n` +
+      `• 👤 *الملف الشخصي:* استعرض أهدافك، مشاركاتك وبطاقتك كلاعب\n` +
+      `• ⚔️ *تأكيد الجاهزية (Check-In):* سجّل حضورك للمشاركة في البطولة القادمة\n` +
+      `• 🎯 *تشكيلة البطولة:* تعرف على التشكيلة الأساسية وقائمة الاحتياط لليوم\n` +
+      `• 🏆 *قائمة الهدافين:* ترتيب أفضل هدافي الفريق\n` +
+      `• 📜 *قوانين الدوري:* الالتزام بـ 3/3 محاولات ونظام الانضباط\n` +
+      `• 🌐 *الموقع الرسمي:* الأرشيف الكامل للمباريات وسجلات الأرقام القياسية\n\n` +
       `👥 *مجتمع تيليجرام (القناة + المجموعة):*\n${COMMUNITY_URL}\n\n` +
-      `💬 *الملف الشخصي / الدردشة:* اكتب اسم أي لاعب (مثل \`DOXIBERO1\`) لعرض بطاقته، أو اسأل أي سؤال!\n\n` +
-      `📋 *القائمة الرئيسية:* اختر من الأزرار أدناه 👇`;
+      `📋 *اختر ما تريد من القائمة أدناه 👇*`;
   }
   if (lang === 'es') {
-    return `⚜️ *BOT DE LA LIGA BRATVA FCM (Nube 24/7)* ⚜️\n\n` +
-      `📸 *¡Envíame capturas de pantalla del torneo de EA FC Mobile!*\n` +
-      `¡Puedes enviar de 4 a 5 capturas juntas como un álbum!\n` +
-      `¡Uniré a todos los jugadores (#1 al #32), actualizaré la web oficial y publicaré el resumen en el canal!\n\n` +
+    return `⚜️ *LIGA BRATVA FCM* ⚜️\n` +
+      `🏆 *Portal Oficial de la Liga*\n\n` +
+      `¡Bienvenido al bot oficial de la Liga **БРАТВА FCM**!\n` +
+      `Toda la gestión del equipo, alineaciones y rendimiento en un solo lugar:\n\n` +
+      `• 👤 *Perfil de Jugador:* Consulta tus goles, partidos y tarjeta personal\n` +
+      `• ⚔️ *Check-In Pre-Partido:* Confirma tu disponibilidad para el torneo\n` +
+      `• 🎯 *Alineación Oficial:* Conoce el 11 titular y la rotación de hoy\n` +
+      `• 🏆 *Goleadores:* Consulta la tabla de máximos anotadores\n` +
+      `• 📜 *Reglas de la Liga:* Obligatorio 3/3 turnos y código disciplinario\n` +
+      `• 🌐 *Web Oficial:* Historial completo de torneos y récords de la plantilla\n\n` +
       `👥 *Comunidad de Telegram (Canal + Grupo):*\n${COMMUNITY_URL}\n\n` +
-      `💬 *Perfil de Jugador / Chat:* ¡Escribe el nombre de cualquier jugador (ej. \`DOXIBERO1\`) para ver su tarjeta o haz cualquier pregunta!\n\n` +
-      `📋 *Menú Principal:* Elige una opción abajo 👇`;
+      `📋 *Elige una opción en el menú abajo 👇*`;
   }
-  return `⚜️ *БРАТВА FCM LEAGUE BOT (24/7 Cloud)* ⚜️\n\n` +
-    `📸 *Отправь мне скриншоты турнира из EA FC Mobile!*\n` +
-    `Можешь отправить сразу до 4-5 скриншотов турнира (альбомом)!\n` +
-    `Я объединю всех игроков от 1 до 32, обновлю сайт и отправлю отчет в канал!\n\n` +
+  return `⚜️ *БРАТВА FCM LEAGUE* ⚜️\n` +
+    `🏆 *Официальный бот и портал лиги*\n\n` +
+    `Добро пожаловать в официальный клубный бот лиги **БРАТВА FCM**!\n` +
+    `Здесь собрана вся статистика команды и ключевые функции для каждого игрока:\n\n` +
+    `• 👤 *Карточка игрока:* Личные голы, сыгранные турниры и статистика\n` +
+    `• ⚔️ *Предматчевый сбор:* Подтверждение участия в турнире (Check-In)\n` +
+    `• 🎯 *Основа лиги:* Стартовый состав и ротация на сегодняшний матч\n` +
+    `• 🏆 *Топ бомбардиров:* Рейтинг лучших снайперов команды\n` +
+    `• 📜 *Правила лиги:* Обязательные 3/3 ходов и регламент дисциплины\n` +
+    `• 🌐 *Сайт лиги:* Полная история всех матчей и рекордов команды\n\n` +
     `👥 *Telegram Сообщество (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
-    `💬 *Профиль игрока / Чат:* Напиши имя игрока (например \`DOXIBERO1\`), чтобы увидеть карточку, или задай любой вопрос!\n\n` +
-    `📋 *Главное меню:* Выберите действие ниже 👇`;
+    `📋 *Выберите действие в меню ниже 👇*`;
 }
 
 function formatChannelWelcome(lang = 'ru') {
@@ -2614,6 +2634,10 @@ function getVerificationSuccessKeyboard(playerId, currentLang = 'ru') {
 
   const cardUrl = hasStats ? `${WEBSITE_URL}?player=${encodeURIComponent(playerId)}` : WEBSITE_URL;
 
+  const menuBtnLabel = currentLang === 'ar' ? '📋 القائمة الرئيسية (لوحة التحكم)' :
+                       currentLang === 'es' ? '📋 Menú Principal (Panel)' :
+                       currentLang === 'en' ? '📋 Main Menu (Dashboard)' : '📋 Главное меню Лиги';
+
   return {
     inline_keyboard: [
       [
@@ -2621,6 +2645,9 @@ function getVerificationSuccessKeyboard(playerId, currentLang = 'ru') {
         { text: enLabel, callback_data: `tab_versuccess_${playerId}_en` },
         { text: arLabel, callback_data: `tab_versuccess_${playerId}_ar` },
         { text: esLabel, callback_data: `tab_versuccess_${playerId}_es` }
+      ],
+      [
+        { text: menuBtnLabel, callback_data: 'cmd_menu' }
       ],
       [
         { text: rulesBtnLabel, callback_data: `tab_rules_0_${currentLang}` }
@@ -6927,14 +6954,33 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
-      if (text.startsWith('/player') || text.startsWith('/stats') || text.startsWith('/p ')) {
+      if (text.startsWith('/mystats') || text.startsWith('/my') || text.startsWith('/me') || text.startsWith('/card') || text.startsWith('/player') || text.startsWith('/stats') || text.startsWith('/p ')) {
         const parts = text.split(/\s+/);
-        const query = parts.slice(1).join(' ');
-        const matched = findPlayerByQuery(query);
-        const pid = matched ? matched.player_id : query;
-        const pMsg = generatePlayerStatsMessage(query, 'ru');
-        await sendTelegramMessage(chatId, pMsg, getPlayerKeyboard(pid, 'ru'));
-        return sendResponse(res, 200, 'OK');
+        const query = parts.slice(1).join(' ').trim();
+        let pid = '';
+
+        if (query) {
+          const matched = findPlayerByQuery(query);
+          pid = matched ? matched.player_id : query;
+        } else {
+          const userReg = Object.values(regData.registrations || {}).find(r =>
+            String(r.telegram_id) === String(userId) ||
+            (message.from && message.from.username && r.telegram_username && r.telegram_username.toLowerCase() === message.from.username.toLowerCase())
+          );
+          if (userReg) {
+            pid = userReg.player_id;
+          }
+        }
+
+        if (pid) {
+          const pMsg = generatePlayerStatsMessage(pid, 'ru');
+          await sendTelegramMessage(chatId, pMsg, getPlayerKeyboard(pid, 'ru'));
+          return sendResponse(res, 200, 'OK');
+        } else {
+          const statsPrompt = formatMyStatsPrompt('ru');
+          await sendTelegramMessage(chatId, statsPrompt, getLanguageKeyboard('mystats', '0', 'ru', false));
+          return sendResponse(res, 200, 'OK');
+        }
       }
 
       if (text.startsWith('/warning') || text.startsWith('/lastchance')) {
@@ -6968,11 +7014,34 @@ export default async function handler(req, res) {
           return sendResponse(res, 200, 'Registration reset');
         }
 
-        const names = existingRegs.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
-        const vSuccessText = formatVerificationSuccess(names, existingRegs[0].uid, 'ru');
-        const vSuccessKeys = getVerificationSuccessKeyboard(existingRegs[0].player_id, 'ru');
-        await sendTelegramMessage(chatId, vSuccessText, vSuccessKeys);
-        return sendResponse(res, 200, 'Already registered');
+        if (text.startsWith('/start') || text.startsWith('/menu') || text.startsWith('/help')) {
+          const welcome = formatWelcome('ru');
+          await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru'));
+          return sendResponse(res, 200, 'OK');
+        }
+
+        if (text.startsWith('/status') || text.startsWith('/verify')) {
+          const names = existingRegs.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
+          const vSuccessText = formatVerificationSuccess(names, existingRegs[0].uid, 'ru');
+          const vSuccessKeys = getVerificationSuccessKeyboard(existingRegs[0].player_id, 'ru');
+          await sendTelegramMessage(chatId, vSuccessText, vSuccessKeys);
+          return sendResponse(res, 200, 'Already registered');
+        }
+
+        // Check if message is a player name query (e.g. "DOXIBERO1")
+        if (!text.startsWith('/')) {
+          const matched = findPlayerByQuery(text);
+          if (matched) {
+            const pid = matched.player_id;
+            const pMsg = generatePlayerStatsMessage(pid, 'ru');
+            await sendTelegramMessage(chatId, pMsg, getPlayerKeyboard(pid, 'ru'));
+            return sendResponse(res, 200, 'OK');
+          }
+        }
+
+        const welcome = formatWelcome('ru');
+        await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru'));
+        return sendResponse(res, 200, 'OK');
       }
 
       // 5. Community Membership Gatekeeper:
@@ -7556,6 +7625,42 @@ export default async function handler(req, res) {
         await sendTelegramMessage(chatId, helpMsg, keys);
         return sendResponse(res, 200, 'OK');
       }
+    }
+
+    if (text.startsWith('/admin')) {
+      const adminHelpMsg = `👑 *ПАНЕЛЬ УПРАВЛЕНИЯ АДМИНИСТРАТОРА (BRATVA FCM)* ⚜️\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `📸 *Загрузка результатов турнира:*\n` +
+        `Отправьте 4-5 скриншотов турнира из EA FC Mobile прямо в этот чат (альбомом).\n` +
+        `Бот автоматически объединит игроков (#1-#32), обновит сайт и сформирует отчет для канала.\n\n` +
+        `📹 *Синхронизация состава из игры:*\n` +
+        `Отправьте видео скролла участников лиги в EA FC Mobile (/sync) для выявления исключенных, вернувшихся и новичков.\n\n` +
+        `📢 *Быстрые рассылки игрокам:*\n` +
+        `• \`/notify lineup\` — рассылка состава в ЛС\n` +
+        `• \`/notify debrief\` — персональный разбор матча в ЛС\n` +
+        `• \`/notify checkin\` — предматчевый сбор готовности\n` +
+        `• \`/notify warning\` — предупреждения нарушителям\n\n` +
+        `👥 *Аудит базы игроков:* \`/audit\` или \`/pending\`\n` +
+        `⚙️ *Настройка правил:* \`/setrules <цель_голов> <макс_страйков> <ходов>\``;
+
+      const adminKeys = {
+        inline_keyboard: [
+          [
+            { text: '⚔️ Оповестить состав', callback_data: 'bcast_lineup_auto' },
+            { text: '📊 Отправить разборы матча', callback_data: 'cmd_notify_debrief' }
+          ],
+          [
+            { text: '⏳ Запустить Check-In', callback_data: 'cmd_notify_checkin' },
+            { text: '⚠️ Предупредить должников', callback_data: 'cmd_notify_warning' }
+          ],
+          [
+            { text: '👥 Аудит игроков', callback_data: 'cmd_pending' },
+            { text: '📋 Главное меню', callback_data: 'cmd_menu' }
+          ]
+        ]
+      };
+      await sendTelegramMessage(chatId, adminHelpMsg, adminKeys);
+      return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/start') || text.startsWith('/help') || text.startsWith('/menu')) {
