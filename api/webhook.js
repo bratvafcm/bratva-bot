@@ -1367,6 +1367,15 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
     ]);
   }
 
+  if (category === 'rules') {
+    const checkLabel = currentLang === 'ar' ? '2️⃣ تأكيد الانضمام والمتابعة' :
+                       currentLang === 'es' ? '2️⃣ Verificar suscripción y continuar' :
+                       currentLang === 'en' ? '2️⃣ Check Membership & Continue' : '2️⃣ Проверить подписку и продолжить';
+    rows.push([
+      { text: checkLabel, callback_data: `verify_sub_${currentLang}` }
+    ]);
+  }
+
   rows.push([
     { text: '🌐 Open Official League Website', url: WEBSITE_URL }
   ]);
@@ -2542,9 +2551,9 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ للمشاركة في دوري **БРАТВА FCM** والظهور في تشكيلة البطولات، يجب أولاً الانضمام إلى القناة الرسمية ومجموعة الفريق!\n\n` +
       `📲 *خطوات التسجيل الإلزامية:*\n` +
-      `**1.** اضغط على زر [ 1️⃣ اضغط هنا للانضمام للقناة والمجموعة ] بالأسفل.\n` +
-      `**2.** بعد الانضمام، اضغط على زر [ 2️⃣ تأكيد الانضمام والمتابعة ].\n` +
-      `**3.** سيرحب بك البوت ويطلب منك إرسال اسم حسابك في اللعبة (IGN) لتفعيله!\n\n` +
+      `**1.** انضم إلى القناة الرسمية ومجموعة الفريق عبر الزر بالأسفل.\n` +
+      `**2.** فور انضمامك، سيرسل لك البوت تلقائياً رسالة تأكيد العضوية وتفعيل الحساب.\n` +
+      `**3.** أرسل اسمك الدقيق في لعبة EA FC Mobile لتفعيل ملفك ودخول التشكيلة!\n\n` +
       `🚫 *ملاحظة:* لن يتم قبول أي تسجيل دون الانضمام الفعلي لمجتمع الفريق.`;
   }
   if (lang === 'en') {
@@ -2552,9 +2561,9 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ To participate in **BRATVA FCM** tournaments, you must first join our official Channel and Discussion Group!\n\n` +
       `📲 *Mandatory Steps to Register:*\n` +
-      `**1.** Tap the [ 1️⃣ Join Channel & Group Chat ] button below.\n` +
-      `**2.** Once joined, tap [ 2️⃣ Check Membership & Continue ] to verify.\n` +
-      `**3.** The bot will confirm your entry and request your EA FC Mobile In-Game Nickname!\n\n` +
+      `**1.** Join our official Channel and Discussion Group via the button below.\n` +
+      `**2.** Once joined, the bot will automatically send you the confirmation message to activate your profile.\n` +
+      `**3.** Send your exact EA FC Mobile In-Game Nickname to complete registration!\n\n` +
       `🚫 *Note:* Registration is locked until you join our official community.`;
   }
   if (lang === 'es') {
@@ -2562,19 +2571,19 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ Para participar en los torneos de **BRATVA FCM**, ¡primero debes unirte a nuestro Canal y Grupo oficial!\n\n` +
       `📲 *Pasos obligatorios:*\n` +
-      `**1.** Toca el botón [ 1️⃣ Unirse al Canal y Grupo ] abajo para entrar.\n` +
-      `**2.** Tras unirte, pulsa en [ 2️⃣ Verificar suscripción y continuar ].\n` +
-      `**3.** ¡El bot confirmará tu entrada y te pedirá tu nombre exacto en el juego (IGN)!\n\n` +
-      `🚫 *Nota:* No se permite registrar el nombre sin unirse a la comunidad.`;
+      `**1.** Únete a nuestro Canal y Grupo oficial mediante el botón de abajo.\n` +
+      `**2.** Una vez dentro, el bot te enviará automáticamente el mensaje de confirmación para activar tu perfil.\n` +
+      `**3.** Envía tu nombre exacto de EA FC Mobile para entrar en la plantilla del equipo.\n\n` +
+      `🚫 *Nota:* El registro está bloqueado hasta que te unas a la comunidad.`;
   }
   // Russian (Default)
   return `📢 *ОБЯЗАТЕЛЬНО: ВСТУПИТЕ В КАНАЛ И ЧАТ ЛИГИ!* 📢\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `⚠️ Для участия в турнирах **БРАТВА FCM** необходимо сначала вступить в наш официальный Канал и Чат команды!\n\n` +
     `📲 *Обязательные шаги для допуска:*\n` +
-    `**1.** Нажмите кнопку [ 1️⃣ Вступить в Канал и Чат ] ниже по ссылке.\n` +
-    `**2.** После вступления нажмите кнопку [ 2️⃣ Проверить подписку и продолжить ].\n` +
-    `**3.** Бот подтвердит вход и запросит ваш точный игровой никнейм (IGN) в FC Mobile!\n\n` +
+    `**1.** Вступите в наш официальный Канал и Чат по кнопке ниже.\n` +
+    `**2.** После вступления бот автоматически пришлет вам сообщение с подтверждением для активации профиля.\n` +
+    `**3.** Отправьте точный игровой никнейм в EA FC Mobile для допуска к составу!\n\n` +
     `🚫 *Важно:* Регистрация игрового ника заблокирована до вступления в сообщество.`;
 }
 
@@ -2582,10 +2591,6 @@ function getJoinRequiredKeyboard(currentLang = 'ru') {
   const joinLabel = currentLang === 'ar' ? '1️⃣ اضغط هنا للانضمام للقناة والمجموعة' :
                     currentLang === 'es' ? '1️⃣ Unirse al Canal y Grupo' :
                     currentLang === 'en' ? '1️⃣ Join Channel & Group Chat' : '1️⃣ Вступить в Канал и Чат';
-
-  const checkLabel = currentLang === 'ar' ? '2️⃣ تأكيد الانضمام والمتابعة' :
-                     currentLang === 'es' ? '2️⃣ Verificar suscripción y continuar' :
-                     currentLang === 'en' ? '2️⃣ Check Membership & Continue' : '2️⃣ Проверить подписку и продолжить';
 
   const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
   const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
@@ -2596,9 +2601,6 @@ function getJoinRequiredKeyboard(currentLang = 'ru') {
     inline_keyboard: [
       [
         { text: joinLabel, url: COMMUNITY_URL }
-      ],
-      [
-        { text: checkLabel, callback_data: `verify_sub_${currentLang}` }
       ],
       [
         { text: ruLabel, callback_data: 'tab_joinreq_0_ru' },
@@ -7289,12 +7291,11 @@ export default async function handler(req, res) {
       // 🧪 Sandbox testing helper commands
       if (isTester && text === '/simulate_join') {
         sandboxSubscribed.add(String(userId));
-        verifiedGateUsers.add(String(userId));
         const userLang = detectUserLang(message.from);
         await sendTelegramMessage(chatId, '🧪 *[SANDBOX TEST] Simulated joining channel & group chat successfully!*');
-        const vPrompt = formatVerificationPrompt(userLang);
-        const vKeys = getVerificationKeyboard(userLang);
-        await sendTelegramMessage(chatId, vPrompt, vKeys);
+        const welcomeDm = formatCommunityJoinedPrompt(userLang);
+        const dmKeys = getCommunityJoinedKeyboard(userLang);
+        await sendTelegramMessage(chatId, welcomeDm, dmKeys);
         return sendResponse(res, 200, 'Sandbox simulated join');
       }
 
@@ -7311,10 +7312,18 @@ export default async function handler(req, res) {
       }
 
       // 5. Community Membership Gatekeeper:
-      // Users MUST join the official Channel and Group and tap '2️⃣ Check Membership & Continue' before they can register their IGN!
+      // Step 1: Users not yet in the community see ONLY Button 1️⃣ [ Join Channel & Group Chat ].
+      // Step 2: Once joined, Telegram auto-triggers (or bot detects) Button 2️⃣ [ Check Membership & Continue ].
       const userLang = detectUserLang(message.from);
       const hasPassedGate = verifiedGateUsers.has(String(userId));
       if (!hasPassedGate) {
+        const isSub = await isUserSubscribedToCommunity(userId);
+        if (isSub) {
+          const joinedMsg = formatCommunityJoinedPrompt(userLang);
+          const joinedKeys = getCommunityJoinedKeyboard(userLang);
+          await sendTelegramMessage(chatId, joinedMsg, joinedKeys);
+          return sendResponse(res, 200, 'Community joined prompt sent');
+        }
         const joinMsg = formatJoinRequiredPrompt(userLang);
         const joinKeys = getJoinRequiredKeyboard(userLang);
         await sendTelegramMessage(chatId, joinMsg, joinKeys);
