@@ -192,10 +192,26 @@ async function isUserAdmin(userId, username = '') {
 
 const subCache = new Map();
 const sandboxSubscribed = new Set(); // For sandbox testers simulation
+let cachedLinkedGroupId = null;
+
+async function getLinkedGroupId() {
+  if (cachedLinkedGroupId) return cachedLinkedGroupId;
+  try {
+    const chatInfo = await telegramRequest('getChat', { chat_id: CHANNEL_ID });
+    if (chatInfo && chatInfo.ok && chatInfo.result && chatInfo.result.linked_chat_id) {
+      cachedLinkedGroupId = chatInfo.result.linked_chat_id;
+      return cachedLinkedGroupId;
+    }
+  } catch (e) {
+    console.warn('Failed to get linked_chat_id for CHANNEL_ID:', e.message);
+  }
+  return null;
+}
 
 async function isUserSubscribedToCommunity(userId) {
   if (!userId) return false;
   const strId = String(userId);
+  const numId = parseInt(userId, 10);
 
   // If sandbox tester explicitly simulated joining
   if (sandboxSubscribed.has(strId)) return true;
@@ -204,17 +220,37 @@ async function isUserSubscribedToCommunity(userId) {
   if (cached && Date.now() < cached.expiresAt) return cached.isSub;
 
   try {
+    // 1. Check official Channel (@BRATVAFCM)
     const res = await telegramRequest('getChatMember', {
       chat_id: CHANNEL_ID,
-      user_id: userId
+      user_id: numId
     });
     if (res && res.ok && res.result) {
       const st = res.result.status;
-      const isSub = ['creator', 'administrator', 'member', 'restricted'].includes(st);
-      subCache.set(strId, { isSub, expiresAt: Date.now() + 60 * 1000 });
-      return isSub;
+      if (['creator', 'administrator', 'member', 'restricted'].includes(st)) {
+        subCache.set(strId, { isSub: true, expiresAt: Date.now() + 60 * 1000 });
+        return true;
+      }
     } else {
-      console.log(`[Community Gate] User ${userId} checkChatMember on ${CHANNEL_ID} returned:`, res ? JSON.stringify(res) : 'null');
+      console.log(`[Community Gate] User ${numId} checkChatMember on ${CHANNEL_ID} returned:`, res ? JSON.stringify(res) : 'null');
+    }
+
+    // 2. Also check linked Discussion Group
+    const linkedGroupId = await getLinkedGroupId();
+    if (linkedGroupId) {
+      const resGroup = await telegramRequest('getChatMember', {
+        chat_id: linkedGroupId,
+        user_id: numId
+      });
+      if (resGroup && resGroup.ok && resGroup.result) {
+        const stGroup = resGroup.result.status;
+        if (['creator', 'administrator', 'member', 'restricted'].includes(stGroup)) {
+          subCache.set(strId, { isSub: true, expiresAt: Date.now() + 60 * 1000 });
+          return true;
+        }
+      } else {
+        console.log(`[Community Gate] User ${numId} checkChatMember on linkedGroup ${linkedGroupId} returned:`, resGroup ? JSON.stringify(resGroup) : 'null');
+      }
     }
   } catch (err) {
     console.warn('isUserSubscribedToCommunity check failed:', err.message);
@@ -2506,7 +2542,7 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `⚠️ للمشاركة في دوري **БРАТВА FCM** والظهور في تشكيلة البطولات، يجب أولاً الانضمام إلى القناة الرسمية ومجموعة الفريق!\n\n` +
       `📲 *خطوات التسجيل الإلزامية:*\n` +
       `1️⃣ اضغط على الزر بالأسفل وانضم للقناة والمجموعة عبر الرابط.\n` +
-      `2️⃣ بعد الانضمام، اضغط على زر [ ✅ تأكيد الانضمام ] بالأسفل.\n` +
+      `2️⃣ بعد الانضمام، اضغط على زر [ 2️⃣ تأكيد الانضمام والمتابعة ] بالأسفل.\n` +
       `3️⃣ سيرحب بك البوت ويطلب منك إرسال اسم حسابك في اللعبة (In-Game Nickname) لربطه بحسابك وتفعيل ملفك!\n\n` +
       `🚫 *ملاحظة:* لن يتم قبول أي تسجيل دون الانضمام الفعلي لمجتمع الفريق.`;
   }
@@ -2516,7 +2552,7 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `⚠️ To participate in **BRATVA FCM** tournaments, you must first join our official Channel and Discussion Group!\n\n` +
       `📲 *Mandatory Steps to Register:*\n` +
       `1️⃣ Tap the button below to join both our Channel and Group Chat.\n` +
-      `2️⃣ After joining, tap [ ✅ Check Membership ] below.\n` +
+      `2️⃣ After joining, tap [ 2️⃣ Check Membership & Continue ] below.\n` +
       `3️⃣ The bot will verify your membership and ask for your exact In-Game Nickname to complete registration!\n\n` +
       `🚫 *Note:* Registration is locked until you join our official community.`;
   }
@@ -2526,7 +2562,7 @@ function formatJoinRequiredPrompt(lang = 'ru') {
       `⚠️ Para participar en los torneos de **BRATVA FCM**, ¡primero debes unirte a nuestro Canal y Grupo oficial!\n\n` +
       `📲 *Pasos obligatorios:*\n` +
       `1️⃣ Toca el botón de abajo para unirte al Canal y Grupo oficial.\n` +
-      `2️⃣ Tras unirte, pulsa en [ ✅ Verificar Suscripción ].\n` +
+      `2️⃣ Tras unirte, pulsa en [ 2️⃣ Verificar suscripción y continuar ] abajo.\n` +
       `3️⃣ El bot confirmará tu entrada y te pedirá tu nombre exacto en el juego (IGN).\n\n` +
       `🚫 *Nota:* No se permite registrar el nombre sin unirse a la comunidad.`;
   }
@@ -2536,19 +2572,19 @@ function formatJoinRequiredPrompt(lang = 'ru') {
     `⚠️ Для участия в турнирах **БРАТВА FCM** необходимо сначала вступить в наш официальный Канал и Чат команды!\n\n` +
     `📲 *Обязательные шаги для допуска:*\n` +
     `1️⃣ Нажмите кнопку ниже и вступите в Канал и Чат лиги по ссылке.\n` +
-    `2️⃣ После вступления нажмите кнопку [ ✅ Проверить подписку ].\n` +
+    `2️⃣ После вступления нажмите кнопку [ 2️⃣ Проверить подписку и продолжить ] ниже.\n` +
     `3️⃣ Бот подтвердит вход и запросит ваш точный игровой никнейм (IGN) в FC Mobile!\n\n` +
     `🚫 *Важно:* Регистрация игрового ника заблокирована до вступления в сообщество.`;
 }
 
 function getJoinRequiredKeyboard(currentLang = 'ru') {
-  const joinLabel = currentLang === 'ar' ? '🚀 1. اضغط هنا للانضمام للقناة والمجموعة' :
-                    currentLang === 'es' ? '🚀 1. Unirse al Canal y Grupo' :
-                    currentLang === 'en' ? '🚀 1. Join Channel & Group Chat' : '🚀 1. Вступить в Канал и Чат';
+  const joinLabel = currentLang === 'ar' ? '1️⃣ اضغط هنا للانضمام للقناة والمجموعة' :
+                    currentLang === 'es' ? '1️⃣ Unirse al Canal y Grupo' :
+                    currentLang === 'en' ? '1️⃣ Join Channel & Group Chat' : '1️⃣ Вступить в Канал и Чат';
 
-  const checkLabel = currentLang === 'ar' ? '✅ 2. تأكيد الانضمام والاشتراك' :
-                     currentLang === 'es' ? '✅ 2. Verificar suscripción' :
-                     currentLang === 'en' ? '✅ 2. Check Membership & Continue' : '✅ 2. Я вступил (Проверить)';
+  const checkLabel = currentLang === 'ar' ? '2️⃣ تأكيد الانضمام والمتابعة' :
+                     currentLang === 'es' ? '2️⃣ Verificar suscripción y continuar' :
+                     currentLang === 'en' ? '2️⃣ Check Membership & Continue' : '2️⃣ Проверить подписку и продолжить';
 
   const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
   const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
@@ -5901,6 +5937,8 @@ export default async function handler(req, res) {
       const data = cb.data || '';
       const chatId = cb.message ? cb.message.chat.id : cb.from.id;
       const isCbPrivate = !cb.message || !cb.message.chat || cb.message.chat.type === 'private';
+      const userId = cb.from ? cb.from.id : null;
+      const username = cb.from ? (cb.from.username || '') : '';
 
       // Actions accessible to all squad members:
       const isPublicAction = data.startsWith('tab_') || data.startsWith('ci_') || data.startsWith('fmt_lineup_') || data.startsWith('verify_sub_') ||
@@ -5921,8 +5959,7 @@ export default async function handler(req, res) {
       // Security Gate: Check-in, language tabs, lineup views, and general stats are public.
       // Admin-only actions (buffer analysis, clearing, broadcast to channel, rules editing, audits, kick lists) require Admin!
       if (!isPublicAction) {
-        const userId = cb.from ? cb.from.id : null;
-        const isAdmin = await isUserAdmin(userId, cb.from?.username);
+        const isAdmin = await isUserAdmin(userId, username);
         if (!isAdmin) {
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
@@ -6155,32 +6192,42 @@ export default async function handler(req, res) {
 
       if (data.startsWith('verify_sub_')) {
         const targetLang = data.replace('verify_sub_', '') || 'ru';
-        subCache.delete(String(userId));
-        const isSub = await isUserSubscribedToCommunity(userId);
+        try {
+          if (userId) subCache.delete(String(userId));
+          const isSub = await isUserSubscribedToCommunity(userId);
 
-        if (!isSub) {
-          let alertMsg = '❌ You haven\'t joined yet! Please tap button 1 to join our Channel & Group first.';
-          if (targetLang === 'ar') alertMsg = '❌ لم تنضم بعد! اضغط على الزر رقم 1 وانضم أولاً للقناة والمجموعة.';
-          else if (targetLang === 'es') alertMsg = '❌ ¡Aún no te has unido! Pulsa el botón 1 y únete al Canal y Grupo primero.';
-          else if (targetLang === 'ru') alertMsg = '❌ Вы еще не вступили! Нажмите кнопку 1 и вступите в Канал и Чат лиги.';
+          if (!isSub) {
+            let alertMsg = '❌ You haven\'t joined yet! Please tap button 1 to join our Channel & Group first.';
+            if (targetLang === 'ar') alertMsg = '❌ لم تنضم بعد! اضغط على الزر رقم 1 وانضم أولاً للقناة والمجموعة.';
+            else if (targetLang === 'es') alertMsg = '❌ ¡Aún no te has unido! Pulsa el botón 1 y únete al Canal y Grupo primero.';
+            else if (targetLang === 'ru') alertMsg = '❌ Вы еще не вступили! Нажмите кнопку 1 и вступите в Канал и Чат лиги.';
+
+            await telegramRequest('answerCallbackQuery', {
+              callback_query_id: cb.id,
+              text: alertMsg,
+              show_alert: true
+            });
+            return sendResponse(res, 200, 'Not joined yet');
+          }
 
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
-            text: alertMsg,
+            text: targetLang === 'ar' ? '✅ تم تأكيد عضويتك بنجاح!' : '✅ Membership verified!'
+          });
+
+          const vPrompt = formatVerificationPrompt(targetLang);
+          const vKeys = getVerificationKeyboard(targetLang);
+          await editTelegramMessage(chatId, cb.message.message_id, vPrompt, vKeys);
+          return sendResponse(res, 200, 'Subscription verified');
+        } catch (err) {
+          console.error('[verify_sub_ error]:', err);
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: '⚠️ Verification error. Please try again.',
             show_alert: true
           });
-          return sendResponse(res, 200, 'Not joined yet');
+          return sendResponse(res, 200, 'Error in verify_sub_');
         }
-
-        await telegramRequest('answerCallbackQuery', {
-          callback_query_id: cb.id,
-          text: targetLang === 'ar' ? '✅ تم تأكيد عضويتك بنجاح!' : '✅ Membership verified!'
-        });
-
-        const vPrompt = formatVerificationPrompt(targetLang);
-        const vKeys = getVerificationKeyboard(targetLang);
-        await editTelegramMessage(chatId, cb.message.message_id, vPrompt, vKeys);
-        return sendResponse(res, 200, 'Subscription verified');
       }
 
       if (data.startsWith('bcast_')) {
