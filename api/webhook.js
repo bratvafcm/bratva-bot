@@ -192,6 +192,7 @@ async function isUserAdmin(userId, username = '') {
 
 const subCache = new Map();
 const sandboxSubscribed = new Set(); // For sandbox testers simulation
+const verifiedGateUsers = new Set(); // Users who passed '2️⃣ Check Membership & Continue'
 let cachedLinkedGroupId = null;
 
 async function getLinkedGroupId() {
@@ -6210,6 +6211,8 @@ export default async function handler(req, res) {
             return sendResponse(res, 200, 'Not joined yet');
           }
 
+          if (userId) verifiedGateUsers.add(String(userId));
+
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
             text: targetLang === 'ar' ? '✅ تم تأكيد عضويتك بنجاح!' : '✅ Membership verified!'
@@ -7177,6 +7180,7 @@ export default async function handler(req, res) {
       if (existingRegs.length > 0) {
         if (text === '/reset' || text === '/change' || (isTester && (text === '/restart' || text === '/test'))) {
           subCache.delete(String(userId));
+          verifiedGateUsers.delete(String(userId));
           if (isTester) {
             sandboxSessions.delete(String(userId));
             sandboxSubscribed.delete(String(userId));
@@ -7187,17 +7191,10 @@ export default async function handler(req, res) {
             await saveRegisteredPlayersRaw(regData, `Player Reset: TG @${existingRegs[0].telegram_username || userId}`);
           }
           const userLang = detectUserLang(message.from);
-          const isSub = await isUserSubscribedToCommunity(userId);
-          if (!isSub) {
-            const joinMsg = formatJoinRequiredPrompt(userLang);
-            const joinKeys = getJoinRequiredKeyboard(userLang);
-            await sendTelegramMessage(chatId, joinMsg, joinKeys);
-            return sendResponse(res, 200, 'Reset & Subscription required');
-          }
-          const vPrompt = formatVerificationPrompt(userLang);
-          const vKeys = getVerificationKeyboard(userLang);
-          await sendTelegramMessage(chatId, vPrompt, vKeys);
-          return sendResponse(res, 200, 'Registration reset');
+          const joinMsg = formatJoinRequiredPrompt(userLang);
+          const joinKeys = getJoinRequiredKeyboard(userLang);
+          await sendTelegramMessage(chatId, joinMsg, joinKeys);
+          return sendResponse(res, 200, 'Registration reset to step 1');
         }
 
         if (text.startsWith('/start') || text.startsWith('/menu') || text.startsWith('/help')) {
@@ -7230,9 +7227,25 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
+      // Handle /reset or /restart for unregistered users
+      if (text === '/reset' || text === '/restart' || (isTester && text === '/test')) {
+        subCache.delete(String(userId));
+        verifiedGateUsers.delete(String(userId));
+        if (isTester) {
+          sandboxSessions.delete(String(userId));
+          sandboxSubscribed.delete(String(userId));
+        }
+        const userLang = detectUserLang(message.from);
+        const joinMsg = formatJoinRequiredPrompt(userLang);
+        const joinKeys = getJoinRequiredKeyboard(userLang);
+        await sendTelegramMessage(chatId, joinMsg, joinKeys);
+        return sendResponse(res, 200, 'Reset to step 1');
+      }
+
       // 🧪 Sandbox testing helper commands
       if (isTester && text === '/simulate_join') {
         sandboxSubscribed.add(String(userId));
+        verifiedGateUsers.add(String(userId));
         const userLang = detectUserLang(message.from);
         await sendTelegramMessage(chatId, '🧪 *[SANDBOX TEST] Simulated joining channel & group chat successfully!*');
         const vPrompt = formatVerificationPrompt(userLang);
@@ -7243,6 +7256,7 @@ export default async function handler(req, res) {
 
       if (isTester && text === '/simulate_leave') {
         sandboxSubscribed.delete(String(userId));
+        verifiedGateUsers.delete(String(userId));
         subCache.delete(String(userId));
         const userLang = detectUserLang(message.from);
         await sendTelegramMessage(chatId, '🧪 *[SANDBOX TEST] Simulated leaving channel & chat.*');
@@ -7253,10 +7267,10 @@ export default async function handler(req, res) {
       }
 
       // 5. Community Membership Gatekeeper:
-      // Users MUST join the official Channel and Group before they can register their IGN!
+      // Users MUST join the official Channel and Group and tap '2️⃣ Check Membership & Continue' before they can register their IGN!
       const userLang = detectUserLang(message.from);
-      const isSubscribed = await isUserSubscribedToCommunity(userId);
-      if (!isSubscribed) {
+      const hasPassedGate = verifiedGateUsers.has(String(userId));
+      if (!hasPassedGate) {
         const joinMsg = formatJoinRequiredPrompt(userLang);
         const joinKeys = getJoinRequiredKeyboard(userLang);
         await sendTelegramMessage(chatId, joinMsg, joinKeys);
