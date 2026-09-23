@@ -122,6 +122,16 @@ function isSandboxTester(userId, username = '') {
   return false;
 }
 
+function detectUserLang(fromObj, defaultLang = 'ru') {
+  if (!fromObj || !fromObj.language_code) return defaultLang;
+  const lc = fromObj.language_code.toLowerCase();
+  if (lc.startsWith('ar')) return 'ar';
+  if (lc.startsWith('es')) return 'es';
+  if (lc.startsWith('en')) return 'en';
+  if (lc.startsWith('ru') || lc.startsWith('be') || lc.startsWith('uk') || lc.startsWith('kk')) return 'ru';
+  return defaultLang;
+}
+
 async function isUserAdmin(userId, username = '') {
   if (!userId) return false;
   const strId = String(userId);
@@ -181,11 +191,14 @@ async function isUserAdmin(userId, username = '') {
 }
 
 const subCache = new Map();
+const sandboxSubscribed = new Set(); // For sandbox testers simulation
 
 async function isUserSubscribedToCommunity(userId) {
   if (!userId) return false;
   const strId = String(userId);
-  if (['5414088590'].includes(strId)) return true;
+
+  // If sandbox tester explicitly simulated joining
+  if (sandboxSubscribed.has(strId)) return true;
 
   const cached = subCache.get(strId);
   if (cached && Date.now() < cached.expiresAt) return cached.isSub;
@@ -200,6 +213,8 @@ async function isUserSubscribedToCommunity(userId) {
       const isSub = ['creator', 'administrator', 'member', 'restricted'].includes(st);
       subCache.set(strId, { isSub, expiresAt: Date.now() + 60 * 1000 });
       return isSub;
+    } else {
+      console.log(`[Community Gate] User ${userId} checkChatMember on ${CHANNEL_ID} returned:`, res ? JSON.stringify(res) : 'null');
     }
   } catch (err) {
     console.warn('isUserSubscribedToCommunity check failed:', err.message);
@@ -6140,6 +6155,7 @@ export default async function handler(req, res) {
 
       if (data.startsWith('verify_sub_')) {
         const targetLang = data.replace('verify_sub_', '') || 'ru';
+        subCache.delete(String(userId));
         const isSub = await isUserSubscribedToCommunity(userId);
 
         if (!isSub) {
@@ -6975,8 +6991,9 @@ export default async function handler(req, res) {
       if (pendingEntry) {
         if (text === '/cancel' || text === '/start') {
           await clearPendingUid(userId);
-          const vPrompt = formatVerificationPrompt('ru');
-          const vKeys = getVerificationKeyboard('ru');
+          const userLang = detectUserLang(message.from);
+          const vPrompt = formatVerificationPrompt(userLang);
+          const vKeys = getVerificationKeyboard(userLang);
           await sendTelegramMessage(chatId, vPrompt, vKeys);
           return sendResponse(res, 200, 'Pending UID cleared');
         }
@@ -7112,16 +7129,26 @@ export default async function handler(req, res) {
 
       if (existingRegs.length > 0) {
         if (text === '/reset' || text === '/change' || (isTester && (text === '/restart' || text === '/test'))) {
+          subCache.delete(String(userId));
           if (isTester) {
             sandboxSessions.delete(String(userId));
+            sandboxSubscribed.delete(String(userId));
           } else {
             for (const reg of existingRegs) {
               delete regData.registrations[reg.player_id];
             }
             await saveRegisteredPlayersRaw(regData, `Player Reset: TG @${existingRegs[0].telegram_username || userId}`);
           }
-          const vPrompt = formatVerificationPrompt('ru');
-          const vKeys = getVerificationKeyboard('ru');
+          const userLang = detectUserLang(message.from);
+          const isSub = await isUserSubscribedToCommunity(userId);
+          if (!isSub) {
+            const joinMsg = formatJoinRequiredPrompt(userLang);
+            const joinKeys = getJoinRequiredKeyboard(userLang);
+            await sendTelegramMessage(chatId, joinMsg, joinKeys);
+            return sendResponse(res, 200, 'Reset & Subscription required');
+          }
+          const vPrompt = formatVerificationPrompt(userLang);
+          const vKeys = getVerificationKeyboard(userLang);
           await sendTelegramMessage(chatId, vPrompt, vKeys);
           return sendResponse(res, 200, 'Registration reset');
         }
@@ -7156,12 +7183,35 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
+      // 🧪 Sandbox testing helper commands
+      if (isTester && text === '/simulate_join') {
+        sandboxSubscribed.add(String(userId));
+        const userLang = detectUserLang(message.from);
+        await sendTelegramMessage(chatId, '🧪 *[SANDBOX TEST] Simulated joining channel & group chat successfully!*');
+        const vPrompt = formatVerificationPrompt(userLang);
+        const vKeys = getVerificationKeyboard(userLang);
+        await sendTelegramMessage(chatId, vPrompt, vKeys);
+        return sendResponse(res, 200, 'Sandbox simulated join');
+      }
+
+      if (isTester && text === '/simulate_leave') {
+        sandboxSubscribed.delete(String(userId));
+        subCache.delete(String(userId));
+        const userLang = detectUserLang(message.from);
+        await sendTelegramMessage(chatId, '🧪 *[SANDBOX TEST] Simulated leaving channel & chat.*');
+        const joinMsg = formatJoinRequiredPrompt(userLang);
+        const joinKeys = getJoinRequiredKeyboard(userLang);
+        await sendTelegramMessage(chatId, joinMsg, joinKeys);
+        return sendResponse(res, 200, 'Sandbox simulated leave');
+      }
+
       // 5. Community Membership Gatekeeper:
       // Users MUST join the official Channel and Group before they can register their IGN!
+      const userLang = detectUserLang(message.from);
       const isSubscribed = await isUserSubscribedToCommunity(userId);
       if (!isSubscribed) {
-        const joinMsg = formatJoinRequiredPrompt('ru');
-        const joinKeys = getJoinRequiredKeyboard('ru');
+        const joinMsg = formatJoinRequiredPrompt(userLang);
+        const joinKeys = getJoinRequiredKeyboard(userLang);
         await sendTelegramMessage(chatId, joinMsg, joinKeys);
         return sendResponse(res, 200, 'Community subscription required');
       }
@@ -7169,20 +7219,20 @@ export default async function handler(req, res) {
       // 6. User is confirmed subscribed: Show in-game name registration prompt
       if (!text || text.startsWith('/start') || text.startsWith('/help') || text.startsWith('/verify')) {
         if (text.includes('rules')) {
-          const rulesMsg = formatRules('ru');
-          await sendTelegramMessage(chatId, rulesMsg, getLanguageKeyboard('rules', '0', 'ru', false));
+          const rulesMsg = formatRules(userLang);
+          await sendTelegramMessage(chatId, rulesMsg, getLanguageKeyboard('rules', '0', userLang, false));
           return sendResponse(res, 200, 'OK');
         }
-        const vPrompt = formatVerificationPrompt('ru');
-        const vKeys = getVerificationKeyboard('ru');
+        const vPrompt = formatVerificationPrompt(userLang);
+        const vKeys = getVerificationKeyboard(userLang);
         await sendTelegramMessage(chatId, vPrompt, vKeys);
         return sendResponse(res, 200, 'OK');
       }
 
       // If unregistered user sends an unhandled slash command, guide them back to verification prompt
       if (text.startsWith('/')) {
-        const vPrompt = formatVerificationPrompt('ru');
-        const vKeys = getVerificationKeyboard('ru');
+        const vPrompt = formatVerificationPrompt(userLang);
+        const vKeys = getVerificationKeyboard(userLang);
         await sendTelegramMessage(chatId, vPrompt, vKeys);
         return sendResponse(res, 200, 'Ignored unknown slash command');
       }
