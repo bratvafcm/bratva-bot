@@ -1023,13 +1023,21 @@ async function syncBotCommands() {
     { command: 'tournaments', description: '📊 Historial de Torneos' }
   ];
 
-  const resDef = await telegramRequest('setMyCommands', { commands: commandsEn });
-  const resEn = await telegramRequest('setMyCommands', { commands: commandsEn, language_code: 'en' });
-  const resRu = await telegramRequest('setMyCommands', { commands: commandsRu, language_code: 'ru' });
-  const resAr = await telegramRequest('setMyCommands', { commands: commandsAr, language_code: 'ar' });
-  const resEs = await telegramRequest('setMyCommands', { commands: commandsEs, language_code: 'es' });
+  const scopes = [
+    { type: 'default' },
+    { type: 'all_private_chats' }
+  ];
 
-  return { default: resDef, en: resEn, ru: resRu, ar: resAr, es: resEs };
+  const results = {};
+  for (const scope of scopes) {
+    results[`${scope.type}_def`] = await telegramRequest('setMyCommands', { commands: commandsEn, scope });
+    results[`${scope.type}_en`] = await telegramRequest('setMyCommands', { commands: commandsEn, scope, language_code: 'en' });
+    results[`${scope.type}_ru`] = await telegramRequest('setMyCommands', { commands: commandsRu, scope, language_code: 'ru' });
+    results[`${scope.type}_ar`] = await telegramRequest('setMyCommands', { commands: commandsAr, scope, language_code: 'ar' });
+    results[`${scope.type}_es`] = await telegramRequest('setMyCommands', { commands: commandsEs, scope, language_code: 'es' });
+  }
+
+  return results;
 }
 
 function getPlayerKeyboard(playerId, currentLang = 'ru') {
@@ -7057,12 +7065,35 @@ export default async function handler(req, res) {
     // 🔒 NON-ADMIN FLOW: 1-on-1 Player Verification & Onboarding
     // ==========================================
     if (!isAdmin) {
-      // 1. Photos are strictly blocked for non-admins (match upload is admin-only)
+      // 1. Photos and videos are strictly blocked for non-admins
       if (message.photo && message.photo.length > 0) {
         const photoMsg = formatPhotoWarning('ru');
         const photoKeys = getPhotoWarningKeyboard('ru');
         await sendTelegramMessage(chatId, photoMsg, photoKeys);
         return sendResponse(res, 200, 'Non-admin photo rejected with tabs');
+      }
+
+      if (message.video || (message.document && (message.document.mime_type || '').startsWith('video/'))) {
+        await sendTelegramMessage(chatId, '⛔ *Video analysis is reserved for League Administrators.*');
+        return sendResponse(res, 200, 'Non-admin video blocked');
+      }
+
+      // 🔒 Global Admin Command Guard: Strictly block any non-admin from executing admin commands
+      const adminCmdPrefixes = [
+        '/admin', '/strikes', '/roster', '/sync_roster', '/syncroster',
+        '/audit', '/pending', '/checkjoin', '/registered',
+        '/kicklist', '/flagged', '/kicked', '/removal', '/kickwarning',
+        '/warning', '/lastchance', '/tgnotice', '/joinnotice',
+        '/welcome', '/intro', '/invite_pentax', '/dm_pentax',
+        '/notify', '/synccommands', '/sync_commands', '/setcommands', '/sync',
+        '/closecheckin', '/endcheckin', '/lockcheckin',
+        '/forgive', '/clearstrike', '/excuse', '/setrules', '/editrules',
+        '/done', '/analyze', '/clear'
+      ];
+      const lowerText = (text || '').trim().toLowerCase();
+      if (adminCmdPrefixes.some(cmd => lowerText === cmd || lowerText.startsWith(cmd + ' ') || lowerText.startsWith(cmd + '@'))) {
+        await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+        return sendResponse(res, 200, 'Admin command blocked for non-admin');
       }
 
       const isTester = isSandboxTester(userId, message.from ? message.from.username : '');
@@ -7110,16 +7141,6 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
-      if (text.startsWith('/tgnotice') || text.startsWith('/joinnotice')) {
-        if (!isAdmin) {
-          await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
-          return sendResponse(res, 200, 'Admin only command');
-        }
-        const noticeMsg = formatTelegramNotice('ru');
-        await sendTelegramMessage(chatId, noticeMsg, getLanguageKeyboard('tgnotice', '0', 'ru', false));
-        return sendResponse(res, 200, 'OK');
-      }
-
       if (text.startsWith('/checkin') || text.startsWith('/rally')) {
         const ciMsg = formatCheckInPrompt('ru');
         const ciKeys = getCheckInKeyboard('ru', false);
@@ -7137,16 +7158,6 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
-      if (text.startsWith('/strikes')) {
-        if (!isAdmin) {
-          await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
-          return sendResponse(res, 200, 'Admin only command');
-        }
-        const strikesMsg = await formatStrikes('ru');
-        await sendTelegramMessage(chatId, strikesMsg, getLanguageKeyboard('strikes', '0', 'ru', false));
-        return sendResponse(res, 200, 'OK');
-      }
-
       if (text.startsWith('/top') || text.startsWith('/leaderboard')) {
         const topMsg = formatTopScorers('ru');
         await sendTelegramMessage(chatId, topMsg, getLanguageKeyboard('top', '0', 'ru', false));
@@ -7156,6 +7167,15 @@ export default async function handler(req, res) {
       if (text.startsWith('/tournaments')) {
         const tMsg = await formatTournaments('ru');
         await sendTelegramMessage(chatId, tMsg, getLanguageKeyboard('tournaments', '0', 'ru', false));
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (text.startsWith('/recap') || text.startsWith('/broadcast')) {
+        const t = await getLatestTournament();
+        const tId = t?.id || t?.tournament_id || '0';
+        const recap = formatRecap(t, 'ru');
+        const keys = getTabsKeyboard('ru', tId, false);
+        await sendTelegramMessage(chatId, recap, keys);
         return sendResponse(res, 200, 'OK');
       }
 
@@ -7194,31 +7214,6 @@ export default async function handler(req, res) {
           await sendTelegramMessage(chatId, statsPrompt, getLanguageKeyboard('mystats', '0', 'ru', false));
           return sendResponse(res, 200, 'OK');
         }
-      }
-
-      if (text.startsWith('/warning') || text.startsWith('/lastchance')) {
-        if (!isAdmin) {
-          await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
-          return sendResponse(res, 200, 'Admin only command');
-        }
-        const warnMsg = await formatLastChanceWarning('ru');
-        await sendTelegramMessage(chatId, warnMsg, getLastChanceWarningKeyboard('ru'));
-        return sendResponse(res, 200, 'OK');
-      }
-
-      if (text.startsWith('/kicked') || text.startsWith('/removal') || text.startsWith('/kickwarning')) {
-        if (!isAdmin) {
-          await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
-          return sendResponse(res, 200, 'Admin only command');
-        }
-        const kickMsg = await formatKickedWarning('ru');
-        await sendTelegramMessage(chatId, kickMsg, getKickedWarningKeyboard('ru'));
-        return sendResponse(res, 200, 'OK');
-      }
-
-      if (text.startsWith('/forgive') || text.startsWith('/clearstrike') || text.startsWith('/excuse') || text.startsWith('/setrules') || text.startsWith('/editrules')) {
-        await sendTelegramMessage(chatId, '⛔ *Admin only command.*');
-        return sendResponse(res, 200, 'OK');
       }
 
       // 4. Check if this player is ALREADY verified & registered
