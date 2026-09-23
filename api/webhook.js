@@ -57,6 +57,7 @@ const currentCheckIn = {
   ready: new Set(),
   away: new Set()
 };
+let globalCommandsSynced = false;
 
 function clean(str) {
   return String(str || '').replace(/[_*`\[\]()]/g, ' ').trim();
@@ -975,71 +976,51 @@ function getMainKeyboard(currentLang = 'ru', isAdmin = false) {
 
 async function syncBotCommands() {
   const commandsEn = [
-    { command: 'start', description: '⚜️ Main Menu (Dashboard)' },
+    { command: 'start', description: '⚜️ Main Menu / Home' },
     { command: 'mystats', description: '👤 My Stats & Player Card' },
+    { command: 'lineup', description: '🎯 Official Starting Lineup' },
     { command: 'checkin', description: '⚔️ Pre-Match Check-In (Ready)' },
-    { command: 'lineup', description: '🎯 Smart Lineup (Best 16)' },
     { command: 'top', description: '🏆 Top Scorers Leaderboard' },
     { command: 'recap', description: '⭐ Last Match Recap' },
     { command: 'mvp', description: '👑 MVP Player of the Week' },
     { command: 'rules', description: '📜 Official Rules (IMPORTANT)' },
-    { command: 'strikes', description: '⛔ Strikes & Debtors List' },
-    { command: 'kicklist', description: '🚨 Kick Review (At Risk)' },
-    { command: 'tournaments', description: '📊 Tournaments History' },
-    { command: 'tgnotice', description: '📢 Official Telegram Registration Notice' },
-    { command: 'roster', description: '🔄 Sync In-Game Roster (Video/Photos)' },
-    { command: 'notify', description: '📢 Direct Player Notifications (Admin)' }
+    { command: 'tournaments', description: '📊 Tournaments History' }
   ];
 
   const commandsRu = [
     { command: 'start', description: '⚜️ Главное меню / На главную' },
     { command: 'mystats', description: '👤 Моя статистика и карточка' },
-    { command: 'checkin', description: '⚔️ Предматчевый сбор (Чек-ин)' },
     { command: 'lineup', description: '🎯 Состав основы (Топ-16)' },
+    { command: 'checkin', description: '⚔️ Предматчевый сбор (Чек-ин)' },
     { command: 'top', description: '🏆 Топ бомбардиров лиги' },
     { command: 'recap', description: '⭐ Последний матч / Итоги' },
     { command: 'mvp', description: '👑 Лучший игрок недели (MVP)' },
     { command: 'rules', description: '📜 Правила лиги (ВАЖНО)' },
-    { command: 'strikes', description: '⛔ Страйки и должники' },
-    { command: 'kicklist', description: '🚨 Кандидаты на кик' },
-    { command: 'tournaments', description: '📊 Все турниры лиги' },
-    { command: 'tgnotice', description: '📢 Уведомление о регистрации в Telegram' },
-    { command: 'roster', description: '🔄 Синхронизация состава (Видео/Скрины)' },
-    { command: 'notify', description: '📢 Личные уведомления игрокам (Админ)' }
+    { command: 'tournaments', description: '📊 Все турниры лиги' }
   ];
 
   const commandsAr = [
     { command: 'start', description: '⚜️ القائمة الرئيسية' },
     { command: 'mystats', description: '👤 إحصائياتي وبطاقتي الشخصية' },
-    { command: 'checkin', description: '⚔️ تأكيد الجاهزية (Check-In)' },
     { command: 'lineup', description: '🎯 التشكيلة الأساسية الذكية' },
+    { command: 'checkin', description: '⚔️ تأكيد الجاهزية (Check-In)' },
     { command: 'top', description: '🏆 قائمة هدافي الدوري' },
     { command: 'recap', description: '⭐ ملخص آخر مباراة' },
     { command: 'mvp', description: '👑 أفضل لاعب في الأسبوع (MVP)' },
     { command: 'rules', description: '📜 قوانين الدوري (هام جداً)' },
-    { command: 'strikes', description: '⛔ سجل الإنذارات والمقصرين' },
-    { command: 'kicklist', description: '🚨 مراجعة المستبعدين من الدوري' },
-    { command: 'tournaments', description: '📊 سجل بطولات الدوري' },
-    { command: 'tgnotice', description: '📢 تنبيه التسجيل في تيليجرام' },
-    { command: 'roster', description: '🔄 مزامنة أعضاء اللعبة (فيديو/صور)' },
-    { command: 'notify', description: '📢 إرسال إشعارات مباشرة للاعبين (أدمن)' }
+    { command: 'tournaments', description: '📊 سجل بطولات الدوري' }
   ];
 
   const commandsEs = [
     { command: 'start', description: '⚜️ Menú Principal (Inicio)' },
     { command: 'mystats', description: '👤 Mis Estadísticas y Tarjeta' },
-    { command: 'checkin', description: '⚔️ Check-In Pre-Partido (Listo)' },
     { command: 'lineup', description: '🎯 Alineación Titular Inteligente' },
+    { command: 'checkin', description: '⚔️ Check-In Pre-Partido (Listo)' },
     { command: 'top', description: '🏆 Tabla de Máximos Goleadores' },
     { command: 'recap', description: '⭐ Último Resumen del Partido' },
     { command: 'mvp', description: '👑 Jugador MVP de la Semana' },
     { command: 'rules', description: '📜 Reglas Oficiales (IMPORTANTE)' },
-    { command: 'strikes', description: '⛔ Lista de Strikes y Deudores' },
-    { command: 'kicklist', description: '🚨 Candidatos a Expulsión' },
-    { command: 'tournaments', description: '📊 Historial de Torneos' },
-    { command: 'tgnotice', description: '📢 Aviso de Registro en Telegram' },
-    { command: 'roster', description: '🔄 Sincronizar Roster (Video/Fotos)' },
-    { command: 'notify', description: '📢 Notificaciones Directas a Jugadores (Admin)' }
+    { command: 'tournaments', description: '📊 Historial de Torneos' }
   ];
 
   const resDef = await telegramRequest('setMyCommands', { commands: commandsEn });
@@ -2623,7 +2604,7 @@ function formatCommunityJoinedPrompt(lang = 'ru') {
       `👉 *الخطوة التالية — تسجيل اسمك في تشكيلة البطولات:*\n` +
       `اضغط على الزر بالأسفل لتأكيد عضويتك وإرسال اسمك المستعار في لعبة EA FC Mobile!\n\n` +
       `🔒 *آمن 100%:* نطلب فقط اسمك المستعار الظاهر في اللعبة (Nickname) لحساب أهدافك وإدراجك في تشكيلة المباريات — لا نطلب أي كلمة مرور أو دخول لحسابك نهائياً!\n\n` +
-      `⚠️ *تنبيه هام:* يرجى قراءة قوانين الفريق بالأسفل (إلزامية لعب 3/3 جولات في كل بطولة) لتفادي العقوبات أو الاستبعاد!`;
+      `⚠️ *تنبيه:* التسجيل مخصص للاعبي БРАТВА FCM في اللعبة (إلزامية لعب 3/3 جولات في كل بطولة لتفادي الاستبعاد).`;
   }
   if (lang === 'en') {
     return `👋 *Welcome to the BRATVA FCM Community!* ⚜️\n\n` +
@@ -2631,7 +2612,7 @@ function formatCommunityJoinedPrompt(lang = 'ru') {
       `👉 *Next Step — Enter Tournament Squad Roster:*\n` +
       `Tap the button below to confirm your membership and submit your public EA FC Mobile In-Game Nickname!\n\n` +
       `🔒 *100% Safe:* We only ask for your public in-game nickname to record your match goals and lineup selection — no passwords or account logins ever!\n\n` +
-      `⚠️ *Important:* Please read our official League Rules below (play all 3/3 turns in tournaments) to avoid strikes and removal!`;
+      `⚠️ *Important:* Tournament participation requires playing all 3/3 turns in every match to avoid strikes.`;
   }
   if (lang === 'es') {
     return `👋 *¡Bienvenido a la comunidad de BRATVA FCM!* ⚜️\n\n` +
@@ -2639,7 +2620,7 @@ function formatCommunityJoinedPrompt(lang = 'ru') {
       `👉 *Siguiente paso — Registro en la plantilla de torneos:*\n` +
       `¡Pulsa el botón de abajo para confirmar tu membresía y registrar tu nombre de EA FC Mobile!\n\n` +
       `🔒 *100% Seguro:* Solo necesitamos tu nombre público del juego para registrar tus goles en torneos y convocarte en la alineación — ¡sin contraseñas!\n\n` +
-      `⚠️ *Importante:* Lee el reglamento oficial abajo (jugar los 3/3 turnos en cada torneo) para evitar sanciones y expulsión.`;
+      `⚠️ *Importante:* Es obligatorio jugar los 3/3 turnos en cada torneo para evitar sanciones.`;
   }
   // Russian (Default)
   return `👋 *Добро пожаловать в сообщество БРАТВА FCM!* ⚜️\n\n` +
@@ -2647,17 +2628,13 @@ function formatCommunityJoinedPrompt(lang = 'ru') {
     `👉 *Следующий шаг — Запись в состав лиги на турниры:*\n` +
     `Нажмите кнопку ниже, чтобы подтвердить участие и записать свой игровой никнейм EA FC Mobile в состав команды!\n\n` +
     `🔒 *100% Безопасно:* Бот просит только ваш публичный игровой никнейм для учета забитых голов и расстановки в турнирах — пароли не требуются!\n\n` +
-    `⚠️ *Важно:* Обязательно прочитайте правила лиги ниже (забирать все 3/3 ходов в каждом турнире), чтобы избежать штрафов!`;
+    `⚠️ *Важно:* Обязательно забирать все 3/3 ходов в каждом турнире лиги, чтобы избежать штрафов!`;
 }
 
 function getCommunityJoinedKeyboard(currentLang = 'ru') {
   const checkLabel = currentLang === 'ar' ? '2️⃣ تأكيد الانضمام والمتابعة' :
                      currentLang === 'es' ? '2️⃣ Verificar suscripción y continuar' :
                      currentLang === 'en' ? '2️⃣ Check Membership & Continue' : '2️⃣ Проверить подписку и продолжить';
-
-  const rulesLabel = currentLang === 'ar' ? '📜 قراءة قوانين الفريق' :
-                     currentLang === 'es' ? '📜 Leer Reglamento de la Liga' :
-                     currentLang === 'en' ? '📜 Read League Rules' : '📜 Правила лиги';
 
   const siteLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للفريق' :
                     currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
@@ -2674,7 +2651,6 @@ function getCommunityJoinedKeyboard(currentLang = 'ru') {
         { text: checkLabel, callback_data: `verify_sub_${currentLang}` }
       ],
       [
-        { text: rulesLabel, callback_data: `tab_rules_0_${currentLang}` },
         { text: siteLabel, url: WEBSITE_URL }
       ],
       [
@@ -2753,7 +2729,7 @@ function formatVerificationSuccess(matchedName, uid = null, lang = 'ru') {
       `⚠️ *تنبيه هام جداً (إلزامي للقراءة):*\n` +
       `يرجى قراءة قوانين الدوري الرسمية بالضغط على [ 📜 اقرأ قوانين الدوري (هام جداً) ] بالأسفل لتجنب الإنذارات والاستبعاد!\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👉 *الخطوة التالية:* اضغط على الأزرار بالأسفل للانضمام للقناة وقراءة القوانين:`;
+      `👉 *الخطوة التالية:* اضغط بالأسفل لقراءة القوانين وتصفح القائمة الرئيسية:`;
   }
   if (lang === 'en') {
     return `✅ *REGISTERED IN SQUAD ROSTER!* ⚜️\n` +
@@ -2764,7 +2740,7 @@ function formatVerificationSuccess(matchedName, uid = null, lang = 'ru') {
       `⚠️ *IMPORTANT TO READ (MANDATORY):*\n` +
       `Please read our official League Rules by tapping [ 📜 Read League Rules (IMPORTANT) ] below to avoid strikes and removal from the team!\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👉 *Next Step:* Tap buttons below to join our community and read the rules:`;
+      `👉 *Next Step:* Tap below to read the official rules and open the Main Menu:`;
   }
   if (lang === 'es') {
     return `✅ *¡REGISTRADO EN LA PLANTILLA!* ⚜️\n` +
@@ -2775,7 +2751,7 @@ function formatVerificationSuccess(matchedName, uid = null, lang = 'ru') {
       `⚠️ *AVISO IMPORTANTE (LECTURA OBLIGATORIA):*\n` +
       `¡Lee las reglas oficiales de la liga pulsando [ 📜 Leer Reglas (IMPORTANTE) ] abajo para evitar strikes y expulsión!\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👉 *Siguiente paso:* Toca los botones de abajo para unirte al canal y leer las reglas:`;
+      `👉 *Siguiente paso:* Pulsa abajo para leer el reglamento y abrir el Menú Principal:`;
   }
   return `✅ *ИГРОК УСПЕШНО ЗАПИСАН В СОСТАВ!* ⚜️\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
@@ -2785,7 +2761,7 @@ function formatVerificationSuccess(matchedName, uid = null, lang = 'ru') {
     `⚠️ *ВАЖНО К ПРОЧТЕНИЮ (ОБЯЗАТЕЛЬНО):*\n` +
     `Обязательно ознакомься с правилами лиги, нажав [ 📜 Читать Правила (ВАЖНО) ] ниже, чтобы избежать страйков и кика из команды!\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `👉 *Следующий шаг:* Вступай в канал/чат и читай правила по кнопкам ниже:`;
+    `👉 *Следующий шаг:* Нажмите ниже, чтобы прочитать правила и открыть Главное Меню:`;
 }
 
 function getVerificationSuccessKeyboard(playerId, currentLang = 'ru') {
@@ -2794,17 +2770,17 @@ function getVerificationSuccessKeyboard(playerId, currentLang = 'ru') {
   const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
   const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
 
-  const folderLabel = currentLang === 'ar' ? '👥 انضم للقناة والمجموعة الرسمية' :
-                      currentLang === 'es' ? '👥 Unirse al Canal y Grupo Oficial' :
-                      currentLang === 'en' ? '👥 Join Official Channel & Chat' : '👥 Вступить в Канал и Чат Лиги';
-
-  const channelLabel = currentLang === 'ar' ? '📢 القناة الرسمية @BRATVAFCM' :
-                       currentLang === 'es' ? '📢 Canal Oficial @BRATVAFCM' :
-                       currentLang === 'en' ? '📢 Official Channel @BRATVAFCM' : '📢 Официальный Канал @BRATVAFCM';
-
   const rulesBtnLabel = currentLang === 'ar' ? '📜 اقرأ قوانين الدوري (هام جداً)' :
                         currentLang === 'es' ? '📜 Leer Reglas (IMPORTANTE)' :
                         currentLang === 'en' ? '📜 Read League Rules (IMPORTANT)' : '📜 Читать Правила Лиги (ВАЖНО)';
+
+  const menuBtnLabel = currentLang === 'ar' ? '📋 القائمة الرئيسية (لوحة التحكم)' :
+                       currentLang === 'es' ? '📋 Menú Principal (Panel)' :
+                       currentLang === 'en' ? '📋 Main Menu (Dashboard)' : '📋 Главное меню Лиги';
+
+  const folderLabel = currentLang === 'ar' ? '📁 فتح مجلد الفريق (القناة والدردشة)' :
+                      currentLang === 'es' ? '📁 Abrir Carpeta del Equipo (Canal y Chat)' :
+                      currentLang === 'en' ? '📁 Open League Folder (Channel & Chat)' : '📁 Папка команды (Канал и Чат Лиги)';
 
   const { pIndex } = loadLeagueData();
   const hasStats = pIndex && pIndex[playerId];
@@ -2816,10 +2792,6 @@ function getVerificationSuccessKeyboard(playerId, currentLang = 'ru') {
 
   const cardUrl = hasStats ? `${WEBSITE_URL}?player=${encodeURIComponent(playerId)}` : WEBSITE_URL;
 
-  const menuBtnLabel = currentLang === 'ar' ? '📋 القائمة الرئيسية (لوحة التحكم)' :
-                       currentLang === 'es' ? '📋 Menú Principal (Panel)' :
-                       currentLang === 'en' ? '📋 Main Menu (Dashboard)' : '📋 Главное меню Лиги';
-
   return {
     inline_keyboard: [
       [
@@ -2829,16 +2801,13 @@ function getVerificationSuccessKeyboard(playerId, currentLang = 'ru') {
         { text: esLabel, callback_data: `tab_versuccess_${playerId}_es` }
       ],
       [
-        { text: menuBtnLabel, callback_data: 'cmd_menu' }
-      ],
-      [
         { text: rulesBtnLabel, callback_data: `tab_rules_0_${currentLang}` }
       ],
       [
-        { text: folderLabel, url: COMMUNITY_URL }
+        { text: menuBtnLabel, callback_data: 'cmd_menu' }
       ],
       [
-        { text: channelLabel, url: 'https://t.me/BRATVAFCM' }
+        { text: folderLabel, url: COMMUNITY_URL }
       ],
       [
         { text: cardLabel, url: cardUrl }
@@ -5953,6 +5922,12 @@ export default async function handler(req, res) {
       }
     }
 
+    // Automatic sync of cleaned bot menu commands to Telegram API
+    if (!globalCommandsSynced) {
+      globalCommandsSynced = true;
+      syncBotCommands().catch(err => console.warn('[syncBotCommands error]:', err.message));
+    }
+
     // 0. Handle Channel Join / Membership Update (Notify new members of Rules!)
     if (update.chat_member) {
       const cm = update.chat_member;
@@ -7136,6 +7111,10 @@ export default async function handler(req, res) {
       }
 
       if (text.startsWith('/tgnotice') || text.startsWith('/joinnotice')) {
+        if (!isAdmin) {
+          await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+          return sendResponse(res, 200, 'Admin only command');
+        }
         const noticeMsg = formatTelegramNotice('ru');
         await sendTelegramMessage(chatId, noticeMsg, getLanguageKeyboard('tgnotice', '0', 'ru', false));
         return sendResponse(res, 200, 'OK');
@@ -7159,6 +7138,10 @@ export default async function handler(req, res) {
       }
 
       if (text.startsWith('/strikes')) {
+        if (!isAdmin) {
+          await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+          return sendResponse(res, 200, 'Admin only command');
+        }
         const strikesMsg = await formatStrikes('ru');
         await sendTelegramMessage(chatId, strikesMsg, getLanguageKeyboard('strikes', '0', 'ru', false));
         return sendResponse(res, 200, 'OK');
@@ -7214,12 +7197,20 @@ export default async function handler(req, res) {
       }
 
       if (text.startsWith('/warning') || text.startsWith('/lastchance')) {
+        if (!isAdmin) {
+          await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+          return sendResponse(res, 200, 'Admin only command');
+        }
         const warnMsg = await formatLastChanceWarning('ru');
         await sendTelegramMessage(chatId, warnMsg, getLastChanceWarningKeyboard('ru'));
         return sendResponse(res, 200, 'OK');
       }
 
       if (text.startsWith('/kicked') || text.startsWith('/removal') || text.startsWith('/kickwarning')) {
+        if (!isAdmin) {
+          await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+          return sendResponse(res, 200, 'Admin only command');
+        }
         const kickMsg = await formatKickedWarning('ru');
         await sendTelegramMessage(chatId, kickMsg, getKickedWarningKeyboard('ru'));
         return sendResponse(res, 200, 'OK');
@@ -7690,6 +7681,10 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/welcome') || text.startsWith('/intro')) {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+        return sendResponse(res, 200, 'Admin only command');
+      }
       const wText = formatChannelWelcome('ru');
       const wKeys = getLanguageKeyboard('welcome', '0', 'ru', true);
       await sendTelegramMessage(chatId, wText, wKeys);
@@ -7697,6 +7692,10 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/pending') || text.startsWith('/checkjoin') || text.startsWith('/registered') || text.startsWith('/audit')) {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+        return sendResponse(res, 200, 'Admin only command');
+      }
       const auditMsg = await formatPendingAudit('ru');
       const auditKeys = getPendingKeyboard();
       await sendTelegramMessage(chatId, auditMsg, auditKeys);
@@ -7704,6 +7703,10 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/kicked') || text.startsWith('/removal') || text.startsWith('/kickwarning')) {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+        return sendResponse(res, 200, 'Admin only command');
+      }
       const kickMsg = await formatKickedWarning('ru');
       const kickKeys = getKickedWarningKeyboard('ru');
       await sendTelegramMessage(chatId, kickMsg, kickKeys);
@@ -7711,6 +7714,10 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/warning') || text.startsWith('/lastchance')) {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+        return sendResponse(res, 200, 'Admin only command');
+      }
       const warnMsg = await formatLastChanceWarning('ru');
       const warnKeys = getLastChanceWarningKeyboard('ru');
       await sendTelegramMessage(chatId, warnMsg, warnKeys);
@@ -7719,7 +7726,7 @@ export default async function handler(req, res) {
 
     if (text.startsWith('/rules')) {
       const rules = formatRules('ru');
-      await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', 'ru', true));
+      await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', 'ru', false));
       return sendResponse(res, 200, 'OK');
     }
 
@@ -7741,14 +7748,18 @@ export default async function handler(req, res) {
       };
       const resPentax = await sendTelegramMessage(6577572183, pentaxMsg, pKeys);
       if (resPentax && resPentax.ok) {
-        await sendTelegramMessage(chatId, `✅ *Invite sent successfully to Fernando (King_Pentax)!*\nThe bot delivered the invitation and link directly to his private chat (ID: \`6577572183\`).`, getMainKeyboard('ru'));
+        await sendTelegramMessage(chatId, `✅ *Invite sent successfully to Fernando (King_Pentax)!*\nThe bot delivered the invitation and link directly to his private chat (ID: \`6577572183\`).`, getMainKeyboard('ru', isAdmin));
       } else {
-        await sendTelegramMessage(chatId, `⚠️ Could not DM Fernando. Details: ${resPentax?.description || 'Error'}\nManual Profile link: [Fernando](tg://user?id=6577572183)`, getMainKeyboard('ru'));
+        await sendTelegramMessage(chatId, `⚠️ Could not DM Fernando. Details: ${resPentax?.description || 'Error'}\nManual Profile link: [Fernando](tg://user?id=6577572183)`, getMainKeyboard('ru', isAdmin));
       }
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/tgnotice') || text.startsWith('/joinnotice')) {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+        return sendResponse(res, 200, 'Admin only command');
+      }
       const noticeMsg = formatTelegramNotice('ru');
       await sendTelegramMessage(chatId, noticeMsg, getLanguageKeyboard('tgnotice', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
@@ -7758,18 +7769,26 @@ export default async function handler(req, res) {
       const t = await getLatestTournament();
       const tId = t?.id || t?.tournament_id || '0';
       const recap = formatRecap(t, 'ru');
-      const keys = getTabsKeyboard('ru', tId, true);
+      const keys = getTabsKeyboard('ru', tId, isAdmin);
       await sendTelegramMessage(chatId, recap, keys);
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/kicklist') || text.startsWith('/flagged')) {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+        return sendResponse(res, 200, 'Admin only command');
+      }
       const kickMsg = await formatKicklist('ru');
       await sendTelegramMessage(chatId, kickMsg, getLanguageKeyboard('kicklist', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
     }
 
     if (text.startsWith('/roster') || text.startsWith('/sync_roster') || text.startsWith('/syncroster')) {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+        return sendResponse(res, 200, 'Admin only command');
+      }
       waitingRosterSync.set(chatId, Date.now());
       const promptText = formatRosterInstructions('ru');
       await sendTelegramMessage(chatId, promptText, getLanguageKeyboard('rosterprompt', '0', 'ru', false));
@@ -7779,7 +7798,7 @@ export default async function handler(req, res) {
     if (text.startsWith('/mvp') || text.startsWith('/totw')) {
       const mvpMsg = formatMvp('ru');
       latestMvpMessage = mvpMsg;
-      await sendTelegramMessage(chatId, mvpMsg, getLanguageKeyboard('mvp', '0', 'ru', true));
+      await sendTelegramMessage(chatId, mvpMsg, getLanguageKeyboard('mvp', '0', 'ru', isAdmin));
       return sendResponse(res, 200, 'OK');
     }
 
@@ -7931,6 +7950,10 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/admin')) {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⛔ *This command is reserved for League Administrators.*');
+        return sendResponse(res, 200, 'Admin only command');
+      }
       const adminHelpMsg = `👑 *ПАНЕЛЬ УПРАВЛЕНИЯ АДМИНИСТРАТОРА (BRATVA FCM)* ⚜️\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `📸 *Загрузка результатов турнира:*\n` +
@@ -7967,8 +7990,9 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/start') || text.startsWith('/help') || text.startsWith('/menu')) {
-      const welcome = formatWelcome('ru');
-      await sendTelegramMessage(chatId, welcome, getMainKeyboard('ru'));
+      const userLang = detectUserLang(message.from);
+      const welcome = formatWelcome(userLang);
+      await sendTelegramMessage(chatId, welcome, getMainKeyboard(userLang, isAdmin));
       return sendResponse(res, 200, 'OK');
     }
 
