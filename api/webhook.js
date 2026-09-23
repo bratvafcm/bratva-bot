@@ -766,21 +766,9 @@ function getMainKeyboard(currentLang = 'ru') {
                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный Сайт Лиги';
 
-  const auditLabel = currentLang === 'ar' ? '👥 تدقيق تيليجرام (مهلة 3 أيام)' :
-                     currentLang === 'es' ? '👥 Auditoría Telegram (Plazo 3 Días)' :
-                     currentLang === 'en' ? '👥 Telegram Audit (3-Day Kick Tracker)' : '👥 Аудит Telegram (Контроль 3 дня)';
-
-  const kickedMenuLabel = currentLang === 'ar' ? '🚨 تنبيه المطرودين: غداً الدور عليك' :
-                          currentLang === 'es' ? '🚨 Aviso: Expulsados y Mañana Te Toca' :
-                          currentLang === 'en' ? '🚨 Notice: Kicked & Tomorrow Next' : '🚨 Предупреждение: Завтра очередь остальных';
-
-  const warnMenuLabel = currentLang === 'ar' ? '🚨 تحذير: اليوم آخر فرصة (تيليجرام)' :
-                        currentLang === 'es' ? '🚨 Aviso: Hoy Última Oportunidad' :
-                        currentLang === 'en' ? '🚨 Warning: Today is Last Chance' : '🚨 Предупреждение: Сегодня последний шанс';
-
-  const rosterSyncLabel = currentLang === 'ar' ? '🔄 مزامنة أعضاء اللعبة (فيديو/صور)' :
-                          currentLang === 'es' ? '🔄 Sincronizar Roster (Video/Fotos)' :
-                          currentLang === 'en' ? '🔄 Sync In-Game Roster (Video/Photos)' : '🔄 Синхронизация состава (Видео/Скрины)';
+  const tgNoticeLabel = currentLang === 'ar' ? '📢 تنبيه: التسجيل في تيليجرام' :
+                        currentLang === 'es' ? '📢 Registro en Telegram' :
+                        currentLang === 'en' ? '📢 Join Telegram Notice' : '📢 Регистрация в Telegram';
 
   return {
     inline_keyboard: [
@@ -813,16 +801,7 @@ function getMainKeyboard(currentLang = 'ru') {
         { text: tournLabel, callback_data: 'cmd_tournaments' }
       ],
       [
-        { text: kickedMenuLabel, callback_data: 'cmd_warning_kicked' }
-      ],
-      [
-        { text: warnMenuLabel, callback_data: 'cmd_warning_lastchance' }
-      ],
-      [
-        { text: auditLabel, callback_data: 'cmd_pending' }
-      ],
-      [
-        { text: rosterSyncLabel, callback_data: 'cmd_sync_roster' }
+        { text: tgNoticeLabel, callback_data: 'cmd_tg_notice' }
       ],
       [
         { text: webLabel, url: WEBSITE_URL }
@@ -844,9 +823,7 @@ async function syncBotCommands() {
     { command: 'strikes', description: '⛔ Strikes & Debtors List' },
     { command: 'kicklist', description: '🚨 Kick Review (At Risk)' },
     { command: 'tournaments', description: '📊 Tournaments History' },
-    { command: 'kicked', description: '🚨 Notice: Kicked & Tomorrow Next' },
-    { command: 'warning', description: '🚨 Last Chance Warning (Telegram)' },
-    { command: 'audit', description: '👥 Telegram Audit (3-Day Kick)' },
+    { command: 'tgnotice', description: '📢 Official Telegram Registration Notice' },
     { command: 'roster', description: '🔄 Sync In-Game Roster (Video/Photos)' },
     { command: 'notify', description: '📢 Direct Player Notifications (Admin)' }
   ];
@@ -863,9 +840,7 @@ async function syncBotCommands() {
     { command: 'strikes', description: '⛔ Страйки и должники' },
     { command: 'kicklist', description: '🚨 Кандидаты на кик' },
     { command: 'tournaments', description: '📊 Все турниры лиги' },
-    { command: 'kicked', description: '🚨 Предупреждение: Завтра очередь остальных' },
-    { command: 'warning', description: '🚨 Предупреждение: Последний шанс' },
-    { command: 'audit', description: '👥 Аудит Telegram (Контроль 3 дня)' },
+    { command: 'tgnotice', description: '📢 Уведомление о регистрации в Telegram' },
     { command: 'roster', description: '🔄 Синхронизация состава (Видео/Скрины)' },
     { command: 'notify', description: '📢 Личные уведомления игрокам (Админ)' }
   ];
@@ -882,9 +857,7 @@ async function syncBotCommands() {
     { command: 'strikes', description: '⛔ سجل الإنذارات والمقصرين' },
     { command: 'kicklist', description: '🚨 مراجعة المستبعدين من الدوري' },
     { command: 'tournaments', description: '📊 سجل بطولات الدوري' },
-    { command: 'kicked', description: '🚨 تنبيه: المطرودون وغداً الدور عليك' },
-    { command: 'warning', description: '🚨 تحذير: اليوم آخر فرصة (تيليجرام)' },
-    { command: 'audit', description: '👥 تدقيق أعضاء تيليجرام (مهلة 3 أيام)' },
+    { command: 'tgnotice', description: '📢 تنبيه التسجيل في تيليجرام' },
     { command: 'roster', description: '🔄 مزامنة أعضاء اللعبة (فيديو/صور)' },
     { command: 'notify', description: '📢 إرسال إشعارات مباشرة للاعبين (أدمن)' }
   ];
@@ -901,9 +874,7 @@ async function syncBotCommands() {
     { command: 'strikes', description: '⛔ Lista de Strikes y Deudores' },
     { command: 'kicklist', description: '🚨 Candidatos a Expulsión' },
     { command: 'tournaments', description: '📊 Historial de Torneos' },
-    { command: 'kicked', description: '🚨 Aviso: Expulsados y Mañana Te Toca' },
-    { command: 'warning', description: '🚨 Aviso: Hoy Última Oportunidad' },
-    { command: 'audit', description: '👥 Auditoría Telegram (Plazo 3 Días)' },
+    { command: 'tgnotice', description: '📢 Aviso de Registro en Telegram' },
     { command: 'roster', description: '🔄 Sincronizar Roster (Video/Fotos)' },
     { command: 'notify', description: '📢 Notificaciones Directas a Jugadores (Admin)' }
   ];
@@ -1189,7 +1160,8 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
     player: 'Player Profile',
     welcome: 'Welcome Notice',
     menu: 'Main Menu',
-    rosterprompt: 'Roster Sync'
+    rosterprompt: 'Roster Sync',
+    tgnotice: 'Registration Notice'
   };
   const title = categoryTitles[category] || 'to Channel';
 
@@ -1208,7 +1180,7 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
     { text: esLabel, callback_data: `tab_${category}_${param}_es` }
   ]);
 
-  if (category === 'welcome') {
+  if (category === 'welcome' || category === 'tgnotice') {
     rows.push([
       { text: '🤖 Регистрация в боте / Register in Bot', url: 'https://t.me/BratvaFCMBot?start=register' }
     ]);
@@ -2901,6 +2873,65 @@ async function getCleanSquadTelegramStatus() {
 }
 
 /**
+ * Format Clean Telegram Registration Notice:
+ * Clear, motivating instructions with NO member lists, explaining how to verify in the bot
+ * and that Telegram verification is mandatory to be eligible for LvL tournament lineups.
+ */
+function formatTelegramNotice(lang = 'ru') {
+  if (lang === 'en') {
+    return `📢 *BRATVA FCM: OFFICIAL TELEGRAM REGISTRATION* 📢\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚠️ *ATTENTION TO ALL IN-GAME SQUAD MEMBERS:*\n\n` +
+      `Registration in our official Telegram bot is **MANDATORY** to participate in LvL tournaments!\n\n` +
+      `🚫 *No Telegram = Strictly Benched.* Unverified players cannot be selected for tournament lineups.\n` +
+      `🛡️ Inactive accounts without Telegram verification will be removed from the in-game league when spots are needed for active recruits.\n\n` +
+      `📲 *HOW TO VERIFY IN 3 EASY STEPS (Takes 10s):*\n` +
+      `1️⃣ Open our official bot: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+      `2️⃣ Press /start and send your exact in-game Nickname\n` +
+      `3️⃣ Join our official Community (Channel & Group Chat)\n\n` +
+      `⚡ Once verified, your stats, match history, and tournament lineup eligibility will be activated!`;
+  }
+  if (lang === 'ar') {
+    return `📢 *دوري БРАТВА FCM: تنبيه رسمي للتسجيل في تيليجرام* 📢\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚠️ *إلى جميع أعضاء الدوري داخل لعبة FC Mobile:*\n\n` +
+      `التسجيل في بوت تيليجرام الرسمي **إلزامي وضروري** للمشاركة في بطولات الدوري (LvL)!\n\n` +
+      `🚫 *غير مسجل في البوت = في الاحتياط التام.* لا يدخل أي لاعب غير موثق إلى التشكيلة الأساسية للبطولات نهائياً.\n` +
+      `🛡️ الحسابات غير الموثقة في تيليجرام معرضة للاستبعاد من الدوري عند امتلاء المقاعد لإفساح المجال للأعضاء النشيطين.\n\n` +
+      `📲 *خطوات التوثيق في 3 خطوات بسيطة (10 ثوانٍ فقط):*\n` +
+      `1️⃣ ادخل إلى البوت الرسمي: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+      `2️⃣ اضغط على /start وأرسل اسم حسابك في اللعبة (Nickname) تماماً\n` +
+      `3️⃣ انضم إلى مجتمع الفريق الرسمي (القناة ومجموعة النقاش)\n\n` +
+      `⚡ بعد التوثيق، يتم تفعيل إحصائياتك وأهليتك لدخول التشكيلة والمنافسة في البطولات!`;
+  }
+  if (lang === 'es') {
+    return `📢 *BRATVA FCM: REGISTRO OFICIAL EN TELEGRAM* 📢\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚠️ *ATENCIÓN A TODOS LOS MIEMBROS EN FC MOBILE:*\n\n` +
+      `¡El registro en nuestro bot oficial de Telegram es **OBLIGATORIO** para participar en torneos LvL!\n\n` +
+      `🚫 *Sin Telegram = Banquillo Estricto.* Los jugadores sin verificar no jugarán partidos de torneo.\n` +
+      `🛡️ Las cuentas inactivas sin verificar en Telegram podrán ser expulsadas de la liga para dar espacio a miembros activos.\n\n` +
+      `📲 *CÓMO VERIFICARTE EN 3 PASOS (10 segundos):*\n` +
+      `1️⃣ Abre nuestro bot oficial: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+      `2️⃣ Pulsa /start y envía tu Nick exacto del juego\n` +
+      `3️⃣ Únete a nuestra comunidad oficial (Canal y Grupo)\n\n` +
+      `⚡ ¡Una vez verificado, tendrás acceso a las alineaciones de torneos y tus estadísticas!`;
+  }
+  // Russian (Default)
+  return `📢 *БРАТВА FCM: РЕГИСТРАЦИЯ В TELEGRAM* 📢\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `⚠️ *ВНИМАНИЮ ВСЕХ УЧАСТНИКОВ ЛИГИ В FC MOBILE:*\n\n` +
+    `Регистрация в официальном боте Telegram **ОБЯЗАТЕЛЬНА** для участия в турнирах LvL!\n\n` +
+    `🚫 *Нет в боте = Строго в запасе.* Неверифицированные игроки не допускаются в основу на турнирные матчи.\n` +
+    `🛡️ Неактивные аккаунты без верификации в Telegram подлежат исключению из лиги при необходимости мест для активных новичков.\n\n` +
+    `📲 *КАК ПРОЙТИ ВЕРИФИКАЦИЮ ЗА 3 ШАГА (10 секунд):*\n` +
+    `1️⃣ Откройте официального бота: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+    `2️⃣ Нажмите /start и отправьте свой точный игровой ник\n` +
+    `3️⃣ Вступите в официальное сообщество (Канал и Чат)\n\n` +
+    `⚡ После верификации ваш профиль, статистика и допуск к турнирам будут активированы!`;
+}
+
+/**
  * Format Dedicated Warning Message: "Today is Last Chance"
  * Showing clean names of players who joined (no @, no ID, admins as members)
  * and unjoined players with urgent kick deadline warning!
@@ -3378,27 +3409,28 @@ function formatRules(lang = 'ru') {
     return `📜 *OFFICIAL BRATVA FCM LEAGUE RULEBOOK* 📜\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `1️⃣ ⚽ *Attendance & Turns (Mandatory 3/3):*\n` +
-      `• Every member must complete all *${rules.minTurnsPerTournament}/3* turns in every tournament.\n` +
+      `• Every member selected in the lineup must complete all *${rules.minTurnsPerTournament}/3* turns.\n` +
       `• Unplayed turns (<3) = *1 Strike*.\n` +
       `• 🚨 *3 strikes in your last 5 tournaments* = *AUTOMATIC KICK*.\n` +
       `• ⛔ *2 consecutive 0/3 tournaments* = *IMMEDIATE KICK*.\n` +
-      `• 🟢 *Decay:* Playing 5 consecutive clean matches (3/3) clears all past strikes!\n` +
+      `• 🟢 *Strike Decay:* Playing 3 consecutive clean matches (3/3) clears 1 strike!\n` +
       `────────────────────\n` +
-      `2️⃣ 📱 *Telegram 3-Day Registration Deadline:*\n` +
-      `• Verify your account in this bot and join the channel & chat within *${rules.telegramDeadlineDays || 3} days* of joining the in-game league.\n` +
-      `• Unregistered accounts after 3 days = *KICK*.\n` +
+      `2️⃣ 📱 *Telegram Verification (Mandatory for LvL):*\n` +
+      `• Every member must verify their account in [@BratvaFCMBot](https://t.me/BratvaFCMBot) and join the official community.\n` +
+      `• 🚫 *No Telegram = Strictly Benched.* Unverified players cannot be selected for LvL tournament lineups.\n` +
+      `• Inactive accounts without Telegram verification are subject to removal to keep the squad active.\n` +
       `────────────────────\n` +
-      `3️⃣ 🎯 *Goal Target (20+) & Bot Auto-Selected Lineup:*\n` +
-      `• Minimum benchmark: *${rules.minGoalsPerTournament}+ goals* per tournament.\n` +
-      `• 🤖 *The Bot automatically determines tournament size* (4v4, 8v8, 16v16, 24v24, 32v32) based on how many players check in [ 🟢 Ready ]!\n` +
+      `3️⃣ 🎯 *Performance & Smart Lineup Selection:*\n` +
+      `• 🤖 *The Bot automatically determines tournament size* (4v4, 8v8, 16v16, 24v24, 32v32) based on active check-ins!\n` +
       `• Starting spots are awarded based on 3 criteria:\n` +
       `  1. Checked in as [ 🟢 Ready ] before match start\n` +
       `  2. Clean discipline (0 strikes priority)\n` +
       `  3. Top scoring average in **your own last 5 matches played**!\n` +
+      `• 🔄 *Tactical Bench Rotation:* Players with temporary low scoring are rotated to the bench to regain form (not a disciplinary kick).\n` +
       `────────────────────\n` +
       `4️⃣ 🛡️ *Advance Notice & Excuses:*\n` +
-      `• If an emergency occurs, notify admins before check-in closes.\n` +
-      `• Admins can excuse an absence via \`/forgive <player>\` (resets strikes to 0).\n` +
+      `• If an emergency occurs, notify admins in the chat before check-in closes.\n` +
+      `• Admins can excuse an absence via \`/forgive <player>\`.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `👥 *Telegram Community (Channel + Group):*\n${COMMUNITY_URL}\n\n` +
       `🌐 *Official Website:* ${WEBSITE_URL}`;
@@ -3407,26 +3439,27 @@ function formatRules(lang = 'ru') {
     return `📜 *دستور وقوانين دوري БРАТВА FCM الرسمية* 📜\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `1️⃣ ⚽ *الحضور وإكمال الهجمات (إلزامي 3/3):*\n` +
-      `• يجب على كل لاعب لعب جميع *${rules.minTurnsPerTournament}/3* محاولات في كل بطولة.\n` +
+      `• يجب على كل لاعب مشارك في التشكيلة لعب جميع *${rules.minTurnsPerTournament}/3* محاولات.\n` +
       `• أي تفويت للمحاولات (<3) = *إنذار (سترايك)*.\n` +
       `• 🚨 *3 إنذارات خلال آخر 5 بطولات* = *طرد نهائي واستبعاد* من الدوري.\n` +
       `• ⛔ *تفويت بطولتين متتاليتين (0/3 مرتين)* = *طرد فوري ومباشر*.\n` +
-      `• 🟢 *إلغاء الإنذارات:* لعب 5 بطولات متتالية بـ 3/3 يمسح جميع الإنذارات السابقة!\n` +
+      `• 🟢 *إلغاء الإنذارات:* لعب 3 بطولات متتالية بـ 3/3 يمسح إنذاراً واحداً تلقائياً!\n` +
       `────────────────────\n` +
-      `2️⃣ 📱 *مهلة التسجيل في تيليجرام (3 أيام):*\n` +
-      `• كل لاعب ملزم بتأكيد حسابه في البوت والانضمام للقناة خلال *${rules.telegramDeadlineDays || 3} أيام* من انضمامه للدوري في اللعبة.\n` +
-      `• الحسابات غير المسجلة بعد 3 أيام = *طرد من الدوري*.\n` +
+      `2️⃣ 📱 *التسجيل في تيليجرام (شرط إلزامي للبطولات):*\n` +
+      `• كل عضو ملزم بتوثيق حسابه في البوت [@BratvaFCMBot](https://t.me/BratvaFCMBot) والانضمام للقناة والمجموعة.\n` +
+      `• 🚫 *غير مسجل في البوت = في الاحتياط التام.* لا يدخل أي لاعب غير موثق إلى التشكيلة الأساسية للبطولات نهائياً.\n` +
+      `• الحسابات غير المسجلة داخل اللعبة معرضة للاستبعاد عند امتلاء الدوري لإفساح المجال للاعبين النشطين.\n` +
       `────────────────────\n` +
-      `3️⃣ 🎯 *المعدل التهديفي (20+ هدف) وتشكيلة البوت التلقائية:*\n` +
-      `• الهدف الأدنى المطلوب: *${rules.minGoalsPerTournament}+ هدف* في البطولة.\n` +
-      `• 🤖 *البوت هو من يقرر حجم البطولة تلقائياً* (4v4 أو 8v8 أو 16v16 أو 24v24 أو 32v32) بحسب عدد اللاعبين الجاهزين في التشيك-إن!\n` +
+      `3️⃣ 🎯 *المستوى التهديفي والتشكيلة الذكية:*\n` +
+      `• 🤖 *البوت هو من يقرر حجم البطولة تلقائياً* (4v4 أو 8v8 أو 16v16 أو 24v24 أو 32v32) بحسب الجاهزين في التشيك-إن!\n` +
       `• مقاعد التشكيلة الأساسية تُمنح وفق المعايير الثلاثة:\n` +
       `  1. تأكيد الجاهزية [ 🟢 أنا جاهز ] قبل بدء البطولة\n` +
       `  2. سجل انضباط نظيف (0 إنذارات أولاً)\n` +
       `  3. أعلى معدل تهديفي للاعب في **آخر 5 مباريات لعبها هو شخصياً**!\n` +
+      `• 🔄 *المداورة التكتيكية:* تراجع معدل التهديف يضع اللاعب في الاحتياط لاستعادة مستواه (وليس طرداً عقابياً).\n` +
       `────────────────────\n` +
       `4️⃣ 🛡️ *الأعذار والغياب الطارئ:*\n` +
-      `• في حال وجود ظرف طارئ، يجب إبلاغ الإدارة في شات الفريق قبل إغلاق التسجيل.\n` +
+      `• في حال وجود ظرف طارئ، يجب إبلاغ الإدارة في شات الفريق قبل إغلاق التشيك-إن.\n` +
       `• يمكن للإدارة إسقاط الإنذار عبر أمر \`/forgive <اسم_اللاعب>\`.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `👥 *مجتمع تيليجرام الرسمي (القناة + المجموعة):*\n${COMMUNITY_URL}\n\n` +
@@ -3436,26 +3469,27 @@ function formatRules(lang = 'ru') {
     return `📜 *REGLAMENTO OFICIAL DE LA LIGA BRATVA FCM* 📜\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `1️⃣ ⚽ *Asistencia y Turnos (Obligatorio 3/3):*\n` +
-      `• Todo jugador debe completar sus *${rules.minTurnsPerTournament}/3* turnos en cada torneo.\n` +
+      `• Todo jugador en la alineación debe completar sus *${rules.minTurnsPerTournament}/3* turnos.\n` +
       `• Turnos incompletos (<3) = *1 Strike*.\n` +
       `• 🚨 *3 strikes en tus últimos 5 torneos* = *EXPULSIÓN AUTOMÁTICA*.\n` +
       `• ⛔ *2 torneos consecutivos con 0/3* = *EXPULSIÓN DIRECTA*.\n` +
-      `• 🟢 *Limpieza:* ¡5 partidos consecutivos limpios (3/3) eliminan todos los strikes!\n` +
+      `• 🟢 *Limpieza:* ¡3 partidos consecutivos limpios (3/3) eliminan 1 strike!\n` +
       `────────────────────\n` +
-      `2️⃣ 📱 *Plazo de Registro en Telegram (3 Días):*\n` +
-      `• Es obligatorio verificar tu cuenta en el bot y unirte al canal/grupo en *${rules.telegramDeadlineDays || 3} días*.\n` +
-      `• Sin registrar tras 3 días = *EXPULSIÓN* de la liga.\n` +
+      `2️⃣ 📱 *Verificación en Telegram (Obligatorio para LvL):*\n` +
+      `• Es obligatorio verificar tu cuenta en [@BratvaFCMBot](https://t.me/BratvaFCMBot) y unirte a la comunidad oficial.\n` +
+      `• 🚫 *Sin Telegram = Banquillo Estricto.* Los jugadores sin verificar no jugarán torneos LvL.\n` +
+      `• Las cuentas inactivas sin verificar podrán ser expulsadas al llenarse la liga para dar espacio a miembros activos.\n` +
       `────────────────────\n` +
-      `3️⃣ 🎯 *Objetivo de Goles (20+) y Alineación Auto por Bot:*\n` +
-      `• Objetivo mínimo: *${rules.minGoalsPerTournament}+ goles* por torneo.\n` +
-      `• 🤖 *El Bot decide automáticamente el tamaño del torneo* (4v4, 8v8, 16v16, 24v24, 32v32) según los jugadores listos en el check-in!\n` +
+      `3️⃣ 🎯 *Rendimiento y Alineación Inteligente:*\n` +
+      `• 🤖 *El Bot decide automáticamente el tamaño del torneo* (4v4, 8v8, 16v16, 24v24, 32v32) según el check-in!\n` +
       `• La titularidad se otorga por:\n` +
       `  1. Confirmar [ 🟢 Estoy Listo ] antes del partido\n` +
       `  2. 0 strikes (disciplina limpia prioritaria)\n` +
       `  3. Mayor promedio de goles en **tus propios últimos 5 partidos jugados**!\n` +
+      `• 🔄 *Rotación Táctica:* Un bajón goleador sitúa al jugador en el banquillo para recuperar forma (no es sanción de expulsión).\n` +
       `────────────────────\n` +
       `4️⃣ 🛡️ *Avisos y Justificaciones:*\n` +
-      `• En caso de emergencia, avisa a los administradores antes del cierre.\n` +
+      `• En caso de emergencia, avisa a los administradores antes del cierre del check-in.\n` +
       `• Los administradores pueden justificar con \`/forgive <jugador>\`.\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `👥 *Comunidad de Telegram (Canal + Grupo):*\n${COMMUNITY_URL}\n\n` +
@@ -3466,26 +3500,27 @@ function formatRules(lang = 'ru') {
   return `📜 *ОФИЦИАЛЬНЫЙ СВОД ПРАВИЛ БРАТВА FCM* 📜\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `1️⃣ ⚽ *Явка и Ходы (Обязательно 3/3):*\n` +
-    `• Каждый участник обязан сыграть все *${rules.minTurnsPerTournament}/3* ходов в каждом турнире.\n` +
+    `• Каждый участник основы обязан сыграть все *${rules.minTurnsPerTournament}/3* ходов.\n` +
     `• Несыгранные ходы (<3) = *1 Страйк*.\n` +
     `• 🚨 *3 страйка в последних 5 турнирах* = *АВТОМАТИЧЕСКИЙ КИК*.\n` +
     `• ⛔ *2 турнира подряд по 0/3* = *ПРЯМОЙ КИК*.\n` +
-    `• 🟢 *Сгорание:* 5 чистых матчей подряд с 3/3 полностью снимают все страйки!\n` +
+    `• 🟢 *Сгорание:* 3 чистых матча подряд с 3/3 снимают 1 страйк!\n` +
     `────────────────────\n` +
-    `2️⃣ 📱 *Срок регистрации в Telegram (3 дня):*\n` +
-    `• В течение *${rules.telegramDeadlineDays || 3} дней* игрок обязан подтвердить аккаунт в боте и вступить в канал/чат.\n` +
-    `• Не зарегистрированные через 3 дня = *КИК* из лиги.\n` +
+    `2️⃣ 📱 *Верификация в Telegram (Обязательно для LvL):*\n` +
+    `• Каждый участник обязан подтвердить аккаунт в боте [@BratvaFCMBot](https://t.me/BratvaFCMBot) и вступить в сообщество.\n` +
+    `• 🚫 *Нет в Telegram = Строго в запасе.* Неверифицированные игроки не допускаются в основу на турниры LvL.\n` +
+    `• Неактивные аккаунты без верификации подлежат исключению при заполнении лиги для освобождения мест активным бойцам.\n` +
     `────────────────────\n` +
-    `3️⃣ 🎯 *Планка голов и Авто-выбор основы Ботом:*\n` +
-    `• Цель лиги: *${rules.minGoalsPerTournament}+ голов* за турнир.\n` +
-    `• 🤖 *Бот автоматически определяет формат матча* (4x4, 8x8, 16x16, 24x24, 32x32) по числу готовых игроков в чек-ине!\n` +
+    `3️⃣ 🎯 *Результативность и Умный выбор основы:*\n` +
+    `• 🤖 *Бот автоматически определяет формат матча* (4x4, 8x8, 16x16, 24x24, 32x32) по числу готовых в чек-ине!\n` +
     `• Стартовый состав отбирается строго по критериям:\n` +
     `  1. Чек-ин готовности [ 🟢 Готов к игре ] перед матчем\n` +
     `  2. 0 страйков (строгая дисциплина в приоритете)\n` +
     `  3. Лучший средний показатель забитых голов в **своих последних 5 матчах**!\n` +
+    `• 🔄 *Тактическая ротация:* Спад результативности переводит игрока на банку для набора формы (без штрафного кика).\n` +
     `────────────────────\n` +
     `4️⃣ 🛡️ *Предупреждения и Уважительные причины:*\n` +
-    `• Предупредите админов в чате ДО закрытия сбора.\n` +
+    `• Предупредите админов в чате ДО закрытия чек-ина.\n` +
     `• Админ может аннулировать страйк командой \`/forgive <игрок>\`.\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `👥 *Сообщество лиги (Канал + Чат):*\n${COMMUNITY_URL}\n\n` +
@@ -5578,7 +5613,7 @@ export default async function handler(req, res) {
         const welcomeDm = `👋 *Welcome to BRATVA FCM!* ⚜️\n\n` +
           `⚠️ *IMPORTANT TO READ (هام جداً للقراءة / ВАЖНО К ПРОЧТЕНИЮ):*\n` +
           `Please read our official League Rules to avoid strikes and removal from the team!\n\n` +
-          `⚽ *Core Rules:* Complete all 3/3 turns in tournaments & register your in-game name within 3 days.\n\n` +
+          `⚽ *Core Rules:* Complete all 3/3 turns in tournaments & verify your account in this bot.\n\n` +
           `👉 *Tap button below to read the complete rulebook:*`;
 
         const dmKeys = {
@@ -5609,8 +5644,8 @@ export default async function handler(req, res) {
       const isPublicAction = data.startsWith('tab_') || data.startsWith('ci_') || data.startsWith('fmt_lineup_') ||
                              data === 'cmd_rules' || data === 'cmd_top' || data === 'cmd_lineup' || data === 'cmd_checkin' ||
                              data === 'cmd_recap' || data === 'cmd_mvp' || data === 'cmd_tournaments' || data === 'cmd_mystats' ||
-                             data === 'cmd_strikes' || data === 'cmd_kicklist' || data === 'cmd_menu' || data === 'cmd_pending' ||
-                             data === 'cmd_warning_lastchance' || data === 'cmd_warning_kicked';
+                             data === 'cmd_strikes' || data === 'cmd_kicklist' || data === 'cmd_menu' || data === 'cmd_tg_notice' ||
+                             data === 'cmd_pending' || data === 'cmd_warning_lastchance' || data === 'cmd_warning_kicked';
 
       // If clicked inside a channel or group, allow in-place translation tabs (tab_) and check-in buttons (ci_)
       if (!isCbPrivate && !data.startsWith('tab_') && !data.startsWith('ci_')) {
@@ -5801,6 +5836,9 @@ export default async function handler(req, res) {
         } else if (category === 'kicked' || category === 'removal') {
           updatedText = await formatKickedWarning(targetLang);
           updatedKeyboard = getKickedWarningKeyboard(targetLang);
+        } else if (category === 'tgnotice' || category === 'notice') {
+          updatedText = formatTelegramNotice(targetLang);
+          updatedKeyboard = getLanguageKeyboard('tgnotice', '0', targetLang, isCbPrivate);
         } else if (category === 'welcome') {
           updatedText = formatChannelWelcome(targetLang);
           updatedKeyboard = getLanguageKeyboard('welcome', '0', targetLang, false);
@@ -6340,6 +6378,38 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
+      if (data === 'cmd_tg_notice') {
+        const text = formatTelegramNotice('ru');
+        await sendTelegramMessage(chatId, text, getLanguageKeyboard('tgnotice', '0', 'ru', true));
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data === 'bcast_tgnotice') {
+        const noticeMsg = formatTelegramNotice('ru');
+        const channelKey = {
+          inline_keyboard: [
+            [
+              { text: '🤖 Register in Bot / سجل الآن بالبوت', url: 'https://t.me/BratvaFCMBot?start=register' }
+            ],
+            [
+              { text: '👥 Official Channel & Chat / القناة والمجموعة', url: COMMUNITY_URL }
+            ],
+            [
+              { text: '🌐 Official League Website', url: WEBSITE_URL }
+            ]
+          ]
+        };
+        await sendTelegramMessage(CHANNEL_ID, noticeMsg, channelKey);
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: '📢 Registration Notice broadcasted to channel!',
+          show_alert: true
+        });
+        await sendTelegramMessage(chatId, `✅ *Registration Notice has been published to channel ${CHANNEL_ID}!*`, getLanguageKeyboard('tgnotice', '0', 'ru', true));
+        return sendResponse(res, 200, 'OK');
+      }
+
       if (data === 'cmd_strikes') {
         const text = await formatStrikes('ru');
         await sendTelegramMessage(chatId, text, getLanguageKeyboard('strikes', '0', 'ru', true));
@@ -6604,6 +6674,12 @@ export default async function handler(req, res) {
       if (text.startsWith('/rules')) {
         const rules = formatRules('ru');
         await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', 'ru', false));
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (text.startsWith('/tgnotice') || text.startsWith('/joinnotice')) {
+        const noticeMsg = formatTelegramNotice('ru');
+        await sendTelegramMessage(chatId, noticeMsg, getLanguageKeyboard('tgnotice', '0', 'ru', false));
         return sendResponse(res, 200, 'OK');
       }
 
@@ -7059,6 +7135,12 @@ export default async function handler(req, res) {
     if (text.startsWith('/rules')) {
       const rules = formatRules('ru');
       await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', 'ru', true));
+      return sendResponse(res, 200, 'OK');
+    }
+
+    if (text.startsWith('/tgnotice') || text.startsWith('/joinnotice')) {
+      const noticeMsg = formatTelegramNotice('ru');
+      await sendTelegramMessage(chatId, noticeMsg, getLanguageKeyboard('tgnotice', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
     }
 
