@@ -2288,79 +2288,399 @@ function getCheckInKeyboard(currentLang = 'ru', includeBcast = false) {
   return { inline_keyboard: rows };
 }
 
-async function formatTournaments(lang = 'ru') {
+async function getFilteredTournaments(filter = '7') {
   let list = [];
   try {
     const tIndex = await getTournamentsIndex();
     const entries = Object.entries(tIndex || {});
     if (entries.length > 0) {
-      list = entries.slice(-5).reverse().map(([id, meta]) => ({ id, ...meta }));
+      list = entries.map(([id, meta]) => ({ id, ...meta }));
     }
   } catch (e) {}
 
   if (list.length === 0) {
     const { tournaments } = loadLeagueData();
-    list = (tournaments || []).slice(0, 5);
+    list = (tournaments || []).map(t => ({ id: t.tournament_id || t.id, ...t }));
   }
 
-  if (list.length === 0) return 'No tournaments recorded yet.';
-
-  const cards = list.map(t => {
-    let statusBadge = '🟢 ПОБЕДА';
-    if (lang === 'en') {
-      statusBadge = t.result === 'win' ? '🟢 WIN' : (t.result === 'draw' ? '🟡 DRAW' : '🔴 DEFEAT');
-    } else if (lang === 'ar') {
-      statusBadge = t.result === 'win' ? '🟢 فوز' : (t.result === 'draw' ? '🟡 تعادل' : '🔴 خسارة');
-    } else if (lang === 'es') {
-      statusBadge = t.result === 'win' ? '🟢 VICTORIA' : (t.result === 'draw' ? '🟡 EMPATE' : '🔴 DERROTA');
-    } else {
-      statusBadge = t.result === 'win' ? '🟢 ПОБЕДА' : (t.result === 'draw' ? '🟡 НИЧЬЯ' : '🔴 ПОРАЖЕНИЕ');
-    }
-
-    let cleanDate = t.date || '';
-    if (/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
-      const [y, m, d] = cleanDate.split('-');
-      cleanDate = `${d}.${m}.${y}`;
-    }
-
-    const oppIso = bidiIsolate(t.opponent_league || 'OPPONENT');
-    const vsWord = lang === 'ar' ? 'ضد' : 'vs';
-
-    return `${statusBadge}  •  *${t.our_total_goals} : ${t.opponent_total_goals}*\n` +
-           `⚔️ ${vsWord} *${oppIso}*\n` +
-           `📅 *${cleanDate}*`;
+  // Sort descending by date/timestamp (latest tournament first!)
+  list.sort((a, b) => {
+    const dateA = a.date || (a.id ? a.id.slice(0, 10) : '');
+    const dateB = b.date || (b.id ? b.id.slice(0, 10) : '');
+    if (dateA !== dateB) return dateB.localeCompare(dateA);
+    const timeA = a.timestamp || 0;
+    const timeB = b.timestamp || 0;
+    if (timeA !== timeB) return timeB - timeA;
+    return (b.id || '').localeCompare(a.id || '');
   });
 
-  const divider = '\n────────────────────\n';
-  const content = cards.join(divider);
-
-  if (lang === 'en') {
-    return `🏆 *RECENT БРАТВА TOURNAMENTS*\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `${content}\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🌐 *Full Match History:*\n${WEBSITE_URL}`;
+  if (filter === '1') {
+    return list.slice(0, 1);
+  } else if (filter === '7') {
+    return list.slice(0, 7);
+  } else if (filter === '30') {
+    return list.slice(0, 30);
+  } else if (filter === 'all') {
+    return list;
+  } else if (filter === 's26') {
+    return list.filter(t => {
+      if (t.season === 27) return false;
+      const d = t.date || (t.id ? t.id.slice(0, 10) : '');
+      return d < '2026-09-24' || t.season === 26;
+    });
+  } else if (filter === 's27') {
+    return list.filter(t => {
+      if (t.season === 27) return true;
+      const d = t.date || (t.id ? t.id.slice(0, 10) : '');
+      return d >= '2026-09-24';
+    });
   }
+  return list.slice(0, 7);
+}
+
+function getTournamentsBrowserKeyboard(filter = '7', currentLang = 'ru', tournamentsList = null) {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  const f1Label = filter === '1' ? '• ⚡ 1 •' : '⚡ 1';
+  const f7Label = filter === '7' ? (currentLang === 'ar' ? '• 7️⃣ آخر 7 •' : currentLang === 'es' ? '• 7️⃣ Últimos 7 •' : currentLang === 'en' ? '• 7️⃣ Last 7 •' : '• 7️⃣ Посл. 7 •')
+                                 : (currentLang === 'ar' ? '7️⃣ آخر 7' : currentLang === 'es' ? '7️⃣ Últimos 7' : currentLang === 'en' ? '7️⃣ Last 7' : '7️⃣ Посл. 7');
+  const f30Label = filter === '30' ? (currentLang === 'ar' ? '• 3️⃣0️⃣ 30 •' : currentLang === 'es' ? '• 3️⃣0️⃣ 30 •' : currentLang === 'en' ? '• 3️⃣0️⃣ 30 •' : '• 3️⃣0️⃣ 30 •')
+                                   : '3️⃣0️⃣ 30';
+  const fAllLabel = filter === 'all' ? (currentLang === 'ar' ? '• 🌐 الكل •' : currentLang === 'es' ? '• 🌐 Todos •' : currentLang === 'en' ? '• 🌐 All •' : '• 🌐 Все •')
+                                     : (currentLang === 'ar' ? '🌐 الكل' : currentLang === 'es' ? '🌐 Todos' : currentLang === 'en' ? '🌐 All' : '🌐 Все');
+
+  const s26Label = filter === 's26' ? (currentLang === 'ar' ? '• 🏆 الموسم 26 •' : currentLang === 'es' ? '• 🏆 Temporada 26 •' : currentLang === 'en' ? '• 🏆 Season 26 •' : '• 🏆 Сезон 26 •')
+                                    : (currentLang === 'ar' ? '🏆 الموسم 26' : currentLang === 'es' ? '🏆 Temporada 26' : currentLang === 'en' ? '🏆 Season 26' : '🏆 Сезон 26');
+  const s27Label = filter === 's27' ? (currentLang === 'ar' ? '• 🏆 الموسم 27 •' : currentLang === 'es' ? '• 🏆 Temporada 27 •' : currentLang === 'en' ? '• 🏆 Season 27 •' : '• 🏆 Сезон 27 •')
+                                    : (currentLang === 'ar' ? '🏆 الموسم 27' : currentLang === 'es' ? '🏆 Temporada 27' : currentLang === 'en' ? '🏆 Season 27' : '🏆 Сезон 27');
+
+  const rows = [
+    [
+      { text: f1Label, callback_data: `filter_t_1_${currentLang}` },
+      { text: f7Label, callback_data: `filter_t_7_${currentLang}` },
+      { text: f30Label, callback_data: `filter_t_30_${currentLang}` },
+      { text: fAllLabel, callback_data: `filter_t_all_${currentLang}` }
+    ],
+    [
+      { text: s26Label, callback_data: `filter_t_s26_${currentLang}` },
+      { text: s27Label, callback_data: `filter_t_s27_${currentLang}` }
+    ]
+  ];
+
+  if (Array.isArray(tournamentsList)) {
+    tournamentsList.forEach(t => {
+      const emoji = t.result === 'win' ? '🟢' : (t.result === 'draw' ? '🟡' : '🔴');
+      const ourScore = t.our_total_goals != null ? t.our_total_goals : (t.our_score || 0);
+      const oppScore = t.opponent_total_goals != null ? t.opponent_total_goals : (t.opp_score || 0);
+
+      let oppName = t.opponent_league || 'Opponent';
+      if (oppName.length > 15) {
+        oppName = oppName.slice(0, 14) + '…';
+      }
+
+      let dateStr = '';
+      if (t.date && /^\d{4}-\d{2}-\d{2}$/.test(t.date)) {
+        const [, m, d] = t.date.split('-');
+        dateStr = ` (${d}.${m})`;
+      }
+
+      const btnText = `${emoji} ${ourScore}:${oppScore} vs ${oppName}${dateStr}`;
+      rows.push([
+        { text: btnText, callback_data: `view_t_${t.id}_${filter}_${currentLang}` }
+      ]);
+    });
+  }
+
+  // Language switcher row
+  rows.push([
+    { text: ruLabel, callback_data: `filter_t_${filter}_ru` },
+    { text: enLabel, callback_data: `filter_t_${filter}_en` },
+    { text: arLabel, callback_data: `filter_t_${filter}_ar` },
+    { text: esLabel, callback_data: `filter_t_${filter}_es` }
+  ]);
+
+  // Main menu and website
+  const menuLabel = currentLang === 'ar' ? '📋 العودة للقائمة الرئيسية' :
+                    currentLang === 'es' ? '📋 Menú Principal' :
+                    currentLang === 'en' ? '📋 Main Menu' : '📋 Главное Меню';
+  const siteLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
+                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
+
+  rows.push([
+    { text: menuLabel, callback_data: 'cmd_menu' }
+  ]);
+  rows.push([
+    { text: siteLabel, url: WEBSITE_URL }
+  ]);
+
+  return { inline_keyboard: rows };
+}
+
+async function formatTournamentsBrowser(filter = '7', lang = 'ru') {
+  const list = await getFilteredTournaments(filter);
+
+  let filterName = '';
   if (lang === 'ar') {
-    return `🏆 *بطولات دوري БРАТВА الأخيرة*\n` +
+    filterName = filter === '1' ? 'آخر مباراة' :
+                 filter === '7' ? 'آخر 7 مباريات' :
+                 filter === '30' ? 'آخر 30 مباراة' :
+                 filter === 'all' ? 'جميع المباريات المسجلة' :
+                 filter === 's26' ? 'الموسم 26' : 'الموسم 27';
+  } else if (lang === 'es') {
+    filterName = filter === '1' ? 'Último partido' :
+                 filter === '7' ? 'Últimos 7 torneos' :
+                 filter === '30' ? 'Últimos 30 torneos' :
+                 filter === 'all' ? 'Todos los torneos' :
+                 filter === 's26' ? 'Temporada 26' : 'Temporada 27';
+  } else if (lang === 'en') {
+    filterName = filter === '1' ? 'Last Tournament' :
+                 filter === '7' ? 'Last 7 Tournaments' :
+                 filter === '30' ? 'Last 30 Tournaments' :
+                 filter === 'all' ? 'All Tournaments' :
+                 filter === 's26' ? 'Season 26' : 'Season 27';
+  } else {
+    filterName = filter === '1' ? 'Последний матч' :
+                 filter === '7' ? 'Последние 7 матчей' :
+                 filter === '30' ? 'Последние 30 матчей' :
+                 filter === 'all' ? 'Все турниры' :
+                 filter === 's26' ? 'Сезон 26' : 'Сезон 27';
+  }
+
+  if (list.length === 0) {
+    if (filter === 's27') {
+      if (lang === 'ar') {
+        return `🏆 *أرشيف بطولات دوري БРАТВА FCM — الموسم 27* ⏳\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `✨ *موسم FCM 27 ينطلق الليلة!*\n` +
+          `• لم تُلعب أي بطولة في الموسم 27 حتى الآن.\n` +
+          `• فور انتهاء أولى بطولات الموسم، ستظهر تلقائياً في هذه القائمة مع إحصائيات جميع اللاعبين!\n\n` +
+          `👉 *يمكنك مراجعة مباريات الموسم 26 بالضغط على زر [ 🏆 الموسم 26 ] بالأسفل!*`;
+      }
+      if (lang === 'en') {
+        return `🏆 *BRATVA FCM TOURNAMENT ARCHIVE — SEASON 27* ⏳\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `✨ *Season 27 Kickoff is Tonight!*\n` +
+          `• No matches have been played yet in Season 27.\n` +
+          `• As soon as the first tournament concludes, it will appear here automatically with full player scorecards!\n\n` +
+          `👉 *You can review Season 26 matches by tapping [ 🏆 Season 26 ] below!*`;
+      }
+      if (lang === 'es') {
+        return `🏆 *ARCHIVO DE TORNEOS DE BRATVA FCM — TEMPORADA 27* ⏳\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `✨ *¡El saque inicial de la Temporada 27 es esta noche!*\n` +
+          `• Aún no se han jugado partidos en la Temporada 27.\n` +
+          `• ¡En cuanto termine el primer torneo, aparecerá aquí con los datos de todos los jugadores!\n\n` +
+          `👉 *¡Puedes ver los torneos de la Temporada 26 pulsando [ 🏆 Temporada 26 ] abajo!*`;
+      }
+      return `🏆 *АРХИВ ТУРНИРОВ БРАТВА FCM — СЕЗОН 27* ⏳\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `✨ *Старт Сезона 27 уже сегодня ночью!*\n` +
+        `• В новом сезоне пока не сыграно матчей.\n` +
+        `• Как только завершится первый турнир, он автоматически появится здесь со статистикой всех игроков!\n\n` +
+        `👉 *Вы можете просмотреть матчи прошлого сезона, нажав [ 🏆 Сезон 26 ] ниже!*`;
+    }
+
+    return lang === 'ar' ? '⚠️ لا توجد بطولات مسجلة حالياً.' :
+           lang === 'es' ? '⚠️ No hay torneos registrados actualmente.' :
+           lang === 'en' ? '⚠️ No tournaments recorded currently.' : '⚠️ Нет записей о турнирах.';
+  }
+
+  if (lang === 'ar') {
+    return `🏆 *سجل وأرشيف بطولات دوري БРАТВА FCM* 📊\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `${content}\n` +
+      `📌 *اختر أي بطولة من الأزرار بالأسفل لعرض تفاصيلها الكاملة:*\n` +
+      `⚡ سيعرض لك البوت قائمة المشاركين كاملة مرتبة حسب عدد الأهداف المسجلة (من الأعلى للأدنى)!\n\n` +
+      `🔍 *الفلتر النشط:* *${filterName}*\n` +
+      `📊 *عدد البطولات المعروضة:* *${list.length}* مباراة`;
+  }
+  if (lang === 'en') {
+    return `🏆 *BRATVA FCM TOURNAMENT HISTORY ARCHIVE* 📊\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🌐 *سجل المباريات الكامل:*\n${WEBSITE_URL}`;
+      `📌 *Tap any tournament button below to view the full participant scorecard:*\n` +
+      `⚡ The bot will display all participants ranked by goals scored (top to bottom)!\n\n` +
+      `🔍 *Active Filter:* *${filterName}*\n` +
+      `📊 *Tournaments Displayed:* *${list.length}* matches`;
   }
   if (lang === 'es') {
-    return `🏆 *ÚLTIMOS TORNEOS DE БРАТВА*\n` +
+    return `🏆 *HISTORIAL Y ARCHIVO DE TORNEOS BRATVA FCM* 📊\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `${content}\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🌐 *Historial completo:*\n${WEBSITE_URL}`;
+      `📌 *Toca cualquier torneo abajo para ver el acta completa:*\n` +
+      `⚡ ¡El bot mostrará la lista de todos los participantes ordenada por goles (de mayor a menor)!\n\n` +
+      `🔍 *Filtro activo:* *${filterName}*\n` +
+      `📊 *Torneos mostrados:* *${list.length}* partidos`;
   }
-  return `🏆 *ПОСЛЕДНИЕ ТУРНИРЫ БРАТВА*\n` +
+
+  return `🏆 *АРХИВ И ИСТОРИЯ ТУРНИРОВ БРАТВА FCM* 📊\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `${content}\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n` +
-    `🌐 *Полная история матчей:*\n${WEBSITE_URL}`;
+    `📌 *Нажмите на любой турнир в кнопках ниже для детального протокола:*\n` +
+    `⚡ Бот покажет полный список участников с голами и ходами (от лучших к худшим)!\n\n` +
+    `🔍 *Активный фильтр:* *${filterName}*\n` +
+    `📊 *Отображается матчей:* *${list.length}*`;
 }
+
+function formatTournamentScorecard(t, lang = 'ru') {
+  if (!t) return 'No match data available.';
+  const opp = bidiIsolate(t.opponent_league || 'OPPONENT');
+  const ourScore = t.our_total_goals != null ? t.our_total_goals : (t.our_score || 0);
+  const oppScore = t.opponent_total_goals != null ? t.opponent_total_goals : (t.opp_score || 0);
+  const isWin = ourScore > oppScore;
+  const isDraw = ourScore === oppScore;
+
+  let cleanDate = t.date || '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
+    const [y, m, d] = cleanDate.split('-');
+    cleanDate = `${d}.${m}.${y}`;
+  }
+
+  // Sort participants by goals descending
+  const matches = ((t.matches || []).slice()).sort((a, b) => {
+    const gA = a.goals_for !== undefined ? a.goals_for : 0;
+    const gB = b.goals_for !== undefined ? b.goals_for : 0;
+    if (gB !== gA) return gB - gA;
+    const tA = a.turns_played !== undefined ? a.turns_played : 0;
+    const tB = b.turns_played !== undefined ? b.turns_played : 0;
+    return tB - tA;
+  });
+
+  const totalTurnsPlayed = t.total_turns_played || matches.reduce((sum, m) => sum + (m.turns_played || 0), 0);
+  const maxPossibleTurns = t.max_possible_turns || (matches.length * 3);
+  const squadSize = matches.length;
+
+  let headerOutcome = '';
+  let subTitle = '';
+
+  if (lang === 'ar') {
+    headerOutcome = isWin ? '🟢 *فوز مستحق لكتيبة BRATVA*' : (isDraw ? '🟡 *تعادل شاق وقوي*' : '🔴 *خسارة في هذه الجولة*');
+    subTitle = `👥 *سجل هدافي ومشاركي المباراة (من الأعلى للأدنى):*`;
+  } else if (lang === 'en') {
+    headerOutcome = isWin ? '🟢 *BRATVA FCM: VICTORY!*' : (isDraw ? '🟡 *HARD-FOUGHT DRAW*' : '🔴 *MATCH RESULT: DEFEAT*');
+    subTitle = `👥 *PARTICIPANT SCORECARD (Ranked by Goals):*`;
+  } else if (lang === 'es') {
+    headerOutcome = isWin ? '🟢 *¡VICTORIA DE BRATVA FCM!*' : (isDraw ? '🟡 *EMPATE MUY DISPUTADO*' : '🔴 *RESULTADO: DERROTA*');
+    subTitle = `👥 *ACTA DE PARTICIPANTES (De mayor a menor):*`;
+  } else {
+    // Russian
+    headerOutcome = isWin ? '🟢 *ПОБЕДА БРАТВА FCM!*' : (isDraw ? '🟡 *БОЕВАЯ НИЧЬЯ*' : '🔴 *ИТОГ МАТЧА: ПОРАЖЕНИЕ*');
+    subTitle = `👥 *ПРОТОКОЛ УЧАСТНИКОВ (По забитым голам):*`;
+  }
+
+  const rows = matches.map((m, i) => {
+    const rank = i + 1;
+    const medal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : `${rank < 10 ? ' ' : ''}${rank}.`));
+    const name = bidiIsolate(m.player_display_name || m.player_id || `Player ${rank}`);
+    const goals = m.goals_for !== undefined ? m.goals_for : 0;
+    const turns = m.turns_played !== undefined ? m.turns_played : 0;
+    const turnWarn = turns < 3 ? ' ❌' : '';
+
+    const turnText = lang === 'ar' ? `${turns}/3 جولات` :
+                     lang === 'es' ? `${turns}/3 turnos` :
+                     lang === 'en' ? `${turns}/3 turns` : `${turns}/3 ходов`;
+
+    const goalWord = lang === 'ar' ? 'هدف' :
+                     lang === 'es' ? 'goles' :
+                     lang === 'en' ? 'goals' : 'голов';
+
+    return `${medal} *${name}* — *${goals}* ${goalWord} (${turnText})${turnWarn}`;
+  });
+
+  const playerList = rows.length > 0 ? rows.join('\n') : (lang === 'ar' ? '_لا توجد تفاصيل للمشاركين_' : '_No participant details recorded_');
+
+  if (lang === 'ar') {
+    return `🏆 *دوري БРАТВА FCM ضد ${opp}* ⚔️\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `${headerOutcome}\n` +
+      `📊 *النتيجة النهائية:* *${ourScore}* : *${oppScore}*\n` +
+      `📅 *التاريخ:* ${cleanDate}  |  👥 *الحجم:* ${squadSize} ضد ${squadSize}\n` +
+      `⚽ *إجمالي الهجمات الملعوبة:* ${totalTurnsPlayed}/${maxPossibleTurns}\n` +
+      `────────────────────\n` +
+      `${subTitle}\n\n` +
+      `${playerList}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🌐 *سجل بطولات الرابطة كاملة في الموقع الرسمي:*`;
+  } else if (lang === 'en') {
+    return `🏆 *BRATVA FCM vs ${opp}* ⚔️\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `${headerOutcome}\n` +
+      `📊 *Final Score:* *${ourScore}* : *${oppScore}*\n` +
+      `📅 *Date:* ${cleanDate}  |  👥 *Format:* ${squadSize}v${squadSize}\n` +
+      `⚽ *Turns Played:* ${totalTurnsPlayed}/${maxPossibleTurns}\n` +
+      `────────────────────\n` +
+      `${subTitle}\n\n` +
+      `${playerList}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🌐 *Official League Match Center:*`;
+  } else if (lang === 'es') {
+    return `🏆 *BRATVA FCM vs ${opp}* ⚔️\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `${headerOutcome}\n` +
+      `📊 *Marcador Final:* *${ourScore}* : *${oppScore}*\n` +
+      `📅 *Fecha:* ${cleanDate}  |  👥 *Formato:* ${squadSize}v${squadSize}\n` +
+      `⚽ *Turnos jugados:* ${totalTurnsPlayed}/${maxPossibleTurns}\n` +
+      `────────────────────\n` +
+      `${subTitle}\n\n` +
+      `${playerList}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🌐 *Sitio Oficial de la Liga:*`;
+  } else {
+    // Russian
+    return `🏆 *БРАТВА FCM vs ${opp}* ⚔️\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `${headerOutcome}\n` +
+      `📊 *Итоговый счёт:* *${ourScore}* : *${oppScore}*\n` +
+      `📅 *Дата:* ${cleanDate}  |  👥 *Формат:* ${squadSize}x${squadSize}\n` +
+      `⚽ *Сыграно ходов:* ${totalTurnsPlayed}/${maxPossibleTurns}\n` +
+      `────────────────────\n` +
+      `${subTitle}\n\n` +
+      `${playerList}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🌐 *Официальный сайт лиги:*`;
+  }
+}
+
+function getTournamentScorecardKeyboard(tId, filter = '7', currentLang = 'ru') {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  const backLabel = currentLang === 'ar' ? '🔙 العودة لقائمة البطولات' :
+                    currentLang === 'es' ? '🔙 Volver a Torneos' :
+                    currentLang === 'en' ? '🔙 Back to Tournaments' : '🔙 Назад к турнирам';
+
+  const menuLabel = currentLang === 'ar' ? '📋 العودة للقائمة الرئيسية' :
+                    currentLang === 'es' ? '📋 Menú Principal' :
+                    currentLang === 'en' ? '📋 Main Menu' : '📋 Главное Меню';
+
+  const siteLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
+                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
+
+  return {
+    inline_keyboard: [
+      [
+        { text: backLabel, callback_data: `back_t_${filter}_${currentLang}` }
+      ],
+      [
+        { text: ruLabel, callback_data: `tab_tdetail_${tId}_${filter}_ru` },
+        { text: enLabel, callback_data: `tab_tdetail_${tId}_${filter}_en` },
+        { text: arLabel, callback_data: `tab_tdetail_${tId}_${filter}_ar` },
+        { text: esLabel, callback_data: `tab_tdetail_${tId}_${filter}_es` }
+      ],
+      [
+        { text: menuLabel, callback_data: 'cmd_menu' }
+      ],
+      [
+        { text: siteLabel, url: `${WEBSITE_URL}?tournament=${encodeURIComponent(tId)}` }
+      ]
+    ]
+  };
+}
+
+const formatTournaments = (lang = 'ru') => formatTournamentsBrowser('7', lang);
 
 function findPlayerByQuery(query) {
   if (!query || typeof query !== 'string') return null;
@@ -6133,12 +6453,13 @@ export default async function handler(req, res) {
 
       // Actions accessible to all squad members:
       const isPublicAction = data.startsWith('tab_') || data.startsWith('ci_') || data.startsWith('fmt_lineup_') || data.startsWith('verify_sub_') ||
+                             data.startsWith('filter_t_') || data.startsWith('view_t_') || data.startsWith('back_t_') ||
                              data === 'cmd_rules' || data === 'cmd_top' || data === 'cmd_lineup' || data === 'cmd_checkin' ||
                              data === 'cmd_recap' || data === 'cmd_mvp' || data === 'cmd_tournaments' || data === 'cmd_mystats' ||
                              data === 'cmd_menu';
 
       // If clicked inside a channel or group, allow in-place translation tabs (tab_) and check-in buttons (ci_)
-      if (!isCbPrivate && !data.startsWith('tab_') && !data.startsWith('ci_')) {
+      if (!isCbPrivate && !data.startsWith('tab_') && !data.startsWith('ci_') && !data.startsWith('filter_t_') && !data.startsWith('view_t_') && !data.startsWith('back_t_')) {
         await telegramRequest('answerCallbackQuery', {
           callback_query_id: cb.id,
           text: '⚠️ Bot commands & menus are only available in private DM @BratvaFCMBot',
@@ -6305,8 +6626,9 @@ export default async function handler(req, res) {
           updatedText = formatCheckInPrompt(targetLang);
           updatedKeyboard = getCheckInKeyboard(targetLang, isCbPrivate);
         } else if (category === 'tournaments') {
-          updatedText = await formatTournaments(targetLang);
-          updatedKeyboard = getLanguageKeyboard('tournaments', '0', targetLang, isCbPrivate);
+          const list = await getFilteredTournaments('7');
+          updatedText = await formatTournamentsBrowser('7', targetLang);
+          updatedKeyboard = getTournamentsBrowserKeyboard('7', targetLang, list);
         } else if (category === 'kicklist') {
           updatedText = await formatKicklist(targetLang);
           updatedKeyboard = getLanguageKeyboard('kicklist', '0', targetLang, isCbPrivate);
@@ -6978,9 +7300,77 @@ export default async function handler(req, res) {
       }
 
       if (data === 'cmd_tournaments') {
-        const text = await formatTournaments('ru');
-        await sendTelegramMessage(chatId, text, getLanguageKeyboard('tournaments', '0', 'ru', true));
-        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
+        const userLang = detectUserLang(cb.from, 'ru');
+        const list = await getFilteredTournaments('7');
+        const text = await formatTournamentsBrowser('7', userLang);
+        const keys = getTournamentsBrowserKeyboard('7', userLang, list);
+        if (cb.message && cb.message.message_id) {
+          await editTelegramMessage(chatId, cb.message.message_id, text, keys);
+        } else {
+          await sendTelegramMessage(chatId, text, keys);
+        }
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id }).catch(() => {});
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data.startsWith('filter_t_') || data.startsWith('back_t_')) {
+        const parts = data.split('_');
+        const filter = parts[2] || '7';
+        const targetLang = parts[3] || 'ru';
+        const list = await getFilteredTournaments(filter);
+        const text = await formatTournamentsBrowser(filter, targetLang);
+        const keys = getTournamentsBrowserKeyboard(filter, targetLang, list);
+        if (cb.message && cb.message.message_id) {
+          await editTelegramMessage(chatId, cb.message.message_id, text, keys);
+        } else {
+          await sendTelegramMessage(chatId, text, keys);
+        }
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id }).catch(() => {});
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data.startsWith('view_t_')) {
+        const parts = data.replace('view_t_', '').split('_');
+        const targetLang = parts[parts.length - 1] || 'ru';
+        const filter = parts[parts.length - 2] || '7';
+        const tId = parts.slice(0, parts.length - 2).join('_');
+
+        const t = await getTournamentById(tId);
+        if (!t) {
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: '⚠️ Tournament details not found',
+            show_alert: true
+          }).catch(() => {});
+          return sendResponse(res, 200, 'OK');
+        }
+
+        const scorecardMsg = formatTournamentScorecard(t, targetLang);
+        const scorecardKeys = getTournamentScorecardKeyboard(tId, filter, targetLang);
+        if (cb.message && cb.message.message_id) {
+          await editTelegramMessage(chatId, cb.message.message_id, scorecardMsg, scorecardKeys);
+        } else {
+          await sendTelegramMessage(chatId, scorecardMsg, scorecardKeys);
+        }
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id }).catch(() => {});
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (data.startsWith('tab_tdetail_')) {
+        const parts = data.replace('tab_tdetail_', '').split('_');
+        const targetLang = parts[parts.length - 1] || 'ru';
+        const filter = parts[parts.length - 2] || '7';
+        const tId = parts.slice(0, parts.length - 2).join('_');
+
+        const t = await getTournamentById(tId);
+        if (t) {
+          const scorecardMsg = formatTournamentScorecard(t, targetLang);
+          const scorecardKeys = getTournamentScorecardKeyboard(tId, filter, targetLang);
+          if (cb.message && cb.message.message_id) {
+            await editTelegramMessage(chatId, cb.message.message_id, scorecardMsg, scorecardKeys);
+          }
+        }
+        await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id }).catch(() => {});
         return sendResponse(res, 200, 'OK');
       }
 
@@ -7319,8 +7709,21 @@ export default async function handler(req, res) {
       }
 
       if (text.startsWith('/tournaments')) {
-        const tMsg = await formatTournaments('ru');
-        await sendTelegramMessage(chatId, tMsg, getLanguageKeyboard('tournaments', '0', 'ru', false));
+        const parts = text.split(/\s+/);
+        let filter = '7';
+        if (parts[1]) {
+          const arg = parts[1].toLowerCase();
+          if (arg === '26' || arg === 's26') filter = 's26';
+          else if (arg === '27' || arg === 's27') filter = 's27';
+          else if (arg === '1' || arg === 'last') filter = '1';
+          else if (arg === '30') filter = '30';
+          else if (arg === 'all') filter = 'all';
+        }
+        const userLang = detectUserLang(message.from, 'ru');
+        const list = await getFilteredTournaments(filter);
+        const tMsg = await formatTournamentsBrowser(filter, userLang);
+        const tKeys = getTournamentsBrowserKeyboard(filter, userLang, list);
+        await sendTelegramMessage(chatId, tMsg, tKeys);
         return sendResponse(res, 200, 'OK');
       }
 
@@ -7727,8 +8130,21 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/tournaments')) {
-      const tMsg = await formatTournaments('ru');
-      await sendTelegramMessage(chatId, tMsg, getLanguageKeyboard('tournaments', '0', 'ru', true));
+      const parts = text.split(/\s+/);
+      let filter = '7';
+      if (parts[1]) {
+        const arg = parts[1].toLowerCase();
+        if (arg === '26' || arg === 's26') filter = 's26';
+        else if (arg === '27' || arg === 's27') filter = 's27';
+        else if (arg === '1' || arg === 'last') filter = '1';
+        else if (arg === '30') filter = '30';
+        else if (arg === 'all') filter = 'all';
+      }
+      const userLang = detectUserLang(message.from, 'ru');
+      const list = await getFilteredTournaments(filter);
+      const tMsg = await formatTournamentsBrowser(filter, userLang);
+      const tKeys = getTournamentsBrowserKeyboard(filter, userLang, list);
+      await sendTelegramMessage(chatId, tMsg, tKeys);
       return sendResponse(res, 200, 'OK');
     }
 
