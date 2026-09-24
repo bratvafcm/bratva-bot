@@ -1,0 +1,27 @@
+{
+  "player_id": "realmadridfc",
+  "display_name": "RealMadridFc",
+  "known_aliases": [],
+  "total_goals": 34,
+  "total_matches": 1,
+  "average_goals": 34,
+  "matches": [
+    {
+      "tournament_id": "2026-08-29_team-work",
+      "match_index_in_tournament": 16,
+      "opponent_display_name": "Team Work",
+      "opponent_id": "2026-08-29_team-work",
+      "goals_for": 34,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "RealMadridFc",
+      "player_id": "realmadridfc"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-08-29_team-work",
+    "flagged_for_review": false
+  }
+}

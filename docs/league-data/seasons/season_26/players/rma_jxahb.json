@@ -1,0 +1,87 @@
+{
+  "player_id": "rma_jxahb",
+  "display_name": "RMa_jXAHB",
+  "known_aliases": [],
+  "total_goals": 124,
+  "total_matches": 6,
+  "average_goals": 20.7,
+  "matches": [
+    {
+      "tournament_id": "2026-08-09_abtal-al-arab",
+      "match_index_in_tournament": 15,
+      "opponent_display_name": "ابطال العرب",
+      "opponent_id": "2026-08-09_abtal-al-arab",
+      "goals_for": 31,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "RMa_jXAHB",
+      "player_id": "rma_jxahb"
+    },
+    {
+      "tournament_id": "2026-08-11_onsoranje",
+      "match_index_in_tournament": 19,
+      "opponent_display_name": "OnsOranje®",
+      "opponent_id": "2026-08-11_onsoranje",
+      "goals_for": 34,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "RMa_jXAHB",
+      "player_id": "rma_jxahb"
+    },
+    {
+      "tournament_id": "2026-08-12_arabs-team",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "ARAB'S TEAM",
+      "opponent_id": "2026-08-12_arabs-team",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "RMa_jXAHB",
+      "player_id": "rma_jxahb"
+    },
+    {
+      "tournament_id": "2026-08-12_warga",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "Warga +82™",
+      "opponent_id": "2026-08-12_warga",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "RMa_jXAHB",
+      "player_id": "rma_jxahb"
+    },
+    {
+      "tournament_id": "2026-08-13_free-palestine",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "FREE PALESTINE",
+      "opponent_id": "2026-08-13_free-palestine",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "RMa_jXAHB",
+      "player_id": "rma_jxahb"
+    },
+    {
+      "tournament_id": "2026-08-14_sudamericana",
+      "match_index_in_tournament": 17,
+      "opponent_display_name": "SUDAMERICANA",
+      "opponent_id": "2026-08-14_sudamericana",
+      "goals_for": 29,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "RMa_jXAHB",
+      "player_id": "rma_jxahb"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-08-14_sudamericana",
+    "flagged_for_review": false
+  }
+}

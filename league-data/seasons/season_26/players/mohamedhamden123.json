@@ -1,0 +1,39 @@
+{
+  "player_id": "mohamedhamden123",
+  "display_name": "MOHAMEDHAMDEN123",
+  "known_aliases": [],
+  "total_goals": 0,
+  "total_matches": 2,
+  "average_goals": 0,
+  "matches": [
+    {
+      "tournament_id": "2026-08-11_onsoranje",
+      "match_index_in_tournament": 16,
+      "opponent_display_name": "OnsOranje®",
+      "opponent_id": "2026-08-11_onsoranje",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "MOHAMEDHAMDEN123",
+      "player_id": "mohamedhamden123"
+    },
+    {
+      "tournament_id": "2026-08-14_sudamericana",
+      "match_index_in_tournament": 21,
+      "opponent_display_name": "SUDAMERICANA",
+      "opponent_id": "2026-08-14_sudamericana",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "MOHAMEDHAMDEN123",
+      "player_id": "mohamedhamden123"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 2,
+    "last_evaluated_tournament_id": "2026-08-14_sudamericana",
+    "flagged_for_review": true
+  }
+}

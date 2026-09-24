@@ -3,25 +3,13 @@
   "display_name": "Uz_BESTchiter",
   "known_aliases": [],
   "total_goals": 0,
-  "total_matches": 1,
+  "total_matches": 0,
   "average_goals": 0,
-  "matches": [
-    {
-      "tournament_id": "2026-08-29_team-work",
-      "match_index_in_tournament": 13,
-      "opponent_display_name": "Team Work",
-      "opponent_id": "2026-08-29_team-work",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 0,
-      "player_display_name": "Uz_BESTchiter",
-      "player_id": "uz_bestchiter"
-    }
-  ],
+  "matches": [],
   "eligibility_streak": {
-    "current_fail_streak": 1,
-    "last_evaluated_tournament_id": "2026-08-29_team-work",
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": null,
     "flagged_for_review": false
-  }
+  },
+  "last_tournament_date": null
 }

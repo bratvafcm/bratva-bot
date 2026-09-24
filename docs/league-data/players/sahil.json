@@ -2,62 +2,14 @@
   "player_id": "sahil",
   "display_name": "sahil",
   "known_aliases": [],
-  "total_goals": 22,
-  "total_matches": 4,
-  "average_goals": 5.5,
-  "matches": [
-    {
-      "tournament_id": "2026-09-19_best_liga",
-      "match_index_in_tournament": 11,
-      "opponent_display_name": "BEST LIGA",
-      "opponent_id": "2026-09-19_best_liga",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 0,
-      "player_display_name": "sahil",
-      "player_id": "sahil"
-    },
-    {
-      "tournament_id": "2026-09-21_apex_reapers",
-      "match_index_in_tournament": 10,
-      "opponent_display_name": "Apex Reapers",
-      "opponent_id": "2026-09-21_apex_reapers",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 0,
-      "player_display_name": "sahil",
-      "player_id": "sahil"
-    },
-    {
-      "tournament_id": "2026-09-21_los_viciados",
-      "match_index_in_tournament": 11,
-      "opponent_display_name": "Los+Viciados",
-      "opponent_id": "2026-09-21_los_viciados",
-      "goals_for": 22,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "sahil",
-      "player_id": "sahil"
-    },
-    {
-      "tournament_id": "2026-09-22_fc_the_conqueror",
-      "match_index_in_tournament": 10,
-      "opponent_display_name": "FC.The Conqueror",
-      "opponent_id": "2026-09-22_fc_the_conqueror",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 0,
-      "player_display_name": "sahil",
-      "player_id": "sahil"
-    }
-  ],
+  "total_goals": 0,
+  "total_matches": 0,
+  "average_goals": 0,
+  "matches": [],
   "eligibility_streak": {
-    "current_fail_streak": 2,
-    "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": null,
     "flagged_for_review": false
-  }
+  },
+  "last_tournament_date": null
 }

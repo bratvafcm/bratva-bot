@@ -1,0 +1,51 @@
+{
+  "player_id": "aidar0911",
+  "display_name": "Aidar0911",
+  "known_aliases": [],
+  "total_goals": 0,
+  "total_matches": 3,
+  "average_goals": 0,
+  "matches": [
+    {
+      "tournament_id": "2026-09-19_best_liga",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "BEST LIGA",
+      "opponent_id": "2026-09-19_best_liga",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Aidar0911",
+      "player_id": "aidar0911"
+    },
+    {
+      "tournament_id": "2026-09-21_apex_reapers",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "Apex Reapers",
+      "opponent_id": "2026-09-21_apex_reapers",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Aidar0911",
+      "player_id": "aidar0911"
+    },
+    {
+      "tournament_id": "2026-09-21_los_viciados",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "Los+Viciados",
+      "opponent_id": "2026-09-21_los_viciados",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Aidar0911",
+      "player_id": "aidar0911"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 3,
+    "last_evaluated_tournament_id": "2026-09-21_apex_reapers",
+    "flagged_for_review": true
+  }
+}

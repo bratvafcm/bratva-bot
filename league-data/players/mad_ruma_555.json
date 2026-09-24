@@ -3,25 +3,13 @@
   "display_name": "Mad_Ruma_555",
   "known_aliases": [],
   "total_goals": 0,
-  "total_matches": 1,
+  "total_matches": 0,
   "average_goals": 0,
-  "matches": [
-    {
-      "tournament_id": "2026-08-09_abtal-al-arab",
-      "match_index_in_tournament": 30,
-      "opponent_display_name": "ابطال العرب",
-      "opponent_id": "2026-08-09_abtal-al-arab",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 0,
-      "player_display_name": "Mad_Ruma_555",
-      "player_id": "mad_ruma_555"
-    }
-  ],
+  "matches": [],
   "eligibility_streak": {
-    "current_fail_streak": 1,
-    "last_evaluated_tournament_id": "2026-08-09_abtal-al-arab",
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": null,
     "flagged_for_review": false
-  }
+  },
+  "last_tournament_date": null
 }

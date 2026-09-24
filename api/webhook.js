@@ -578,7 +578,10 @@ async function getTournamentById(tId) {
   // 3. Fetch from GitHub API first (always fresh, multi-instance safe!)
   if (GITHUB_PAT) {
     try {
-      const remoteT = await fetchGithubJson(`docs/league-data/tournaments/${tId}.json`);
+      let remoteT = await fetchGithubJson(`docs/league-data/tournaments/${tId}.json`);
+      if (!remoteT) {
+        remoteT = await fetchGithubJson(`docs/league-data/seasons/season_26/tournaments/${tId}.json`);
+      }
       if (remoteT) {
         tournamentCache.set(tId, remoteT);
         return remoteT;
@@ -590,7 +593,10 @@ async function getTournamentById(tId) {
 
   // 4. Fallback to local file
   try {
-    const localPath = path.join(process.cwd(), 'docs', 'league-data', 'tournaments', `${tId}.json`);
+    let localPath = path.join(process.cwd(), 'docs', 'league-data', 'tournaments', `${tId}.json`);
+    if (!fs.existsSync(localPath)) {
+      localPath = path.join(process.cwd(), 'docs', 'league-data', 'seasons', 'season_26', 'tournaments', `${tId}.json`);
+    }
     if (fs.existsSync(localPath)) {
       const data = JSON.parse(fs.readFileSync(localPath, 'utf8'));
       tournamentCache.set(tId, data);
@@ -2296,13 +2302,43 @@ async function getFilteredTournaments(filter = '7') {
     const tIndex = await getTournamentsIndex();
     const entries = Object.entries(tIndex || {});
     if (entries.length > 0) {
-      list = entries.map(([id, meta]) => ({ id, ...meta }));
+      list = entries.map(([id, meta]) => ({ id, season: 27, ...meta }));
     }
   } catch (e) {}
 
   if (list.length === 0) {
     const { tournaments } = loadLeagueData();
-    list = (tournaments || []).map(t => ({ id: t.tournament_id || t.id, ...t }));
+    list = (tournaments || []).map(t => ({ id: t.tournament_id || t.id, season: 27, ...t }));
+  }
+
+  // Load Season 26 archive if requested or needed
+  if (filter === 's26' || filter === 'all' || (list.length === 0 && (filter === '7' || filter === '30' || filter === '1'))) {
+    try {
+      const root = process.cwd();
+      const s26Path = path.join(root, 'docs', 'league-data', 'seasons', 'season_26', 'index', 'tournaments_index.json');
+      let s26Index = null;
+      if (fs.existsSync(s26Path)) {
+        s26Index = JSON.parse(fs.readFileSync(s26Path, 'utf8'));
+      } else if (GITHUB_PAT) {
+        s26Index = await fetchGithubJson('docs/league-data/seasons/season_26/index/tournaments_index.json');
+      }
+      if (s26Index) {
+        const s26List = Object.entries(s26Index).map(([id, meta]) => ({ id, season: 26, ...meta }));
+        if (filter === 's26') {
+          list = s26List;
+        } else {
+          const seen = new Set(list.map(t => t.id));
+          s26List.forEach(t => {
+            if (!seen.has(t.id)) {
+              list.push(t);
+              seen.add(t.id);
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load season 26 archive in getFilteredTournaments:', e.message);
+    }
   }
 
   // Sort descending by date/timestamp (latest tournament first!)
@@ -2325,17 +2361,9 @@ async function getFilteredTournaments(filter = '7') {
   } else if (filter === 'all') {
     return list;
   } else if (filter === 's26') {
-    return list.filter(t => {
-      if (t.season === 27) return false;
-      const d = t.date || (t.id ? t.id.slice(0, 10) : '');
-      return d < '2026-09-24' || t.season === 26;
-    });
+    return list.filter(t => t.season === 26 || (t.date && t.date < '2026-09-24'));
   } else if (filter === 's27') {
-    return list.filter(t => {
-      if (t.season === 27) return true;
-      const d = t.date || (t.id ? t.id.slice(0, 10) : '');
-      return d >= '2026-09-24';
-    });
+    return list.filter(t => t.season === 27 && (!t.date || t.date >= '2026-09-24'));
   }
   return list.slice(0, 7);
 }

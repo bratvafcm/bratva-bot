@@ -261,7 +261,7 @@ body {
   left: 0;
 }
 
-.lang-opt {
+.lang-opt, .season-opt {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -276,11 +276,12 @@ body {
   cursor: pointer;
   text-align: left;
   transition: background 0.15s, color 0.15s;
+  width: 100%;
 }
-[dir="rtl"] .lang-opt {
+[dir="rtl"] .lang-opt, [dir="rtl"] .season-opt {
   text-align: right;
 }
-.lang-opt:hover, .lang-opt.active {
+.lang-opt:hover, .lang-opt.active, .season-opt:hover, .season-opt.active {
   background: rgba(192, 132, 252, 0.15);
   color: var(--ucl-cyan);
 }

@@ -3,37 +3,13 @@
   "display_name": "Blackmoon11",
   "known_aliases": [],
   "total_goals": 0,
-  "total_matches": 2,
+  "total_matches": 0,
   "average_goals": 0,
-  "matches": [
-    {
-      "tournament_id": "2026-09-12_ed_phoenix_gen_2",
-      "match_index_in_tournament": 14,
-      "opponent_display_name": "ED PHOENIX GEN 2",
-      "opponent_id": "2026-09-12_ed_phoenix_gen_2",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 0,
-      "player_display_name": "Blackmoon11",
-      "player_id": "blackmoon11"
-    },
-    {
-      "tournament_id": "2026-09-19_store12",
-      "match_index_in_tournament": 13,
-      "opponent_display_name": "STORE12",
-      "opponent_id": "2026-09-19_store12",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 3,
-      "player_display_name": "Blackmoon11",
-      "player_id": "blackmoon11"
-    }
-  ],
+  "matches": [],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-09-19_store12",
+    "last_evaluated_tournament_id": null,
     "flagged_for_review": false
-  }
+  },
+  "last_tournament_date": null
 }

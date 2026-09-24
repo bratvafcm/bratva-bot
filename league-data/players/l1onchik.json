@@ -2,86 +2,14 @@
   "player_id": "l1onchik",
   "display_name": "L1onchik",
   "known_aliases": [],
-  "total_goals": 119,
-  "total_matches": 6,
-  "average_goals": 19.8,
-  "matches": [
-    {
-      "tournament_id": "2026-09-12_ed_phoenix_gen_2",
-      "match_index_in_tournament": 15,
-      "opponent_display_name": "ED PHOENIX GEN 2",
-      "opponent_id": "2026-09-12_ed_phoenix_gen_2",
-      "goals_for": 21,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 3,
-      "player_display_name": "L1onchik",
-      "player_id": "l1onchik"
-    },
-    {
-      "tournament_id": "2026-09-13_vse_svoi",
-      "match_index_in_tournament": 14,
-      "opponent_display_name": "ВСЕ СВОИ",
-      "opponent_id": "2026-09-13_vse_svoi",
-      "goals_for": 23,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "L1onchik",
-      "player_id": "l1onchik"
-    },
-    {
-      "tournament_id": "2026-09-14_na_legends",
-      "match_index_in_tournament": 14,
-      "opponent_display_name": "@NA.LEGENDS",
-      "opponent_id": "2026-09-14_na_legends",
-      "goals_for": 18,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 2,
-      "player_display_name": "L1onchik",
-      "player_id": "l1onchik"
-    },
-    {
-      "tournament_id": "2026-09-15_ultras",
-      "match_index_in_tournament": 6,
-      "opponent_display_name": "ULTRAS",
-      "opponent_id": "2026-09-15_ultras",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 0,
-      "player_display_name": "L1onchik",
-      "player_id": "l1onchik"
-    },
-    {
-      "tournament_id": "2026-09-19_store12",
-      "match_index_in_tournament": 6,
-      "opponent_display_name": "STORE12",
-      "opponent_id": "2026-09-19_store12",
-      "goals_for": 30,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 3,
-      "player_display_name": "L1onchik",
-      "player_id": "l1onchik"
-    },
-    {
-      "tournament_id": "2026-09-23_x_elite_legends",
-      "match_index_in_tournament": 8,
-      "opponent_display_name": "X Elite Legends",
-      "opponent_id": "2026-09-23_x_elite_legends",
-      "goals_for": 27,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "L1onchik",
-      "player_id": "l1onchik"
-    }
-  ],
+  "total_goals": 0,
+  "total_matches": 0,
+  "average_goals": 0,
+  "matches": [],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
+    "last_evaluated_tournament_id": null,
     "flagged_for_review": false
-  }
+  },
+  "last_tournament_date": null
 }

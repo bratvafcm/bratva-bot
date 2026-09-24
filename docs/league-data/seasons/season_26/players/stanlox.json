@@ -1,0 +1,75 @@
+{
+  "player_id": "stanlox",
+  "display_name": "Stanlox",
+  "known_aliases": [],
+  "total_goals": 145,
+  "total_matches": 5,
+  "average_goals": 29,
+  "matches": [
+    {
+      "tournament_id": "2026-08-09_abtal-al-arab",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "ابطال العرب",
+      "opponent_id": "2026-08-09_abtal-al-arab",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Stanlox",
+      "player_id": "stanlox"
+    },
+    {
+      "tournament_id": "2026-08-11_onsoranje",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "OnsOranje®",
+      "opponent_id": "2026-08-11_onsoranje",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Stanlox",
+      "player_id": "stanlox"
+    },
+    {
+      "tournament_id": "2026-08-12_arabs-team",
+      "match_index_in_tournament": 2,
+      "opponent_display_name": "ARAB'S TEAM",
+      "opponent_id": "2026-08-12_arabs-team",
+      "goals_for": 26,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Stanlox",
+      "player_id": "stanlox"
+    },
+    {
+      "tournament_id": "2026-08-13_free-palestine",
+      "match_index_in_tournament": 2,
+      "opponent_display_name": "FREE PALESTINE",
+      "opponent_id": "2026-08-13_free-palestine",
+      "goals_for": 29,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Stanlox",
+      "player_id": "stanlox"
+    },
+    {
+      "tournament_id": "2026-08-14_sudamericana",
+      "match_index_in_tournament": 14,
+      "opponent_display_name": "SUDAMERICANA",
+      "opponent_id": "2026-08-14_sudamericana",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Stanlox",
+      "player_id": "stanlox"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-08-14_sudamericana",
+    "flagged_for_review": false
+  }
+}

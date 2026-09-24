@@ -1,0 +1,159 @@
+{
+  "player_id": "koustav_007",
+  "display_name": "KOUSTAV_007",
+  "known_aliases": [],
+  "total_goals": 320,
+  "total_matches": 12,
+  "average_goals": 26.7,
+  "matches": [
+    {
+      "tournament_id": "2026-08-29_team-work",
+      "match_index_in_tournament": 24,
+      "opponent_display_name": "Team Work",
+      "opponent_id": "2026-08-29_team-work",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-08-31_royal-challenger",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "ROYAL CHALLENGER",
+      "opponent_id": "2026-08-31_royal-challenger",
+      "goals_for": 28,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-01_italiani-fc",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "ITALIANI F.C",
+      "opponent_id": "2026-09-01_italiani-fc",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-04_al-afdal-al-riyadi-26",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "الافضل الرياضي26",
+      "opponent_id": "2026-09-04_al-afdal-al-riyadi-26",
+      "goals_for": 28,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-06_th-thedemon-fc",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "TH'·TheDemon·'FC",
+      "opponent_id": "2026-09-06_th-thedemon-fc",
+      "goals_for": 28,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-07_iran-gold",
+      "match_index_in_tournament": 10,
+      "opponent_display_name": "IRAN. gold",
+      "opponent_id": "2026-09-07_iran-gold",
+      "goals_for": 28,
+      "goals_against": 0,
+      "result": "draw",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-08_memequis_juniors",
+      "match_index_in_tournament": 2,
+      "opponent_display_name": "Memequis Juniors",
+      "opponent_id": "2026-09-08_memequis_juniors",
+      "goals_for": 31,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-19_best_liga",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "BEST LIGA",
+      "opponent_id": "2026-09-19_best_liga",
+      "goals_for": 32,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-21_apex_reapers",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "Apex Reapers",
+      "opponent_id": "2026-09-21_apex_reapers",
+      "goals_for": 32,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-21_los_viciados",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "Los+Viciados",
+      "opponent_id": "2026-09-21_los_viciados",
+      "goals_for": 27,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-22_fc_the_conqueror",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "FC.The Conqueror",
+      "opponent_id": "2026-09-22_fc_the_conqueror",
+      "goals_for": 26,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-09-23_x_elite_legends",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "X Elite Legends",
+      "opponent_id": "2026-09-23_x_elite_legends",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
+    "flagged_for_review": false
+  }
+}

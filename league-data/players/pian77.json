@@ -3,61 +3,13 @@
   "display_name": "PIAN77",
   "known_aliases": [],
   "total_goals": 0,
-  "total_matches": 4,
+  "total_matches": 0,
   "average_goals": 0,
-  "matches": [
-    {
-      "tournament_id": "2026-08-09_abtal-al-arab",
-      "match_index_in_tournament": 29,
-      "opponent_display_name": "ابطال العرب",
-      "opponent_id": "2026-08-09_abtal-al-arab",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 0,
-      "player_display_name": "PIAN77",
-      "player_id": "pian77"
-    },
-    {
-      "tournament_id": "2026-08-11_onsoranje",
-      "match_index_in_tournament": 31,
-      "opponent_display_name": "OnsOranje®",
-      "opponent_id": "2026-08-11_onsoranje",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 0,
-      "player_display_name": "PIAN77",
-      "player_id": "pian77"
-    },
-    {
-      "tournament_id": "2026-08-12_arabs-team",
-      "match_index_in_tournament": 14,
-      "opponent_display_name": "ARAB'S TEAM",
-      "opponent_id": "2026-08-12_arabs-team",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 0,
-      "player_display_name": "PIAN77",
-      "player_id": "pian77"
-    },
-    {
-      "tournament_id": "2026-08-13_free-palestine",
-      "match_index_in_tournament": 15,
-      "opponent_display_name": "FREE PALESTINE",
-      "opponent_id": "2026-08-13_free-palestine",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 3,
-      "player_display_name": "PIAN77",
-      "player_id": "pian77"
-    }
-  ],
+  "matches": [],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-08-13_free-palestine",
+    "last_evaluated_tournament_id": null,
     "flagged_for_review": false
-  }
+  },
+  "last_tournament_date": null
 }

@@ -1197,7 +1197,8 @@ const CinematicDirector = {
 
     // Top Scorer
     const sorted = [...state.players].sort((a, b) => getPlayerGoals(b) - getPlayerGoals(a));
-    if (sorted.length > 0) {
+    const hasGoals = sorted.some(p => getPlayerGoals(p) > 0);
+    if (sorted.length > 0 && hasGoals) {
       const topP = sorted[0];
       const pGoals = getPlayerGoals(topP);
       const pMatches = topP.matches ? topP.matches.length : 0;
@@ -1205,6 +1206,9 @@ const CinematicDirector = {
 
       if (mvpNameEl) mvpNameEl.textContent = topP.display_name;
       if (mvpStatsEl) mvpStatsEl.textContent = `${pGoals} ${t('goals')} • ${pAvg} ${t('avg_goals')}`;
+    } else {
+      if (mvpNameEl) mvpNameEl.textContent = 'Standby';
+      if (mvpStatsEl) mvpStatsEl.textContent = 'Season Kickoff Tonight';
     }
   },
 
@@ -1256,6 +1260,7 @@ document.addEventListener('touchstart', unlockAudio, { once: true });
 
 const state = {
   lang: 'en',
+  currentSeason: '27',
   playersIndex: {},
   tournamentsIndex: {},
   players: [],
@@ -1279,6 +1284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   setupLanguageSelector();
+  setupSeasonSelector();
   setupNavigation();
   setupSearch();
   setupFilterControls();
@@ -1350,6 +1356,8 @@ function setupLanguageSelector() {
   toggleBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     menu.classList.toggle('show');
+    const seasonMenu = document.getElementById('season-menu');
+    if (seasonMenu) seasonMenu.classList.remove('show');
   });
 
   document.addEventListener('click', () => menu.classList.remove('show'));
@@ -1361,6 +1369,60 @@ function setupLanguageSelector() {
       opt.classList.add('active');
       setLanguage(opt.dataset.lang);
       menu.classList.remove('show');
+    });
+  });
+}
+
+function updateSeasonBanner() {
+  const titleEl = document.querySelector('[data-i18n="s1_concluded_title"]');
+  const subEl = document.querySelector('[data-i18n="s1_concluded_subtitle"]');
+  const tagEl = document.querySelector('[data-i18n="s2_launch_tag"]');
+  if (state.currentSeason === '26') {
+    if (titleEl) titleEl.textContent = 'SEASON 26 ARCHIVE • 27 TOURNAMENTS';
+    if (subEl) subEl.textContent = '13W - 1D - 13L (7,285 Goals) • Champion: DOXIBERO1 (695G)';
+    if (tagEl) tagEl.textContent = 'ARCHIVED HISTORIC DATA';
+  } else {
+    if (titleEl) titleEl.textContent = 'SEASON 26 ARCHIVED • 27 TOURNAMENTS';
+    if (subEl) subEl.textContent = '13W - 1D - 13L (7,285 Goals) • Champion: DOXIBERO1 (695G)';
+    if (tagEl) tagEl.textContent = 'SEASON 27 ACTIVE • KICKOFF TONIGHT';
+  }
+}
+
+function setupSeasonSelector() {
+  const toggleBtn = document.getElementById('season-toggle-btn');
+  const menu = document.getElementById('season-menu');
+  const codeSpan = document.getElementById('current-season-code');
+  if (!toggleBtn || !menu) return;
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menu.classList.toggle('show');
+    const langMenu = document.getElementById('lang-menu');
+    if (langMenu) langMenu.classList.remove('show');
+  });
+
+  document.addEventListener('click', () => menu.classList.remove('show'));
+
+  const options = document.querySelectorAll('.season-opt');
+  options.forEach(opt => {
+    opt.addEventListener('click', async () => {
+      const season = opt.dataset.season;
+      if (state.currentSeason === season) {
+        menu.classList.remove('show');
+        return;
+      }
+      if (typeof SoundManager !== 'undefined' && SoundManager.playClick) {
+        SoundManager.playClick();
+      }
+      options.forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+      state.currentSeason = season;
+      if (codeSpan) codeSpan.textContent = `S${season}`;
+      menu.classList.remove('show');
+
+      updateSeasonBanner();
+      await loadData();
+      renderAll();
     });
   });
 }
@@ -1450,16 +1512,36 @@ async function loadData() {
       const res = await fetch(`${path}/index/players_index.json?v=${cb}`);
       if (res.ok) {
         activePath = path;
-        state.playersIndex = await res.json();
         break;
       }
     } catch (e) {}
   }
 
+  const seasonBase = state.currentSeason === '26'
+    ? `${activePath}/seasons/season_26`
+    : activePath;
+
   try {
-    const tRes = await fetch(`${activePath}/index/tournaments_index.json?v=${cb}`);
-    if (tRes.ok) state.tournamentsIndex = await tRes.json();
-  } catch (e) {}
+    const res = await fetch(`${seasonBase}/index/players_index.json?v=${cb}`);
+    if (res.ok) {
+      state.playersIndex = await res.json();
+    } else {
+      state.playersIndex = {};
+    }
+  } catch (e) {
+    state.playersIndex = {};
+  }
+
+  try {
+    const tRes = await fetch(`${seasonBase}/index/tournaments_index.json?v=${cb}`);
+    if (tRes.ok) {
+      state.tournamentsIndex = await tRes.json();
+    } else {
+      state.tournamentsIndex = {};
+    }
+  } catch (e) {
+    state.tournamentsIndex = {};
+  }
 
   try {
     const regRes = await fetch(`${activePath}/registered_players.json?v=${cb}`);
@@ -1467,7 +1549,7 @@ async function loadData() {
   } catch (e) {}
 
   const tIds = Object.keys(state.tournamentsIndex || {});
-  const tPromises = tIds.map(id => fetch(`${activePath}/tournaments/${id}.json?v=${cb}`).then(r => r.ok ? r.json() : null).catch(() => null));
+  const tPromises = tIds.map(id => fetch(`${seasonBase}/tournaments/${id}.json?v=${cb}`).then(r => r.ok ? r.json() : null).catch(() => null));
 
   const tResults = await Promise.all(tPromises);
   const seenTournaments = new Set();
@@ -2137,7 +2219,13 @@ function renderDashboard() {
   // Recent match
   const recentBox = document.getElementById('recent-match-container');
   if (state.tournaments.length === 0) {
-    recentBox.innerHTML = `<div style="text-align:center; padding:16px;" class="hand-text">${t('loading')}</div>`;
+    recentBox.innerHTML = `
+      <div style="text-align:center; padding:24px 16px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.15); border-radius: 12px;">
+        <div style="font-size: 1.8rem; margin-bottom: 6px;">🚀</div>
+        <div style="font-weight: 700; font-size: 0.95rem; color: #f1c40f; margin-bottom: 4px;">SEASON 27 KICKOFF</div>
+        <div style="font-size: 0.8rem; opacity: 0.75;">No matches played yet in Season 27. First tournament tonight!</div>
+      </div>
+    `;
   } else {
     const tItem = state.tournaments[0];
     const stampClass = tItem.result === 'win' ? 'stamp-win' : tItem.result === 'loss' ? 'stamp-loss' : 'stamp-draw';
@@ -2175,11 +2263,22 @@ function renderDashboard() {
   // Top performers FC Cards
   const topContainer = document.getElementById('top-performers-container');
   const sortedPlayers = [...state.players].sort((a, b) => getPlayerGoals(b) - getPlayerGoals(a));
-  const top3 = sortedPlayers.slice(0, 3);
+  const hasGoals = sortedPlayers.some(p => getPlayerGoals(p) > 0);
 
   if (topContainer) {
-    topContainer.innerHTML = top3.map((p, idx) => renderPlayerCard(p, idx + 1)).join('');
-    setTimeout(() => SilkBadges3DManager.mountAll(), 30);
+    if (!hasGoals && state.tournaments.length === 0) {
+      topContainer.innerHTML = `
+        <div style="text-align:center; padding:24px 16px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.15); border-radius: 12px; grid-column: 1 / -1; width: 100%;">
+          <div style="font-size: 1.6rem; margin-bottom: 6px;">⭐</div>
+          <div style="font-weight: 700; font-size: 0.95rem; color: #f1c40f; margin-bottom: 4px;">TOP SCORERS STANDBY</div>
+          <div style="font-size: 0.8rem; opacity: 0.75;">Season 27 top scorers will be crowned after the opening tournament.</div>
+        </div>
+      `;
+    } else {
+      const top3 = sortedPlayers.slice(0, 3);
+      topContainer.innerHTML = top3.map((p, idx) => renderPlayerCard(p, idx + 1)).join('');
+      setTimeout(() => SilkBadges3DManager.mountAll(), 30);
+    }
   }
 
   // Flagged Section
@@ -2202,6 +2301,17 @@ function renderDashboard() {
 
 function renderTournaments() {
   const container = document.getElementById('tournaments-list-container');
+  if (!container) return;
+  if (state.tournaments.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:36px 16px; color:var(--ucl-slate); font-weight:600; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.15); border-radius: 12px;">
+        <div style="font-size: 2rem; margin-bottom: 8px;">⏳</div>
+        <div style="font-size: 1.05rem; color: #fff; font-weight: 700; margin-bottom: 4px;">NO TOURNAMENTS RECORDED YET</div>
+        <div style="font-size: 0.85rem; opacity: 0.75;">${state.currentSeason === '27' ? 'Season 27 opening matches will appear here immediately after the tournament.' : 'No archives found.'}</div>
+      </div>
+    `;
+    return;
+  }
   container.innerHTML = state.tournaments.map(tItem => {
     const stampClass = tItem.result === 'win' ? 'stamp-win' : tItem.result === 'loss' ? 'stamp-loss' : 'stamp-draw';
     return `
@@ -2311,11 +2421,21 @@ function renderLeaderboard() {
   }
 
   if (cardsContainer) {
-    cardsContainer.innerHTML = list.map((item, idx) => {
-      const p = item.player || state.players.find(pl => pl.player_id === item.player_id) || item;
-      return renderPlayerCard(p, idx + 1, item.goals, item.avg);
-    }).join('');
-    setTimeout(() => SilkBadges3DManager.mountAll(), 30);
+    if (list.length === 0) {
+      cardsContainer.innerHTML = `
+        <div style="text-align:center; padding:36px 16px; color:var(--ucl-slate); font-weight:600; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.15); border-radius: 12px; width: 100%; grid-column: 1 / -1;">
+          <div style="font-size: 2rem; margin-bottom: 8px;">🏅</div>
+          <div style="font-size: 1.05rem; color: #fff; font-weight: 700; margin-bottom: 4px;">SEASON 27 LEADERBOARD READY</div>
+          <div style="font-size: 0.85rem; opacity: 0.75;">Stats and player rankings will populate once tournament matches are logged.</div>
+        </div>
+      `;
+    } else {
+      cardsContainer.innerHTML = list.map((item, idx) => {
+        const p = item.player || state.players.find(pl => pl.player_id === item.player_id) || item;
+        return renderPlayerCard(p, idx + 1, item.goals, item.avg);
+      }).join('');
+      setTimeout(() => SilkBadges3DManager.mountAll(), 30);
+    }
   }
 }
 

@@ -2,50 +2,14 @@
   "player_id": "rts",
   "display_name": "R.ØÇąÑįTąS",
   "known_aliases": [],
-  "total_goals": 28,
-  "total_matches": 3,
-  "average_goals": 9.3,
-  "matches": [
-    {
-      "tournament_id": "2026-08-12_arabs-team",
-      "match_index_in_tournament": 10,
-      "opponent_display_name": "ARAB'S TEAM",
-      "opponent_id": "2026-08-12_arabs-team",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 0,
-      "player_display_name": "R.ØÇąÑįTąS",
-      "player_id": "rts"
-    },
-    {
-      "tournament_id": "2026-08-13_free-palestine",
-      "match_index_in_tournament": 7,
-      "opponent_display_name": "FREE PALESTINE",
-      "opponent_id": "2026-08-13_free-palestine",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 0,
-      "player_display_name": "R.ØÇąÑįTąS",
-      "player_id": "rts"
-    },
-    {
-      "tournament_id": "2026-08-14_sudamericana",
-      "match_index_in_tournament": 7,
-      "opponent_display_name": "SUDAMERICANA",
-      "opponent_id": "2026-08-14_sudamericana",
-      "goals_for": 28,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "R.ØÇąÑįTąS",
-      "player_id": "rts"
-    }
-  ],
+  "total_goals": 0,
+  "total_matches": 0,
+  "average_goals": 0,
+  "matches": [],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-08-14_sudamericana",
+    "last_evaluated_tournament_id": null,
     "flagged_for_review": false
-  }
+  },
+  "last_tournament_date": null
 }

@@ -3,37 +3,13 @@
   "display_name": "CR7Siiii",
   "known_aliases": [],
   "total_goals": 0,
-  "total_matches": 2,
+  "total_matches": 0,
   "average_goals": 0,
-  "matches": [
-    {
-      "tournament_id": "2026-08-09_abtal-al-arab",
-      "match_index_in_tournament": 17,
-      "opponent_display_name": "ابطال العرب",
-      "opponent_id": "2026-08-09_abtal-al-arab",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 0,
-      "player_display_name": "CR7Siiii",
-      "player_id": "cr7siiii"
-    },
-    {
-      "tournament_id": "2026-08-12_warga",
-      "match_index_in_tournament": 4,
-      "opponent_display_name": "Warga +82™",
-      "opponent_id": "2026-08-12_warga",
-      "goals_for": 0,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 0,
-      "player_display_name": "CR7Siiii",
-      "player_id": "cr7siiii"
-    }
-  ],
+  "matches": [],
   "eligibility_streak": {
-    "current_fail_streak": 2,
-    "last_evaluated_tournament_id": "2026-08-12_warga",
-    "flagged_for_review": true
-  }
+    "current_fail_streak": 0,
+    "last_evaluated_tournament_id": null,
+    "flagged_for_review": false
+  },
+  "last_tournament_date": null
 }

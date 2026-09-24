@@ -1,0 +1,27 @@
+{
+  "player_id": "funko_xh10",
+  "display_name": "FUNKO_XH10",
+  "known_aliases": [],
+  "total_goals": 12,
+  "total_matches": 1,
+  "average_goals": 12,
+  "matches": [
+    {
+      "tournament_id": "2026-08-29_team-work",
+      "match_index_in_tournament": 28,
+      "opponent_display_name": "Team Work",
+      "opponent_id": "2026-08-29_team-work",
+      "goals_for": 12,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 2,
+      "player_display_name": "FUNKO_XH10",
+      "player_id": "funko_xh10"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 1,
+    "last_evaluated_tournament_id": "2026-08-29_team-work",
+    "flagged_for_review": false
+  }
+}

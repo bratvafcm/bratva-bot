@@ -2,62 +2,14 @@
   "player_id": "k8n",
   "display_name": "K8N",
   "known_aliases": [],
-  "total_goals": 125,
-  "total_matches": 4,
-  "average_goals": 31.3,
-  "matches": [
-    {
-      "tournament_id": "2026-08-09_abtal-al-arab",
-      "match_index_in_tournament": 11,
-      "opponent_display_name": "ابطال العرب",
-      "opponent_id": "2026-08-09_abtal-al-arab",
-      "goals_for": 28,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 3,
-      "player_display_name": "K8N",
-      "player_id": "k8n"
-    },
-    {
-      "tournament_id": "2026-08-11_onsoranje",
-      "match_index_in_tournament": 12,
-      "opponent_display_name": "OnsOranje®",
-      "opponent_id": "2026-08-11_onsoranje",
-      "goals_for": 31,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "K8N",
-      "player_id": "k8n"
-    },
-    {
-      "tournament_id": "2026-08-12_warga",
-      "match_index_in_tournament": 8,
-      "opponent_display_name": "Warga +82™",
-      "opponent_id": "2026-08-12_warga",
-      "goals_for": 28,
-      "goals_against": 0,
-      "result": "loss",
-      "turns_played": 3,
-      "player_display_name": "K8N",
-      "player_id": "k8n"
-    },
-    {
-      "tournament_id": "2026-08-14_sudamericana",
-      "match_index_in_tournament": 13,
-      "opponent_display_name": "SUDAMERICANA",
-      "opponent_id": "2026-08-14_sudamericana",
-      "goals_for": 38,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "K8N",
-      "player_id": "k8n"
-    }
-  ],
+  "total_goals": 0,
+  "total_matches": 0,
+  "average_goals": 0,
+  "matches": [],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-08-14_sudamericana",
+    "last_evaluated_tournament_id": null,
     "flagged_for_review": false
-  }
+  },
+  "last_tournament_date": null
 }

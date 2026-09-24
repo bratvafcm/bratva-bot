@@ -1,0 +1,39 @@
+{
+  "player_id": "midhunn",
+  "display_name": "midhunn",
+  "known_aliases": [],
+  "total_goals": 0,
+  "total_matches": 2,
+  "average_goals": 0,
+  "matches": [
+    {
+      "tournament_id": "2026-08-14_sudamericana",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "SUDAMERICANA",
+      "opponent_id": "2026-08-14_sudamericana",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "midhunn",
+      "player_id": "midhunn"
+    },
+    {
+      "tournament_id": "2026-08-29_team-work",
+      "match_index_in_tournament": 9,
+      "opponent_display_name": "Team Work",
+      "opponent_id": "2026-08-29_team-work",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "midhunn",
+      "player_id": "midhunn"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 2,
+    "last_evaluated_tournament_id": "2026-08-29_team-work",
+    "flagged_for_review": true
+  }
+}

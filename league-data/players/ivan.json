@@ -2,26 +2,14 @@
   "player_id": "ivan",
   "display_name": "Иван",
   "known_aliases": [],
-  "total_goals": 37,
-  "total_matches": 1,
-  "average_goals": 37,
-  "matches": [
-    {
-      "tournament_id": "2026-08-29_team-work",
-      "match_index_in_tournament": 22,
-      "opponent_display_name": "Team Work",
-      "opponent_id": "2026-08-29_team-work",
-      "goals_for": 37,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "Иван",
-      "player_id": "ivan"
-    }
-  ],
+  "total_goals": 0,
+  "total_matches": 0,
+  "average_goals": 0,
+  "matches": [],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-08-29_team-work",
+    "last_evaluated_tournament_id": null,
     "flagged_for_review": false
-  }
+  },
+  "last_tournament_date": null
 }

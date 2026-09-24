@@ -2,26 +2,14 @@
   "player_id": "whiterex",
   "display_name": "WHITEREX",
   "known_aliases": [],
-  "total_goals": 34,
-  "total_matches": 1,
-  "average_goals": 34,
-  "matches": [
-    {
-      "tournament_id": "2026-08-14_sudamericana",
-      "match_index_in_tournament": 26,
-      "opponent_display_name": "SUDAMERICANA",
-      "opponent_id": "2026-08-14_sudamericana",
-      "goals_for": 34,
-      "goals_against": 0,
-      "result": "win",
-      "turns_played": 3,
-      "player_display_name": "WHITEREX",
-      "player_id": "whiterex"
-    }
-  ],
+  "total_goals": 0,
+  "total_matches": 0,
+  "average_goals": 0,
+  "matches": [],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-08-14_sudamericana",
+    "last_evaluated_tournament_id": null,
     "flagged_for_review": false
-  }
+  },
+  "last_tournament_date": null
 }
