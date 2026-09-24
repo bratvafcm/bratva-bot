@@ -3749,7 +3749,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `🎖️ *HONORABLE DEDICATION: SEASON 26 TOP 3 SCORERS*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `Massive salute to the three legends who powered BRATVA's offense with historic scoring records:\n` +
-      `🥇 *DOXIBÉRO* — *695 Goals* (26 Matches)\n` +
+      `🥇 *DOXIBERO1* — *695 Goals* (26 Matches)\n` +
       `🥈 *Mohamed\\_Osama* — *542 Goals* (25 Matches)\n` +
       `🥉 *саня (Sanya)* — *532 Goals* (15 Matches | 35.5 Avg)\n\n` +
       `❤️ *SPECIAL SALUTE TO ALL MEMBERS WHO JOINED & REGISTERED*\n` +
@@ -3757,6 +3757,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `A deep, heartfelt thank you to every warrior who joined our brotherhood, registered in the bot, and stays battle-ready:\n` +
       `⭐ *Mike (Josue)* — 450 Goals\n` +
       `⭐ *Abirsh07* — 364 Goals\n` +
+      `⭐ *DOXIBÉRO (Account 2)* — 328 Goals\n` +
       `⭐ *KOUSTAV\\_007 (K C)* — 320 Goals\n` +
       `⭐ *King\\_Pentax* — 285 Goals\n` +
       `⭐ *Rogelio (Rogelio Ramírez)* — 246 Goals\n` +
@@ -3783,7 +3784,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `🎖️ *ПОЧЕТНОЕ ПОСВЯЩЕНИЕ: ТОП-3 БОМБАРДИРА 26 СЕЗОНА*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `Низкий поклон и респект трем титанам атаки, показавшим колоссальную результативность:\n` +
-      `🥇 *DOXIBÉRO* — *695 Голов* (26 Матчей)\n` +
+      `🥇 *DOXIBERO1* — *695 Голов* (26 Матчей)\n` +
       `🥈 *Mohamed\\_Osama* — *542 Гола* (25 Матчей)\n` +
       `🥉 *саня (Sanya)* — *532 Гола* (15 Матчей | Среднее: 35.5)\n\n` +
       `❤️ *ОСОБАЯ БЛАГОДАРНОСТЬ ВСЕМ ВСТУПИВШИМ БОЙЦАМ*\n` +
@@ -3791,6 +3792,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `Огромное спасибо каждому игроку, кто присоединился к BRATVA, зарегистрировался в боте и держит строй:\n` +
       `⭐ *Mike (Josue)* — 450 Голов\n` +
       `⭐ *Abirsh07* — 364 Гола\n` +
+      `⭐ *DOXIBÉRO (Второй аккаунт)* — 328 Голов\n` +
       `⭐ *KOUSTAV\\_007 (K C)* — 320 Голов\n` +
       `⭐ *King\\_Pentax* — 285 Голов\n` +
       `⭐ *Rogelio (Rogelio Ramírez)* — 246 Голов\n` +
@@ -3817,7 +3819,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `🎖️ *HOMENAJE DE HONOR: TOP 3 GOLEADORES DE LA TEMPORADA 26*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `Un gran reconocimiento a los tres titanes que lideraron la ofensiva de BRATVA con cifras históricas:\n` +
-      `🥇 *DOXIBÉRO* — *695 Goles* (26 Partidos)\n` +
+      `🥇 *DOXIBERO1* — *695 Goles* (26 Partidos)\n` +
       `🥈 *Mohamed\\_Osama* — *542 Goles* (25 Partidos)\n` +
       `🥉 *саня (Sanya)* — *532 Goles* (15 Partidos | Promedio: 35.5)\n\n` +
       `❤️ *AGRADECIMIENTO ESPECIAL A TODOS LOS MIEMBROS UNIDOS*\n` +
@@ -3825,6 +3827,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `Nuestro más sincero agradecimiento a cada guerrero que se unió a la hermandad, se registró en el bot y demuestra compromiso:\n` +
       `⭐ *Mike (Josue)* — 450 Goles\n` +
       `⭐ *Abirsh07* — 364 Goles\n` +
+      `⭐ *DOXIBÉRO (Segunda cuenta)* — 328 Goles\n` +
       `⭐ *KOUSTAV\\_007 (K C)* — 320 Goles\n` +
       `⭐ *King\\_Pentax* — 285 Goles\n` +
       `⭐ *Rogelio (Rogelio Ramírez)* — 246 Goles\n` +
@@ -3852,7 +3855,7 @@ function formatSeason27Announcement(lang = 'ar') {
     `🎖️ *إهداء شرفي خاص لـ TOP 3 (أساطير الموسم 26)*\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
     `تحية إجلال وتقدير لثلاثي القمة الذين قادوا هجوم BRATVA بأعلى معدلات تسجيل للأهداف:\n` +
-    `🥇 *DOXIBÉRO* — *695 هدفاً* (26 مباراة)\n` +
+    `🥇 *DOXIBERO1* — *695 هدفاً* (26 مباراة)\n` +
     `🥈 *Mohamed\\_Osama* — *542 هدفاً* (25 مباراة)\n` +
     `🥉 *саня (Sanya)* — *532 هدفاً* (15 مباراة | معدل استثنائي 35.5)\n\n` +
     `❤️ *شكر وتقدير خاص لجميع الأبطال المنضمين*\n` +
@@ -3860,6 +3863,7 @@ function formatSeason27Announcement(lang = 'ar') {
     `شكراً من أعماق القلب لكل محارب التحق بكتيبة BRATVA، سجل في البوت، وأثبت ولاءه والتزامه:\n` +
     `⭐ *Mike (Josue)* — 450 هدفاً\n` +
     `⭐ *Abirsh07* — 364 هدفاً\n` +
+    `⭐ *DOXIBÉRO (الحساب الثاني)* — 328 هدفاً\n` +
     `⭐ *KOUSTAV\\_007 (K C)* — 320 هدفاً\n` +
     `⭐ *King\\_Pentax* — 285 هدفاً\n` +
     `⭐ *Rogelio (Rogelio Ramírez)* — 246 هدفاً\n` +
@@ -6446,10 +6450,16 @@ export default async function handler(req, res) {
           const bText = formatSeason27Announcement(defaultLang);
           const bKeys = getSeason27Keyboard(defaultLang, false);
 
-          const resChannel = await sendTelegramMessage(CHANNEL_ID, bText, bKeys);
+          const editId = url.searchParams.get('edit_id');
+          let resChannel = null;
+          if (editId) {
+            resChannel = await editTelegramMessage(CHANNEL_ID, parseInt(editId, 10), bText, bKeys);
+          } else {
+            resChannel = await sendTelegramMessage(CHANNEL_ID, bText, bKeys);
+          }
           let resGroup = null;
           const linkedGroupId = await getLinkedGroupId();
-          if (linkedGroupId && String(linkedGroupId) !== String(CHANNEL_ID)) {
+          if (linkedGroupId && String(linkedGroupId) !== String(CHANNEL_ID) && !editId) {
             resGroup = await sendTelegramMessage(linkedGroupId, bText, bKeys);
           }
 
