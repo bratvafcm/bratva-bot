@@ -6458,9 +6458,10 @@ export default async function handler(req, res) {
             resChannel = await sendTelegramMessage(CHANNEL_ID, bText, bKeys);
           }
           let resGroup = null;
-          const linkedGroupId = await getLinkedGroupId();
-          if (linkedGroupId && String(linkedGroupId) !== String(CHANNEL_ID) && !editId) {
-            resGroup = await sendTelegramMessage(linkedGroupId, bText, bKeys);
+          const explicitGroupId = url.searchParams.get('group_id');
+          const targetGroupId = explicitGroupId || (await getLinkedGroupId());
+          if (targetGroupId && String(targetGroupId) !== String(CHANNEL_ID) && !editId) {
+            resGroup = await sendTelegramMessage(targetGroupId, bText, bKeys);
           }
 
           return sendResponse(res, 200, {
@@ -7824,6 +7825,20 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'Group bot link sent');
       }
 
+      // 3. Admin Command inside Group: Post Season 27 Announcement directly into this group!
+      if (text.startsWith('/broadcast_season27') || text.startsWith('/season27')) {
+        const userId = message.from ? message.from.id : null;
+        const isAdmin = await isUserAdmin(userId, message.from?.username);
+        if (isAdmin) {
+          deleteTelegramMessage(chatId, message.message_id).catch(() => {});
+          const bText = formatSeason27Announcement('ar');
+          const bKeys = getSeason27Keyboard('ar', false);
+          await sendTelegramMessage(chatId, bText, bKeys);
+          cachedLinkedGroupId = chatId;
+          return sendResponse(res, 200, 'Season 27 announcement posted to group');
+        }
+      }
+
       return sendResponse(res, 200, 'All other group messages strictly ignored');
     }
 
@@ -7832,6 +7847,26 @@ export default async function handler(req, res) {
     const userId = message.from ? message.from.id : null;
     const strId = String(userId || '');
     const username = message.from ? (message.from.username || '') : '';
+
+    // 🔒 Admin Forward Detection: If admin forwards any message from the group to the bot in private DM
+    if (isPrivate && message.forward_from_chat) {
+      const fChat = message.forward_from_chat;
+      if (fChat.type === 'group' || fChat.type === 'supergroup') {
+        const isAdmin = await isUserAdmin(userId, username);
+        if (isAdmin) {
+          cachedLinkedGroupId = fChat.id;
+          const bText = formatSeason27Announcement('ar');
+          const bKeys = getSeason27Keyboard('ar', false);
+          const postRes = await sendTelegramMessage(fChat.id, bText, bKeys);
+          if (postRes && postRes.ok) {
+            await sendTelegramMessage(chatId, `✅ *تم إرسال إعلان الموسم 27 بنجاح إلى المجموعة مباشرة مع جميع الأزرار والترجمات!* 🎯\n\n📌 *المجموعة:* *${clean(fChat.title || 'Group')}* (ID: \`${fChat.id}\`)`);
+          } else {
+            await sendTelegramMessage(chatId, `⚠️ *تعذر الإرسال إلى المجموعة:* تأكد من إضافة البوت كمشرف (Admin) في المجموعة، أو أرسل الأمر \`/season27\` مباشرة داخل المجموعة.`);
+          }
+          return sendResponse(res, 200, 'Group forward broadcast handled');
+        }
+      }
+    }
 
     // 🧪 Sandbox Mode Toggle (Exclusive for Bilal / Tester):
     // Allows switching on-the-fly between tester member mode and administrator mode!
