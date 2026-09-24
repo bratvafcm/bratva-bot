@@ -6469,7 +6469,7 @@ export default async function handler(req, res) {
             status: 'success',
             action: 'broadcast_season27',
             channel: CHANNEL_ID,
-            linked_group: linkedGroupId,
+            linked_group: targetGroupId,
             result_channel: resChannel,
             result_group: resGroup,
             timestamp: new Date().toISOString()
