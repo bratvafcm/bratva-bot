@@ -43,6 +43,7 @@ let latestLiveMessage = null;
 let latestMvpMessage = null;
 const processedUpdates = new Set();
 const mediaGroupMap = new Map();
+const recentLogs = [];
 const processingPhotos = new Set();
 const activeBufferStatusMessages = new Map(); // chatId -> messageId
 const waitingRosterSync = new Map(); // chatId -> timestamp
@@ -6584,6 +6585,7 @@ export default async function handler(req, res) {
         has_gemini: Boolean(GEMINI_KEY),
         has_pat: Boolean(GITHUB_PAT),
         cached_tournament: globalLatestTournament ? `${globalLatestTournament.id} (${globalLatestTournament.matches.length} players)` : null,
+        recent_logs: recentLogs,
         timestamp: new Date().toISOString()
       }, true);
     }
@@ -6614,6 +6616,18 @@ export default async function handler(req, res) {
     if (!update) {
       return sendResponse(res, 200, 'OK');
     }
+
+    try {
+      recentLogs.unshift({
+        time: new Date().toISOString(),
+        type: update.message ? (`${update.message.chat?.type}:${update.message.text || 'media'}`) : Object.keys(update)[1],
+        from: update.message?.from?.id,
+        username: update.message?.from?.username,
+        chat: update.message?.chat?.id,
+        forward: Boolean(update.message?.forward_origin || update.message?.forward_from_chat)
+      });
+      if (recentLogs.length > 25) recentLogs.pop();
+    } catch (e) {}
 
     if (update.channel_post) {
       return sendResponse(res, 200, 'Channel post ignored');
@@ -7825,18 +7839,15 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'Group bot link sent');
       }
 
-      // 3. Admin Command inside Group: Post Season 27 Announcement directly into this group!
-      if (text.startsWith('/broadcast_season27') || text.startsWith('/season27')) {
-        const userId = message.from ? message.from.id : null;
-        const isAdmin = await isUserAdmin(userId, message.from?.username);
-        if (isAdmin) {
-          deleteTelegramMessage(chatId, message.message_id).catch(() => {});
-          const bText = formatSeason27Announcement('ar');
-          const bKeys = getSeason27Keyboard('ar', false);
-          await sendTelegramMessage(chatId, bText, bKeys);
-          cachedLinkedGroupId = chatId;
-          return sendResponse(res, 200, 'Season 27 announcement posted to group');
-        }
+      // 3. Group Command: Post Season 27 Announcement directly into this group!
+      const lower = text.toLowerCase();
+      if (lower.startsWith('/season27') || lower.startsWith('/broadcast_season27') || lower.startsWith('/s27')) {
+        deleteTelegramMessage(chatId, message.message_id).catch(() => {});
+        const bText = formatSeason27Announcement('ar');
+        const bKeys = getSeason27Keyboard('ar', false);
+        await sendTelegramMessage(chatId, bText, bKeys);
+        cachedLinkedGroupId = chatId;
+        return sendResponse(res, 200, 'Season 27 announcement posted to group');
       }
 
       return sendResponse(res, 200, 'All other group messages strictly ignored');
@@ -7848,12 +7859,12 @@ export default async function handler(req, res) {
     const strId = String(userId || '');
     const username = message.from ? (message.from.username || '') : '';
 
-    // 🔒 Admin Forward Detection: If admin forwards any message from the group to the bot in private DM
-    if (isPrivate && message.forward_from_chat) {
-      const fChat = message.forward_from_chat;
-      if (fChat.type === 'group' || fChat.type === 'supergroup') {
-        const isAdmin = await isUserAdmin(userId, username);
-        if (isAdmin) {
+    // 🔒 Group Forward Detection: If admin or owner forwards any message from the group to the bot in private DM
+    if (isPrivate) {
+      const fChat = message.forward_from_chat || (message.forward_origin && (message.forward_origin.chat || message.forward_origin.channel));
+      if (fChat && (fChat.type === 'group' || fChat.type === 'supergroup')) {
+        const isOwnerOrAdm = strId === '5414088590' || username.toLowerCase() === 'bilalmorocci' || username.toLowerCase() === 'doxibero' || (await isUserAdmin(userId, username));
+        if (isOwnerOrAdm) {
           cachedLinkedGroupId = fChat.id;
           const bText = formatSeason27Announcement('ar');
           const bKeys = getSeason27Keyboard('ar', false);
@@ -7861,7 +7872,7 @@ export default async function handler(req, res) {
           if (postRes && postRes.ok) {
             await sendTelegramMessage(chatId, `✅ *تم إرسال إعلان الموسم 27 بنجاح إلى المجموعة مباشرة مع جميع الأزرار والترجمات!* 🎯\n\n📌 *المجموعة:* *${clean(fChat.title || 'Group')}* (ID: \`${fChat.id}\`)`);
           } else {
-            await sendTelegramMessage(chatId, `⚠️ *تعذر الإرسال إلى المجموعة:* تأكد من إضافة البوت كمشرف (Admin) في المجموعة، أو أرسل الأمر \`/season27\` مباشرة داخل المجموعة.`);
+            await sendTelegramMessage(chatId, `⚠️ *تعذر الإرسال إلى المجموعة:* تأكد من إضافة البوت كمشرف (Admin) في المجموعة حتى يتمكن من النشر.\n\nخطأ: ${postRes?.description || 'Unknown'}`);
           }
           return sendResponse(res, 200, 'Group forward broadcast handled');
         }
