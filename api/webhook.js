@@ -1378,7 +1378,8 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
     welcome: 'Welcome Notice',
     menu: 'Main Menu',
     rosterprompt: 'Roster Sync',
-    tgnotice: 'Registration Notice'
+    tgnotice: 'Registration Notice',
+    season27: 'Season 27 Launch'
   };
   const title = categoryTitles[category] || 'to Channel';
 
@@ -1397,7 +1398,7 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
     { text: esLabel, callback_data: `tab_${category}_${param}_es` }
   ]);
 
-  if (category === 'welcome' || category === 'tgnotice') {
+  if (category === 'welcome' || category === 'tgnotice' || category === 'season27') {
     rows.push([
       { text: '🤖 Регистрация в боте / Register in Bot', url: 'https://t.me/BratvaFCMBot?start=register' }
     ]);
@@ -3726,6 +3727,200 @@ function formatTelegramNotice(lang = 'ru') {
     `2️⃣ Нажмите /start и отправьте свой точный игровой ник\n` +
     `3️⃣ Вступите в официальное сообщество (Канал и Чат)\n\n` +
     `⚡ После верификации ваш профиль, статистика и допуск к турнирам будут активированы!`;
+}
+
+/**
+ * Format Season 27 Kickoff Announcement:
+ * - Pre-match check-in poll explanation (won't start until 32-100 players)
+ * - Dedication to Season 26 Top 3 scorers with total goals
+ * - Special thanks & shoutout to all registered and active squad members
+ * - Multilingual versions: Arabic (Default / System), English, Russian, Spanish
+ */
+function formatSeason27Announcement(lang = 'ar') {
+  if (lang === 'en') {
+    return `🚨👑 *BRATVA FCM: OFFICIAL SEASON 27 KICKOFF BRIEFING* 👑🚨\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `With the dawn of *Season 27*, we officially launch a new era of ambition, unity, and dominance in EA FC Mobile! 🏆\n\n` +
+      `A warm welcome to all warriors! Here is the official roadmap and operational update for our squad:\n\n` +
+      `⚠️ *IMPORTANT NOTICE: PRE-MATCH CHECK-IN POLL*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `📌 *The 1-Hour Pre-Match Check-In Poll will NOT be activated yet!* It will officially launch once our roster expands to *32–100 active members* registered in the bot.\n` +
+      `Right now, we are fully focused on squad building and recruiting top-tier talent. Invite elite warriors to join our bot and community so we reach our target fast! 🎯\n\n` +
+      `🎖️ *HONORABLE DEDICATION: SEASON 26 TOP 3 SCORERS*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `Massive salute to the three legends who powered BRATVA's offense with historic scoring records:\n` +
+      `🥇 *DOXIBÉRO* — *695 Goals* (26 Matches)\n` +
+      `🥈 *Mohamed\\_Osama* — *542 Goals* (25 Matches)\n` +
+      `🥉 *саня (Sanya)* — *532 Goals* (15 Matches | 35.5 Avg)\n\n` +
+      `❤️ *SPECIAL SALUTE TO ALL MEMBERS WHO JOINED & REGISTERED*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `A deep, heartfelt thank you to every warrior who joined our brotherhood, registered in the bot, and stays battle-ready:\n` +
+      `⭐ *Mike (Josue)* — 450 Goals\n` +
+      `⭐ *Abirsh07* — 364 Goals\n` +
+      `⭐ *KOUSTAV\\_007 (K C)* — 320 Goals\n` +
+      `⭐ *King\\_Pentax* — 285 Goals\n` +
+      `⭐ *Rogelio (Rogelio Ramírez)* — 246 Goals\n` +
+      `⭐ *L1onchik (L1on⚡🏆)* — 119 Goals\n` +
+      `And huge respect to our active fighters:\n` +
+      `• *MSRPBOT* • *KSFALUBAZ* • *RMa\\_jXAHB* • *Тима* • *Omar* • *Real* • *PSG* • *PapaCarlos1234* • *Awukufc* • *RÈDHAWK前*\n\n` +
+      `You are the true backbone and heartbeat of BRATVA! 🤝🔥\n\n` +
+      `🤖 *COMMANDS & FEATURES AT YOUR FINGERTIPS:*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `🔹 */tournaments* — Browse past match results and participant scorecards ranked top-to-bottom.\n` +
+      `🔹 */stats* — View your personal stats, goal totals, and turn reliability.\n` +
+      `🔹 */rules* — Review league standards, minimum targets, and strike discipline.\n\n` +
+      `🦁⚔️ *ONE FAMILY. ONE CREED. DOMINATION! FOR BRATVA!* 🔴⚪️`;
+  }
+  if (lang === 'ru') {
+    return `🚨👑 *БРАТВА FCM: ОФИЦИАЛЬНЫЙ СТАРТ 27 СЕЗОНА* 👑🚨\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `С началом *27 Сезона* мы открываем новую главу побед, единства и абсолютного доминирования в EA FC Mobile! 🏆\n\n` +
+      `Приветствуем всех бойцов! Главная информация, стратегия и правила на старте сезона:\n\n` +
+      `⚠️ *ВАЖНОЕ СООБЩЕНИЕ: ОПРОС ГОТОВНОСТИ (CHECK-IN POLL)*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `📌 *1-часовой опрос готовности перед турниром ПОКА НЕ ЗАПУСКАЕТСЯ!* Он стартует, когда наш состав расширится до *32–100 активных бойцов*, зарегистрированных в боте.\n` +
+      `Сейчас мы находимся в фазе активного набора и укрепления состава. Приглашайте сильных игроков в лигу и бота, чтобы быстрее набрать полную мощь! 🎯\n\n` +
+      `🎖️ *ПОЧЕТНОЕ ПОСВЯЩЕНИЕ: ТОП-3 БОМБАРДИРА 26 СЕЗОНА*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `Низкий поклон и респект трем титанам атаки, показавшим колоссальную результативность:\n` +
+      `🥇 *DOXIBÉRO* — *695 Голов* (26 Матчей)\n` +
+      `🥈 *Mohamed\\_Osama* — *542 Гола* (25 Матчей)\n` +
+      `🥉 *саня (Sanya)* — *532 Гола* (15 Матчей | Среднее: 35.5)\n\n` +
+      `❤️ *ОСОБАЯ БЛАГОДАРНОСТЬ ВСЕМ ВСТУПИВШИМ БОЙЦАМ*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `Огромное спасибо каждому игроку, кто присоединился к BRATVA, зарегистрировался в боте и держит строй:\n` +
+      `⭐ *Mike (Josue)* — 450 Голов\n` +
+      `⭐ *Abirsh07* — 364 Гола\n` +
+      `⭐ *KOUSTAV\\_007 (K C)* — 320 Голов\n` +
+      `⭐ *King\\_Pentax* — 285 Голов\n` +
+      `⭐ *Rogelio (Rogelio Ramírez)* — 246 Голов\n` +
+      `⭐ *L1onchik (L1on⚡🏆)* — 119 Голов\n` +
+      `А также нашим надежным бойцам состава:\n` +
+      `• *MSRPBOT* • *KSFALUBAZ* • *RMa\\_jXAHB* • *Тима* • *Omar* • *Real* • *PSG* • *PapaCarlos1234* • *Awukufc* • *RÈDHAWK前*\n\n` +
+      `Вы — стальной хребет и гордость нашей лиги! 🤝🔥\n\n` +
+      `🤖 *ПОЛЕЗНЫЕ КОМАНДЫ БОТА:*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `🔹 */tournaments* — Интерактивный архив матчей со скоркардами бомбардиров.\n` +
+      `🔹 */stats* — Личная статистика, забитые голы и процент отыгранных атак.\n` +
+      `🔹 */rules* — Официальные правила лиги и система предупреждений.\n\n` +
+      `🦁⚔️ *ВМЕСТЕ МЫ — СИЛА! ОДНА СЕМЬЯ! ЗА БРАТВУ!* 🔴⚪️`;
+  }
+  if (lang === 'es') {
+    return `🚨👑 *BRATVA FCM: COMUNICADO OFICIAL TEMPORADA 27* 👑🚨\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `¡Con el inicio de la *Temporada 27*, abrimos una nueva era de gloria, ambición y dominio en EA FC Mobile! 🏆\n\n` +
+      `¡Bienvenidos a todos los guerreros! Esta es la hoja de ruta y actualización oficial para nuestra plantilla:\n\n` +
+      `⚠️ *AVISO IMPORTANTE: ENCUESTA DE PRE-PARTIDO (CHECK-IN)*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `📌 *¡La encuesta de disponibilidad de 1 hora NO se activará todavía!* Iniciará formalmente una vez que nuestra plantilla alcance entre *32 y 100 jugadores activos* registrados en el bot.\n` +
+      `Ahora mismo estamos en fase de reclutamiento y consolidación de la plantilla. ¡Inviten a jugadores de alto nivel para alcanzar la meta pronto! 🎯\n\n` +
+      `🎖️ *HOMENAJE DE HONOR: TOP 3 GOLEADORES DE LA TEMPORADA 26*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `Un gran reconocimiento a los tres titanes que lideraron la ofensiva de BRATVA con cifras históricas:\n` +
+      `🥇 *DOXIBÉRO* — *695 Goles* (26 Partidos)\n` +
+      `🥈 *Mohamed\\_Osama* — *542 Goles* (25 Partidos)\n` +
+      `🥉 *саня (Sanya)* — *532 Goles* (15 Partidos | Promedio: 35.5)\n\n` +
+      `❤️ *AGRADECIMIENTO ESPECIAL A TODOS LOS MIEMBROS UNIDOS*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `Nuestro más sincero agradecimiento a cada guerrero que se unió a la hermandad, se registró en el bot y demuestra compromiso:\n` +
+      `⭐ *Mike (Josue)* — 450 Goles\n` +
+      `⭐ *Abirsh07* — 364 Goles\n` +
+      `⭐ *KOUSTAV\\_007 (K C)* — 320 Goles\n` +
+      `⭐ *King\\_Pentax* — 285 Goles\n` +
+      `⭐ *Rogelio (Rogelio Ramírez)* — 246 Goles\n` +
+      `⭐ *L1onchik (L1on⚡🏆)* — 119 Goles\n` +
+      `Y un saludo especial a todos nuestros luchadores:\n` +
+      `• *MSRPBOT* • *KSFALUBAZ* • *RMa\\_jXAHB* • *Тима* • *Omar* • *Real* • *PSG* • *PapaCarlos1234* • *Awukufc* • *RÈDHAWK前*\n\n` +
+      `¡Ustedes son el corazón y la columna vertebral de BRATVA! 🤝🔥\n\n` +
+      `🤖 *HERRAMIENTAS DEL BOT DISPONIBLES:*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `🔹 */tournaments* — Historial interactivo de torneos y lista de goleadores.\n` +
+      `🔹 */stats* — Estadísticas personales, goles y turnos jugados.\n` +
+      `🔹 */rules* — Reglas oficiales de la liga y disciplina.\n\n` +
+      `🦁⚔️ *¡UNA SOLA FAMILIA, UN SOLO OBJETIVO! ¡VAMOS BRATVA!* 🔴⚪️`;
+  }
+
+  // Arabic (Default System)
+  return `🚨👑 *إعلان انطلاق الموسم 27 — عائلة BRATVA FCM* 👑🚨\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `مع إشراقة *الموسم الجديد 27*، نعلن رسمياً افتتاح فصل جديد من القوة، المجد، والسيطرة المطلقة على ساحة EA FC Mobile! 🏆\n\n` +
+    `مرحباً بجميع الأبطال والمحاربين! إليكم التوجيهات الرسمية وخطة العمل للموسم الجديد:\n\n` +
+    `⚠️ *تنبيه هام بخصوص استطلاع الجاهزية (Check-In Poll)*\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `📌 *استطلاع الجاهزية المسبق (1-Hour Pre-Match Poll) لن يتم إطلاقه حالياً!* سيبدأ تفعيله رسمياً بمجرد اكتمال نصاب الدوري ووصولنا إلى *32 حتى 100 لاعب نشط* مسجل بالبوت.\n` +
+    `نحن حالياً في مرحلة استقطاب وبناء كتيبة نخبة قوية. شاركوا البوت والدوري مع أقوى اللاعبين حتى نصل للهدف سريعاً! 🎯\n\n` +
+    `🎖️ *إهداء شرفي خاص لـ TOP 3 (أساطير الموسم 26)*\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `تحية إجلال وتقدير لثلاثي القمة الذين قادوا هجوم BRATVA بأعلى معدلات تسجيل للأهداف:\n` +
+    `🥇 *DOXIBÉRO* — *695 هدفاً* (26 مباراة)\n` +
+    `🥈 *Mohamed\\_Osama* — *542 هدفاً* (25 مباراة)\n` +
+    `🥉 *саня (Sanya)* — *532 هدفاً* (15 مباراة | معدل استثنائي 35.5)\n\n` +
+    `❤️ *شكر وتقدير خاص لجميع الأبطال المنضمين*\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `شكراً من أعماق القلب لكل محارب التحق بكتيبة BRATVA، سجل في البوت، وأثبت ولاءه والتزامه:\n` +
+    `⭐ *Mike (Josue)* — 450 هدفاً\n` +
+    `⭐ *Abirsh07* — 364 هدفاً\n` +
+    `⭐ *KOUSTAV\\_007 (K C)* — 320 هدفاً\n` +
+    `⭐ *King\\_Pentax* — 285 هدفاً\n` +
+    `⭐ *Rogelio (Rogelio Ramírez)* — 246 هدفاً\n` +
+    `⭐ *L1onchik (L1on⚡🏆)* — 119 هدفاً\n` +
+    `وكذلك تحية تقدير خاصة لباقي أبطال التشكيلة:\n` +
+    `• *MSRPBOT* • *KSFALUBAZ* • *RMa\\_jXAHB* • *Тима* • *Omar* • *Real* • *PSG* • *PapaCarlos1234* • *Awukufc* • *RÈDHAWK前*\n\n` +
+    `بفضلكم جميعاً تصنع BRATVA هيبتها.. أنتم العمود الفقري للفريق! 🤝🔥\n\n` +
+    `🤖 *أوامر البوت الجديدة في خدمتكم:*\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `🔹 */tournaments* — استعراض سجل البطولات وترتيب الهدافين من الأعلى للأسفل.\n` +
+    `🔹 */stats* — متابعة أرقامك الفردية ونسبة التزامك بالهجمات.\n` +
+    `🔹 */rules* — القوانين الرسمية، الأهداف المطلوبة ونظام الإنذارات.\n\n` +
+    `🦁⚔️ *عائلة واحدة.. هدف واحد.. ديما BRATVA!* 🔴⚪️`;
+}
+
+function getSeason27Keyboard(currentLang = 'ar', isPrivate = false) {
+  const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
+  const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
+  const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
+  const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
+
+  const regLabel = currentLang === 'ar' ? '🤖 التسجيل في البوت (إلزامي للتشكيلة)' :
+                   currentLang === 'es' ? '🤖 Registro en Bot (Obligatorio)' :
+                   currentLang === 'en' ? '🤖 Register in Bot (Mandatory)' : '🤖 Регистрация в боте';
+
+  const chatLabel = currentLang === 'ar' ? '💬 شات ومجموعة الفريق' :
+                    currentLang === 'es' ? '💬 Chat de la Comunidad' :
+                    currentLang === 'en' ? '💬 Discussion Group Chat' : '💬 Чат сообщества';
+
+  const siteLabel = currentLang === 'ar' ? '🌐 الموقع الرسمي للدوري' :
+                    currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
+                    currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
+
+  const rows = [
+    [
+      { text: arLabel, callback_data: 'tab_season27_0_ar' },
+      { text: enLabel, callback_data: 'tab_season27_0_en' },
+      { text: ruLabel, callback_data: 'tab_season27_0_ru' },
+      { text: esLabel, callback_data: 'tab_season27_0_es' }
+    ],
+    [
+      { text: regLabel, url: BOT_REGISTER_URL }
+    ],
+    [
+      { text: chatLabel, url: COMMUNITY_URL }
+    ],
+    [
+      { text: siteLabel, url: WEBSITE_URL }
+    ]
+  ];
+
+  if (isPrivate) {
+    const menuLabel = currentLang === 'ar' ? '📋 القائمة الرئيسية' :
+                      currentLang === 'es' ? '📋 Menú Principal' :
+                      currentLang === 'en' ? '📋 Main Menu' : '📋 Главное Меню';
+    rows.push([
+      { text: menuLabel, callback_data: 'cmd_menu' }
+    ]);
+  }
+
+  return { inline_keyboard: rows };
 }
 
 /**
@@ -6225,7 +6420,8 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       try {
-        const url = new URL(req.url, `https://${req.headers.host || 'bratva-bot.vercel.app'}`);
+        const host = (req.headers && req.headers.host) ? req.headers.host : 'bratva-bot.vercel.app';
+        const url = new URL(req.url, `https://${host}`);
         if (url.searchParams.get('cron') === 'daily_rally') {
           return sendResponse(res, 200, {
             status: 'ignored',
@@ -6241,6 +6437,29 @@ export default async function handler(req, res) {
             action: 'broadcast_welcome',
             channel: CHANNEL_ID,
             result: bRes,
+            timestamp: new Date().toISOString()
+          }, true);
+        }
+
+        if (url.searchParams.get('action') === 'broadcast_season27') {
+          const defaultLang = url.searchParams.get('lang') || 'ar';
+          const bText = formatSeason27Announcement(defaultLang);
+          const bKeys = getSeason27Keyboard(defaultLang, false);
+
+          const resChannel = await sendTelegramMessage(CHANNEL_ID, bText, bKeys);
+          let resGroup = null;
+          const linkedGroupId = await getLinkedGroupId();
+          if (linkedGroupId && String(linkedGroupId) !== String(CHANNEL_ID)) {
+            resGroup = await sendTelegramMessage(linkedGroupId, bText, bKeys);
+          }
+
+          return sendResponse(res, 200, {
+            status: 'success',
+            action: 'broadcast_season27',
+            channel: CHANNEL_ID,
+            linked_group: linkedGroupId,
+            result_channel: resChannel,
+            result_group: resGroup,
             timestamp: new Date().toISOString()
           }, true);
         }
@@ -6651,6 +6870,9 @@ export default async function handler(req, res) {
         } else if (category === 'tgnotice' || category === 'notice') {
           updatedText = formatTelegramNotice(targetLang);
           updatedKeyboard = getLanguageKeyboard('tgnotice', '0', targetLang, isCbPrivate);
+        } else if (category === 'season27') {
+          updatedText = formatSeason27Announcement(targetLang);
+          updatedKeyboard = getSeason27Keyboard(targetLang, isCbPrivate);
         } else if (category === 'welcome') {
           updatedText = formatChannelWelcome(targetLang);
           updatedKeyboard = getLanguageKeyboard('welcome', '0', targetLang, false);
@@ -6701,7 +6923,7 @@ export default async function handler(req, res) {
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
             text: `✓ ${targetLang.toUpperCase()}`
-          });
+          }).catch(() => {});
           return sendResponse(res, 200, 'OK');
         }
       }
@@ -7270,6 +7492,23 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
+      if (data === 'bcast_season27') {
+        const bText = formatSeason27Announcement('ar');
+        const bKeys = getSeason27Keyboard('ar', false);
+        await sendTelegramMessage(CHANNEL_ID, bText, bKeys);
+        const linkedGroupId = await getLinkedGroupId();
+        if (linkedGroupId && String(linkedGroupId) !== String(CHANNEL_ID)) {
+          await sendTelegramMessage(linkedGroupId, bText, bKeys);
+        }
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: '📢 Season 27 Announcement broadcasted to channel & group!',
+          show_alert: true
+        });
+        await sendTelegramMessage(chatId, `✅ *Season 27 Announcement has been published to channel ${CHANNEL_ID} and linked discussion group!*`, getSeason27Keyboard('ar', true));
+        return sendResponse(res, 200, 'OK');
+      }
+
       if (data === 'cmd_strikes') {
         const text = await formatStrikes('ru');
         await sendTelegramMessage(chatId, text, getLanguageKeyboard('strikes', '0', 'ru', true));
@@ -7705,6 +7944,26 @@ export default async function handler(req, res) {
       if (text.startsWith('/top') || text.startsWith('/leaderboard')) {
         const topMsg = formatTopScorers('ru');
         await sendTelegramMessage(chatId, topMsg, getLanguageKeyboard('top', '0', 'ru', false));
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (text.startsWith('/broadcast_season27') || text.startsWith('/season27')) {
+        const isAdmin = await isUserAdmin(userId, message.from?.username);
+        if (!isAdmin) {
+          const userLang = detectUserLang(message.from, 'ar');
+          const seasonMsg = formatSeason27Announcement(userLang);
+          const seasonKeys = getSeason27Keyboard(userLang, isPrivate);
+          await sendTelegramMessage(chatId, seasonMsg, seasonKeys);
+          return sendResponse(res, 200, 'OK');
+        }
+        const bText = formatSeason27Announcement('ar');
+        const bKeys = getSeason27Keyboard('ar', false);
+        await sendTelegramMessage(CHANNEL_ID, bText, bKeys);
+        const linkedGroupId = await getLinkedGroupId();
+        if (linkedGroupId && String(linkedGroupId) !== String(CHANNEL_ID)) {
+          await sendTelegramMessage(linkedGroupId, bText, bKeys);
+        }
+        await sendTelegramMessage(chatId, `✅ *Season 27 Announcement has been published to channel ${CHANNEL_ID} and linked discussion group!*`, getSeason27Keyboard('ar', true));
         return sendResponse(res, 200, 'OK');
       }
 
