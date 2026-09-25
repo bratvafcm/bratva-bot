@@ -13,13 +13,13 @@
   },
   "doxibero1": {
     "display_name": "DOXIBERO1",
-    "total_goals": 0,
-    "total_matches": 0,
-    "average_goals": 0,
-    "last_tournament_date": null,
+    "total_goals": 34,
+    "total_matches": 1,
+    "average_goals": 34,
+    "last_tournament_date": "2026-09-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": null,
+      "last_evaluated_tournament_id": "2026-09-25_garuda_indonesia",
       "flagged_for_review": false
     }
   },
@@ -61,13 +61,13 @@
   },
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
-    "total_goals": 0,
-    "total_matches": 0,
-    "average_goals": 0,
-    "last_tournament_date": null,
+    "total_goals": 26,
+    "total_matches": 1,
+    "average_goals": 26,
+    "last_tournament_date": "2026-09-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": null,
+      "last_evaluated_tournament_id": "2026-09-25_garuda_indonesia",
       "flagged_for_review": false
     }
   },
@@ -181,13 +181,13 @@
   },
   "mike": {
     "display_name": "Mike",
-    "total_goals": 0,
-    "total_matches": 0,
-    "average_goals": 0,
-    "last_tournament_date": null,
+    "total_goals": 27,
+    "total_matches": 1,
+    "average_goals": 27,
+    "last_tournament_date": "2026-09-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": null,
+      "last_evaluated_tournament_id": "2026-09-25_garuda_indonesia",
       "flagged_for_review": false
     }
   },
@@ -361,13 +361,13 @@
   },
   "koustav_007": {
     "display_name": "KOUSTAV_007",
-    "total_goals": 0,
-    "total_matches": 0,
-    "average_goals": 0,
-    "last_tournament_date": null,
+    "total_goals": 35,
+    "total_matches": 1,
+    "average_goals": 35,
+    "last_tournament_date": "2026-09-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": null,
+      "last_evaluated_tournament_id": "2026-09-25_garuda_indonesia",
       "flagged_for_review": false
     }
   },
@@ -482,12 +482,12 @@
   "rogelio": {
     "display_name": "Rogelio",
     "total_goals": 0,
-    "total_matches": 0,
+    "total_matches": 1,
     "average_goals": 0,
-    "last_tournament_date": null,
+    "last_tournament_date": "2026-09-25",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": null,
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-25_garuda_indonesia",
       "flagged_for_review": false
     }
   },
@@ -529,13 +529,13 @@
   },
   "саня": {
     "display_name": "саня",
-    "total_goals": 0,
-    "total_matches": 0,
-    "average_goals": 0,
-    "last_tournament_date": null,
+    "total_goals": 39,
+    "total_matches": 1,
+    "average_goals": 39,
+    "last_tournament_date": "2026-09-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": null,
+      "last_evaluated_tournament_id": "2026-09-25_garuda_indonesia",
       "flagged_for_review": false
     }
   },
@@ -601,13 +601,13 @@
   },
   "king_pentax": {
     "display_name": "King_Pentax",
-    "total_goals": 0,
-    "total_matches": 0,
-    "average_goals": 0,
-    "last_tournament_date": null,
+    "total_goals": 32,
+    "total_matches": 1,
+    "average_goals": 32,
+    "last_tournament_date": "2026-09-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": null,
+      "last_evaluated_tournament_id": "2026-09-25_garuda_indonesia",
       "flagged_for_review": false
     }
   },
@@ -1340,6 +1340,18 @@
     "eligibility_streak": {
       "current_fail_streak": 0,
       "last_evaluated_tournament_id": null,
+      "flagged_for_review": false
+    }
+  },
+  "llonchik": {
+    "display_name": "Llonchik",
+    "total_goals": 21,
+    "total_matches": 1,
+    "average_goals": 21,
+    "last_tournament_date": "2026-09-25",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-09-25_garuda_indonesia",
       "flagged_for_review": false
     }
   }
