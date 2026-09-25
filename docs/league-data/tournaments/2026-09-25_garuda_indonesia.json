@@ -1,0 +1,79 @@
+{
+  "id": "2026-09-25_garuda_indonesia",
+  "tournament_id": "2026-09-25_garuda_indonesia",
+  "date": "2026-09-25",
+  "timestamp": 1790370402224,
+  "opponent_league": "GARUDA INDONESIA",
+  "our_total_goals": 214,
+  "opponent_total_goals": 194,
+  "result": "win",
+  "status": "complete",
+  "total_turns_played": 20,
+  "max_possible_turns": 24,
+  "matches": [
+    {
+      "board_order": 1,
+      "player_id": "саня",
+      "player_display_name": "саня",
+      "ovr": 128,
+      "goals_for": 39,
+      "turns_played": 3
+    },
+    {
+      "board_order": 2,
+      "player_id": "koustav_007",
+      "player_display_name": "KOUSTAV_007",
+      "ovr": 126,
+      "goals_for": 35,
+      "turns_played": 3
+    },
+    {
+      "board_order": 3,
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
+      "ovr": 126,
+      "goals_for": 34,
+      "turns_played": 3
+    },
+    {
+      "board_order": 4,
+      "player_id": "mohamed_osama",
+      "player_display_name": "Mohamed_Osama",
+      "ovr": 125,
+      "goals_for": 26,
+      "turns_played": 3
+    },
+    {
+      "board_order": 5,
+      "player_id": "mike",
+      "player_display_name": "Mike",
+      "ovr": 125,
+      "goals_for": 27,
+      "turns_played": 3
+    },
+    {
+      "board_order": 6,
+      "player_id": "llonchik",
+      "player_display_name": "Llonchik",
+      "ovr": 125,
+      "goals_for": 21,
+      "turns_played": 2
+    },
+    {
+      "board_order": 7,
+      "player_id": "rogelio",
+      "player_display_name": "Rogelio",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 8,
+      "player_id": "king_pentax",
+      "player_display_name": "King_Pentax",
+      "ovr": 124,
+      "goals_for": 32,
+      "turns_played": 3
+    }
+  ]
+}
