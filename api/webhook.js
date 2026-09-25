@@ -1082,7 +1082,8 @@ async function syncBotCommands() {
 
   const scopes = [
     { type: 'default' },
-    { type: 'all_private_chats' }
+    { type: 'all_private_chats' },
+    { type: 'all_group_chats' }
   ];
 
   const results = {};
@@ -6725,16 +6726,16 @@ export default async function handler(req, res) {
 
       // Actions accessible to all squad members:
       const isPublicAction = data.startsWith('tab_') || data.startsWith('ci_') || data.startsWith('fmt_lineup_') || data.startsWith('verify_sub_') ||
-                             data.startsWith('filter_t_') || data.startsWith('view_t_') || data.startsWith('back_t_') ||
+                             data.startsWith('filter_t_') || data.startsWith('view_t_') || data.startsWith('back_t_') || data.startsWith('pl_') || data.startsWith('s27_') ||
                              data === 'cmd_rules' || data === 'cmd_top' || data === 'cmd_lineup' || data === 'cmd_checkin' ||
                              data === 'cmd_recap' || data === 'cmd_mvp' || data === 'cmd_tournaments' || data === 'cmd_mystats' ||
                              data === 'cmd_menu';
 
-      // If clicked inside a channel or group, allow in-place translation tabs (tab_) and check-in buttons (ci_)
-      if (!isCbPrivate && !data.startsWith('tab_') && !data.startsWith('ci_') && !data.startsWith('filter_t_') && !data.startsWith('view_t_') && !data.startsWith('back_t_')) {
+      // If clicked inside a channel or group, allow public actions (translations, filters, check-ins, lineups)
+      if (!isCbPrivate && !isPublicAction) {
         await telegramRequest('answerCallbackQuery', {
           callback_query_id: cb.id,
-          text: '⚠️ Bot commands & menus are only available in private DM @BratvaFCMBot',
+          text: '⚠️ This action is only available in private DM @BratvaFCMBot',
           show_alert: true
         });
         return sendResponse(res, 200, 'Group callback ignored');
@@ -7817,7 +7818,7 @@ export default async function handler(req, res) {
     const isPrivate = !message.chat || message.chat.type === 'private';
     const text = (message.text || '').trim();
 
-    // Group Policy: The bot is muted in groups, EXCEPT for automatically guiding new members to the bot!
+    // Group Policy: Process group commands without spamming casual chat
     if (!isPrivate) {
       // 1. Automatic Group Onboarding: When new members join the group, greet them with direct bot registration link!
       if (message.new_chat_members && Array.isArray(message.new_chat_members) && message.new_chat_members.length > 0) {
@@ -7854,10 +7855,22 @@ export default async function handler(req, res) {
         }
       }
 
-      // 2. Helpful 1-line guidance if someone asks for bot in group
-      if (text.startsWith('/register') || text.startsWith('/bot') || text === '/start') {
-        const replyText = `🤖 *БРАТВА FCM Official Bot:* [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
-          `👉 [Нажмите сюда / Click here to open bot](https://t.me/BratvaFCMBot?start=register) to verify your in-game name!`;
+      // If it's NOT a command (casual chatting between members), stay quiet!
+      if (!text.startsWith('/')) {
+        return sendResponse(res, 200, 'Group casual message ignored');
+      }
+
+      // Extract command and arguments (cleaning off any @BratvaFCMBot suffix)
+      const parts = text.split(/\s+/);
+      const rawCmd = (parts[0] || '').toLowerCase();
+      const cmd = rawCmd.split('@')[0];
+      const cmdArg = text.slice(rawCmd.length).trim();
+      const userLang = detectUserLang(message.from, 'ru');
+
+      // 2. Direct Bot Registration Link
+      if (cmd === '/register' || cmd === '/bot' || cmd === '/start' || cmd === '/verify') {
+        const replyText = `🤖 *БРАТВА FCM Official Bot:* [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n\n` +
+          `👉 [Нажмите сюда / Click here to open bot](https://t.me/BratvaFCMBot?start=register) to verify your in-game name and join the squad roster!`;
         const replyKeys = {
           inline_keyboard: [
             [{ text: '🤖 Открыть бота / Open Bot', url: 'https://t.me/BratvaFCMBot?start=register' }]
@@ -7867,9 +7880,99 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'Group bot link sent');
       }
 
-      // 3. Group Command: Post Season 27 Announcement directly into this group!
-      const lower = text.toLowerCase();
-      if (lower.startsWith('/season27') || lower.startsWith('/broadcast_season27') || lower.startsWith('/s27')) {
+      // 3. Leaderboard / Top Scorers
+      if (cmd === '/top' || cmd === '/leaderboard') {
+        const topMsg = formatTopScorers(userLang);
+        await sendTelegramMessage(chatId, topMsg, getLanguageKeyboard('top', '0', userLang, false));
+        return sendResponse(res, 200, 'Group top sent');
+      }
+
+      // 4. Tournaments Browser
+      if (cmd === '/tournaments' || cmd === '/history') {
+        let filter = '7';
+        if (cmdArg) {
+          const a = cmdArg.toLowerCase();
+          if (a === '26' || a === 's26') filter = 's26';
+          else if (a === '27' || a === 's27') filter = 's27';
+          else if (a === '1' || a === 'last') filter = '1';
+          else if (a === '30') filter = '30';
+          else if (a === 'all') filter = 'all';
+        }
+        const list = await getFilteredTournaments(filter);
+        const tMsg = await formatTournamentsBrowser(filter, userLang);
+        const tKeys = getTournamentsBrowserKeyboard(filter, userLang, list);
+        await sendTelegramMessage(chatId, tMsg, tKeys);
+        return sendResponse(res, 200, 'Group tournaments sent');
+      }
+
+      // 5. League Rules
+      if (cmd === '/rules') {
+        const rules = formatRules(userLang);
+        await sendTelegramMessage(chatId, rules, getLanguageKeyboard('rules', '0', userLang, false));
+        return sendResponse(res, 200, 'Group rules sent');
+      }
+
+      // 6. Squad Rally / Check-in
+      if (cmd === '/checkin' || cmd === '/rally') {
+        const ciMsg = formatCheckInPrompt(userLang);
+        const ciKeys = getCheckInKeyboard(userLang, false);
+        await sendTelegramMessage(chatId, ciMsg, ciKeys);
+        return sendResponse(res, 200, 'Group checkin sent');
+      }
+
+      // 7. Smart Lineup
+      if (cmd === '/lineup') {
+        const reqSize = cmdArg ? parseInt(cmdArg, 10) : null;
+        const lineupData = await generateSmartLineup(reqSize);
+        const lineupMsg = await formatSmartLineup(reqSize, 'ru');
+        await sendTelegramMessage(chatId, lineupMsg, getLineupKeyboard(lineupData.size, 'ru', false, lineupData.isAuto));
+        return sendResponse(res, 200, 'Group lineup sent');
+      }
+
+      // 8. Latest Match Recap
+      if (cmd === '/recap' || cmd === '/broadcast') {
+        const t = await getLatestTournament();
+        const tId = t?.id || t?.tournament_id || '0';
+        const recap = formatRecap(t, userLang);
+        const keys = getTabsKeyboard(userLang, tId, false);
+        await sendTelegramMessage(chatId, recap, keys);
+        return sendResponse(res, 200, 'Group recap sent');
+      }
+
+      // 9. MVP Spotlight
+      if (cmd === '/mvp' || cmd === '/totw') {
+        const mvpMsg = formatMvp(userLang);
+        await sendTelegramMessage(chatId, mvpMsg, getLanguageKeyboard('mvp', '0', userLang, false));
+        return sendResponse(res, 200, 'Group mvp sent');
+      }
+
+      // 10. Player Card & Stats
+      if (cmd === '/stats' || cmd === '/mystats' || cmd === '/card' || cmd === '/player' || cmd === '/me' || cmd === '/my' || cmd === '/p') {
+        const regData = await getRegisteredPlayers();
+        let pid = '';
+        if (cmdArg) {
+          const matched = findPlayerByQuery(cmdArg);
+          pid = matched ? matched.player_id : cmdArg;
+        } else {
+          const userReg = Object.values(regData.registrations || {}).find(r =>
+            String(r.telegram_id) === String(userId) ||
+            (message.from && message.from.username && r.telegram_username && r.telegram_username.toLowerCase() === message.from.username.toLowerCase())
+          );
+          if (userReg) pid = userReg.player_id;
+        }
+
+        if (pid) {
+          const pMsg = generatePlayerStatsMessage(pid, userLang);
+          await sendTelegramMessage(chatId, pMsg, getPlayerKeyboard(pid, userLang));
+        } else {
+          const statsPrompt = formatMyStatsPrompt(userLang);
+          await sendTelegramMessage(chatId, statsPrompt, getLanguageKeyboard('mystats', '0', userLang, false));
+        }
+        return sendResponse(res, 200, 'Group stats sent');
+      }
+
+      // 11. Season 27 Announcement
+      if (cmd === '/season27' || cmd === '/broadcast_season27' || cmd === '/s27') {
         deleteTelegramMessage(chatId, message.message_id).catch(() => {});
         const bText = formatSeason27Announcement('ar');
         const bKeys = getSeason27Keyboard('ar', false);
@@ -7878,7 +7981,38 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'Season 27 announcement posted to group');
       }
 
-      return sendResponse(res, 200, 'All other group messages strictly ignored');
+      // 12. Help / Commands Menu
+      if (cmd === '/help' || cmd === '/commands' || cmd === '/menu') {
+        const helpMsg = `⚜️ *BRATVA FCM LEAGUE BOT COMMANDS:* ⚽\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `📊 */top* — Top Scorers & Rankings\n` +
+          `📜 */tournaments* — Match History & Archive\n` +
+          `🃏 */stats [player]* — View player profile & goals\n` +
+          `📋 */lineup* — Smart Match Lineup\n` +
+          `⚔️ */rally* — Squad Call & Check-in\n` +
+          `🏆 */recap* — Latest match summary\n` +
+          `⭐ */mvp* — Most Valuable Player\n` +
+          `⚖️ */rules* — Official League Rules\n` +
+          `🤖 */register* — Register your in-game name\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `🌐 *Website:* [bratvafcm.github.io](${WEBSITE_URL})`;
+        const helpKeys = {
+          inline_keyboard: [
+            [
+              { text: '📊 Leaderboard', callback_data: 'cmd_top' },
+              { text: '📜 Tournaments', callback_data: 'cmd_tournaments' }
+            ],
+            [
+              { text: '⚖️ Rules', callback_data: 'cmd_rules' },
+              { text: '🌐 Official Website', url: WEBSITE_URL }
+            ]
+          ]
+        };
+        await sendTelegramMessage(chatId, helpMsg, helpKeys);
+        return sendResponse(res, 200, 'Group help sent');
+      }
+
+      return sendResponse(res, 200, 'Unrecognized group command ignored');
     }
 
     // 🔒 Admin Security Gate: Players have NO access to the bot.
