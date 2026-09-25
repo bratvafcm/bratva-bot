@@ -1,1 +1,11 @@
-{}
+{
+  "2026-09-25_garuda_indonesia": {
+    "date": "2026-09-25",
+    "timestamp": 1790370402224,
+    "opponent_league": "GARUDA INDONESIA",
+    "our_total_goals": 214,
+    "opponent_total_goals": 194,
+    "result": "win",
+    "status": "complete"
+  }
+}
