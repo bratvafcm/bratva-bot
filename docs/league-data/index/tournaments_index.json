@@ -7,5 +7,14 @@
     "opponent_total_goals": 194,
     "result": "win",
     "status": "complete"
+  },
+  "2026-09-26_ujedinjeni_strim": {
+    "date": "2026-09-26",
+    "timestamp": 1790453968324,
+    "opponent_league": "Ujedinjeni Strim",
+    "our_total_goals": 184,
+    "opponent_total_goals": 238,
+    "result": "loss",
+    "status": "complete"
   }
 }
