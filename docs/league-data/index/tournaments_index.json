@@ -16,5 +16,14 @@
     "opponent_total_goals": 238,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-09-27_shaidul": {
+    "date": "2026-09-27",
+    "timestamp": 1790547614004,
+    "opponent_league": "Shaidul",
+    "our_total_goals": 167,
+    "opponent_total_goals": 163,
+    "result": "win",
+    "status": "complete"
   }
 }
