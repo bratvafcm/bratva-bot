@@ -25,5 +25,14 @@
     "opponent_total_goals": 163,
     "result": "win",
     "status": "complete"
+  },
+  "2026-09-30_blivion": {
+    "date": "2026-09-30",
+    "timestamp": 1790812199402,
+    "opponent_league": "BLIVION",
+    "our_total_goals": 289,
+    "opponent_total_goals": 318,
+    "result": "loss",
+    "status": "complete"
   }
 }
