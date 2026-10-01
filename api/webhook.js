@@ -16,10 +16,9 @@ import fs from 'fs';
 import path from 'path';
 
 const TELEGRAM_TOKEN = (process.env.TELEGRAM_TOKEN || '').trim();
-const FALLBACK_GEMINI_KEY = Buffer.from('QVEuQWI4Uk42SUFYZ1VHM0lyRFhWekxTWVA0cWNmREJlcDBpNGtEQ3VfS0dpQmhGRDBmTXc=', 'base64').toString('utf8');
 const GEMINI_KEYS = [
-  FALLBACK_GEMINI_KEY,
-  (process.env.GEMINI_KEY || '').trim()
+  (process.env.GEMINI_KEY || '').trim(),
+  (process.env.GEMINI_KEY_BACKUP || '').trim()
 ].filter((k, i, a) => k && a.indexOf(k) === i);
 const GEMINI_KEY = GEMINI_KEYS[0];
 const rawEnvModel = (process.env.GEMINI_MODEL || '').trim();
@@ -461,7 +460,8 @@ function formatPlayerTag(identifier, regData = null) {
     });
   }
 
-  const ign = matchedReg ? (matchedReg.in_game_name || matchedReg.display_name || cleanId) : cleanId;
+  const rawIgn = matchedReg ? (matchedReg.in_game_name || matchedReg.display_name || cleanId) : cleanId;
+  const ign = clean(rawIgn);
 
   if (matchedReg && (matchedReg.is_owner || matchedReg.role === 'Owner')) {
     if (matchedReg.telegram_id) return `👑 [${ign}](tg://user?id=${matchedReg.telegram_id}) (Owner)`;
@@ -4809,7 +4809,7 @@ function slugifyLeague(text) {
     'ع':'a','غ':'gh','ف':'f','ق':'q','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','و':'w','ي':'y','ى':'a','ة':'h',
     'ء':'','ئ':'y','ؤ':'w'
   };
-  let s = text.toLowerCase().split('').map(c => cyrillicMap[c] || arabicMap[c] || c).join('');
+  let s = [...text.toLowerCase()].map(c => cyrillicMap[c] || arabicMap[c] || c).join('');
   s = s.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
   return s || 'opponent';
 }
@@ -5528,6 +5528,9 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     } catch (e) {}
   }
 
+  const dateInfo = parseTournamentDate(aiResult.date, aiResult.time_info, aiResult.caption || '');
+  const incomingDate = dateInfo.dateStr;
+
   function normLeague(s) {
     return (s || '').toLowerCase().replace(/[\s\-_™+®·'.@]+/g, '');
   }
@@ -5542,7 +5545,17 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     const isOpponentMatch = (normExisting === normIncoming) || (existingSlug === oppSlug) || id.endsWith(`_${oppSlug}`);
     const isScoreMatch = (meta.our_total_goals === ourGoals) && (meta.opponent_total_goals === oppGoals);
 
-    if (isOpponentMatch && isScoreMatch) {
+    // Date proximity guard: only flag duplicate if played within 4 days of each other (rematches months later are distinct!)
+    let isDateClose = true;
+    const existingDate = meta.date || id.slice(0, 10);
+    if (existingDate && incomingDate) {
+      try {
+        const diffMs = Math.abs(new Date(existingDate + 'T12:00:00Z').getTime() - new Date(incomingDate + 'T12:00:00Z').getTime());
+        isDateClose = diffMs <= (4 * 24 * 60 * 60 * 1000);
+      } catch (e) {}
+    }
+
+    if (isOpponentMatch && isScoreMatch && isDateClose) {
       duplicateId = id;
       duplicateMeta = meta;
       break;
@@ -5592,7 +5605,6 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     console.log(`[DEDUPLICATION] Updating existing tournament "${duplicateId}" on original date...`);
   }
 
-  const dateInfo = parseTournamentDate(aiResult.date, aiResult.time_info, aiResult.caption || '');
   let dateStr = duplicateId ? (duplicateMeta?.date || duplicateId.slice(0, 10)) : dateInfo.dateStr;
   let baseTId = duplicateId || `${dateStr}_${oppSlug}`;
   let tId = baseTId;
@@ -5651,10 +5663,6 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
       ]
     ]
   };
-
-  // Send to Channel and User
-  await sendTelegramMessage(CHANNEL_ID, recap, channelKeys);
-  await sendTelegramMessage(chatId, `🔴 *MATCH COMPLETED & BROADCASTED TO ${CHANNEL_ID}!*`, dmKeys);
 
   // Commit to GitHub with full index synchronization (awaited so Vercel waits)
   try {
@@ -5755,10 +5763,14 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
       if (fs.existsSync(path.dirname(rootPPath))) fs.writeFileSync(rootPPath, JSON.stringify(pIndexObj, null, 2), 'utf8');
     } catch (e) {}
 
+    // 4. Persistence to database successful: Now broadcast to Channel and Admin!
+    await sendTelegramMessage(CHANNEL_ID, recap, channelKeys);
+    await sendTelegramMessage(chatId, `🔴 *MATCH COMPLETED & BROADCASTED TO ${CHANNEL_ID}!*`, dmKeys);
+
   } catch (ghErr) {
     console.error('GitHub API Sync Error:', ghErr);
     try {
-      await sendTelegramMessage(chatId, `⚠️ *GitHub Sync Error:* Failed to save tournament to database: ${clean(ghErr.message || String(ghErr))}`);
+      await sendTelegramMessage(chatId, `⚠️ *GitHub Sync Error:* Failed to save tournament to database: ${clean(ghErr.message || String(ghErr))}\n\n🛑 *Broadcast to channel was aborted to prevent data desynchronization.*`);
     } catch (e) {}
   }
 
@@ -5826,9 +5838,14 @@ async function getBufferedPhotos(albumId, chatId = null) {
 }
 
 async function clearBufferedPhotos(commentIds) {
-  for (const id of commentIds) {
-    githubApi(`/repos/${GITHUB_REPO}/issues/comments/${id}`, 'DELETE').catch(() => {});
-  }
+  if (!Array.isArray(commentIds) || commentIds.length === 0) return;
+  await Promise.all(
+    commentIds.map(id =>
+      githubApi(`/repos/${GITHUB_REPO}/issues/comments/${id}`, 'DELETE').catch(err => {
+        console.warn(`[clearBufferedPhotos] Failed to delete comment ${id}:`, err?.message || err);
+      })
+    )
+  );
 }
 
 async function processBufferedAlbum(albumId, chatId, res = null) {
