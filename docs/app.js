@@ -1554,7 +1554,7 @@ async function loadData() {
   const tResults = await Promise.all(tPromises);
   const seenTournaments = new Set();
   state.tournaments = tResults.filter(Boolean).filter(t => {
-    const key = `${(t.opponent_league || '').trim().toLowerCase()}_${t.our_total_goals}_${t.opponent_total_goals}`;
+    const key = t.id || t.tournament_id || `${t.date}_${(t.opponent_league || '').trim().toLowerCase()}_${t.our_total_goals}_${t.opponent_total_goals}`;
     if (seenTournaments.has(key)) return false;
     seenTournaments.add(key);
     return true;

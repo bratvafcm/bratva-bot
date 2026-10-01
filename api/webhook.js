@@ -70,6 +70,7 @@ function bidiIsolate(str) {
 }
 
 function sendResponse(res, statusCode, body, isJson = false) {
+  if (!res) return body;
   if (typeof res.status === 'function') {
     if (isJson && typeof res.json === 'function') {
       return res.status(statusCode).json(body);
@@ -621,18 +622,24 @@ function analyzeImagesWithGemini(imageBuffers) {
     if (!GEMINI_KEY) return reject(new Error('GEMINI_KEY environment variable is missing'));
 
     const prompt = `You are the master tournament data auditor for EA Sports FC Mobile league "БРАТВА".
-You are analyzing ${imageBuffers.length} screenshots of the SAME tournament leaderboard.
+You are analyzing ${imageBuffers.length} screenshot(s).
 
-CRITICAL RULES & SCREEN LAYOUT:
+CRITICAL MULTI-TOURNAMENT & MATCH DETECTION:
+- The user may upload screenshots for ONE tournament (which was scrolled down to show all members), OR screenshots of MULTIPLE DISTINCT TOURNAMENTS (e.g. played against different opponent leagues, or different matches played on the same/different days).
+- Detect each distinct tournament by looking at the top score banner: each tournament has its own Opponent League name, score, and turns.
+- For each distinct tournament, stitch any scrolled screenshots that belong to it.
+- If multiple tournaments exist in the images, extract ALL of them into the "tournaments" array!
+- If only one tournament exists, the "tournaments" array must contain that one tournament.
+
+RULES FOR EACH TOURNAMENT:
 1. TWO COLUMNS ON SCREEN:
    - LEFT COLUMN: ALWAYS our league "БРАТВА". EXTRACT PLAYERS EXCLUSIVELY FROM THIS LEFT COLUMN!
    - RIGHT COLUMN: OPPONENT league. COMPLETELY IGNORE the right column! DO NOT extract any opponent players!
 
 2. MULTI-SCREENSHOT SCROLLING & STITCHING:
-   - The user scrolled down the tournament table to capture all squad members across multiple screenshots.
-   - Consecutive screenshots may overlap (a player visible at the bottom of one screenshot might appear at the top of the next).
-   - DEDUPLICATE: Each player must appear EXACTLY ONCE in your final output.
-   - PRESERVE EXACT BOARD ORDER: On the far left of each row is a rank number (1, 2, 3... up to 16 or 32). Sort the players in exact top-to-bottom order (#1 to #N).
+   - For screenshots belonging to the same tournament, the user scrolled down the table.
+   - Deduplicate players within the same tournament.
+   - PRESERVE EXACT BOARD ORDER (#1 to #N).
 
 3. SCORE & HEADER (Look at top banner):
    - Left side: "БРАТВА" score (e.g. 155) and turns (e.g. "18/48 TURNS").
@@ -644,33 +651,36 @@ CRITICAL RULES & SCREEN LAYOUT:
    - "name": Player's exact display name (top line in row). Do NOT translate or modify.
    - "ovr": OVR rating number shown below player name (e.g. 124, 125, 128).
    - "goals": The number next to the football icon under "GOALS".
-    - "limit_remaining": Exact string under "LIMIT" column: "0/3", "1/3", "2/3", or "3/3".
-    - "turns_played":
-      * CRITICAL: In EA FC Mobile, the "LIMIT" column displays TURNS REMAINING (available to attack), NOT turns played!
-      * "0/3" limit = 0 turns remaining -> exactly 3 turns played (turns_played = 3)
-      * "1/3" limit = 1 turn remaining  -> exactly 2 turns played (turns_played = 2)
-      * "2/3" limit = 2 turns remaining -> exactly 1 turn played (turns_played = 1)
-      * "3/3" limit = 3 turns remaining -> 0 turns played (turns_played = 0, STRIKE!)
-      * SANITY CHECK: If a player scored goals (goals > 0), their turns_played is ALWAYS 3 (or at least 1-3). NEVER output turns_played: 0 for a player who scored goals!
+   - "limit_remaining": Exact string under "LIMIT" column: "0/3", "1/3", "2/3", or "3/3".
+   - "turns_played":
+     * "0/3" limit = 3 turns played
+     * "1/3" limit = 2 turns played
+     * "2/3" limit = 1 turn played
+     * "3/3" limit = 0 turns played (STRIKE!)
+     * SANITY CHECK: If a player scored goals (goals > 0), their turns_played is ALWAYS 3 (or at least 1-3). NEVER output turns_played: 0 for a player who scored goals!
 
 Return STRICT JSON ONLY, no markdown ticks, no commentary:
 {
   "is_tournament_screenshot": true,
-  "status": "LIVE" or "HISTORY",
-  "time_info": "e.g. 12 MINS AGO or 03:49:49",
-  "opponent_league": "Opponent Team Name",
-  "score_bratva": number,
-  "score_opponent": number,
-  "turns_bratva": number,
-  "turns_max": number,
-  "players": [
+  "tournaments": [
     {
-      "board_order": number,
-      "name": "Exact Name",
-      "ovr": number,
-      "goals": number,
-      "limit_remaining": "0/3",
-      "turns_played": number
+      "status": "LIVE" or "HISTORY",
+      "time_info": "e.g. 12 MINS AGO or 03:49:49",
+      "opponent_league": "Opponent Team Name",
+      "score_bratva": number,
+      "score_opponent": number,
+      "turns_bratva": number,
+      "turns_max": number,
+      "players": [
+        {
+          "board_order": number,
+          "name": "Exact Name",
+          "ovr": number,
+          "goals": number,
+          "limit_remaining": "0/3",
+          "turns_played": number
+        }
+      ]
     }
   ]
 }`;
@@ -5427,10 +5437,14 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
   // Global Deduplication & Idempotency Guard
   let tIndexObj = {};
   let existingTIndex = null;
+  if (tournamentsIndexCache && Object.keys(tournamentsIndexCache).length > 0) {
+    tIndexObj = { ...tournamentsIndexCache };
+  }
   try {
     existingTIndex = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/tournaments_index.json`);
     if (existingTIndex && existingTIndex.content) {
-      tIndexObj = JSON.parse(Buffer.from(existingTIndex.content, 'base64').toString('utf8'));
+      const ghIndex = JSON.parse(Buffer.from(existingTIndex.content, 'base64').toString('utf8'));
+      tIndexObj = { ...tIndexObj, ...ghIndex };
     }
   } catch (e) {}
 
@@ -5507,8 +5521,17 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     console.log(`[DEDUPLICATION] Updating existing tournament "${duplicateId}" on original date...`);
   }
 
-  let dateStr = duplicateId ? (duplicateMeta?.date || duplicateId.slice(0, 10)) : new Date().toISOString().split('T')[0];
-  let tId = duplicateId || `${dateStr}_${oppSlug}`;
+  let dateStr = duplicateId ? (duplicateMeta?.date || duplicateId.slice(0, 10)) : (aiResult.date || new Date().toISOString().split('T')[0]);
+  let baseTId = duplicateId || `${dateStr}_${oppSlug}`;
+  let tId = baseTId;
+
+  if (!duplicateId && tIndexObj[tId]) {
+    let counter = 2;
+    while (tIndexObj[`${baseTId}_${counter}`]) {
+      counter++;
+    }
+    tId = `${baseTId}_${counter}`;
+  }
 
   let tData = {
     id: tId,
@@ -5576,7 +5599,8 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
       const refreshedTIndex = await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/tournaments_index.json`);
       if (refreshedTIndex && refreshedTIndex.content) {
         existingTIndex = refreshedTIndex;
-        tIndexObj = JSON.parse(Buffer.from(refreshedTIndex.content, 'base64').toString('utf8'));
+        const remoteTIndex = JSON.parse(Buffer.from(refreshedTIndex.content, 'base64').toString('utf8'));
+        tIndexObj = { ...tIndexObj, ...remoteTIndex };
       }
     } catch (e) {}
     tIndexObj[tId] = {
@@ -5588,6 +5612,9 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
       result: tData.result,
       status: tData.status
     };
+    tournamentsIndexCache = tIndexObj;
+    lastTournamentsIndexFetchTime = Date.now();
+
     const tIndexPayload = {
       message: `Auto-Update: Index tournament vs ${tData.opponent_league}`,
       content: Buffer.from(JSON.stringify(tIndexObj, null, 2)).toString('base64')
@@ -5601,6 +5628,10 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
       if (fs.existsSync(path.dirname(localTPath))) fs.writeFileSync(localTPath, JSON.stringify(tData, null, 2), 'utf8');
       const localTIPath = path.join(process.cwd(), 'docs', 'league-data', 'index', 'tournaments_index.json');
       if (fs.existsSync(path.dirname(localTIPath))) fs.writeFileSync(localTIPath, JSON.stringify(tIndexObj, null, 2), 'utf8');
+      const rootTPath = path.join(process.cwd(), 'league-data', 'tournaments', `${tId}.json`);
+      if (fs.existsSync(path.dirname(rootTPath))) fs.writeFileSync(rootTPath, JSON.stringify(tData, null, 2), 'utf8');
+      const rootTIPath = path.join(process.cwd(), 'league-data', 'index', 'tournaments_index.json');
+      if (fs.existsSync(path.dirname(rootTIPath))) fs.writeFileSync(rootTIPath, JSON.stringify(tIndexObj, null, 2), 'utf8');
     } catch (e) {}
 
     // 3. Update and Commit players_index.json
@@ -5641,6 +5672,13 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     };
     if (existingPIndex && existingPIndex.sha) pIndexPayload.sha = existingPIndex.sha;
     await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/players_index.json`, 'PUT', pIndexPayload);
+
+    try {
+      const localPPath = path.join(process.cwd(), 'docs', 'league-data', 'index', 'players_index.json');
+      if (fs.existsSync(path.dirname(localPPath))) fs.writeFileSync(localPPath, JSON.stringify(pIndexObj, null, 2), 'utf8');
+      const rootPPath = path.join(process.cwd(), 'league-data', 'index', 'players_index.json');
+      if (fs.existsSync(path.dirname(rootPPath))) fs.writeFileSync(rootPPath, JSON.stringify(pIndexObj, null, 2), 'utf8');
+    } catch (e) {}
 
   } catch (ghErr) {
     console.error('GitHub API Sync Error:', ghErr);
@@ -5748,7 +5786,36 @@ async function processBufferedAlbum(albumId, chatId, res = null) {
   try {
     const buffers = await Promise.all(uniqueFileIds.map(fid => downloadTelegramFile(fid)));
     const aiResult = await analyzeImagesWithGemini(buffers);
-    return await handleTournamentResult(aiResult, chatId, res, true, analyzingMsgId);
+
+    let tournaments = [];
+    if (aiResult && Array.isArray(aiResult.tournaments) && aiResult.tournaments.length > 0) {
+      tournaments = aiResult.tournaments;
+    } else if (aiResult && (aiResult.players || aiResult.opponent_league)) {
+      tournaments = [aiResult];
+    }
+
+    if (tournaments.length === 0) {
+      if (analyzingMsgId) {
+        await deleteTelegramMessage(chatId, analyzingMsgId);
+      }
+      await sendTelegramMessage(chatId, '❌ *No tournament matches recognized.* Please make sure the screenshots clearly show the match leaderboard or end screen.');
+      if (res) return sendResponse(res, 200, 'No tournament found');
+      return;
+    }
+
+    if (tournaments.length > 1) {
+      await sendTelegramMessage(chatId, `🎯 *Detected ${tournaments.length} distinct tournaments in this batch! Processing all sequentially...*`);
+    }
+
+    for (let i = 0; i < tournaments.length; i++) {
+      const tItem = tournaments[i];
+      tItem.is_tournament_screenshot = true;
+      const isLast = (i === tournaments.length - 1);
+      await handleTournamentResult(tItem, chatId, isLast ? res : null, true, (i === 0) ? analyzingMsgId : null);
+    }
+    if (res && (!res.headersSent && !res.finished)) {
+      return sendResponse(res, 200, 'All tournaments processed');
+    }
   } catch (err) {
     if (analyzingMsgId) {
       await deleteTelegramMessage(chatId, analyzingMsgId);
