@@ -293,16 +293,29 @@ async function editTelegramMessage(chatId, messageId, text, replyMarkup = null) 
     if (replyMarkup) params.reply_markup = replyMarkup;
     const res = await telegramRequest('editMessageText', params);
     if (!res.ok) {
+      if (res.description && res.description.includes('message is not modified')) {
+        return { ok: true, result: true };
+      }
       delete params.parse_mode;
-      return await telegramRequest('editMessageText', params);
+      const retryRes = await telegramRequest('editMessageText', params);
+      if (!retryRes.ok && retryRes.description && retryRes.description.includes('message is not modified')) {
+        return { ok: true, result: true };
+      }
+      return retryRes;
     }
     return res;
   } catch (err) {
+    if (err && err.message && err.message.includes('message is not modified')) {
+      return { ok: true, result: true };
+    }
     try {
       const plainParams = { chat_id: chatId, message_id: messageId, text: text.replace(/[*_`\[\]()]/g, '') };
       if (replyMarkup) plainParams.reply_markup = replyMarkup;
       return await telegramRequest('editMessageText', plainParams);
     } catch (e) {
+      if (e && e.message && e.message.includes('message is not modified')) {
+        return { ok: true, result: true };
+      }
       console.error('editTelegramMessage plain error:', e);
     }
   }
@@ -470,19 +483,19 @@ function formatPlayerTag(identifier, regData = null) {
   const ign = clean(rawIgn);
 
   if (matchedReg && (matchedReg.is_owner || matchedReg.role === 'Owner')) {
-    if (matchedReg.telegram_id) return `👑 [${ign}](tg://user?id=${matchedReg.telegram_id}) (Owner)`;
-    return `👑 ${ign} (Owner)`;
+    if (matchedReg.telegram_id) return `👑 [*${ign}*](tg://user?id=${matchedReg.telegram_id}) (Owner)`;
+    return `👑 *${ign}* (Owner)`;
   }
 
   if (matchedReg && matchedReg.telegram_id) {
-    return `[${ign}](tg://user?id=${matchedReg.telegram_id})`;
+    return `[*${ign}*](tg://user?id=${matchedReg.telegram_id})`;
   }
 
   if (matchedReg && matchedReg.telegram_username) {
-    return `[${ign}](https://t.me/${matchedReg.telegram_username})`;
+    return `[*${ign}*](https://t.me/${matchedReg.telegram_username})`;
   }
 
-  return ign;
+  return `*${ign}*`;
 }
 
 let inMemoryLatestTournament = null;
@@ -1844,7 +1857,16 @@ async function evaluateAllSquadStrikes() {
 
   // Incorporate newly registered players who haven't played a tournament yet so they can be selected in lineups when ready!
   const registeredEntries = Object.entries(regData?.registrations || {});
-  const registeredNotInIndex = registeredEntries.filter(([pid]) => !pIndex[pid]);
+  const registeredNotInIndex = registeredEntries.filter(([pid, reg]) => {
+    if (pIndex[pid]) return false;
+    const cleanPid = pid.replace(/^member_/, '');
+    if (pIndex[cleanPid]) return false;
+    const ign = (reg?.in_game_name || '').toLowerCase().trim();
+    if (ign && pIndex[ign]) return false;
+    const disp = (reg?.display_name || '').toLowerCase().trim();
+    if (disp && pIndex[disp]) return false;
+    return true;
+  });
 
   const newRegisteredEvaluated = registeredNotInIndex.map(([pid, reg]) => {
     const isLeadership = ['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1'].includes(pid.toLowerCase()) ||
@@ -1885,9 +1907,9 @@ async function formatStrikes(lang = 'ru') {
     if (p.isEligibleForKick) {
       const reason = p.consecutiveKick ? (lang === 'ar' ? 'غياب بطولتين متتاليتين 0/3' : lang === 'es' ? '2 torneos seguidos 0/3' : lang === 'en' ? '2 consecutive 0/3' : '2 турнира подряд 0/3')
                                       : `${p.strikesIn5}/${rules.rollingHorizon || 5} ${lang === 'ar' ? 'إنذارات' : lang === 'es' ? 'strikes' : lang === 'en' ? 'strikes' : 'страйка'}`;
-      critical.push(`• 🚨 *${playerTag}* — ${reason} ⛔`);
+      critical.push(`• 🚨 ${playerTag} — ${reason} ⛔`);
     } else if (p.strikesIn5 > 0) {
-      warnings.push(`• ⚠️ *${playerTag}* — ${p.strikesIn5}/${rules.maxMissesKick} ${lang === 'ar' ? 'إنذارات (آخر 5)' : lang === 'es' ? 'strikes (últimos 5)' : lang === 'en' ? 'strikes (last 5)' : 'страйка (посл. 5)'}`);
+      warnings.push(`• ⚠️ ${playerTag} — ${p.strikesIn5}/${rules.maxMissesKick} ${lang === 'ar' ? 'إنذارات (آخر 5)' : lang === 'es' ? 'strikes (últimos 5)' : lang === 'en' ? 'strikes (last 5)' : 'страйка (посл. 5)'}`);
     }
   });
 
@@ -2045,10 +2067,10 @@ async function formatSmartLineup(requestedSize = null, lang = 'ru') {
     const num = idx + 1;
     const padNum = num < 10 ? ` ${num}` : `${num}`;
     const playerTag = formatPlayerTag(p.displayName || p.pid, regData);
-    if (lang === 'en') return `${padNum}. 🟢 *${playerTag}* — avg *${p.last5Avg}*G`;
-    if (lang === 'ar') return `${padNum}. 🟢 *${playerTag}* — معدل *${p.last5Avg}* هدف`;
-    if (lang === 'es') return `${padNum}. 🟢 *${playerTag}* — prom *${p.last5Avg}*G`;
-    return `${padNum}. 🟢 *${playerTag}* — ср. *${p.last5Avg}*Г`;
+    if (lang === 'en') return `${padNum}. 🟢 ${playerTag} — avg *${p.last5Avg}*G`;
+    if (lang === 'ar') return `${padNum}. 🟢 ${playerTag} — معدل *${p.last5Avg}* هدف`;
+    if (lang === 'es') return `${padNum}. 🟢 ${playerTag} — prom *${p.last5Avg}*G`;
+    return `${padNum}. 🟢 ${playerTag} — ср. *${p.last5Avg}*Г`;
   });
 
   const benchLines = bench.map((p, idx) => {
@@ -2063,10 +2085,10 @@ async function formatSmartLineup(requestedSize = null, lang = 'ru') {
     else tag = isReadyPlayer ? '(Запас — Готов)' : '(Резерв)';
 
     const dot = isReadyPlayer ? '🟡' : '⚪';
-    if (lang === 'en') return `${padNum}. ${dot} *${playerTag}* — avg *${p.last5Avg}*G ${tag}`;
-    if (lang === 'ar') return `${padNum}. ${dot} *${playerTag}* — معدل *${p.last5Avg}* هدف ${tag}`;
-    if (lang === 'es') return `${padNum}. ${dot} *${playerTag}* — prom *${p.last5Avg}*G ${tag}`;
-    return `${padNum}. ${dot} *${playerTag}* — ср. *${p.last5Avg}*Г ${tag}`;
+    if (lang === 'en') return `${padNum}. ${dot} ${playerTag} — avg *${p.last5Avg}*G ${tag}`;
+    if (lang === 'ar') return `${padNum}. ${dot} ${playerTag} — معدل *${p.last5Avg}* هدف ${tag}`;
+    if (lang === 'es') return `${padNum}. ${dot} ${playerTag} — prom *${p.last5Avg}*G ${tag}`;
+    return `${padNum}. ${dot} ${playerTag} — ср. *${p.last5Avg}*Г ${tag}`;
   });
 
   // Insufficient players alert banner (< 4 ready)
@@ -2285,11 +2307,11 @@ function formatCheckInPrompt(lang = 'ru') {
   }
 
   const readyList = readyCount > 0
-    ? readyNames.map((n, i) => ` ${i + 1 < 10 ? ' ' : ''}${i + 1}. 🟢 *${n}*`).join('\n')
+    ? readyNames.map((n, i) => ` ${i + 1 < 10 ? ' ' : ''}${i + 1}. 🟢 ${n}`).join('\n')
     : (lang === 'ar' ? '   _لا يوجد لاعبين حتى الآن... اضغط [ أنا جاهز ]!_' : lang === 'es' ? '   _¡Nadie aún... sé el primero!_' : lang === 'en' ? '   _No one checked in yet... Tap [ I\'m Ready ]!_' : '   _Пока никто не нажал... Будь первым!_');
 
   const awayList = awayCount > 0
-    ? awayNames.map(n => `• 🔴 *${n}*`).join('\n')
+    ? awayNames.map(n => `• 🔴 ${n}`).join('\n')
     : (lang === 'ar' ? '   _لا أحد_' : lang === 'es' ? '   _Ninguno_' : lang === 'en' ? '   _None_' : '   _Никого_');
 
   if (lang === 'en') {
@@ -4444,12 +4466,12 @@ async function formatKicklist(lang = 'ru') {
       const kickTag = lang === 'ar' ? 'مؤهل للاستبعاد الفوري ⛔' :
                       lang === 'es' ? 'APTO PARA EXPULSIÓN ⛔' :
                       lang === 'en' ? 'ELIGIBLE FOR KICK ⛔' : 'КАНДИДАТ НА КИК ⛔';
-      critical.push(`• 🚨 *${playerTag}* — ${reason} (${kickTag})`);
+      critical.push(`• 🚨 ${playerTag} — ${reason} (${kickTag})`);
     } else if (p.strikesIn5 > 0) {
       const warnTag = lang === 'ar' ? 'إنذار سترايك ❌' :
                       lang === 'es' ? 'Strike de aviso ❌' :
                       lang === 'en' ? 'Warning strike ❌' : 'Предупреждение ❌';
-      warning.push(`• ⚠️ *${playerTag}* — ${p.strikesIn5}/${rules.maxMissesKick} (${warnTag})`);
+      warning.push(`• ⚠️ ${playerTag} — ${p.strikesIn5}/${rules.maxMissesKick} (${warnTag})`);
     }
   });
 
@@ -7605,7 +7627,7 @@ export default async function handler(req, res) {
         regData.current_checkin.ready = Array.from(currentCheckIn.ready);
         regData.current_checkin.away = Array.from(currentCheckIn.away);
         const readyNamesList = matchedRegs.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
-        saveRegisteredPlayersRaw(regData, `CheckIn: ${readyNamesList} is Ready`);
+        await saveRegisteredPlayersRaw(regData, `CheckIn: ${readyNamesList} is Ready`);
 
         try {
           await telegramRequest('answerCallbackQuery', {
@@ -7665,7 +7687,7 @@ export default async function handler(req, res) {
         regData.current_checkin.ready = Array.from(currentCheckIn.ready);
         regData.current_checkin.away = Array.from(currentCheckIn.away);
         const awayNamesList = matchedRegs.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
-        saveRegisteredPlayersRaw(regData, `CheckIn: ${awayNamesList} is Away`);
+        await saveRegisteredPlayersRaw(regData, `CheckIn: ${awayNamesList} is Away`);
 
         try {
           await telegramRequest('answerCallbackQuery', {
