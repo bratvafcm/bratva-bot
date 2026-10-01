@@ -510,6 +510,33 @@ async function getTournamentsIndex() {
   return {};
 }
 
+let playersIndexCache = null;
+let lastPlayersIndexFetchTime = 0;
+
+async function getPlayersIndex() {
+  const now = Date.now();
+  if (playersIndexCache && (now - lastPlayersIndexFetchTime < 30000)) {
+    return playersIndexCache;
+  }
+  if (GITHUB_PAT) {
+    try {
+      const remoteIndex = await fetchGithubJson('docs/league-data/index/players_index.json');
+      if (remoteIndex && typeof remoteIndex === 'object') {
+        playersIndexCache = remoteIndex;
+        lastPlayersIndexFetchTime = now;
+        return remoteIndex;
+      }
+    } catch (e) {
+      console.warn('Failed to fetch players_index from GitHub:', e.message);
+    }
+  }
+  const { pIndex } = loadLeagueData();
+  if (pIndex && Object.keys(pIndex).length > 0) {
+    return pIndex;
+  }
+  return {};
+}
+
 async function getLatestTournament() {
   const now = Date.now();
   if (globalLatestTournament) {
@@ -1120,6 +1147,10 @@ function getPlayerKeyboard(playerId, currentLang = 'ru') {
                    currentLang === 'es' ? '🌐 Ver Perfil Interactivo en Web' :
                    currentLang === 'en' ? '🌐 View Full Web Dashboard' : '🌐 Открыть Профиль на Сайте';
 
+  const resetLabel = currentLang === 'ar' ? '✏️ تغيير اسمي في اللعبة (Change IGN)' :
+                     currentLang === 'es' ? '✏️ Cambiar Mi Nombre en Juego' :
+                     currentLang === 'en' ? '✏️ Change My In-Game Name' : '✏️ Сменить ник в игре';
+
   const menuLabel = currentLang === 'ar' ? '📋 العودة للقائمة الرئيسية' :
                     currentLang === 'es' ? '📋 Menú Principal' :
                     currentLang === 'en' ? '📋 Back to Menu' : '📋 Главное Меню';
@@ -1136,6 +1167,7 @@ function getPlayerKeyboard(playerId, currentLang = 'ru') {
         { text: esLabel, callback_data: `tab_player_${playerId}_es` }
       ],
       [
+        { text: resetLabel, callback_data: 'cmd_reset_ign' },
         { text: menuLabel, callback_data: 'cmd_menu' }
       ]
     ]
@@ -1573,8 +1605,8 @@ function formatRecap(t, lang = 'ru') {
   }
 }
 
-function formatTopScorers(lang = 'ru') {
-  const { pIndex } = loadLeagueData();
+async function formatTopScorers(lang = 'ru') {
+  const pIndex = await getPlayersIndex();
   const list = Object.entries(pIndex)
     .filter(([_, data]) => data && data.status !== 'inactive')
     .map(([id, data]) => ({
@@ -1653,7 +1685,8 @@ function formatTopScorers(lang = 'ru') {
 }
 
 async function evaluateAllSquadStrikes() {
-  const { pIndex, players, tournaments } = loadLeagueData();
+  const { players, tournaments } = loadLeagueData();
+  const pIndex = await getPlayersIndex();
   const rules = getLeagueRules();
   const regData = await getRegisteredPlayers();
 
@@ -1736,12 +1769,19 @@ async function evaluateAllSquadStrikes() {
       }
     }
 
-    // Excuse check (admin forgiveness via /forgive)
+    // Excuse check (admin forgiveness via /forgive with expiration date check)
     let isExcused = false;
-    if (regData && regData.excuses && regData.excuses[id]) {
-      isExcused = true;
-      strikesCount = 0;
-      consecutive0 = 0;
+    const excuse = regData && regData.excuses && regData.excuses[id];
+    if (excuse) {
+      const excuseTime = excuse.excused_at ? new Date(excuse.excused_at).getTime() : 0;
+      const latestMatchDateStr = recentMatches.length > 0 ? recentMatches[recentMatches.length - 1].tournament_id?.split('_')[0] : null;
+      const latestMatchTime = latestMatchDateStr ? new Date(latestMatchDateStr + 'T23:59:59Z').getTime() : 0;
+      // Only excuse if missed match was on or before the excuse date! Future missed turns incur normal strikes.
+      if (!excuseTime || latestMatchTime <= excuseTime) {
+        isExcused = true;
+        strikesCount = 0;
+        consecutive0 = 0;
+      }
     }
 
     const strikeKick = strikesCount >= (rules.maxMissesKick || 3);
@@ -1767,7 +1807,34 @@ async function evaluateAllSquadStrikes() {
     };
   });
 
-  return evaluated;
+  // Incorporate newly registered players who haven't played a tournament yet so they can be selected in lineups when ready!
+  const registeredEntries = Object.entries(regData?.registrations || {});
+  const registeredNotInIndex = registeredEntries.filter(([pid]) => !pIndex[pid]);
+
+  const newRegisteredEvaluated = registeredNotInIndex.map(([pid, reg]) => {
+    const isLeadership = ['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1'].includes(pid.toLowerCase()) ||
+      Boolean(reg.is_admin || reg.is_owner || reg.role === 'Owner' || reg.role === 'Admin');
+    const isCheckedIn = Boolean(currentCheckIn && currentCheckIn.ready && currentCheckIn.ready.has(pid));
+    return {
+      pid: pid,
+      displayName: clean(reg.display_name || reg.in_game_name || pid),
+      last5Avg: 0,
+      totalMatches: 0,
+      recentMatchesCount: 0,
+      strikesIn5: 0,
+      consecutiveMisses: 0,
+      consecutiveKick: false,
+      strikeKick: false,
+      isEligibleForKick: false,
+      isInactive: !isCheckedIn,
+      isExcused: false,
+      isTelegramVerified: true,
+      isLeadership,
+      isDecayed: false
+    };
+  });
+
+  return [...evaluated, ...newRegisteredEvaluated];
 }
 
 async function formatStrikes(lang = 'ru') {
@@ -2728,8 +2795,9 @@ const formatTournaments = (lang = 'ru') => formatTournamentsBrowser('7', lang);
 function findPlayerByQuery(query) {
   if (!query || typeof query !== 'string') return null;
   const q = query.trim().toLowerCase();
-  if (q.length < 2) return null;
-  const { pIndex, players } = loadLeagueData();
+  const localData = loadLeagueData();
+  const pIndex = (playersIndexCache && Object.keys(playersIndexCache).length > 0) ? playersIndexCache : (localData.pIndex || {});
+  const players = localData.players || [];
 
   // 1. Exact match by player_id in pIndex
   if (pIndex[q]) {
@@ -2784,7 +2852,9 @@ function generatePlayerStatsMessage(query, lang = 'ru') {
     if (lang === 'en') return '⚠️ Please specify a player name, e.g.: `/player DOXIBERO1`';
     return '⚠️ Пожалуйста, укажите имя игрока, например: `/player DOXIBERO1`';
   }
-  const { pIndex, players } = loadLeagueData();
+  const localData = loadLeagueData();
+  const pIndex = (playersIndexCache && Object.keys(playersIndexCache).length > 0) ? playersIndexCache : (localData.pIndex || {});
+  const players = localData.players || [];
   const found = findPlayerByQuery(query);
 
   if (!found) {
@@ -4578,7 +4648,7 @@ function formatRules(lang = 'ru') {
     `🌐 *Официальный сайт:* ${WEBSITE_URL}`;
 }
 
-const generateTopScorersMessage = (lang = 'ru') => formatTopScorers(lang);
+const generateTopScorersMessage = async (lang = 'ru') => await formatTopScorers(lang);
 const generateStrikesMessage = (lang = 'ru') => formatStrikes(lang);
 const generateLineupMessage = (lang = 'ru') => formatLineup(lang);
 const generateTournamentsMessage = async (lang = 'ru') => await formatTournaments(lang);
@@ -5755,6 +5825,8 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     };
     if (existingPIndex && existingPIndex.sha) pIndexPayload.sha = existingPIndex.sha;
     await githubApi(`/repos/${GITHUB_REPO}/contents/docs/league-data/index/players_index.json`, 'PUT', pIndexPayload);
+    playersIndexCache = pIndexObj;
+    lastPlayersIndexFetchTime = Date.now();
 
     try {
       const localPPath = path.join(process.cwd(), 'docs', 'league-data', 'index', 'players_index.json');
@@ -5950,6 +6022,48 @@ async function savePlayersIndexRaw(pIndex, commitMsg = 'Admin: Update players in
   } catch (e) {
     console.error('Failed to commit players_index.json to GitHub:', e);
   }
+}
+
+async function saveActiveRosterSession(sessionId, sessionData) {
+  activeRosterSessions.set(sessionId, sessionData);
+  try {
+    const tmpPath = path.join('/tmp', `roster_${sessionId}.json`);
+    fs.writeFileSync(tmpPath, JSON.stringify(sessionData), 'utf8');
+  } catch (e) {}
+  try {
+    await githubApi(`/repos/${GITHUB_REPO}/issues/${BUFFER_ISSUE_NUMBER}/comments`, 'POST', {
+      body: JSON.stringify({ type: 'roster_session', sessionId, ...sessionData })
+    });
+  } catch (e) {}
+}
+
+async function getActiveRosterSession(sessionId) {
+  if (activeRosterSessions.has(sessionId)) {
+    return activeRosterSessions.get(sessionId);
+  }
+  try {
+    const tmpPath = path.join('/tmp', `roster_${sessionId}.json`);
+    if (fs.existsSync(tmpPath)) {
+      const data = JSON.parse(fs.readFileSync(tmpPath, 'utf8'));
+      activeRosterSessions.set(sessionId, data);
+      return data;
+    }
+  } catch (e) {}
+  try {
+    const comments = await githubApi(`/repos/${GITHUB_REPO}/issues/${BUFFER_ISSUE_NUMBER}/comments`);
+    if (Array.isArray(comments)) {
+      for (const c of comments.slice().reverse()) {
+        try {
+          const parsed = JSON.parse(c.body);
+          if (parsed && parsed.type === 'roster_session' && parsed.sessionId === sessionId) {
+            activeRosterSessions.set(sessionId, parsed);
+            return parsed;
+          }
+        } catch (e) {}
+      }
+    }
+  } catch (e) {}
+  return null;
 }
 
 async function saveActiveRosterRaw(rosterData, commitMsg = 'Admin: Update active roster') {
@@ -6597,7 +6711,7 @@ async function processBufferedRosterScreenshots(albumId, chatId, res = null) {
     const analysis = await analyzeInGameRoster(extractedNames);
 
     const sessionId = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
-    activeRosterSessions.set(sessionId, { analysis, createdAt: Date.now() });
+    await saveActiveRosterSession(sessionId, { analysis, createdAt: Date.now() });
 
     if (analyzingMsgId) {
       await deleteTelegramMessage(chatId, analyzingMsgId);
@@ -6896,7 +7010,7 @@ export default async function handler(req, res) {
                              data.startsWith('filter_t_') || data.startsWith('view_t_') || data.startsWith('back_t_') || data.startsWith('pl_') || data.startsWith('s27_') ||
                              data === 'cmd_rules' || data === 'cmd_top' || data === 'cmd_lineup' || data === 'cmd_checkin' ||
                              data === 'cmd_recap' || data === 'cmd_mvp' || data === 'cmd_tournaments' || data === 'cmd_mystats' ||
-                             data === 'cmd_menu';
+                             data === 'cmd_menu' || data === 'cmd_reset_ign';
 
       // If clicked inside a channel or group, allow public actions (translations, filters, check-ins, lineups)
       if (!isCbPrivate && !isPublicAction) {
@@ -6949,7 +7063,7 @@ export default async function handler(req, res) {
 
       if (data.startsWith('apply_roster_')) {
         const sessionId = data.replace('apply_roster_', '');
-        const session = activeRosterSessions.get(sessionId);
+        const session = await getActiveRosterSession(sessionId);
         if (!session || !session.analysis) {
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
@@ -7037,11 +7151,14 @@ export default async function handler(req, res) {
             updatedText = formatLiveAlert(liveResult, targetLang);
             updatedKeyboard = getLanguageKeyboard('live', '0', targetLang, isCbPrivate);
           } else {
-            await telegramRequest('answerCallbackQuery', {
-              callback_query_id: cb.id,
-              text: '⚠️ Live match data expired'
-            });
-            return sendResponse(res, 200, 'OK');
+            const t = await getLatestTournament();
+            if (t) {
+              updatedText = formatRecap(t, targetLang);
+              updatedKeyboard = getLanguageKeyboard('recap', t.id || '0', targetLang, isCbPrivate);
+            } else {
+              updatedText = targetLang === 'ar' ? 'ℹ️ انتهت المباراة المباشرة وحفظت نتائجها في الأرشيف.' : 'ℹ️ Live match concluded. Official recap saved.';
+              updatedKeyboard = getLanguageKeyboard('recap', '0', targetLang, isCbPrivate);
+            }
           }
         } else if (category === 'mvp') {
           updatedText = formatMvp(targetLang);
@@ -7050,7 +7167,7 @@ export default async function handler(req, res) {
           updatedText = formatRules(targetLang);
           updatedKeyboard = getLanguageKeyboard('rules', '0', targetLang, isCbPrivate);
         } else if (category === 'top') {
-          updatedText = formatTopScorers(targetLang);
+          updatedText = await formatTopScorers(targetLang);
           updatedKeyboard = getLanguageKeyboard('top', '0', targetLang, isCbPrivate);
         } else if (category === 'strikes') {
           updatedText = await formatStrikes(targetLang);
@@ -7126,7 +7243,7 @@ export default async function handler(req, res) {
           updatedText = generatePlayerStatsMessage(param, targetLang);
           updatedKeyboard = getPlayerKeyboard(param, targetLang);
         } else if (category === 'roster') {
-          const session = activeRosterSessions.get(param);
+          const session = await getActiveRosterSession(param);
           if (session && session.analysis) {
             updatedText = formatRosterSyncReport(session.analysis, targetLang);
             updatedKeyboard = getRosterSyncKeyboard(param, targetLang);
@@ -7221,7 +7338,7 @@ export default async function handler(req, res) {
           bcastText = formatRules('ru');
           catName = 'League Rules';
         } else if (cat === 'top') {
-          bcastText = formatTopScorers('ru');
+          bcastText = await formatTopScorers('ru');
           catName = 'Top Scorers Leaderboard';
         } else if (cat === 'strikes') {
           bcastText = await formatStrikes('ru');
@@ -7276,11 +7393,17 @@ export default async function handler(req, res) {
               text: '⚠️ Finish analyzing last match screenshots first (/done)!',
               show_alert: true
             });
+            const forceKeys = {
+              inline_keyboard: [
+                [{ text: '🗑️ Clear Buffer & Launch Check-In Now', callback_data: 'force_open_checkin_60' }]
+              ]
+            };
             await sendTelegramMessage(
               chatId,
               '⚠️ *Cannot open Pre-Match Check-In yet!*\n\n' +
               '📸 There are unanalyzed tournament screenshots in the buffer.\n' +
-              '👉 Please run `/done` or `/analyze` first to publish the last match results and update player strikes and averages!'
+              '👉 Please run `/done` or tap below to discard them and launch check-in directly:',
+              forceKeys
             );
             return sendResponse(res, 200, 'OK');
           }
@@ -7370,7 +7493,7 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
-      if (data === 'open_checkin_60') {
+      if (data === 'open_checkin_60' || data === 'force_open_checkin_60') {
         if (!isAdmin) {
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
@@ -7381,12 +7504,26 @@ export default async function handler(req, res) {
         }
 
         const buffered = await getBufferedPhotos(null, chatId);
-        if (buffered.length > 0) {
+        if (data === 'force_open_checkin_60' && buffered.length > 0) {
+          await clearBufferedPhotos(buffered.map(it => it.commentId));
+        } else if (buffered.length > 0) {
           await telegramRequest('answerCallbackQuery', {
             callback_query_id: cb.id,
-            text: '⚠️ Finish analyzing last match screenshots first (/done)!',
+            text: '⚠️ Screenshots in buffer! Clear them or analyze first.',
             show_alert: true
           });
+          const forceKeys = {
+            inline_keyboard: [
+              [{ text: '🗑️ Clear Buffer & Launch Check-In Now', callback_data: 'force_open_checkin_60' }]
+            ]
+          };
+          await sendTelegramMessage(
+            chatId,
+            '⚠️ *Cannot open Pre-Match Check-In yet!*\n\n' +
+            '📸 There are unanalyzed tournament screenshots in the buffer.\n' +
+            '👉 Tap below to discard the buffer and open the 1-hour check-in immediately:',
+            forceKeys
+          );
           return sendResponse(res, 200, 'OK');
         }
 
@@ -7595,7 +7732,7 @@ export default async function handler(req, res) {
       }
 
       if (data === 'cmd_top') {
-        const text = formatTopScorers('ru');
+        const text = await formatTopScorers('ru');
         await sendTelegramMessage(chatId, text, getLanguageKeyboard('top', '0', 'ru', true));
         await telegramRequest('answerCallbackQuery', { callback_query_id: cb.id });
         return sendResponse(res, 200, 'OK');
@@ -7872,6 +8009,39 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
+      if (data === 'cmd_reset_ign') {
+        const userId = cb.from ? cb.from.id : chatId;
+        const regData = await getRegisteredPlayers();
+        let changed = false;
+        if (regData && regData.registrations) {
+          for (const [key, reg] of Object.entries(regData.registrations)) {
+            if (String(reg.telegram_id) === String(userId)) {
+              delete regData.registrations[key];
+              changed = true;
+            }
+          }
+          if (changed) {
+            await saveRegisteredPlayersRaw(regData, `User ${userId} requested IGN reset`);
+          }
+        }
+        if (userId) {
+          sandboxSessions.delete(String(userId));
+        }
+        const userLang = detectUserLang(cb.from, 'ru');
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: userLang === 'ar' ? '✅ تم إلغاء التسجيل القديم. أرسل الآن اسمك الجديد باللعبة!' : '✅ Reset complete! Send your new in-game name now.'
+        });
+        const vPrompt = formatVerificationPrompt(userLang);
+        const vKeys = getVerificationKeyboard(userLang);
+        if (cb.message && cb.message.message_id) {
+          await editTelegramMessage(chatId, cb.message.message_id, vPrompt, vKeys);
+        } else {
+          await sendTelegramMessage(chatId, vPrompt, vKeys);
+        }
+        return sendResponse(res, 200, 'OK');
+      }
+
       if (data === 'cmd_admin_panel' || data.startsWith('tab_admin_panel_')) {
         const isUserAdm = await isUserAdmin(cb.from?.id, cb.from?.username);
         if (!isUserAdm) {
@@ -7984,6 +8154,9 @@ export default async function handler(req, res) {
     const chatId = message.chat.id;
     const isPrivate = !message.chat || message.chat.type === 'private';
     const text = (message.text || '').trim();
+    const userId = message.from ? message.from.id : null;
+    const strId = String(userId || '');
+    const username = message.from ? (message.from.username || '') : '';
 
     // Group Policy: Process group commands without spamming casual chat
     if (!isPrivate) {
@@ -8049,7 +8222,7 @@ export default async function handler(req, res) {
 
       // 3. Leaderboard / Top Scorers
       if (cmd === '/top' || cmd === '/leaderboard') {
-        const topMsg = formatTopScorers(userLang);
+        const topMsg = await formatTopScorers(userLang);
         await sendTelegramMessage(chatId, topMsg, getLanguageKeyboard('top', '0', userLang, false));
         return sendResponse(res, 200, 'Group top sent');
       }
@@ -8184,9 +8357,6 @@ export default async function handler(req, res) {
 
     // 🔒 Admin Security Gate: Players have NO access to the bot.
     // Only verified Administrators / Creator of the league can access bot features.
-    const userId = message.from ? message.from.id : null;
-    const strId = String(userId || '');
-    const username = message.from ? (message.from.username || '') : '';
 
     // 🔒 Group Forward Detection: If admin or owner forwards any message from the group to the bot in private DM
     if (isPrivate) {
@@ -8327,7 +8497,7 @@ export default async function handler(req, res) {
       }
 
       if (text.startsWith('/top') || text.startsWith('/leaderboard')) {
-        const topMsg = formatTopScorers('ru');
+        const topMsg = await formatTopScorers('ru');
         await sendTelegramMessage(chatId, topMsg, getLanguageKeyboard('top', '0', 'ru', false));
         return sendResponse(res, 200, 'OK');
       }
@@ -8660,7 +8830,7 @@ export default async function handler(req, res) {
         const analysis = await analyzeInGameRoster(extractedNames);
 
         const sessionId = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
-        activeRosterSessions.set(sessionId, { analysis, createdAt: Date.now() });
+        await saveActiveRosterSession(sessionId, { analysis, createdAt: Date.now() });
 
         if (analyzingMsgId) {
           await deleteTelegramMessage(chatId, analyzingMsgId);
@@ -8752,7 +8922,7 @@ export default async function handler(req, res) {
     }
 
     if (text.startsWith('/top') || text.startsWith('/leaderboard')) {
-      const topMsg = formatTopScorers('ru');
+      const topMsg = await formatTopScorers('ru');
       await sendTelegramMessage(chatId, topMsg, getLanguageKeyboard('top', '0', 'ru', true));
       return sendResponse(res, 200, 'OK');
     }
