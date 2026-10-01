@@ -665,7 +665,8 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
   "tournaments": [
     {
       "status": "LIVE" or "HISTORY",
-      "time_info": "e.g. 12 MINS AGO or 03:49:49",
+      "time_info": "e.g. 12 MINS AGO or 2 DAYS AGO or Sep 28",
+      "date": "YYYY-MM-DD or null",
       "opponent_league": "Opponent Team Name",
       "score_bratva": number,
       "score_opponent": number,
@@ -5383,6 +5384,62 @@ async function notifyVerifiedPlayersDisciplineWarning() {
   }
 }
 
+function parseTournamentDate(aiDate, timeInfo, caption = '') {
+  const now = new Date();
+  const texts = [caption, aiDate, timeInfo].filter(Boolean);
+
+  for (const t of texts) {
+    const str = String(t).trim();
+    // 1. Matches YYYY-MM-DD
+    const isoMatch = str.match(/\b(202\d)-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/);
+    if (isoMatch) {
+      const dStr = isoMatch[0];
+      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+    }
+    // 2. Matches DD-MM-YYYY or DD/MM/YYYY
+    const dmyMatch = str.match(/\b(0[1-9]|[12]\d|3[01])[\/\-.](0[1-9]|1[0-2])[\/\-.](202\d)\b/);
+    if (dmyMatch) {
+      const dStr = `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}`;
+      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+    }
+    // 3. Matches "28 Sep" or "Sep 28"
+    const monthNames = { jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06', jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12' };
+    const monthMatch1 = str.match(/\b(0[1-9]|[12]\d|3[01])\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/i);
+    if (monthMatch1) {
+      const day = monthMatch1[1].padStart(2, '0');
+      const month = monthNames[monthMatch1[2].toLowerCase().slice(0, 3)];
+      const year = now.getFullYear();
+      const dStr = `${year}-${month}-${day}`;
+      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+    }
+    const monthMatch2 = str.match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+(0[1-9]|[12]\d|3[01])\b/i);
+    if (monthMatch2) {
+      const month = monthNames[monthMatch2[1].toLowerCase().slice(0, 3)];
+      const day = monthMatch2[2].padStart(2, '0');
+      const year = now.getFullYear();
+      const dStr = `${year}-${month}-${day}`;
+      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+    }
+    // 4. Matches relative time: "2d ago", "2 days ago", "1d ago"
+    const daysMatch = str.match(/\b(\d+)\s*(?:d|day|days)\s*ago\b/i);
+    if (daysMatch) {
+      const daysAgo = parseInt(daysMatch[1], 10);
+      const d = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+      const dStr = d.toISOString().split('T')[0];
+      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+    }
+    // 5. Matches "yesterday"
+    if (/\byesterday\b/i.test(str)) {
+      const d = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const dStr = d.toISOString().split('T')[0];
+      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+    }
+  }
+
+  const defaultDStr = now.toISOString().split('T')[0];
+  return { dateStr: defaultDStr, timestamp: now.getTime() };
+}
+
 /**
  * Handle Extracted AI Result (with incremental stitching & caching)
  */
@@ -5521,7 +5578,8 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     console.log(`[DEDUPLICATION] Updating existing tournament "${duplicateId}" on original date...`);
   }
 
-  let dateStr = duplicateId ? (duplicateMeta?.date || duplicateId.slice(0, 10)) : (aiResult.date || new Date().toISOString().split('T')[0]);
+  const dateInfo = parseTournamentDate(aiResult.date, aiResult.time_info, aiResult.caption || '');
+  let dateStr = duplicateId ? (duplicateMeta?.date || duplicateId.slice(0, 10)) : dateInfo.dateStr;
   let baseTId = duplicateId || `${dateStr}_${oppSlug}`;
   let tId = baseTId;
 
@@ -5537,7 +5595,7 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     id: tId,
     tournament_id: tId,
     date: dateStr,
-    timestamp: duplicateId ? (duplicateMeta?.timestamp || Date.now()) : Date.now(),
+    timestamp: duplicateId ? (duplicateMeta?.timestamp || dateInfo.timestamp) : dateInfo.timestamp,
     opponent_league: aiResult.opponent_league || 'OPPONENT',
     our_total_goals: ourGoals,
     opponent_total_goals: oppGoals,
@@ -5563,8 +5621,10 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
     tData.result = (tData.our_total_goals > tData.opponent_total_goals) ? 'win' : (tData.our_total_goals === tData.opponent_total_goals ? 'draw' : 'loss');
   }
 
-  // Update in-memory live cache
-  globalLatestTournament = tData;
+  // Update in-memory live cache only if this tournament is newer than or equal to current latest
+  if (!globalLatestTournament || (tData.date >= (globalLatestTournament.date || ''))) {
+    globalLatestTournament = tData;
+  }
 
   const recap = formatRecap(tData, 'ru');
   const channelKeys = getLanguageKeyboard('recap', tId, 'ru', false);
@@ -5651,17 +5711,18 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
       const prevGoals = prev.total_goals || 0;
       const newMatches = prevMatches + 1;
       const newGoals = prevGoals + (m.goals_for || 0);
+      const isNewerOrEqual = !prev.last_tournament_date || (tData.date >= prev.last_tournament_date);
       const prevStreak = prev.eligibility_streak?.current_fail_streak || 0;
-      const currentFailStreak = (m.turns_played < 3) ? (prevStreak + 1) : 0;
+      const currentFailStreak = isNewerOrEqual ? ((m.turns_played < 3) ? (prevStreak + 1) : 0) : prevStreak;
       pIndexObj[m.player_id] = {
         display_name: m.player_display_name,
         total_goals: newGoals,
         total_matches: newMatches,
         average_goals: parseFloat((newGoals / newMatches).toFixed(1)),
-        last_tournament_date: tData.date,
+        last_tournament_date: (prev.last_tournament_date && prev.last_tournament_date > tData.date) ? prev.last_tournament_date : tData.date,
         eligibility_streak: {
           current_fail_streak: currentFailStreak,
-          last_evaluated_tournament_id: tId,
+          last_evaluated_tournament_id: isNewerOrEqual ? tId : (prev.eligibility_streak?.last_evaluated_tournament_id || tId),
           flagged_for_review: currentFailStreak >= 3
         }
       };
@@ -5724,9 +5785,9 @@ async function getLiveMatchResult() {
   return null;
 }
 
-async function bufferPhoto(albumId, fileId, chatId) {
+async function bufferPhoto(albumId, fileId, chatId, caption = '') {
   return await githubApi(`/repos/${GITHUB_REPO}/issues/${BUFFER_ISSUE_NUMBER}/comments`, 'POST', {
-    body: JSON.stringify({ albumId, fileId, chatId, time: Date.now() })
+    body: JSON.stringify({ albumId, fileId, chatId, caption: caption || '', time: Date.now() })
   });
 }
 
@@ -5740,7 +5801,7 @@ async function getBufferedPhotos(albumId, chatId = null) {
       const matchAlbum = albumId && parsed.albumId === albumId;
       const matchChat = chatId && String(parsed.chatId) === String(chatId);
       if (matchAlbum || matchChat) {
-        items.push({ commentId: c.id, albumId: parsed.albumId, fileId: parsed.fileId, chatId: parsed.chatId, time: parsed.time });
+        items.push({ commentId: c.id, albumId: parsed.albumId, fileId: parsed.fileId, chatId: parsed.chatId, caption: parsed.caption || '', time: parsed.time });
       }
     } catch (e) {}
   }
@@ -5774,6 +5835,8 @@ async function processBufferedAlbum(albumId, chatId, res = null) {
       uniqueFileIds.push(it.fileId);
     }
   }
+
+  const combinedCaption = items.map(it => it.caption).filter(Boolean).join(' ');
 
   const count = uniqueFileIds.length;
   const analyzingRes = await sendTelegramMessage(chatId, `🔍 *Analyzing ${count} tournament screenshot${count > 1 ? 's' : ''} with Gemini Vision AI...*`);
@@ -5810,6 +5873,9 @@ async function processBufferedAlbum(albumId, chatId, res = null) {
     for (let i = 0; i < tournaments.length; i++) {
       const tItem = tournaments[i];
       tItem.is_tournament_screenshot = true;
+      if (!tItem.caption && combinedCaption) {
+        tItem.caption = combinedCaption;
+      }
       const isLast = (i === tournaments.length - 1);
       await handleTournamentResult(tItem, chatId, isLast ? res : null, true, (i === 0) ? analyzingMsgId : null);
     }
@@ -8588,7 +8654,7 @@ export default async function handler(req, res) {
       const albumId = mediaGroupId || `chat_${chatId}`;
 
       // 1. Buffer this photo to GitHub Issue #1 (Fast 150ms HTTP POST, zero Git conflicts!)
-      await bufferPhoto(albumId, selectedPhoto.file_id, chatId);
+      await bufferPhoto(albumId, selectedPhoto.file_id, chatId, message.caption || '');
 
       // 2. Fetch current buffer for this album/chat
       const currentItems = await getBufferedPhotos(albumId, chatId);
