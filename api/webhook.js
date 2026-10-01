@@ -433,7 +433,13 @@ function loadLeagueData() {
     if (fs.existsSync(regPath)) regData = JSON.parse(fs.readFileSync(regPath, 'utf8'));
   } catch (e) {}
 
-  return { pIndex, tIndex, players, tournaments, regData };
+  let activeRoster = { members: [] };
+  try {
+    const rosterPath = path.join(root, 'docs', 'league-data', '_active_roster.json');
+    if (fs.existsSync(rosterPath)) activeRoster = JSON.parse(fs.readFileSync(rosterPath, 'utf8'));
+  } catch (e) {}
+
+  return { pIndex, tIndex, players, tournaments, regData, activeRoster };
 }
 
 /**
@@ -535,6 +541,35 @@ async function getPlayersIndex() {
     return pIndex;
   }
   return {};
+}
+
+let activeRosterCache = null;
+let lastActiveRosterFetchTime = 0;
+
+async function getActiveRoster() {
+  const now = Date.now();
+  if (activeRosterCache && (now - lastActiveRosterFetchTime < 30000)) {
+    return activeRosterCache;
+  }
+  if (GITHUB_PAT) {
+    try {
+      const remoteRoster = await fetchGithubJson('docs/league-data/_active_roster.json');
+      if (remoteRoster && Array.isArray(remoteRoster.members)) {
+        activeRosterCache = remoteRoster;
+        lastActiveRosterFetchTime = now;
+        return remoteRoster;
+      }
+    } catch (e) {
+      console.warn('Failed to fetch _active_roster.json from GitHub:', e.message);
+    }
+  }
+  const { activeRoster } = loadLeagueData();
+  if (activeRoster && Array.isArray(activeRoster.members) && activeRoster.members.length > 0) {
+    activeRosterCache = activeRoster;
+    lastActiveRosterFetchTime = now;
+    return activeRoster;
+  }
+  return { members: [] };
 }
 
 async function getLatestTournament() {
@@ -2831,6 +2866,19 @@ function findPlayerByQuery(query) {
   });
   if (aliasMatch) return aliasMatch;
 
+  // 4b. Match in active in-game roster members
+  const activeMembers = (activeRosterCache && activeRosterCache.members) || (localData.activeRoster && localData.activeRoster.members) || [];
+  const rosterMatch = activeMembers.find(m => (m || '').toLowerCase().trim() === q);
+  if (rosterMatch) {
+    const cleanId = rosterMatch.toLowerCase().replace(/[^\p{L}\p{N}_]/gu, '_').replace(/_+/g, '_').replace(/^_|_$/g, '') || rosterMatch;
+    return {
+      player_id: cleanId,
+      display_name: rosterMatch,
+      in_game_name: rosterMatch,
+      in_roster: true
+    };
+  }
+
   // 5. Substring match (if query is at least 3 chars)
   if (q.length >= 3) {
     for (const [id, data] of Object.entries(pIndex)) {
@@ -3512,7 +3560,7 @@ function getCanonicalPlayerKey(pid, displayName) {
   }
 
   const raw = normName || normPid;
-  let cleanKey = raw.replace(/[^a-z0-9а-яё]/gi, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+  let cleanKey = raw.replace(/[^\p{L}\p{N}_]/gu, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
   if (cleanKey.startsWith('member_')) {
     cleanKey = cleanKey.replace(/^member_/, '');
   }
@@ -3520,86 +3568,9 @@ function getCanonicalPlayerKey(pid, displayName) {
 }
 
 async function formatPendingAudit(lang = 'ru') {
-  const regData = await getRegisteredPlayers();
-  const registeredMap = regData.registrations || {};
-
-  const { pIndex } = loadLeagueData();
-
-  const playersByKey = new Map();
-  for (const [pid, p] of Object.entries(pIndex || {})) {
-    if (!p || !p.display_name) continue;
-    const key = getCanonicalPlayerKey(pid, p.display_name);
-    if (!playersByKey.has(key)) {
-      playersByKey.set(key, {
-        pids: [pid],
-        displayName: p.display_name
-      });
-    } else {
-      const pids = playersByKey.get(key).pids;
-      if (!pids.includes(pid)) pids.push(pid);
-    }
-  }
-
-  if (globalLatestTournament && globalLatestTournament.matches) {
-    for (const m of globalLatestTournament.matches) {
-      if (m.player_id && m.player_display_name) {
-        const key = getCanonicalPlayerKey(m.player_id, m.player_display_name);
-        if (!playersByKey.has(key)) {
-          playersByKey.set(key, {
-            pids: [m.player_id],
-            displayName: m.player_display_name
-          });
-        } else {
-          const pids = playersByKey.get(key).pids;
-          if (!pids.includes(m.player_id)) pids.push(m.player_id);
-        }
-      }
-    }
-  }
-
-  for (const [rId, reg] of Object.entries(registeredMap)) {
-    if (reg && reg.display_name) {
-      const key = getCanonicalPlayerKey(reg.player_id || rId, reg.display_name);
-      if (!playersByKey.has(key)) {
-        playersByKey.set(key, {
-          pids: [reg.player_id || rId],
-          displayName: reg.display_name
-        });
-      } else {
-        const pids = playersByKey.get(key).pids;
-        if (reg.player_id && !pids.includes(reg.player_id)) pids.push(reg.player_id);
-      }
-    }
-  }
-
-  const verified = [];
-  const pending = [];
-
-  for (const [key, pInfo] of playersByKey.entries()) {
-    let reg = null;
-    for (const pid of pInfo.pids) {
-      if (registeredMap[pid]) {
-        reg = registeredMap[pid];
-        break;
-      }
-    }
-    if (!reg && registeredMap[key]) {
-      reg = registeredMap[key];
-    }
-
-    const isOwner = key === 'sanya' || key === 'саня' || (reg && (reg.is_owner || reg.role === 'Owner'));
-    const isAdmin = key === 'doxibro' || key === 'doxibero' || key === 'doxibero1' || (reg && (reg.is_admin || reg.role === 'Admin'));
-
-    if (isOwner || isAdmin || reg) {
-      // Clean names ONLY - no @, no ID, no admin labels as requested!
-      verified.push(`• *${clean(pInfo.displayName)}*`);
-    } else {
-      pending.push(`• *${clean(pInfo.displayName)}*`);
-    }
-  }
-
-  const cleanVerified = Array.from(new Set(verified)).sort((a, b) => a.localeCompare(b));
-  const cleanPending = Array.from(new Set(pending)).sort((a, b) => a.localeCompare(b));
+  const { uniqueJoined, uniquePending } = await getCleanSquadTelegramStatus();
+  const cleanVerified = uniqueJoined;
+  const cleanPending = uniquePending;
 
   const total = cleanVerified.length + cleanPending.length;
   const vCount = cleanVerified.length;
@@ -3702,9 +3673,23 @@ async function formatPendingAudit(lang = 'ru') {
 async function getCleanSquadTelegramStatus() {
   const regData = await getRegisteredPlayers();
   const registeredMap = regData.registrations || {};
-  const { pIndex } = loadLeagueData();
+  const pIndex = await getPlayersIndex();
+  const activeRoster = await getActiveRoster();
 
   const playersByKey = new Map();
+
+  // 1. Populate all active members in the in-game league (e.g. 73 roster members)
+  if (activeRoster && Array.isArray(activeRoster.members)) {
+    for (const memberName of activeRoster.members) {
+      if (!memberName) continue;
+      const key = getCanonicalPlayerKey(memberName, memberName);
+      if (!playersByKey.has(key)) {
+        playersByKey.set(key, { pids: [memberName], displayName: memberName });
+      }
+    }
+  }
+
+  // 2. Populate from pIndex (match history)
   for (const [pid, p] of Object.entries(pIndex || {})) {
     if (!p || !p.display_name) continue;
     if (p.status === 'inactive') continue;
@@ -3717,6 +3702,7 @@ async function getCleanSquadTelegramStatus() {
     }
   }
 
+  // 3. Populate from globalLatestTournament matches
   if (globalLatestTournament && globalLatestTournament.matches) {
     for (const m of globalLatestTournament.matches) {
       if (m.player_id && m.player_display_name) {
@@ -3731,14 +3717,17 @@ async function getCleanSquadTelegramStatus() {
     }
   }
 
+  // 4. Populate from registered players
   for (const [rId, reg] of Object.entries(registeredMap)) {
-    if (reg && reg.display_name) {
-      const key = getCanonicalPlayerKey(reg.player_id || rId, reg.display_name);
+    if (reg && (reg.display_name || reg.in_game_name)) {
+      const name = reg.in_game_name || reg.display_name;
+      const key = getCanonicalPlayerKey(reg.player_id || rId, name);
       if (!playersByKey.has(key)) {
-        playersByKey.set(key, { pids: [reg.player_id || rId], displayName: reg.display_name });
+        playersByKey.set(key, { pids: [reg.player_id || rId, name], displayName: name });
       } else {
         const pids = playersByKey.get(key).pids;
         if (reg.player_id && !pids.includes(reg.player_id)) pids.push(reg.player_id);
+        if (!pids.includes(name)) pids.push(name);
       }
     }
   }
@@ -3756,12 +3745,14 @@ async function getCleanSquadTelegramStatus() {
     let isJoined = Boolean(reg || key === 'sanya' || key === 'саня' || key === 'doxibro' || key === 'doxibero' || key === 'doxibero1');
     if (!isJoined) {
       const normKey = key.toLowerCase().replace(/[\s_]+/g, '_');
+      const targetName = (pInfo.displayName || '').toLowerCase().trim();
       for (const r of Object.values(registeredMap)) {
         if (!r) continue;
         const rName = (r.display_name || '').toLowerCase().replace(/[\s_]+/g, '_');
         const rInGame = (r.in_game_name || '').toLowerCase().replace(/[\s_]+/g, '_');
         const rPid = (r.player_id || '').toLowerCase().replace(/[\s_]+/g, '_');
-        if (rName === normKey || rInGame === normKey || rPid === normKey || rPid === `member_${normKey}`) {
+        const rKey = getCanonicalPlayerKey(r.player_id, r.display_name || r.in_game_name);
+        if (rName === normKey || rInGame === normKey || rPid === normKey || rPid === `member_${normKey}` || rKey === key || (r.in_game_name && r.in_game_name.toLowerCase().trim() === targetName) || (r.display_name && r.display_name.toLowerCase().trim() === targetName)) {
           isJoined = true;
           break;
         }
@@ -8683,22 +8674,18 @@ export default async function handler(req, res) {
 
       // 5. Community Membership Gatekeeper:
       // Step 1: Users not yet in the community see ONLY Button 1️⃣ [ Join Channel & Group Chat ].
-      // Step 2: Once joined, Telegram auto-triggers (or bot detects) Button 2️⃣ [ Check Membership & Continue ].
+      // Step 2: Users who are verified members proceed directly to in-game registration.
       const userLang = detectUserLang(message.from);
-      const hasPassedGate = verifiedGateUsers.has(String(userId));
-      if (!hasPassedGate) {
-        const isSub = await isUserSubscribedToCommunity(userId);
-        if (isSub) {
-          const joinedMsg = formatCommunityJoinedPrompt(userLang);
-          const joinedKeys = getCommunityJoinedKeyboard(userLang);
-          await sendTelegramMessage(chatId, joinedMsg, joinedKeys);
-          return sendResponse(res, 200, 'Community joined prompt sent');
-        }
+      const isSub = await isUserSubscribedToCommunity(userId);
+      if (!isSub) {
         const joinMsg = formatJoinRequiredPrompt(userLang);
         const joinKeys = getJoinRequiredKeyboard(userLang);
         await sendTelegramMessage(chatId, joinMsg, joinKeys);
         return sendResponse(res, 200, 'Community subscription required');
       }
+
+      // Mark user in verified gate cache
+      verifiedGateUsers.add(String(userId));
 
       // 6. User is confirmed subscribed: Show in-game name registration prompt
       if (!text || text.startsWith('/start') || text.startsWith('/help') || text.startsWith('/verify')) {
@@ -8764,7 +8751,7 @@ export default async function handler(req, res) {
         isNew = false;
       } else {
         // ACCEPT ALL MEMBERS: league has up to 100 players, many join before tournaments
-        const cleanBase = inputName.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '') || `user_${userId}`;
+        const cleanBase = inputName.toLowerCase().replace(/[^\p{L}\p{N}_]/gu, '_').replace(/_+/g, '_').replace(/^_|_$/g, '') || `user_${userId}`;
         playerId = `member_${cleanBase}`;
         displayName = inputName;
         isNew = true;
