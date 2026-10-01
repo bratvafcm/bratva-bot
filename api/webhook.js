@@ -666,8 +666,8 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
   "tournaments": [
     {
       "status": "LIVE" or "HISTORY",
-      "time_info": "e.g. 12 MINS AGO or 2 DAYS AGO or Sep 28",
-      "date": "YYYY-MM-DD or null",
+      "time_info": "Exact time/date shown on screen, e.g. '2d ago', '2 дня назад', 'منذ يومين', '12 mins ago', or date",
+      "date": "Exact match date in YYYY-MM-DD calculated from screen (reference date today is 2026-10-01, e.g. 2d ago = 2026-09-29)",
       "opponent_league": "Opponent Team Name",
       "score_bratva": number,
       "score_opponent": number,
@@ -5392,7 +5392,7 @@ async function notifyVerifiedPlayersDisciplineWarning() {
 
 function parseTournamentDate(aiDate, timeInfo, caption = '') {
   const now = new Date();
-  const texts = [caption, aiDate, timeInfo].filter(Boolean);
+  const texts = [aiDate, timeInfo, caption].filter(Boolean);
 
   for (const t of texts) {
     const str = String(t).trim();
@@ -5408,7 +5408,29 @@ function parseTournamentDate(aiDate, timeInfo, caption = '') {
       const dStr = `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}`;
       return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
     }
-    // 3. Matches "28 Sep" or "Sep 28"
+    // 3. Multi-language Relative Days (e.g. "2d ago", "2 days ago", "2 дн назад", "2 дня назад", "منذ 2 يوم")
+    const daysMatch = str.match(/(\d+)\s*(?:d|day|days|д|дн|дня|дней|يوم|أيام)\s*(?:ago|назад|منذ)?/i);
+    if (daysMatch) {
+      const daysAgo = parseInt(daysMatch[1], 10);
+      if (daysAgo >= 1 && daysAgo <= 60) {
+        const d = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+        const dStr = d.toISOString().split('T')[0];
+        return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+      }
+    }
+    // Arabic "منذ يومين" (2 days ago)
+    if (/يومين/i.test(str)) {
+      const d = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+      const dStr = d.toISOString().split('T')[0];
+      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+    }
+    // Yesterday / вчера / أمس
+    if (/\b(?:yesterday|вчера|أمس|امس)\b/i.test(str)) {
+      const d = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const dStr = d.toISOString().split('T')[0];
+      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+    }
+    // 4. Matches "28 Sep" or "Sep 28"
     const monthNames = { jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06', jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12' };
     const monthMatch1 = str.match(/\b(0[1-9]|[12]\d|3[01])\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/i);
     if (monthMatch1) {
@@ -5424,20 +5446,6 @@ function parseTournamentDate(aiDate, timeInfo, caption = '') {
       const day = monthMatch2[2].padStart(2, '0');
       const year = now.getFullYear();
       const dStr = `${year}-${month}-${day}`;
-      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
-    }
-    // 4. Matches relative time: "2d ago", "2 days ago", "1d ago"
-    const daysMatch = str.match(/\b(\d+)\s*(?:d|day|days)\s*ago\b/i);
-    if (daysMatch) {
-      const daysAgo = parseInt(daysMatch[1], 10);
-      const d = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
-      const dStr = d.toISOString().split('T')[0];
-      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
-    }
-    // 5. Matches "yesterday"
-    if (/\byesterday\b/i.test(str)) {
-      const d = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      const dStr = d.toISOString().split('T')[0];
       return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
     }
   }
