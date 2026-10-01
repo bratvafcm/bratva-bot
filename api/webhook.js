@@ -361,9 +361,10 @@ function githubApi(path, method = 'GET', body = null) {
       headers['Content-Type'] = 'application/json';
       headers['Content-Length'] = Buffer.byteLength(payload);
     }
+    const safePath = encodeURI(path);
     const req = https.request({
       hostname: 'api.github.com',
-      path: path,
+      path: safePath,
       method: method,
       headers: headers
     }, res => {
@@ -4802,9 +4803,14 @@ function slugifyLeague(text) {
     'к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f',
     'х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'
   };
-  let s = text.toLowerCase().split('').map(c => cyrillicMap[c] || c).join('');
+  const arabicMap = {
+    'ا':'a','أ':'a','إ':'i','آ':'aa','ب':'b','ت':'t','ث':'th','ج':'j','ح':'h','خ':'kh',
+    'د':'d','ذ':'dh','ر':'r','ز':'z','س':'s','ش':'sh','ص':'s','ض':'d','ط':'t','ظ':'dh',
+    'ع':'a','غ':'gh','ف':'f','ق':'q','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','و':'w','ي':'y','ى':'a','ة':'h',
+    'ء':'','ئ':'y','ؤ':'w'
+  };
+  let s = text.toLowerCase().split('').map(c => cyrillicMap[c] || arabicMap[c] || c).join('');
   s = s.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-  if (!s) s = text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '_').replace(/^_+|_+$/g, '');
   return s || 'opponent';
 }
 
@@ -5743,6 +5749,9 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
 
   } catch (ghErr) {
     console.error('GitHub API Sync Error:', ghErr);
+    try {
+      await sendTelegramMessage(chatId, `⚠️ *GitHub Sync Error:* Failed to save tournament to database: ${clean(ghErr.message || String(ghErr))}`);
+    } catch (e) {}
   }
 
   // Automatically dispatch personalized post-match debrief to all verified registered players
