@@ -34,5 +34,14 @@
     "opponent_total_goals": 318,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-09-28_alymn_alsayd": {
+    "date": "2026-09-28",
+    "timestamp": 1790596800000,
+    "opponent_league": "اليمن السعيد",
+    "our_total_goals": 172,
+    "opponent_total_goals": 131,
+    "result": "win",
+    "status": "complete"
   }
 }
