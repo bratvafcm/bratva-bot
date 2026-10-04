@@ -13,13 +13,13 @@
   },
   "doxibero1": {
     "display_name": "DOXIBERO1",
-    "total_goals": 166,
-    "total_matches": 5,
-    "average_goals": 33.2,
+    "total_goals": 198,
+    "total_matches": 6,
+    "average_goals": 33,
     "last_tournament_date": "2026-09-30",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-30_the_eagles_egypt",
       "flagged_for_review": false
     }
   },
@@ -61,13 +61,13 @@
   },
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
-    "total_goals": 122,
-    "total_matches": 5,
-    "average_goals": 24.4,
+    "total_goals": 140,
+    "total_matches": 6,
+    "average_goals": 23.3,
     "last_tournament_date": "2026-09-30",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-30_the_eagles_egypt",
       "flagged_for_review": false
     }
   },
@@ -181,13 +181,13 @@
   },
   "mike": {
     "display_name": "Mike",
-    "total_goals": 144,
-    "total_matches": 5,
-    "average_goals": 28.8,
+    "total_goals": 165,
+    "total_matches": 6,
+    "average_goals": 27.5,
     "last_tournament_date": "2026-09-30",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-30_the_eagles_egypt",
       "flagged_for_review": false
     }
   },
@@ -361,13 +361,13 @@
   },
   "koustav_007": {
     "display_name": "KOUSTAV_007",
-    "total_goals": 145,
-    "total_matches": 5,
-    "average_goals": 29,
+    "total_goals": 178,
+    "total_matches": 6,
+    "average_goals": 29.7,
     "last_tournament_date": "2026-09-30",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-30_the_eagles_egypt",
       "flagged_for_review": false
     }
   },
@@ -481,13 +481,13 @@
   },
   "rogelio": {
     "display_name": "Rogelio",
-    "total_goals": 69,
-    "total_matches": 4,
-    "average_goals": 17.3,
-    "last_tournament_date": "2026-09-28",
+    "total_goals": 96,
+    "total_matches": 5,
+    "average_goals": 19.2,
+    "last_tournament_date": "2026-09-30",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-28_alymn_alsayd",
+      "last_evaluated_tournament_id": "2026-09-30_the_eagles_egypt",
       "flagged_for_review": false
     }
   },
@@ -529,13 +529,13 @@
   },
   "саня": {
     "display_name": "саня",
-    "total_goals": 172,
-    "total_matches": 5,
-    "average_goals": 34.4,
+    "total_goals": 199,
+    "total_matches": 6,
+    "average_goals": 33.2,
     "last_tournament_date": "2026-09-30",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-30_the_eagles_egypt",
       "flagged_for_review": false
     }
   },
@@ -1346,12 +1346,12 @@
   "llonchik": {
     "display_name": "Llonchik",
     "total_goals": 37,
-    "total_matches": 3,
-    "average_goals": 12.3,
-    "last_tournament_date": "2026-09-27",
+    "total_matches": 4,
+    "average_goals": 9.3,
+    "last_tournament_date": "2026-09-30",
     "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-09-27_shaidul",
+      "current_fail_streak": 4,
+      "last_evaluated_tournament_id": "2026-09-30_the_eagles_egypt",
       "flagged_for_review": true
     }
   },
@@ -1424,6 +1424,18 @@
     "eligibility_streak": {
       "current_fail_streak": 1,
       "last_evaluated_tournament_id": "2026-09-28_alymn_alsayd",
+      "flagged_for_review": false
+    }
+  },
+  "sueeex": {
+    "display_name": "sueeex",
+    "total_goals": 26,
+    "total_matches": 1,
+    "average_goals": 26,
+    "last_tournament_date": "2026-09-30",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-30_the_eagles_egypt",
       "flagged_for_review": false
     }
   }
