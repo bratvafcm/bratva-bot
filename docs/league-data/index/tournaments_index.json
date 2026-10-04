@@ -43,5 +43,14 @@
     "opponent_total_goals": 131,
     "result": "win",
     "status": "complete"
+  },
+  "2026-09-30_the_eagles_egypt": {
+    "date": "2026-09-30",
+    "timestamp": 1790769600000,
+    "opponent_league": "The eagles@egypt",
+    "our_total_goals": 184,
+    "opponent_total_goals": 184,
+    "result": "draw",
+    "status": "complete"
   }
 }
