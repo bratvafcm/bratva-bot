@@ -52,5 +52,14 @@
     "opponent_total_goals": 184,
     "result": "draw",
     "status": "complete"
+  },
+  "2026-10-01_banda_blokhera": {
+    "date": "2026-10-01",
+    "timestamp": 1790856000000,
+    "opponent_league": "БАНДА БЛОХЕРА",
+    "our_total_goals": 192,
+    "opponent_total_goals": 165,
+    "result": "win",
+    "status": "complete"
   }
 }
