@@ -61,5 +61,14 @@
     "opponent_total_goals": 165,
     "result": "win",
     "status": "complete"
+  },
+  "2026-10-01_the_king": {
+    "date": "2026-10-01",
+    "timestamp": 1790856000000,
+    "opponent_league": "the king",
+    "our_total_goals": 159,
+    "opponent_total_goals": 204,
+    "result": "loss",
+    "status": "complete"
   }
 }
