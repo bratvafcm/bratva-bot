@@ -13,13 +13,13 @@
   },
   "doxibero1": {
     "display_name": "DOXIBERO1",
-    "total_goals": 262,
-    "total_matches": 8,
-    "average_goals": 32.8,
+    "total_goals": 294,
+    "total_matches": 9,
+    "average_goals": 32.7,
     "last_tournament_date": "2026-10-01",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_the_king",
+      "last_evaluated_tournament_id": "2026-10-01_legends_league",
       "flagged_for_review": false
     }
   },
@@ -61,13 +61,13 @@
   },
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
-    "total_goals": 191,
-    "total_matches": 8,
-    "average_goals": 23.9,
+    "total_goals": 221,
+    "total_matches": 9,
+    "average_goals": 24.6,
     "last_tournament_date": "2026-10-01",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_the_king",
+      "last_evaluated_tournament_id": "2026-10-01_legends_league",
       "flagged_for_review": false
     }
   },
@@ -181,13 +181,13 @@
   },
   "mike": {
     "display_name": "Mike",
-    "total_goals": 192,
-    "total_matches": 8,
-    "average_goals": 24,
+    "total_goals": 217,
+    "total_matches": 9,
+    "average_goals": 24.1,
     "last_tournament_date": "2026-10-01",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_the_king",
+      "last_evaluated_tournament_id": "2026-10-01_legends_league",
       "flagged_for_review": false
     }
   },
@@ -529,13 +529,13 @@
   },
   "саня": {
     "display_name": "саня",
-    "total_goals": 267,
-    "total_matches": 8,
+    "total_goals": 301,
+    "total_matches": 9,
     "average_goals": 33.4,
     "last_tournament_date": "2026-10-01",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_the_king",
+      "last_evaluated_tournament_id": "2026-10-01_legends_league",
       "flagged_for_review": false
     }
   },
@@ -601,13 +601,13 @@
   },
   "king_pentax": {
     "display_name": "King_Pentax",
-    "total_goals": 57,
-    "total_matches": 3,
-    "average_goals": 19,
-    "last_tournament_date": "2026-09-30",
+    "total_goals": 83,
+    "total_matches": 4,
+    "average_goals": 20.8,
+    "last_tournament_date": "2026-10-01",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-10-01_legends_league",
       "flagged_for_review": false
     }
   },
@@ -1345,13 +1345,13 @@
   },
   "llonchik": {
     "display_name": "Llonchik",
-    "total_goals": 77,
-    "total_matches": 6,
-    "average_goals": 12.8,
+    "total_goals": 105,
+    "total_matches": 7,
+    "average_goals": 15,
     "last_tournament_date": "2026-10-01",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_the_king",
+      "last_evaluated_tournament_id": "2026-10-01_legends_league",
       "flagged_for_review": false
     }
   },
@@ -1429,13 +1429,25 @@
   },
   "sueeex": {
     "display_name": "sueeex",
-    "total_goals": 79,
-    "total_matches": 3,
-    "average_goals": 26.3,
+    "total_goals": 112,
+    "total_matches": 4,
+    "average_goals": 28,
     "last_tournament_date": "2026-10-01",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_the_king",
+      "last_evaluated_tournament_id": "2026-10-01_legends_league",
+      "flagged_for_review": false
+    }
+  },
+  "ridoy": {
+    "display_name": "Ridoy",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-10-01",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-10-01_legends_league",
       "flagged_for_review": false
     }
   }
