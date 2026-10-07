@@ -70,5 +70,14 @@
     "opponent_total_goals": 204,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-10-01_legends_league": {
+    "date": "2026-10-01",
+    "timestamp": 1790856000000,
+    "opponent_league": "Legends League",
+    "our_total_goals": 208,
+    "opponent_total_goals": 121,
+    "result": "win",
+    "status": "complete"
   }
 }
