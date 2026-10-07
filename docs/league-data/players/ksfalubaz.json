@@ -2,14 +2,38 @@
   "player_id": "ksfalubaz",
   "display_name": "KSFALUBAZ",
   "known_aliases": [],
-  "total_goals": 0,
-  "total_matches": 0,
-  "average_goals": 0,
-  "matches": [],
+  "total_goals": 29,
+  "total_matches": 2,
+  "average_goals": 14.5,
+  "matches": [
+    {
+      "tournament_id": "2026-09-29_blivion",
+      "match_index_in_tournament": 8,
+      "opponent_display_name": "BLIVION",
+      "opponent_id": "2026-09-29_blivion",
+      "goals_for": 29,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "KSFALUBAZ",
+      "player_id": "ksfalubaz"
+    },
+    {
+      "tournament_id": "2026-10-02_the_king",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "the king",
+      "opponent_id": "2026-10-02_the_king",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "KSFALUBAZ",
+      "player_id": "ksfalubaz"
+    }
+  ],
   "eligibility_streak": {
-    "current_fail_streak": 0,
-    "last_evaluated_tournament_id": null,
+    "current_fail_streak": 1,
+    "last_evaluated_tournament_id": "2026-10-01_the_king",
     "flagged_for_review": false
-  },
-  "last_tournament_date": null
+  }
 }

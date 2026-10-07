@@ -1,0 +1,39 @@
+{
+  "player_id": "dredd",
+  "display_name": "Dredd",
+  "known_aliases": [],
+  "total_goals": 11,
+  "total_matches": 2,
+  "average_goals": 5.5,
+  "matches": [
+    {
+      "tournament_id": "2026-09-27_shaidul",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "Shaidul",
+      "opponent_id": "2026-09-27_shaidul",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Dredd",
+      "player_id": "dredd"
+    },
+    {
+      "tournament_id": "2026-09-29_blivion",
+      "match_index_in_tournament": 12,
+      "opponent_display_name": "BLIVION",
+      "opponent_id": "2026-09-29_blivion",
+      "goals_for": 11,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 1,
+      "player_display_name": "Dredd",
+      "player_id": "dredd"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 2,
+    "last_evaluated_tournament_id": "2026-09-30_blivion",
+    "flagged_for_review": false
+  }
+}

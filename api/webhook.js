@@ -2480,11 +2480,12 @@ async function getFilteredTournaments(filter = '7') {
 
   // Sort descending by date/timestamp (latest tournament first!)
   list.sort((a, b) => {
+    const timeA = a.timestamp || 0;
+    const timeB = b.timestamp || 0;
+    if (timeA && timeB && timeA !== timeB) return timeB - timeA;
     const dateA = a.date || (a.id ? a.id.slice(0, 10) : '');
     const dateB = b.date || (b.id ? b.id.slice(0, 10) : '');
     if (dateA !== dateB) return dateB.localeCompare(dateA);
-    const timeA = a.timestamp || 0;
-    const timeB = b.timestamp || 0;
     if (timeA !== timeB) return timeB - timeA;
     return (b.id || '').localeCompare(a.id || '');
   });
@@ -2554,7 +2555,8 @@ function getTournamentsBrowserKeyboard(filter = '7', currentLang = 'ru', tournam
         dateStr = ` (${d}.${m})`;
       }
 
-      const btnText = `${emoji} ${ourScore}:${oppScore} vs ${oppName}${dateStr}`;
+      const safeOpp = `\u2066${oppName}\u2069`;
+      const btnText = `${emoji} ${ourScore}:${oppScore} vs ${safeOpp}${dateStr}`;
       rows.push([
         { text: btnText, callback_data: `view_t_${t.id}_${filter}_${currentLang}` }
       ]);
@@ -5490,6 +5492,16 @@ function parseTournamentDate(aiDate, timeInfo, caption = '') {
     if (dmyMatch) {
       const dStr = `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}`;
       return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+    }
+    // 2.5 Multi-language Relative Hours (e.g. "4h ago", "4 hours ago", "4 ч назад", "منذ 4 ساعات")
+    const hoursMatch = str.match(/(\d+)\s*(?:h|hr|hrs|hour|hours|ч|час|часа|часов|ساعة|ساعات)\s*(?:ago|назад|منذ)?/i);
+    if (hoursMatch) {
+      const hoursAgo = parseInt(hoursMatch[1], 10);
+      if (hoursAgo >= 0 && hoursAgo <= 72) {
+        const d = new Date(now.getTime() - hoursAgo * 60 * 60 * 1000);
+        const dStr = d.toISOString().split('T')[0];
+        return { dateStr: dStr, timestamp: d.getTime() };
+      }
     }
     // 3. Multi-language Relative Days (e.g. "2d ago", "2 days ago", "2 дн назад", "2 дня назад", "منذ 2 يوم")
     const daysMatch = str.match(/(\d+)\s*(?:d|day|days|д|дн|дня|дней|يوم|أيام)\s*(?:ago|назад|منذ)?/i);

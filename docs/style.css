@@ -687,33 +687,17 @@ body.cinematic-mode .bg-3d-canvas-container {
   font-weight: 800;
   font-size: 1rem;
   color: #ffffff;
+  text-overflow: ellipsis;
 }
 .ucl-team.away .ucl-team-name-wrap {
   margin-left: auto;
   text-align: right;
 }
-.ucl-team-name-wrap.marquee-active .marquee-inner {
-  display: inline-flex;
+.ucl-team-name-static {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  animation: uclMarqueeScroll 11s linear infinite;
-  will-change: transform;
-}
-.ucl-team-name-wrap:hover.marquee-active .marquee-inner {
-  animation-play-state: paused;
-}
-.marquee-gap {
-  opacity: 0.45;
-  color: var(--ucl-cyan);
-  padding: 0 4px;
-}
-
-@keyframes uclMarqueeScroll {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
 }
 
 .ucl-team-score {

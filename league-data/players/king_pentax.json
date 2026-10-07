@@ -2,14 +2,62 @@
   "player_id": "king_pentax",
   "display_name": "King_Pentax",
   "known_aliases": [],
-  "total_goals": 0,
-  "total_matches": 0,
-  "average_goals": 0,
-  "matches": [],
+  "total_goals": 83,
+  "total_matches": 4,
+  "average_goals": 20.8,
+  "matches": [
+    {
+      "tournament_id": "2026-09-25_garuda_indonesia",
+      "match_index_in_tournament": 8,
+      "opponent_display_name": "GARUDA INDONESIA",
+      "opponent_id": "2026-09-25_garuda_indonesia",
+      "goals_for": 32,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "King_Pentax",
+      "player_id": "king_pentax"
+    },
+    {
+      "tournament_id": "2026-09-26_ujedinjeni_strim",
+      "match_index_in_tournament": 8,
+      "opponent_display_name": "Ujedinjeni Strim",
+      "opponent_id": "2026-09-26_ujedinjeni_strim",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "King_Pentax",
+      "player_id": "king_pentax"
+    },
+    {
+      "tournament_id": "2026-09-29_blivion",
+      "match_index_in_tournament": 9,
+      "opponent_display_name": "BLIVION",
+      "opponent_id": "2026-09-29_blivion",
+      "goals_for": 25,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "King_Pentax",
+      "player_id": "king_pentax"
+    },
+    {
+      "tournament_id": "2026-10-03_legends_league",
+      "match_index_in_tournament": 8,
+      "opponent_display_name": "Legends League",
+      "opponent_id": "2026-10-03_legends_league",
+      "goals_for": 26,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "King_Pentax",
+      "player_id": "king_pentax"
+    }
+  ],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": null,
+    "last_evaluated_tournament_id": "2026-10-01_legends_league",
     "flagged_for_review": false
-  },
-  "last_tournament_date": null
+  }
 }

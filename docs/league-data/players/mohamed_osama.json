@@ -2,14 +2,122 @@
   "player_id": "mohamed_osama",
   "display_name": "Mohamed_Osama",
   "known_aliases": [],
-  "total_goals": 0,
-  "total_matches": 0,
-  "average_goals": 0,
-  "matches": [],
+  "total_goals": 221,
+  "total_matches": 9,
+  "average_goals": 24.6,
+  "matches": [
+    {
+      "tournament_id": "2026-09-25_garuda_indonesia",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "GARUDA INDONESIA",
+      "opponent_id": "2026-09-25_garuda_indonesia",
+      "goals_for": 26,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Mohamed_Osama",
+      "player_id": "mohamed_osama"
+    },
+    {
+      "tournament_id": "2026-09-26_ujedinjeni_strim",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "Ujedinjeni Strim",
+      "opponent_id": "2026-09-26_ujedinjeni_strim",
+      "goals_for": 21,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Mohamed_Osama",
+      "player_id": "mohamed_osama"
+    },
+    {
+      "tournament_id": "2026-09-27_shaidul",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "Shaidul",
+      "opponent_id": "2026-09-27_shaidul",
+      "goals_for": 24,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Mohamed_Osama",
+      "player_id": "mohamed_osama"
+    },
+    {
+      "tournament_id": "2026-09-28_alymn_alsayd",
+      "match_index_in_tournament": 7,
+      "opponent_display_name": "اليمن السعيد",
+      "opponent_id": "2026-09-28_alymn_alsayd",
+      "goals_for": 24,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Mohamed_Osama",
+      "player_id": "mohamed_osama"
+    },
+    {
+      "tournament_id": "2026-09-29_blivion",
+      "match_index_in_tournament": 14,
+      "opponent_display_name": "BLIVION",
+      "opponent_id": "2026-09-29_blivion",
+      "goals_for": 27,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Mohamed_Osama",
+      "player_id": "mohamed_osama"
+    },
+    {
+      "tournament_id": "2026-09-30_the_eagles_egypt",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "The eagles@egypt",
+      "opponent_id": "2026-09-30_the_eagles_egypt",
+      "goals_for": 18,
+      "goals_against": 0,
+      "result": "draw",
+      "turns_played": 3,
+      "player_display_name": "Mohamed_Osama",
+      "player_id": "mohamed_osama"
+    },
+    {
+      "tournament_id": "2026-10-01_banda_blokhera",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "БАНДА БЛОХЕРА",
+      "opponent_id": "2026-10-01_banda_blokhera",
+      "goals_for": 27,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Mohamed_Osama",
+      "player_id": "mohamed_osama"
+    },
+    {
+      "tournament_id": "2026-10-02_the_king",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "the king",
+      "opponent_id": "2026-10-02_the_king",
+      "goals_for": 24,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Mohamed_Osama",
+      "player_id": "mohamed_osama"
+    },
+    {
+      "tournament_id": "2026-10-03_legends_league",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "Legends League",
+      "opponent_id": "2026-10-03_legends_league",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Mohamed_Osama",
+      "player_id": "mohamed_osama"
+    }
+  ],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": null,
+    "last_evaluated_tournament_id": "2026-10-01_legends_league",
     "flagged_for_review": false
-  },
-  "last_tournament_date": null
+  }
 }

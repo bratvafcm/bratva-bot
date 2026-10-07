@@ -1,14 +1,14 @@
 {
-  "id": "2026-10-01_the_king",
-  "tournament_id": "2026-10-01_the_king",
-  "date": "2026-10-01",
-  "timestamp": 1790856000000,
-  "opponent_league": "the king",
-  "our_total_goals": 159,
-  "opponent_total_goals": 204,
-  "result": "loss",
+  "id": "2026-10-03_legends_league",
+  "tournament_id": "2026-10-03_legends_league",
+  "date": "2026-10-03",
+  "timestamp": 1791028800000,
+  "opponent_league": "Legends League",
+  "our_total_goals": 208,
+  "opponent_total_goals": 121,
+  "result": "win",
   "status": "complete",
-  "total_turns_played": 18,
+  "total_turns_played": 21,
   "max_possible_turns": 24,
   "matches": [
     {
@@ -16,15 +16,15 @@
       "player_id": "саня",
       "player_display_name": "саня",
       "ovr": 128,
-      "goals_for": 32,
+      "goals_for": 34,
       "turns_played": 3
     },
     {
       "board_order": 2,
-      "player_id": "doxibero1",
-      "player_display_name": "DOXIBERO1",
+      "player_id": "sueeex",
+      "player_display_name": "sueeex",
       "ovr": 126,
-      "goals_for": 30,
+      "goals_for": 33,
       "turns_played": 3
     },
     {
@@ -32,22 +32,22 @@
       "player_id": "mohamed_osama",
       "player_display_name": "Mohamed_Osama",
       "ovr": 126,
-      "goals_for": 24,
+      "goals_for": 30,
       "turns_played": 3
     },
     {
       "board_order": 4,
-      "player_id": "sueeex",
-      "player_display_name": "sueeex",
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
       "ovr": 126,
-      "goals_for": 29,
+      "goals_for": 32,
       "turns_played": 3
     },
     {
       "board_order": 5,
-      "player_id": "ksfalubaz",
-      "player_display_name": "KSFALUBAZ",
-      "ovr": 125,
+      "player_id": "ridoy",
+      "player_display_name": "Ridoy",
+      "ovr": 126,
       "goals_for": 0,
       "turns_played": 0
     },
@@ -56,7 +56,7 @@
       "player_id": "llonchik",
       "player_display_name": "Llonchik",
       "ovr": 125,
-      "goals_for": 17,
+      "goals_for": 28,
       "turns_played": 3
     },
     {
@@ -64,16 +64,16 @@
       "player_id": "mike",
       "player_display_name": "Mike",
       "ovr": 125,
-      "goals_for": 27,
+      "goals_for": 25,
       "turns_played": 3
     },
     {
       "board_order": 8,
-      "player_id": "rogelio",
-      "player_display_name": "Rogelio",
-      "ovr": 125,
-      "goals_for": 0,
-      "turns_played": 0
+      "player_id": "king_pentax",
+      "player_display_name": "King_Pentax",
+      "ovr": 124,
+      "goals_for": 26,
+      "turns_played": 3
     }
   ]
 }

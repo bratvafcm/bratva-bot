@@ -1,22 +1,22 @@
 {
-  "player_id": "bachata",
-  "display_name": "Bachata",
+  "player_id": "maco_jgl",
+  "display_name": "Maco...JGL",
   "known_aliases": [],
-  "total_goals": 22,
+  "total_goals": 0,
   "total_matches": 1,
-  "average_goals": 22,
+  "average_goals": 0,
   "matches": [
     {
       "tournament_id": "2026-09-29_blivion",
-      "match_index_in_tournament": 13,
+      "match_index_in_tournament": 3,
       "opponent_display_name": "BLIVION",
       "opponent_id": "2026-09-29_blivion",
-      "goals_for": 22,
+      "goals_for": 0,
       "goals_against": 0,
       "result": "loss",
-      "turns_played": 2,
-      "player_display_name": "Bachata",
-      "player_id": "bachata"
+      "turns_played": 0,
+      "player_display_name": "Maco...JGL",
+      "player_id": "maco_jgl"
     }
   ],
   "eligibility_streak": {

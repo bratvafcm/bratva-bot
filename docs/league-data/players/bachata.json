@@ -2,14 +2,26 @@
   "player_id": "bachata",
   "display_name": "Bachata",
   "known_aliases": [],
-  "total_goals": 0,
-  "total_matches": 0,
-  "average_goals": 0,
-  "matches": [],
+  "total_goals": 22,
+  "total_matches": 1,
+  "average_goals": 22,
+  "matches": [
+    {
+      "tournament_id": "2026-09-29_blivion",
+      "match_index_in_tournament": 13,
+      "opponent_display_name": "BLIVION",
+      "opponent_id": "2026-09-29_blivion",
+      "goals_for": 22,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 2,
+      "player_display_name": "Bachata",
+      "player_id": "bachata"
+    }
+  ],
   "eligibility_streak": {
-    "current_fail_streak": 0,
-    "last_evaluated_tournament_id": null,
+    "current_fail_streak": 1,
+    "last_evaluated_tournament_id": "2026-09-30_blivion",
     "flagged_for_review": false
-  },
-  "last_tournament_date": null
+  }
 }

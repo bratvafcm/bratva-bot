@@ -1560,9 +1560,11 @@ async function loadData() {
     return true;
   });
   state.tournaments.sort((a, b) => {
+    const timeDiff = (b.timestamp || 0) - (a.timestamp || 0);
+    if (timeDiff !== 0) return timeDiff;
     const diff = new Date(b.date) - new Date(a.date);
     if (diff !== 0) return diff;
-    return (b.timestamp || 0) - (a.timestamp || 0);
+    return (b.id || '').localeCompare(a.id || '');
   });
 
   // Build match index by player from all tournaments
@@ -2183,18 +2185,6 @@ function renderPlayerCard(p, rank, customGoals, customAvg) {
 
 function renderOpponentLeagueName(name) {
   const safeName = escapeHTML(name || '');
-  if (safeName.length > 11) {
-    return `
-      <div class="ucl-team-name-wrap marquee-active" title="${safeName}">
-        <div class="marquee-inner">
-          <span>${safeName}</span>
-          <span class="marquee-gap">&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
-          <span>${safeName}</span>
-          <span class="marquee-gap">&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
-        </div>
-      </div>
-    `;
-  }
   return `
     <div class="ucl-team-name-wrap" title="${safeName}">
       <span class="ucl-team-name-static">${safeName}</span>

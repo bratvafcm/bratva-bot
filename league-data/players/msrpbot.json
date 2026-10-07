@@ -2,14 +2,26 @@
   "player_id": "msrpbot",
   "display_name": "MSRPBOT",
   "known_aliases": [],
-  "total_goals": 0,
-  "total_matches": 0,
-  "average_goals": 0,
-  "matches": [],
+  "total_goals": 17,
+  "total_matches": 1,
+  "average_goals": 17,
+  "matches": [
+    {
+      "tournament_id": "2026-09-29_blivion",
+      "match_index_in_tournament": 11,
+      "opponent_display_name": "BLIVION",
+      "opponent_id": "2026-09-29_blivion",
+      "goals_for": 17,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 2,
+      "player_display_name": "MSRPBOT",
+      "player_id": "msrpbot"
+    }
+  ],
   "eligibility_streak": {
-    "current_fail_streak": 0,
-    "last_evaluated_tournament_id": null,
+    "current_fail_streak": 1,
+    "last_evaluated_tournament_id": "2026-09-30_blivion",
     "flagged_for_review": false
-  },
-  "last_tournament_date": null
+  }
 }

@@ -1,0 +1,39 @@
+{
+  "player_id": "brayo",
+  "display_name": "Brayo",
+  "known_aliases": [],
+  "total_goals": 0,
+  "total_matches": 2,
+  "average_goals": 0,
+  "matches": [
+    {
+      "tournament_id": "2026-09-28_alymn_alsayd",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "اليمن السعيد",
+      "opponent_id": "2026-09-28_alymn_alsayd",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Brayo",
+      "player_id": "brayo"
+    },
+    {
+      "tournament_id": "2026-09-29_blivion",
+      "match_index_in_tournament": 7,
+      "opponent_display_name": "BLIVION",
+      "opponent_id": "2026-09-29_blivion",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Brayo",
+      "player_id": "brayo"
+    }
+  ],
+  "eligibility_streak": {
+    "current_fail_streak": 1,
+    "last_evaluated_tournament_id": "2026-09-30_blivion",
+    "flagged_for_review": false
+  }
+}
