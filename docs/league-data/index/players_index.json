@@ -13,9 +13,9 @@
   },
   "doxibero1": {
     "display_name": "DOXIBERO1",
-    "total_goals": 294,
-    "total_matches": 9,
-    "average_goals": 32.7,
+    "total_goals": 330,
+    "total_matches": 10,
+    "average_goals": 33,
     "last_tournament_date": "2026-10-03",
     "eligibility_streak": {
       "current_fail_streak": 0,
@@ -62,8 +62,8 @@
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
     "total_goals": 221,
-    "total_matches": 9,
-    "average_goals": 24.6,
+    "total_matches": 10,
+    "average_goals": 22.1,
     "last_tournament_date": "2026-10-03",
     "eligibility_streak": {
       "current_fail_streak": 0,
@@ -182,8 +182,8 @@
   "mike": {
     "display_name": "Mike",
     "total_goals": 217,
-    "total_matches": 9,
-    "average_goals": 24.1,
+    "total_matches": 10,
+    "average_goals": 21.7,
     "last_tournament_date": "2026-10-03",
     "eligibility_streak": {
       "current_fail_streak": 0,
@@ -361,13 +361,13 @@
   },
   "koustav_007": {
     "display_name": "KOUSTAV_007",
-    "total_goals": 206,
-    "total_matches": 7,
+    "total_goals": 235,
+    "total_matches": 8,
     "average_goals": 29.4,
     "last_tournament_date": "2026-10-01",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_banda_blokhera",
+      "last_evaluated_tournament_id": "2026-10-01_garuda_la_liga",
       "flagged_for_review": false
     }
   },
@@ -529,9 +529,9 @@
   },
   "саня": {
     "display_name": "саня",
-    "total_goals": 301,
-    "total_matches": 9,
-    "average_goals": 33.4,
+    "total_goals": 331,
+    "total_matches": 10,
+    "average_goals": 33.1,
     "last_tournament_date": "2026-10-03",
     "eligibility_streak": {
       "current_fail_streak": 0,
@@ -602,8 +602,8 @@
   "king_pentax": {
     "display_name": "King_Pentax",
     "total_goals": 83,
-    "total_matches": 4,
-    "average_goals": 20.8,
+    "total_matches": 5,
+    "average_goals": 16.6,
     "last_tournament_date": "2026-10-03",
     "eligibility_streak": {
       "current_fail_streak": 0,
@@ -1346,8 +1346,8 @@
   "llonchik": {
     "display_name": "Llonchik",
     "total_goals": 105,
-    "total_matches": 7,
-    "average_goals": 15,
+    "total_matches": 8,
+    "average_goals": 13.1,
     "last_tournament_date": "2026-10-03",
     "eligibility_streak": {
       "current_fail_streak": 0,
@@ -1429,9 +1429,9 @@
   },
   "sueeex": {
     "display_name": "sueeex",
-    "total_goals": 112,
-    "total_matches": 4,
-    "average_goals": 28,
+    "total_goals": 142,
+    "total_matches": 5,
+    "average_goals": 28.4,
     "last_tournament_date": "2026-10-03",
     "eligibility_streak": {
       "current_fail_streak": 0,
