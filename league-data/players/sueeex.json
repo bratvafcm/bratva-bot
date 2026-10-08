@@ -2,9 +2,9 @@
   "player_id": "sueeex",
   "display_name": "sueeex",
   "known_aliases": [],
-  "total_goals": 112,
-  "total_matches": 4,
-  "average_goals": 28,
+  "total_goals": 142,
+  "total_matches": 5,
+  "average_goals": 28.4,
   "matches": [
     {
       "tournament_id": "2026-09-30_the_eagles_egypt",
@@ -53,11 +53,23 @@
       "turns_played": 3,
       "player_display_name": "sueeex",
       "player_id": "sueeex"
+    },
+    {
+      "tournament_id": "2026-10-08_garuda_la_liga",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "GARUDA LA LIGA",
+      "opponent_id": "2026-10-08_garuda_la_liga",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "sueeex",
+      "player_id": "sueeex"
     }
   ],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-10-01_legends_league",
+    "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
     "flagged_for_review": false
   }
 }

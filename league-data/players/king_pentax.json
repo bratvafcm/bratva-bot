@@ -3,8 +3,8 @@
   "display_name": "King_Pentax",
   "known_aliases": [],
   "total_goals": 83,
-  "total_matches": 4,
-  "average_goals": 20.8,
+  "total_matches": 5,
+  "average_goals": 16.6,
   "matches": [
     {
       "tournament_id": "2026-09-25_garuda_indonesia",
@@ -53,11 +53,23 @@
       "turns_played": 3,
       "player_display_name": "King_Pentax",
       "player_id": "king_pentax"
+    },
+    {
+      "tournament_id": "2026-10-08_garuda_la_liga",
+      "match_index_in_tournament": 8,
+      "opponent_display_name": "GARUDA LA LIGA",
+      "opponent_id": "2026-10-08_garuda_la_liga",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "King_Pentax",
+      "player_id": "king_pentax"
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-10-01_legends_league",
+    "current_fail_streak": 1,
+    "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
     "flagged_for_review": false
   }
 }

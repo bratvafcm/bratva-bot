@@ -2,8 +2,8 @@
   "player_id": "koustav_007",
   "display_name": "KOUSTAV_007",
   "known_aliases": [],
-  "total_goals": 206,
-  "total_matches": 7,
+  "total_goals": 235,
+  "total_matches": 8,
   "average_goals": 29.4,
   "matches": [
     {
@@ -89,11 +89,23 @@
       "turns_played": 3,
       "player_display_name": "KOUSTAV_007",
       "player_id": "koustav_007"
+    },
+    {
+      "tournament_id": "2026-10-08_garuda_la_liga",
+      "match_index_in_tournament": 2,
+      "opponent_display_name": "GARUDA LA LIGA",
+      "opponent_id": "2026-10-08_garuda_la_liga",
+      "goals_for": 29,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "KOUSTAV_007",
+      "player_id": "koustav_007"
     }
   ],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-10-01_banda_blokhera",
+    "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
     "flagged_for_review": false
   }
 }

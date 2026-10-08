@@ -2,9 +2,9 @@
   "player_id": "саня",
   "display_name": "саня",
   "known_aliases": [],
-  "total_goals": 301,
-  "total_matches": 9,
-  "average_goals": 33.4,
+  "total_goals": 331,
+  "total_matches": 10,
+  "average_goals": 33.1,
   "matches": [
     {
       "tournament_id": "2026-09-25_garuda_indonesia",
@@ -113,11 +113,23 @@
       "turns_played": 3,
       "player_display_name": "саня",
       "player_id": "саня"
+    },
+    {
+      "tournament_id": "2026-10-08_garuda_la_liga",
+      "match_index_in_tournament": 1,
+      "opponent_display_name": "GARUDA LA LIGA",
+      "opponent_id": "2026-10-08_garuda_la_liga",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "саня",
+      "player_id": "саня"
     }
   ],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-10-01_legends_league",
+    "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
     "flagged_for_review": false
   }
 }

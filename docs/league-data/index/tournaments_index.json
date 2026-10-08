@@ -80,9 +80,9 @@
     "result": "win",
     "status": "complete"
   },
-  "2026-10-01_garuda_la_liga": {
-    "date": "2026-10-01",
-    "timestamp": 1790856000000,
+  "2026-10-08_garuda_la_liga": {
+    "date": "2026-10-08",
+    "timestamp": 1791464569000,
     "opponent_league": "GARUDA LA LIGA",
     "our_total_goals": 125,
     "opponent_total_goals": 174,

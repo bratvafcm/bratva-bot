@@ -16,10 +16,10 @@
     "total_goals": 330,
     "total_matches": 10,
     "average_goals": 33,
-    "last_tournament_date": "2026-10-03",
+    "last_tournament_date": "2026-10-08",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_legends_league",
+      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
       "flagged_for_review": false
     }
   },
@@ -64,10 +64,10 @@
     "total_goals": 221,
     "total_matches": 10,
     "average_goals": 22.1,
-    "last_tournament_date": "2026-10-03",
+    "last_tournament_date": "2026-10-08",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_legends_league",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
       "flagged_for_review": false
     }
   },
@@ -184,10 +184,10 @@
     "total_goals": 217,
     "total_matches": 10,
     "average_goals": 21.7,
-    "last_tournament_date": "2026-10-03",
+    "last_tournament_date": "2026-10-08",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_legends_league",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
       "flagged_for_review": false
     }
   },
@@ -319,7 +319,7 @@
     "last_tournament_date": "2026-09-29",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-29_blivion",
       "flagged_for_review": false
     }
   },
@@ -364,10 +364,10 @@
     "total_goals": 235,
     "total_matches": 8,
     "average_goals": 29.4,
-    "last_tournament_date": "2026-10-01",
+    "last_tournament_date": "2026-10-08",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_garuda_la_liga",
+      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
       "flagged_for_review": false
     }
   },
@@ -487,7 +487,7 @@
     "last_tournament_date": "2026-10-02",
     "eligibility_streak": {
       "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-10-01_the_king",
+      "last_evaluated_tournament_id": "2026-10-02_the_king",
       "flagged_for_review": false
     }
   },
@@ -532,10 +532,10 @@
     "total_goals": 331,
     "total_matches": 10,
     "average_goals": 33.1,
-    "last_tournament_date": "2026-10-03",
+    "last_tournament_date": "2026-10-08",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_legends_league",
+      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
       "flagged_for_review": false
     }
   },
@@ -571,7 +571,7 @@
     "last_tournament_date": "2026-09-29",
     "eligibility_streak": {
       "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-29_blivion",
       "flagged_for_review": false
     }
   },
@@ -604,10 +604,10 @@
     "total_goals": 83,
     "total_matches": 5,
     "average_goals": 16.6,
-    "last_tournament_date": "2026-10-03",
+    "last_tournament_date": "2026-10-08",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_legends_league",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
       "flagged_for_review": false
     }
   },
@@ -667,7 +667,7 @@
     "last_tournament_date": "2026-09-29",
     "eligibility_streak": {
       "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-29_blivion",
       "flagged_for_review": false
     }
   },
@@ -679,7 +679,7 @@
     "last_tournament_date": "2026-10-02",
     "eligibility_streak": {
       "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-10-01_the_king",
+      "last_evaluated_tournament_id": "2026-10-02_the_king",
       "flagged_for_review": false
     }
   },
@@ -1339,7 +1339,7 @@
     "last_tournament_date": "2026-09-29",
     "eligibility_streak": {
       "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-29_blivion",
       "flagged_for_review": false
     }
   },
@@ -1348,10 +1348,10 @@
     "total_goals": 105,
     "total_matches": 8,
     "average_goals": 13.1,
-    "last_tournament_date": "2026-10-03",
+    "last_tournament_date": "2026-10-08",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_legends_league",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
       "flagged_for_review": false
     }
   },
@@ -1363,7 +1363,7 @@
     "last_tournament_date": "2026-09-29",
     "eligibility_streak": {
       "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-29_blivion",
       "flagged_for_review": false
     }
   },
@@ -1375,7 +1375,7 @@
     "last_tournament_date": "2026-09-29",
     "eligibility_streak": {
       "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-29_blivion",
       "flagged_for_review": false
     }
   },
@@ -1387,7 +1387,7 @@
     "last_tournament_date": "2026-09-29",
     "eligibility_streak": {
       "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-29_blivion",
       "flagged_for_review": false
     }
   },
@@ -1398,8 +1398,8 @@
     "average_goals": 0,
     "last_tournament_date": "2026-09-29",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-09-29_blivion",
       "flagged_for_review": false
     }
   },
@@ -1411,7 +1411,7 @@
     "last_tournament_date": "2026-09-29",
     "eligibility_streak": {
       "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-09-30_blivion",
+      "last_evaluated_tournament_id": "2026-09-29_blivion",
       "flagged_for_review": false
     }
   },
@@ -1432,10 +1432,10 @@
     "total_goals": 142,
     "total_matches": 5,
     "average_goals": 28.4,
-    "last_tournament_date": "2026-10-03",
+    "last_tournament_date": "2026-10-08",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-01_legends_league",
+      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
       "flagged_for_review": false
     }
   },
@@ -1447,7 +1447,7 @@
     "last_tournament_date": "2026-10-03",
     "eligibility_streak": {
       "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-10-01_legends_league",
+      "last_evaluated_tournament_id": "2026-10-03_legends_league",
       "flagged_for_review": false
     }
   }

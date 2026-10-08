@@ -1,4 +1,4 @@
-﻿import fs from 'fs';
+import fs from 'fs';
 import path from 'path';
 
 const tDir = path.join(process.cwd(), 'docs', 'league-data', 'tournaments');
@@ -67,7 +67,7 @@ for (const [pid, data] of Object.entries(playerMap)) {
     total_matches: totalMatches,
     average_goals: avg,
     matches: matches,
-    eligibility_streak: pIndex[pid]?.eligibility_streak || {
+    eligibility_streak: {
       current_fail_streak: failStreak,
       last_evaluated_tournament_id: matches[matches.length - 1].tournament_id,
       flagged_for_review: failStreak >= 3

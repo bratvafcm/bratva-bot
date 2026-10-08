@@ -697,6 +697,8 @@ function analyzeImagesWithGemini(imageBuffers) {
   return new Promise((resolve, reject) => {
     if (!GEMINI_KEY) return reject(new Error('GEMINI_KEY environment variable is missing'));
 
+    const todayIso = new Date().toISOString().split('T')[0];
+
     const prompt = `You are the master tournament data auditor for EA Sports FC Mobile league "БРАТВА".
 You are analyzing ${imageBuffers.length} screenshot(s).
 
@@ -741,8 +743,8 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
   "tournaments": [
     {
       "status": "LIVE" or "HISTORY",
-      "time_info": "Exact time/date shown on screen, e.g. '2d ago', '2 дня назад', 'منذ يومين', '12 mins ago', or date",
-      "date": "Exact match date in YYYY-MM-DD calculated from screen (reference date today is 2026-10-01, e.g. 2d ago = 2026-09-29)",
+      "time_info": "Exact time/date shown on screen, e.g. '4h ago', '1d ago', '2d ago', '2 дня назад', 'منذ يومين', 'Finished', or exact date if visible",
+      "date": "Exact match date in YYYY-MM-DD. Today's current date is ${todayIso}. If the match screen shows relative time (e.g. '2d ago', 'yesterday'), calculate the date relative to ${todayIso}. If the match just finished today, is live, or has NO older date shown on screen, output '${todayIso}'.",
       "opponent_league": "Opponent Team Name",
       "score_bratva": number,
       "score_opponent": number,
@@ -5477,24 +5479,23 @@ async function notifyVerifiedPlayersDisciplineWarning() {
 
 function parseTournamentDate(aiDate, timeInfo, caption = '') {
   const now = new Date();
-  const texts = [aiDate, timeInfo, caption].filter(Boolean);
+  const todayStr = now.toISOString().split('T')[0];
 
-  for (const t of texts) {
-    const str = String(t).trim();
-    // 1. Matches YYYY-MM-DD
-    const isoMatch = str.match(/\b(202\d)-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/);
-    if (isoMatch) {
-      const dStr = isoMatch[0];
-      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+  // 1. User caption has highest manual override priority
+  if (caption) {
+    const capIso = String(caption).match(/\b(202\d)-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/);
+    if (capIso) {
+      const dStr = capIso[0];
+      const ts = (dStr === todayStr) ? now.getTime() : new Date(dStr + 'T12:00:00Z').getTime();
+      return { dateStr: dStr, timestamp: ts };
     }
-    // 2. Matches DD-MM-YYYY or DD/MM/YYYY
-    const dmyMatch = str.match(/\b(0[1-9]|[12]\d|3[01])[\/\-.](0[1-9]|1[0-2])[\/\-.](202\d)\b/);
-    if (dmyMatch) {
-      const dStr = `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}`;
-      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
-    }
-    // 2.5 Multi-language Relative Hours (e.g. "4h ago", "4 hours ago", "4 ч назад", "منذ 4 ساعات")
-    const hoursMatch = str.match(/(\d+)\s*(?:h|hr|hrs|hour|hours|ч|час|часа|часов|ساعة|ساعات)\s*(?:ago|назад|منذ)?/i);
+  }
+
+  // 2. Direct visual evidence from screen (timeInfo) for relative time
+  const timeStr = String(timeInfo || '').trim();
+  if (timeStr) {
+    // 2.1 Multi-language Relative Hours (e.g. "4h ago", "4 hours ago", "4 ч назад", "منذ 4 ساعات")
+    const hoursMatch = timeStr.match(/(\d+)\s*(?:h|hr|hrs|hour|hours|ч|час|часа|часов|ساعة|ساعات)\s*(?:ago|назад|منذ)?/i);
     if (hoursMatch) {
       const hoursAgo = parseInt(hoursMatch[1], 10);
       if (hoursAgo >= 0 && hoursAgo <= 72) {
@@ -5503,8 +5504,8 @@ function parseTournamentDate(aiDate, timeInfo, caption = '') {
         return { dateStr: dStr, timestamp: d.getTime() };
       }
     }
-    // 3. Multi-language Relative Days (e.g. "2d ago", "2 days ago", "2 дн назад", "2 дня назад", "منذ 2 يوم")
-    const daysMatch = str.match(/(\d+)\s*(?:d|day|days|д|дн|дня|дней|يوم|أيام)\s*(?:ago|назад|منذ)?/i);
+    // 2.2 Multi-language Relative Days (e.g. "2d ago", "2 days ago", "2 дн назад", "منذ 2 يوم")
+    const daysMatch = timeStr.match(/(\d+)\s*(?:d|day|days|д|дн|дня|дней|يوم|أيام)\s*(?:ago|назад|منذ)?/i);
     if (daysMatch) {
       const daysAgo = parseInt(daysMatch[1], 10);
       if (daysAgo >= 1 && daysAgo <= 60) {
@@ -5514,18 +5515,38 @@ function parseTournamentDate(aiDate, timeInfo, caption = '') {
       }
     }
     // Arabic "منذ يومين" (2 days ago)
-    if (/يومين/i.test(str)) {
+    if (/يومين/i.test(timeStr)) {
       const d = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
       const dStr = d.toISOString().split('T')[0];
       return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
     }
     // Yesterday / вчера / أمس
-    if (/\b(?:yesterday|вчера|أمس|امس)\b/i.test(str)) {
+    if (/\b(?:yesterday|вчера|أمس|امس)\b/i.test(timeStr)) {
       const d = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       const dStr = d.toISOString().split('T')[0];
       return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
     }
-    // 4. Matches "28 Sep" or "Sep 28"
+  }
+
+  // 3. Check ISO dates or month patterns in aiDate, timeInfo, caption
+  const texts = [aiDate, timeInfo, caption].filter(Boolean);
+  for (const t of texts) {
+    const str = String(t).trim();
+    // YYYY-MM-DD
+    const isoMatch = str.match(/\b(202\d)-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/);
+    if (isoMatch) {
+      const dStr = isoMatch[0];
+      const ts = (dStr === todayStr) ? now.getTime() : new Date(dStr + 'T12:00:00Z').getTime();
+      return { dateStr: dStr, timestamp: ts };
+    }
+    // DD-MM-YYYY or DD/MM/YYYY
+    const dmyMatch = str.match(/\b(0[1-9]|[12]\d|3[01])[\/\-.](0[1-9]|1[0-2])[\/\-.](202\d)\b/);
+    if (dmyMatch) {
+      const dStr = `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}`;
+      const ts = (dStr === todayStr) ? now.getTime() : new Date(dStr + 'T12:00:00Z').getTime();
+      return { dateStr: dStr, timestamp: ts };
+    }
+    // Month names (e.g. 28 Sep)
     const monthNames = { jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06', jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12' };
     const monthMatch1 = str.match(/\b(0[1-9]|[12]\d|3[01])\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/i);
     if (monthMatch1) {
@@ -5533,7 +5554,8 @@ function parseTournamentDate(aiDate, timeInfo, caption = '') {
       const month = monthNames[monthMatch1[2].toLowerCase().slice(0, 3)];
       const year = now.getFullYear();
       const dStr = `${year}-${month}-${day}`;
-      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+      const ts = (dStr === todayStr) ? now.getTime() : new Date(dStr + 'T12:00:00Z').getTime();
+      return { dateStr: dStr, timestamp: ts };
     }
     const monthMatch2 = str.match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+(0[1-9]|[12]\d|3[01])\b/i);
     if (monthMatch2) {
@@ -5541,12 +5563,13 @@ function parseTournamentDate(aiDate, timeInfo, caption = '') {
       const day = monthMatch2[2].padStart(2, '0');
       const year = now.getFullYear();
       const dStr = `${year}-${month}-${day}`;
-      return { dateStr: dStr, timestamp: new Date(dStr + 'T12:00:00Z').getTime() };
+      const ts = (dStr === todayStr) ? now.getTime() : new Date(dStr + 'T12:00:00Z').getTime();
+      return { dateStr: dStr, timestamp: ts };
     }
   }
 
-  const defaultDStr = now.toISOString().split('T')[0];
-  return { dateStr: defaultDStr, timestamp: now.getTime() };
+  // Default: newly completed or live match uploaded today
+  return { dateStr: todayStr, timestamp: now.getTime() };
 }
 
 /**
@@ -5701,6 +5724,24 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
   }
 
   let dateStr = duplicateId ? (duplicateMeta?.date || duplicateId.slice(0, 10)) : dateInfo.dateStr;
+
+  // Chronology Safety Guard: newly uploaded finished matches must never be backdated behind latest tournament
+  const hasExplicitPastIndicator = (aiResult.time_info && /(?:d|day|days|д|дн|дня|дней|يوم|أيام|ago|назад|منذ)/i.test(aiResult.time_info)) ||
+                                   (aiResult.caption && /\b202\d-\d{2}-\d{2}\b/.test(aiResult.caption));
+  if (!duplicateId && !hasExplicitPastIndicator) {
+    const todayStr = new Date().toISOString().split('T')[0];
+    let latestIndexedDate = '';
+    for (const meta of Object.values(tIndexObj)) {
+      if (meta?.date && meta.date > latestIndexedDate) latestIndexedDate = meta.date;
+    }
+    if (latestIndexedDate && dateStr < latestIndexedDate) {
+      console.warn(`[SAFETY] Parsed date ${dateStr} is older than latest tournament ${latestIndexedDate} without relative past indicators. Auto-correcting to today: ${todayStr}`);
+      dateStr = todayStr;
+      dateInfo.dateStr = todayStr;
+      dateInfo.timestamp = Date.now();
+    }
+  }
+
   let baseTId = duplicateId || `${dateStr}_${oppSlug}`;
   let tId = baseTId;
 

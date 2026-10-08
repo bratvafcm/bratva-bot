@@ -3,8 +3,8 @@
   "display_name": "Mike",
   "known_aliases": [],
   "total_goals": 217,
-  "total_matches": 9,
-  "average_goals": 24.1,
+  "total_matches": 10,
+  "average_goals": 21.7,
   "matches": [
     {
       "tournament_id": "2026-09-25_garuda_indonesia",
@@ -113,11 +113,23 @@
       "turns_played": 3,
       "player_display_name": "Mike",
       "player_id": "mike"
+    },
+    {
+      "tournament_id": "2026-10-08_garuda_la_liga",
+      "match_index_in_tournament": 7,
+      "opponent_display_name": "GARUDA LA LIGA",
+      "opponent_id": "2026-10-08_garuda_la_liga",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Mike",
+      "player_id": "mike"
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 0,
-    "last_evaluated_tournament_id": "2026-10-01_legends_league",
+    "current_fail_streak": 1,
+    "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
     "flagged_for_review": false
   }
 }
