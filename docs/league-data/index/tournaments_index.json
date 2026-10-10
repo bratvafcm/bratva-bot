@@ -88,5 +88,14 @@
     "opponent_total_goals": 174,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-10-10_dominators": {
+    "date": "2026-10-10",
+    "timestamp": 1791646513780,
+    "opponent_league": "DOMINATORS",
+    "our_total_goals": 108,
+    "opponent_total_goals": 107,
+    "result": "win",
+    "status": "complete"
   }
 }
