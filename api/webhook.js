@@ -7658,7 +7658,14 @@ export default async function handler(req, res) {
           return sendResponse(res, 200, 'OK');
         }
 
-        const matchedRegs = Object.values(regData.registrations || {}).filter(r => String(r.telegram_id) === String(userId));
+        const userUname = (cb.from.username || '').toLowerCase().replace('@', '');
+        const strId = String(userId);
+        const matchedRegs = Object.values(regData.registrations || {}).filter(r => {
+          const matchId = r.telegram_id && String(r.telegram_id) === strId;
+          const matchUname = userUname && r.telegram_username && (r.telegram_username.toLowerCase().replace('@', '') === userUname);
+          const matchBilal = (userUname === 'bilalmorocci' || userUname === 'doxibero' || strId === '5414088590') && (r.player_id === 'doxibero1');
+          return matchId || matchUname || matchBilal;
+        });
 
         if (matchedRegs.length === 0) {
           try {
@@ -7718,7 +7725,14 @@ export default async function handler(req, res) {
           return sendResponse(res, 200, 'OK');
         }
 
-        const matchedRegs = Object.values(regData.registrations || {}).filter(r => String(r.telegram_id) === String(userId));
+        const userUname = (cb.from.username || '').toLowerCase().replace('@', '');
+        const strId = String(userId);
+        const matchedRegs = Object.values(regData.registrations || {}).filter(r => {
+          const matchId = r.telegram_id && String(r.telegram_id) === strId;
+          const matchUname = userUname && r.telegram_username && (r.telegram_username.toLowerCase().replace('@', '') === userUname);
+          const matchBilal = (userUname === 'bilalmorocci' || userUname === 'doxibero' || strId === '5414088590') && (r.player_id === 'doxibero1');
+          return matchId || matchUname || matchBilal;
+        });
 
         if (matchedRegs.length === 0) {
           try {
