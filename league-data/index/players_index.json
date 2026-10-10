@@ -23,6 +23,18 @@
       "flagged_for_review": false
     }
   },
+  "doxibero": {
+    "display_name": "DOXIBÉRO",
+    "total_goals": 0,
+    "total_matches": 0,
+    "average_goals": 0,
+    "last_tournament_date": null,
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": null,
+      "flagged_for_review": false
+    }
+  },
   "messi": {
     "display_name": "MESSI",
     "total_goals": 0,

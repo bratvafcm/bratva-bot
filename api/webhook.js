@@ -546,7 +546,7 @@ async function syncAllMemberTags(targetChatId) {
   let failed = 0;
 
   for (const r of regs) {
-    if (!r.telegram_id) continue;
+    if (!r.telegram_id || r.is_secondary) continue;
     const tagName = sanitizeMemberTag(r.in_game_name || r.display_name || r.player_id);
     if (!tagName) continue;
 
@@ -1368,7 +1368,7 @@ function cleanRegisteredData(data) {
       const u = (reg.telegram_username || '').toLowerCase();
       const ign = (reg.in_game_name || reg.display_name || '').toLowerCase();
       const pid = (key || '').toLowerCase();
-      if (u === 'bilalmorocci' || ign === 'test' || pid === 'test' || pid === 'member_test' || pid === 'doxibro' || pid === 'doxibero' || pid === 'sanya') {
+      if (u === 'bilalmorocci' || ign === 'test' || pid === 'test' || pid === 'member_test' || pid === 'doxibro' || pid === 'sanya') {
         delete data.registrations[key];
       }
     }
@@ -8387,8 +8387,10 @@ export default async function handler(req, res) {
               const regData = await getRegisteredPlayers();
               for (const member of humanMembers) {
                 const reg = Object.values(regData.registrations || {}).find(r =>
-                  String(r.telegram_id) === String(member.id) ||
-                  (member.username && r.telegram_username && r.telegram_username.toLowerCase() === member.username.toLowerCase())
+                  !r.is_secondary && (
+                    String(r.telegram_id) === String(member.id) ||
+                    (member.username && r.telegram_username && r.telegram_username.toLowerCase() === member.username.toLowerCase())
+                  )
                 );
                 if (reg) {
                   const tagName = sanitizeMemberTag(reg.in_game_name || reg.display_name);
@@ -8436,8 +8438,10 @@ export default async function handler(req, res) {
           try {
             const regData = await getRegisteredPlayers();
             const reg = Object.values(regData.registrations || {}).find(r =>
-              String(r.telegram_id) === String(userId) ||
-              (username && r.telegram_username && r.telegram_username.toLowerCase() === username.toLowerCase())
+              !r.is_secondary && (
+                String(r.telegram_id) === String(userId) ||
+                (username && r.telegram_username && r.telegram_username.toLowerCase() === username.toLowerCase())
+              )
             );
             if (reg) {
               const tagName = sanitizeMemberTag(reg.in_game_name || reg.display_name);
