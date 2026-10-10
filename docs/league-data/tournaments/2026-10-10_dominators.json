@@ -1,0 +1,47 @@
+{
+  "id": "2026-10-10_dominators",
+  "tournament_id": "2026-10-10_dominators",
+  "date": "2026-10-10",
+  "timestamp": 1791646513780,
+  "opponent_league": "DOMINATORS",
+  "our_total_goals": 108,
+  "opponent_total_goals": 107,
+  "result": "win",
+  "status": "complete",
+  "total_turns_played": 12,
+  "max_possible_turns": 12,
+  "matches": [
+    {
+      "board_order": 1,
+      "player_id": "саня",
+      "player_display_name": "саня",
+      "ovr": 128,
+      "goals_for": 37,
+      "turns_played": 3
+    },
+    {
+      "board_order": 2,
+      "player_id": "koustav_007",
+      "player_display_name": "KOUSTAV_007",
+      "ovr": 126,
+      "goals_for": 29,
+      "turns_played": 3
+    },
+    {
+      "board_order": 3,
+      "player_id": "sueeex",
+      "player_display_name": "sueeex",
+      "ovr": 126,
+      "goals_for": 30,
+      "turns_played": 3
+    },
+    {
+      "board_order": 4,
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
+      "ovr": 124,
+      "goals_for": 12,
+      "turns_played": 3
+    }
+  ]
+}
