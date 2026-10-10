@@ -13,13 +13,13 @@
   },
   "doxibero1": {
     "display_name": "DOXIBERO1",
-    "total_goals": 330,
-    "total_matches": 10,
-    "average_goals": 33,
-    "last_tournament_date": "2026-10-08",
+    "total_goals": 342,
+    "total_matches": 11,
+    "average_goals": 31.1,
+    "last_tournament_date": "2026-10-10",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
+      "last_evaluated_tournament_id": "2026-10-10_dominators",
       "flagged_for_review": false
     }
   },
@@ -361,13 +361,13 @@
   },
   "koustav_007": {
     "display_name": "KOUSTAV_007",
-    "total_goals": 235,
-    "total_matches": 8,
-    "average_goals": 29.4,
-    "last_tournament_date": "2026-10-08",
+    "total_goals": 264,
+    "total_matches": 9,
+    "average_goals": 29.3,
+    "last_tournament_date": "2026-10-10",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
+      "last_evaluated_tournament_id": "2026-10-10_dominators",
       "flagged_for_review": false
     }
   },
@@ -529,13 +529,13 @@
   },
   "саня": {
     "display_name": "саня",
-    "total_goals": 331,
-    "total_matches": 10,
-    "average_goals": 33.1,
-    "last_tournament_date": "2026-10-08",
+    "total_goals": 368,
+    "total_matches": 11,
+    "average_goals": 33.5,
+    "last_tournament_date": "2026-10-10",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
+      "last_evaluated_tournament_id": "2026-10-10_dominators",
       "flagged_for_review": false
     }
   },
@@ -1429,13 +1429,13 @@
   },
   "sueeex": {
     "display_name": "sueeex",
-    "total_goals": 142,
-    "total_matches": 5,
-    "average_goals": 28.4,
-    "last_tournament_date": "2026-10-08",
+    "total_goals": 172,
+    "total_matches": 6,
+    "average_goals": 28.7,
+    "last_tournament_date": "2026-10-10",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
+      "last_evaluated_tournament_id": "2026-10-10_dominators",
       "flagged_for_review": false
     }
   },
