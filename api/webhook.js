@@ -1299,9 +1299,17 @@ function cleanRegisteredData(data) {
       const u = (reg.telegram_username || '').toLowerCase();
       const ign = (reg.in_game_name || reg.display_name || '').toLowerCase();
       const pid = (key || '').toLowerCase();
-      if (u === 'bilalmorocci' || ign === 'test' || pid === 'test' || pid === 'member_test') {
+      if (u === 'bilalmorocci' || ign === 'test' || pid === 'test' || pid === 'member_test' || pid === 'doxibro' || pid === 'doxibero' || pid === 'sanya') {
         delete data.registrations[key];
       }
+    }
+  }
+  if (data && data.current_checkin) {
+    if (Array.isArray(data.current_checkin.ready)) {
+      data.current_checkin.ready = data.current_checkin.ready.filter(id => id !== 'doxibro' && id !== 'doxibero');
+    }
+    if (Array.isArray(data.current_checkin.away)) {
+      data.current_checkin.away = data.current_checkin.away.filter(id => id !== 'doxibro' && id !== 'doxibero');
     }
   }
   return data;
@@ -7678,7 +7686,11 @@ export default async function handler(req, res) {
           return sendResponse(res, 200, 'OK');
         }
 
-        for (const reg of matchedRegs) {
+        // Deduplicate: if multiple registrations matched (e.g. aliases), keep only 1 canonical player_id
+        const primaryReg = matchedRegs.find(r => r.player_id === 'doxibero1') || matchedRegs[0];
+        const activeRegs = primaryReg ? [primaryReg] : matchedRegs;
+
+        for (const reg of activeRegs) {
           currentCheckIn.ready.add(reg.player_id);
           currentCheckIn.away.delete(reg.player_id);
         }
@@ -7686,7 +7698,7 @@ export default async function handler(req, res) {
         if (!regData.current_checkin) regData.current_checkin = { ready: [], away: [] };
         regData.current_checkin.ready = Array.from(currentCheckIn.ready);
         regData.current_checkin.away = Array.from(currentCheckIn.away);
-        const readyNamesList = matchedRegs.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
+        const readyNamesList = activeRegs.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
         await saveRegisteredPlayersRaw(regData, `CheckIn: ${readyNamesList} is Ready`);
 
         try {
@@ -7745,7 +7757,11 @@ export default async function handler(req, res) {
           return sendResponse(res, 200, 'OK');
         }
 
-        for (const reg of matchedRegs) {
+        // Deduplicate: if multiple registrations matched (e.g. aliases), keep only 1 canonical player_id
+        const primaryRegAway = matchedRegs.find(r => r.player_id === 'doxibero1') || matchedRegs[0];
+        const activeRegsAway = primaryRegAway ? [primaryRegAway] : matchedRegs;
+
+        for (const reg of activeRegsAway) {
           currentCheckIn.away.add(reg.player_id);
           currentCheckIn.ready.delete(reg.player_id);
         }
@@ -7753,7 +7769,7 @@ export default async function handler(req, res) {
         if (!regData.current_checkin) regData.current_checkin = { ready: [], away: [] };
         regData.current_checkin.ready = Array.from(currentCheckIn.ready);
         regData.current_checkin.away = Array.from(currentCheckIn.away);
-        const awayNamesList = matchedRegs.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
+        const awayNamesList = activeRegsAway.map(r => r.display_name).filter((v, i, a) => a.indexOf(v) === i).join(' & ');
         await saveRegisteredPlayersRaw(regData, `CheckIn: ${awayNamesList} is Away`);
 
         try {

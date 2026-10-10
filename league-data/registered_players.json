@@ -14,46 +14,6 @@
       "is_new_member": false,
       "registered_at": "2026-09-08T20:00:00.000Z"
     },
-    "doxibro": {
-      "player_id": "doxibro",
-      "display_name": "DOXIBÉRO",
-      "in_game_name": "DOXIBÉRO",
-      "uid": null,
-      "telegram_id": 5414088590,
-      "telegram_username": "DOXIBERO",
-      "telegram_name": "Bilal",
-      "is_admin": true,
-      "role": "Admin",
-      "is_new_member": false,
-      "registered_at": "2026-09-08T20:00:00.000Z"
-    },
-    "doxibero": {
-      "player_id": "doxibero",
-      "display_name": "DOXIBÉRO",
-      "in_game_name": "DOXIBÉRO",
-      "uid": null,
-      "telegram_id": 5414088590,
-      "telegram_username": "DOXIBERO",
-      "telegram_name": "Bilal",
-      "is_admin": true,
-      "role": "Admin",
-      "is_new_member": false,
-      "registered_at": "2026-09-08T20:00:00.000Z"
-    },
-    "sanya": {
-      "player_id": "sanya",
-      "display_name": "саня",
-      "in_game_name": "саня",
-      "uid": null,
-      "telegram_id": null,
-      "telegram_username": null,
-      "telegram_name": "саня",
-      "is_admin": true,
-      "is_owner": true,
-      "role": "Owner",
-      "is_new_member": false,
-      "registered_at": "2026-08-01T00:00:00.000Z"
-    },
     "саня": {
       "player_id": "саня",
       "display_name": "саня",
