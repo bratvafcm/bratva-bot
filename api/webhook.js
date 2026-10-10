@@ -510,14 +510,14 @@ function sanitizeMemberTag(name) {
 const appliedTagsCache = new Map(); // `${chatId}_${userId}` -> tag
 
 async function applyMemberTag(chatId, userId, rawTag) {
-  if (!chatId || !userId || !rawTag) return false;
-  const tag = sanitizeMemberTag(rawTag);
-  if (!tag) return false;
+  const res = await applyMemberTagDetailed(chatId, userId, rawTag);
+  return res.ok;
+}
 
-  const cacheKey = `${chatId}_${userId}`;
-  if (appliedTagsCache.get(cacheKey) === tag) {
-    return true; // Already applied in this runtime
-  }
+async function applyMemberTagDetailed(chatId, userId, rawTag) {
+  if (!chatId || !userId || !rawTag) return { ok: false, error: 'Missing parameters' };
+  const tag = sanitizeMemberTag(rawTag);
+  if (!tag) return { ok: false, error: 'Invalid tag format' };
 
   try {
     const res = await telegramRequest('setChatMemberTag', {
@@ -526,38 +526,68 @@ async function applyMemberTag(chatId, userId, rawTag) {
       tag: tag
     });
     if (res && res.ok) {
-      appliedTagsCache.set(cacheKey, tag);
+      appliedTagsCache.set(`${chatId}_${userId}`, tag);
       console.log(`[MemberTag] Set tag "${tag}" for user ${userId} in chat ${chatId}`);
-      return true;
+      return { ok: true, tag };
     } else {
-      console.warn(`[MemberTag] Failed to set tag "${tag}" for user ${userId} in ${chatId}:`, res?.description || 'Error');
+      const desc = res?.description || 'Telegram API Error';
+      console.warn(`[MemberTag] Failed to set tag "${tag}" for user ${userId} in ${chatId}:`, desc);
+      return { ok: false, error: desc, tag };
     }
   } catch (err) {
     console.warn(`[MemberTag] Error setting tag for user ${userId}:`, err.message);
+    return { ok: false, error: err.message, tag };
   }
-  return false;
 }
 
 async function syncAllMemberTags(targetChatId) {
-  if (!targetChatId) return { success: 0, failed: 0 };
+  if (!targetChatId) return { success: 0, failed: 0, tagged: [], errors: ['No target chatId found'] };
   const regData = await getRegisteredPlayers();
   const regs = Object.values(regData.registrations || {});
   let success = 0;
   let failed = 0;
+  const tagged = [];
+  const errors = [];
 
   for (const r of regs) {
     if (!r.telegram_id || r.is_secondary) continue;
     const tagName = sanitizeMemberTag(r.in_game_name || r.display_name || r.player_id);
     if (!tagName) continue;
 
-    const ok = await applyMemberTag(targetChatId, r.telegram_id, tagName);
-    if (ok) {
+    const res = await applyMemberTagDetailed(targetChatId, r.telegram_id, tagName);
+    if (res.ok) {
       success++;
+      tagged.push(`${r.display_name} -> [${tagName}]`);
     } else {
       failed++;
+      if (res.error && !errors.includes(res.error)) {
+        errors.push(res.error);
+      }
     }
   }
-  return { success, failed };
+  return { success, failed, tagged, errors };
+}
+
+function formatSyncTagsReport(result) {
+  let reply = `🏷️ *MEMBER TAGS SYNC REPORT:* ⚽\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `✅ *Successfully Tagged (${result.success}):*\n`;
+
+  if (result.tagged && result.tagged.length > 0) {
+    reply += result.tagged.map(t => `• *${t}*`).join('\n') + '\n';
+  } else {
+    reply += `• _None tagged yet_\n`;
+  }
+
+  if (result.failed > 0) {
+    reply += `\n⚠️ *Failed/Skipped (${result.failed}):*\n` +
+      result.errors.map(e => `• \`${e}\``).join('\n') + '\n' +
+      `💡 _Make sure the bot has "Manage Tags" (إدارة الوسوم) Admin permission in the group!_\n`;
+  }
+
+  reply += `━━━━━━━━━━━━━━━━━━━━\n` +
+    `ℹ️ *Note:* Only members who have registered in @BratvaFCMBot can be tagged. When other members join & register, they receive their tag automatically!`;
+  return reply;
 }
 
 let inMemoryLatestTournament = null;
@@ -8193,12 +8223,7 @@ export default async function handler(req, res) {
           text: '⏳ Syncing member tags in group...'
         });
         const result = await syncAllMemberTags(targetGroupId);
-        const reply = `🏷️ *Member Tags Sync Finished!*\n` +
-          `━━━━━━━━━━━━━━━━━━━━\n` +
-          `✅ *Success:* ${result.success} members tagged with in-game names in group.\n` +
-          (result.failed > 0 ? `⚠️ *Failed/Skipped:* ${result.failed} (check bot "Manage Tags" admin right in group).\n` : '') +
-          `━━━━━━━━━━━━━━━━━━━━\n` +
-          `📌 All registered members now display their official in-game name tag!`;
+        const reply = formatSyncTagsReport(result);
         await sendTelegramMessage(chatId, reply);
         return sendResponse(res, 200, 'Tags synced via callback');
       }
@@ -8617,12 +8642,7 @@ export default async function handler(req, res) {
         }
         cachedLinkedGroupId = chatId;
         const result = await syncAllMemberTags(chatId);
-        const reply = `🏷️ *Member Tags Sync Finished!*\n` +
-          `━━━━━━━━━━━━━━━━━━━━\n` +
-          `✅ *Success:* ${result.success} members tagged with in-game names.\n` +
-          (result.failed > 0 ? `⚠️ *Failed/Skipped:* ${result.failed} (check bot "Manage Tags" admin right in group).\n` : '') +
-          `━━━━━━━━━━━━━━━━━━━━\n` +
-          `📌 All registered members will now display their official in-game name tag in this group!`;
+        const reply = formatSyncTagsReport(result);
         await sendTelegramMessage(chatId, reply);
         return sendResponse(res, 200, 'Group synctags executed');
       }
@@ -9610,12 +9630,7 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'No linked group');
       }
       const result = await syncAllMemberTags(targetGroupId);
-      const reply = `🏷️ *Member Tags Sync Finished!*\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n` +
-        `✅ *Success:* ${result.success} members tagged in group.\n` +
-        (result.failed > 0 ? `⚠️ *Failed/Skipped:* ${result.failed} (check bot "Manage Tags" admin right in group).\n` : '') +
-        `━━━━━━━━━━━━━━━━━━━━\n` +
-        `📌 All registered members now have their official in-game name tag in the group!`;
+      const reply = formatSyncTagsReport(result);
       await sendTelegramMessage(chatId, reply);
       return sendResponse(res, 200, 'Private synctags executed');
     }
