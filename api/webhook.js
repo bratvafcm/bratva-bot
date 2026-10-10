@@ -498,6 +498,68 @@ function formatPlayerTag(identifier, regData = null) {
   return `*${ign}*`;
 }
 
+function sanitizeMemberTag(name) {
+  if (!name) return '';
+  // Strip emojis, symbols, trim, limit to 16 chars (Telegram API constraint for member tags)
+  return String(name)
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}]/gu, '')
+    .trim()
+    .slice(0, 16);
+}
+
+const appliedTagsCache = new Map(); // `${chatId}_${userId}` -> tag
+
+async function applyMemberTag(chatId, userId, rawTag) {
+  if (!chatId || !userId || !rawTag) return false;
+  const tag = sanitizeMemberTag(rawTag);
+  if (!tag) return false;
+
+  const cacheKey = `${chatId}_${userId}`;
+  if (appliedTagsCache.get(cacheKey) === tag) {
+    return true; // Already applied in this runtime
+  }
+
+  try {
+    const res = await telegramRequest('setChatMemberTag', {
+      chat_id: chatId,
+      user_id: userId,
+      tag: tag
+    });
+    if (res && res.ok) {
+      appliedTagsCache.set(cacheKey, tag);
+      console.log(`[MemberTag] Set tag "${tag}" for user ${userId} in chat ${chatId}`);
+      return true;
+    } else {
+      console.warn(`[MemberTag] Failed to set tag "${tag}" for user ${userId} in ${chatId}:`, res?.description || 'Error');
+    }
+  } catch (err) {
+    console.warn(`[MemberTag] Error setting tag for user ${userId}:`, err.message);
+  }
+  return false;
+}
+
+async function syncAllMemberTags(targetChatId) {
+  if (!targetChatId) return { success: 0, failed: 0 };
+  const regData = await getRegisteredPlayers();
+  const regs = Object.values(regData.registrations || {});
+  let success = 0;
+  let failed = 0;
+
+  for (const r of regs) {
+    if (!r.telegram_id) continue;
+    const tagName = sanitizeMemberTag(r.in_game_name || r.display_name || r.player_id);
+    if (!tagName) continue;
+
+    const ok = await applyMemberTag(targetChatId, r.telegram_id, tagName);
+    if (ok) {
+      success++;
+    } else {
+      failed++;
+    }
+  }
+  return { success, failed };
+}
+
 let inMemoryLatestTournament = null;
 let lastLatestTournamentFetchTime = 0;
 const tournamentCache = new Map(); // id -> tournamentData
@@ -1085,6 +1147,10 @@ function getAdminPanelKeyboard(currentLang = 'ru') {
                     currentLang === 'es' ? '🔄 Sincronizar Plantilla' :
                     currentLang === 'en' ? '🔄 Sync Roster' : '🔄 Синхронизация состава';
 
+  const tagsLabel = currentLang === 'ar' ? '🏷️ مزامنة أوسمة الأعضاء (Tags)' :
+                    currentLang === 'es' ? '🏷️ Sincronizar Tags' :
+                    currentLang === 'en' ? '🏷️ Sync Member Tags' : '🏷️ Обновить теги участников';
+
   const menuLabel = currentLang === 'ar' ? '📋 العودة للقائمة الرئيسية' :
                     currentLang === 'es' ? '📋 Volver al Menú Principal' :
                     currentLang === 'en' ? '📋 Back to Main Menu' : '📋 Главное меню';
@@ -1112,6 +1178,9 @@ function getAdminPanelKeyboard(currentLang = 'ru') {
       [
         { text: auditLabel, callback_data: 'cmd_pending' },
         { text: syncLabel, callback_data: 'cmd_sync_roster' }
+      ],
+      [
+        { text: tagsLabel, callback_data: 'cmd_sync_tags' }
       ],
       [
         { text: menuLabel, callback_data: 'cmd_menu' }
@@ -1436,7 +1505,24 @@ async function savePlayerRegistration(reg) {
   };
 
   const commitMsg = `Player Verified: ${reg.display_name}${reg.uid ? ` (UID: ${reg.uid})` : ''} -> TG @${reg.telegram_username || reg.telegram_id}`;
-  return await saveRegisteredPlayersRaw(current, commitMsg);
+  const saved = await saveRegisteredPlayersRaw(current, commitMsg);
+
+  // Auto-apply Member Tag in linked group!
+  if (reg.telegram_id) {
+    try {
+      const targetGroupId = await getLinkedGroupId();
+      if (targetGroupId) {
+        const tagName = sanitizeMemberTag(reg.in_game_name || reg.display_name);
+        if (tagName) {
+          await applyMemberTag(targetGroupId, reg.telegram_id, tagName);
+        }
+      }
+    } catch (e) {
+      console.warn('Auto MemberTag assignment on registration failed:', e.message);
+    }
+  }
+
+  return saved;
 }
 
 async function setPendingUid(telegramId, data) {
@@ -8083,6 +8169,40 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
+      if (data === 'cmd_sync_tags') {
+        const isAdm = await isUserAdmin(cb.from?.id, cb.from?.username);
+        if (!isAdm) {
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: '⚠️ Admin access required.',
+            show_alert: true
+          });
+          return sendResponse(res, 200, 'Unauthorized');
+        }
+        const targetGroupId = await getLinkedGroupId();
+        if (!targetGroupId) {
+          await telegramRequest('answerCallbackQuery', {
+            callback_query_id: cb.id,
+            text: '⚠️ No linked group found! Run /synctags directly inside the group chat.',
+            show_alert: true
+          });
+          return sendResponse(res, 200, 'No linked group');
+        }
+        await telegramRequest('answerCallbackQuery', {
+          callback_query_id: cb.id,
+          text: '⏳ Syncing member tags in group...'
+        });
+        const result = await syncAllMemberTags(targetGroupId);
+        const reply = `🏷️ *Member Tags Sync Finished!*\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `✅ *Success:* ${result.success} members tagged with in-game names in group.\n` +
+          (result.failed > 0 ? `⚠️ *Failed/Skipped:* ${result.failed} (check bot "Manage Tags" admin right in group).\n` : '') +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `📌 All registered members now display their official in-game name tag!`;
+        await sendTelegramMessage(chatId, reply);
+        return sendResponse(res, 200, 'Tags synced via callback');
+      }
+
       if (data === 'cmd_mystats') {
         const userId = cb.from ? cb.from.id : chatId;
         const isTester = isSandboxTester(userId, cb.from?.username);
@@ -8258,8 +8378,26 @@ export default async function handler(req, res) {
     if (!isPrivate) {
       // 1. Automatic Group Onboarding: When new members join the group, greet them with direct bot registration link!
       if (message.new_chat_members && Array.isArray(message.new_chat_members) && message.new_chat_members.length > 0) {
+        cachedLinkedGroupId = chatId;
         const humanMembers = message.new_chat_members.filter(u => !u.is_bot);
         if (humanMembers.length > 0) {
+          // Auto-apply Member Tag if member is already registered in bot
+          (async () => {
+            try {
+              const regData = await getRegisteredPlayers();
+              for (const member of humanMembers) {
+                const reg = Object.values(regData.registrations || {}).find(r =>
+                  String(r.telegram_id) === String(member.id) ||
+                  (member.username && r.telegram_username && r.telegram_username.toLowerCase() === member.username.toLowerCase())
+                );
+                if (reg) {
+                  const tagName = sanitizeMemberTag(reg.in_game_name || reg.display_name);
+                  if (tagName) await applyMemberTag(chatId, member.id, tagName);
+                }
+              }
+            } catch (e) {}
+          })();
+
           const names = humanMembers.map(u => bidiIsolate(u.first_name || u.username || 'Member')).join(', ');
           const welcomeGroupMsg = `👋 *Добро пожаловать / Welcome ${names} to БРАТВА FCM!* ⚜️\n` +
             `━━━━━━━━━━━━━━━━━━━━\n` +
@@ -8289,6 +8427,24 @@ export default async function handler(req, res) {
           await sendTelegramMessage(chatId, welcomeGroupMsg, groupKeys);
           return sendResponse(res, 200, 'Group new members welcomed with bot link');
         }
+      }
+
+      // Auto-tag on message: if a registered member speaks in the group, ensure their tag is set
+      cachedLinkedGroupId = chatId;
+      if (message.from && !message.from.is_bot) {
+        (async () => {
+          try {
+            const regData = await getRegisteredPlayers();
+            const reg = Object.values(regData.registrations || {}).find(r =>
+              String(r.telegram_id) === String(userId) ||
+              (username && r.telegram_username && r.telegram_username.toLowerCase() === username.toLowerCase())
+            );
+            if (reg) {
+              const tagName = sanitizeMemberTag(reg.in_game_name || reg.display_name);
+              if (tagName) await applyMemberTag(chatId, userId, tagName);
+            }
+          } catch (e) {}
+        })();
       }
 
       // If it's NOT a command (casual chatting between members), stay quiet!
@@ -8446,6 +8602,25 @@ export default async function handler(req, res) {
         };
         await sendTelegramMessage(chatId, helpMsg, helpKeys);
         return sendResponse(res, 200, 'Group help sent');
+      }
+
+      // 13. Sync Member Tags (Admin only)
+      if (cmd === '/synctags' || cmd === '/sync_tags' || cmd === '/tags' || cmd === '/settags') {
+        const isAdminUser = await isUserAdmin(userId, username);
+        if (!isAdminUser) {
+          await sendTelegramMessage(chatId, '⚠️ *Only admins can run /synctags!*');
+          return sendResponse(res, 200, 'Unauthorized synctags');
+        }
+        cachedLinkedGroupId = chatId;
+        const result = await syncAllMemberTags(chatId);
+        const reply = `🏷️ *Member Tags Sync Finished!*\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `✅ *Success:* ${result.success} members tagged with in-game names.\n` +
+          (result.failed > 0 ? `⚠️ *Failed/Skipped:* ${result.failed} (check bot "Manage Tags" admin right in group).\n` : '') +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `📌 All registered members will now display their official in-game name tag in this group!`;
+        await sendTelegramMessage(chatId, reply);
+        return sendResponse(res, 200, 'Group synctags executed');
       }
 
       return sendResponse(res, 200, 'Unrecognized group command ignored');
@@ -9418,6 +9593,27 @@ export default async function handler(req, res) {
         await sendTelegramMessage(chatId, helpMsg, keys);
         return sendResponse(res, 200, 'OK');
       }
+    }
+
+    if (text === '/synctags' || text === '/sync_tags' || text === '/tags' || text === '/settags') {
+      if (!isAdmin) {
+        await sendTelegramMessage(chatId, '⚠️ *Admin access required.*');
+        return sendResponse(res, 200, 'Unauthorized synctags');
+      }
+      const targetGroupId = await getLinkedGroupId();
+      if (!targetGroupId) {
+        await sendTelegramMessage(chatId, '⚠️ *No linked group found!* Please run `/synctags` directly inside the group chat.');
+        return sendResponse(res, 200, 'No linked group');
+      }
+      const result = await syncAllMemberTags(targetGroupId);
+      const reply = `🏷️ *Member Tags Sync Finished!*\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `✅ *Success:* ${result.success} members tagged in group.\n` +
+        (result.failed > 0 ? `⚠️ *Failed/Skipped:* ${result.failed} (check bot "Manage Tags" admin right in group).\n` : '') +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `📌 All registered members now have their official in-game name tag in the group!`;
+      await sendTelegramMessage(chatId, reply);
+      return sendResponse(res, 200, 'Private synctags executed');
     }
 
     if (text.startsWith('/admin')) {
