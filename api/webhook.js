@@ -121,8 +121,6 @@ const sandboxSessions = new Map(); // strId -> { player_id, display_name, in_gam
 function isSandboxTester(userId, username = '') {
   const strId = String(userId || '');
   if (sandboxAdminOverrides.has(strId)) return false;
-  const u = (username || '').toLowerCase().replace('@', '').trim();
-  if (u === 'bilalmorocci') return true;
   if (userId && sandboxTesterIds.has(strId)) return true;
   return false;
 }
@@ -140,24 +138,26 @@ function detectUserLang(fromObj, defaultLang = 'ru') {
 async function isUserAdmin(userId, username = '') {
   if (!userId) return false;
   const strId = String(userId);
+  const u = (username || '').toLowerCase().replace('@', '').trim();
 
-  // 0. Sandbox Tester Override: Force NON-ADMIN for tester account @bilalmorocci so Bilal can test normal member experience!
+  // 0. Hardcoded super-admin Bilal & Creator: ALWAYS ADMIN
+  if (strId === '5414088590' || u === 'bilalmorocci' || u === 'doxibero') {
+    if (sandboxTesterIds.has(strId)) return false;
+    return true;
+  }
+
+  // 1. Sandbox Tester Override (only if explicitly enabled)
   if (isSandboxTester(userId, username)) {
     sandboxTesterIds.add(strId);
     return false;
   }
 
-  // 1. In-memory cache (5 min TTL)
+  // 2. In-memory cache (5 min TTL)
   const cached = adminCache.get(strId);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.isAdmin;
   }
 
-  // 2. Hardcoded super-admin Bilal & ADMIN_USER_IDS environment variable whitelist
-  if (strId === '5414088590') {
-    adminCache.set(strId, { isAdmin: true, expiresAt: Date.now() + 5 * 60 * 1000 });
-    return true;
-  }
   const envAdminIds = (process.env.ADMIN_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
   if (envAdminIds.includes(strId)) {
     adminCache.set(strId, { isAdmin: true, expiresAt: Date.now() + 5 * 60 * 1000 });
@@ -8635,7 +8635,19 @@ export default async function handler(req, res) {
 
       // 13. Sync Member Tags (Admin only)
       if (cmd === '/synctags' || cmd === '/sync_tags' || cmd === '/tags' || cmd === '/settags') {
-        const isAdminUser = await isUserAdmin(userId, username);
+        const isBilal = strId === '5414088590' || (username && ['bilalmorocci', 'doxibero'].includes(username.toLowerCase().replace('@', '')));
+        let isAdminUser = isBilal || (await isUserAdmin(userId, username));
+        if (!isAdminUser) {
+          try {
+            const chatMember = await telegramRequest('getChatMember', { chat_id: chatId, user_id: userId });
+            if (chatMember && chatMember.ok && chatMember.result) {
+              const st = chatMember.result.status;
+              if (st === 'creator' || st === 'administrator') {
+                isAdminUser = true;
+              }
+            }
+          } catch (e) {}
+        }
         if (!isAdminUser) {
           await sendTelegramMessage(chatId, '⚠️ *Only admins can run /synctags!*');
           return sendResponse(res, 200, 'Unauthorized synctags');
@@ -9620,7 +9632,8 @@ export default async function handler(req, res) {
     }
 
     if (text === '/synctags' || text === '/sync_tags' || text === '/tags' || text === '/settags') {
-      if (!isAdmin) {
+      const isBilal = strId === '5414088590' || (username && ['bilalmorocci', 'doxibero'].includes(username.toLowerCase().replace('@', '')));
+      if (!isBilal && !isAdmin) {
         await sendTelegramMessage(chatId, '⚠️ *Admin access required.*');
         return sendResponse(res, 200, 'Unauthorized synctags');
       }
