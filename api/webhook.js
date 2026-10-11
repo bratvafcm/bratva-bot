@@ -8632,28 +8632,13 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'Group help sent');
       }
 
-      // 13. Sync Member Tags (Admin only)
+      // 13. Sync Member Tags
       if (cmd === '/synctags' || cmd === '/sync_tags' || cmd === '/tags' || cmd === '/settags') {
-        const isBilal = strId === '5414088590' || (username && ['bilalmorocci', 'doxibero', 'doxibero1'].includes(username.toLowerCase().replace('@', '')));
-        let isAdminUser = isBilal || (await isUserAdmin(userId, username));
-        if (!isAdminUser) {
-          try {
-            const chatMember = await telegramRequest('getChatMember', { chat_id: chatId, user_id: userId });
-            if (chatMember && chatMember.ok && chatMember.result) {
-              const st = chatMember.result.status;
-              if (st === 'creator' || st === 'administrator') {
-                isAdminUser = true;
-              }
-            }
-          } catch (e) {}
-        }
-        if (!isAdminUser) {
-          await sendTelegramMessage(chatId, '⚠️ *Only admins can run /synctags!*');
-          return sendResponse(res, 200, 'Unauthorized synctags');
-        }
         cachedLinkedGroupId = chatId;
         const result = await syncAllMemberTags(chatId);
-        const reply = formatSyncTagsReport(result);
+        let reply = formatSyncTagsReport(result);
+        const senderTag = username ? `@${username}` : (message.from?.first_name || 'Member');
+        reply += `\n👤 _Executed by:_ \`${senderTag}\` _(TG ID: \`${userId || 'N/A'}\`)_`;
         await sendTelegramMessage(chatId, reply);
         return sendResponse(res, 200, 'Group synctags executed');
       }
@@ -9631,18 +9616,15 @@ export default async function handler(req, res) {
     }
 
     if (text === '/synctags' || text === '/sync_tags' || text === '/tags' || text === '/settags') {
-      const isBilal = strId === '5414088590' || (username && ['bilalmorocci', 'doxibero', 'doxibero1'].includes(username.toLowerCase().replace('@', '')));
-      if (!isBilal && !isAdmin) {
-        await sendTelegramMessage(chatId, '⚠️ *Admin access required.*');
-        return sendResponse(res, 200, 'Unauthorized synctags');
-      }
       const targetGroupId = await getLinkedGroupId();
       if (!targetGroupId) {
         await sendTelegramMessage(chatId, '⚠️ *No linked group found!* Please run `/synctags` directly inside the group chat.');
         return sendResponse(res, 200, 'No linked group');
       }
       const result = await syncAllMemberTags(targetGroupId);
-      const reply = formatSyncTagsReport(result);
+      let reply = formatSyncTagsReport(result);
+      const senderTag = username ? `@${username}` : (message.from?.first_name || 'Admin');
+      reply += `\n👤 _Executed by:_ \`${senderTag}\` _(TG ID: \`${userId || 'N/A'}\`)_`;
       await sendTelegramMessage(chatId, reply);
       return sendResponse(res, 200, 'Private synctags executed');
     }
