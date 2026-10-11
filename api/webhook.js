@@ -540,13 +540,14 @@ async function applyMemberTagDetailed(chatId, userId, rawTag) {
 }
 
 async function syncAllMemberTags(targetChatId) {
-  if (!targetChatId) return { success: 0, failed: 0, tagged: [], errors: ['No target chatId found'] };
+  if (!targetChatId) return { success: 0, failed: 0, tagged: [], errors: ['No target chatId found'], failedDetails: [] };
   const regData = await getRegisteredPlayers();
   const regs = Object.values(regData.registrations || {});
   let success = 0;
   let failed = 0;
   const tagged = [];
   const errors = [];
+  const failedDetails = [];
 
   for (const r of regs) {
     if (!r.telegram_id || r.is_secondary) continue;
@@ -559,12 +560,14 @@ async function syncAllMemberTags(targetChatId) {
       tagged.push(`${r.display_name} -> [${tagName}]`);
     } else {
       failed++;
-      if (res.error && !errors.includes(res.error)) {
-        errors.push(res.error);
+      const errStr = res.error || 'Unknown error';
+      if (!errors.includes(errStr)) {
+        errors.push(errStr);
       }
+      failedDetails.push(`${r.display_name}: ${errStr}`);
     }
   }
-  return { success, failed, tagged, errors };
+  return { success, failed, tagged, errors, failedDetails };
 }
 
 function formatSyncTagsReport(result) {
@@ -580,12 +583,23 @@ function formatSyncTagsReport(result) {
 
   if (result.failed > 0) {
     reply += `\n⚠️ *Failed/Skipped (${result.failed}):*\n` +
-      result.errors.map(e => `• \`${e}\``).join('\n') + '\n' +
-      `💡 _Make sure the bot has "Manage Tags" (إدارة الوسوم) Admin permission in the group!_\n`;
+      result.errors.map(e => `• \`${e}\``).join('\n') + '\n';
+
+    const hasAdminReq = result.errors.some(e => e.includes('CHAT_ADMIN_REQUIRED'));
+    if (hasAdminReq) {
+      reply += `\n🚨 *حل المشكل / FIX REQUIRED:*\n` +
+        `البوت خاصو يكون **مشرف (Admin)** فـ هاد الغروب وتفعل ليه صلاحية:\n` +
+        `👉 **"Manage user tags" / "أوسمة الأعضاء"** فـ قائمة المشرفين!\n`;
+    }
+
+    const hasNotPart = result.errors.some(e => e.includes('USER_NOT_PARTICIPANT'));
+    if (hasNotPart) {
+      reply += `ℹ️ _بعض اللاعبين مسجلين فـ البوت ولكن مازال ما دخلوش لهاد الغروب._\n`;
+    }
   }
 
   reply += `━━━━━━━━━━━━━━━━━━━━\n` +
-    `ℹ️ *Note:* Only members who have registered in @BratvaFCMBot can be tagged. When other members join & register, they receive their tag automatically!`;
+    `📌 *Auto-Tag:* أي عضو كيتسجل أو كيدخل للغروب كياخد الـ Tag ديالو تلقائياً بمجرد تفعيل الصلاحية أعلاه.`;
   return reply;
 }
 
