@@ -223,5 +223,14 @@
     "opponent_total_goals": 197,
     "result": "win",
     "status": "complete"
+  },
+  "2026-11-13_fd_fulbo_clu": {
+    "date": "2026-11-13",
+    "timestamp": 1794608201380,
+    "opponent_league": "FD FULBO CLU",
+    "our_total_goals": 281,
+    "opponent_total_goals": 247,
+    "result": "win",
+    "status": "complete"
   }
 }
