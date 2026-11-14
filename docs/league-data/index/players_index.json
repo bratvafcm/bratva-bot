@@ -73,13 +73,13 @@
   },
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
-    "total_goals": 528,
-    "total_matches": 22,
-    "average_goals": 24,
-    "last_tournament_date": "2026-11-12",
+    "total_goals": 550,
+    "total_matches": 23,
+    "average_goals": 23.9,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
@@ -325,14 +325,14 @@
   },
   "abirsh07": {
     "display_name": "Abirsh07",
-    "total_goals": 179,
-    "total_matches": 13,
-    "average_goals": 13.8,
-    "last_tournament_date": "2026-11-12",
+    "total_goals": 212,
+    "total_matches": 14,
+    "average_goals": 15.1,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
-      "flagged_for_review": true
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "flagged_for_review": false
     }
   },
   "vadormirea": {
@@ -602,12 +602,12 @@
   "king_pentax": {
     "display_name": "King_Pentax",
     "total_goals": 137,
-    "total_matches": 16,
-    "average_goals": 8.6,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 17,
+    "average_goals": 8.1,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 8,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 9,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": true
     }
   },
@@ -662,24 +662,24 @@
   "msrpbot": {
     "display_name": "MSRPBOT",
     "total_goals": 73,
-    "total_matches": 12,
-    "average_goals": 6.1,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 13,
+    "average_goals": 5.6,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 12,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 13,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": true
     }
   },
   "ksfalubaz": {
     "display_name": "KSFALUBAZ",
     "total_goals": 108,
-    "total_matches": 13,
-    "average_goals": 8.3,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 14,
+    "average_goals": 7.7,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 4,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": true
     }
   },
@@ -1490,12 +1490,12 @@
   "henry": {
     "display_name": "Henry",
     "total_goals": 0,
-    "total_matches": 11,
+    "total_matches": 12,
     "average_goals": 0,
-    "last_tournament_date": "2026-11-12",
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 11,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 12,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": true
     }
   },
@@ -1514,36 +1514,36 @@
   "qqwwee": {
     "display_name": "qqwwee",
     "total_goals": 0,
-    "total_matches": 11,
+    "total_matches": 12,
     "average_goals": 0,
-    "last_tournament_date": "2026-11-12",
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 11,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 12,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": true
     }
   },
   "bshdjsjqkq": {
     "display_name": "bshdjsjqkq",
     "total_goals": 36,
-    "total_matches": 12,
-    "average_goals": 3,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 13,
+    "average_goals": 2.8,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 7,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 8,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": true
     }
   },
   "twilightfc": {
     "display_name": "TWILIGHTFC",
-    "total_goals": 302,
-    "total_matches": 12,
-    "average_goals": 25.2,
-    "last_tournament_date": "2026-11-12",
+    "total_goals": 332,
+    "total_matches": 13,
+    "average_goals": 25.5,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
@@ -1562,12 +1562,12 @@
   "cr7": {
     "display_name": "CR7",
     "total_goals": 93,
-    "total_matches": 10,
-    "average_goals": 9.3,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 11,
+    "average_goals": 8.5,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
@@ -1609,14 +1609,14 @@
   },
   "wwe": {
     "display_name": "WWE",
-    "total_goals": 65,
-    "total_matches": 11,
-    "average_goals": 5.9,
-    "last_tournament_date": "2026-11-12",
+    "total_goals": 94,
+    "total_matches": 12,
+    "average_goals": 7.8,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 9,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
-      "flagged_for_review": true
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "flagged_for_review": false
     }
   },
   "roma": {
@@ -1634,13 +1634,13 @@
   "ashrooof": {
     "display_name": "AshrOoOf",
     "total_goals": 188,
-    "total_matches": 10,
-    "average_goals": 18.8,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 11,
+    "average_goals": 17.1,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
-      "flagged_for_review": false
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "flagged_for_review": true
     }
   },
   "zh30ne": {
@@ -1777,25 +1777,25 @@
   },
   "jacob": {
     "display_name": "jacob",
-    "total_goals": 32,
-    "total_matches": 5,
-    "average_goals": 6.4,
-    "last_tournament_date": "2026-11-12",
+    "total_goals": 58,
+    "total_matches": 6,
+    "average_goals": 9.7,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
   "anis": {
     "display_name": "Anis",
     "total_goals": 0,
-    "total_matches": 3,
+    "total_matches": 4,
     "average_goals": 0,
-    "last_tournament_date": "2026-11-09",
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-11-09_baan_charan_club",
+      "current_fail_streak": 4,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": true
     }
   },
@@ -1850,12 +1850,12 @@
   "campeónfc": {
     "display_name": "CAMPEÓNFC",
     "total_goals": 30,
-    "total_matches": 3,
-    "average_goals": 10,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 4,
+    "average_goals": 7.5,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 4,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": true
     }
   },
@@ -1874,24 +1874,24 @@
   "lodos_x9": {
     "display_name": "LODOS_X9",
     "total_goals": 60,
-    "total_matches": 5,
-    "average_goals": 12,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 6,
+    "average_goals": 10,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
   "свня": {
     "display_name": "СВНЯ",
     "total_goals": 106,
-    "total_matches": 3,
-    "average_goals": 35.3,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 4,
+    "average_goals": 26.5,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
@@ -1910,12 +1910,12 @@
   "shadow": {
     "display_name": "shadow",
     "total_goals": 49,
-    "total_matches": 3,
-    "average_goals": 16.3,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 4,
+    "average_goals": 12.3,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
@@ -1957,13 +1957,13 @@
   },
   "đ_trung": {
     "display_name": "Đ Trung",
-    "total_goals": 0,
-    "total_matches": 2,
-    "average_goals": 0,
-    "last_tournament_date": "2026-11-12",
+    "total_goals": 43,
+    "total_matches": 3,
+    "average_goals": 14.3,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
@@ -1994,12 +1994,12 @@
   "nazarov_tjk": {
     "display_name": "NAZAROV...TJK",
     "total_goals": 21,
-    "total_matches": 2,
-    "average_goals": 10.5,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 3,
+    "average_goals": 7,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
@@ -2018,24 +2018,24 @@
   "manchestercity01": {
     "display_name": "manchestercity01",
     "total_goals": 18,
-    "total_matches": 3,
-    "average_goals": 6,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 4,
+    "average_goals": 4.5,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
-      "flagged_for_review": false
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "flagged_for_review": true
     }
   },
   "edith": {
     "display_name": "EDITH",
     "total_goals": 28,
-    "total_matches": 3,
-    "average_goals": 9.3,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 4,
+    "average_goals": 7,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 4,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": true
     }
   },
@@ -2077,13 +2077,13 @@
   },
   "smithx": {
     "display_name": "SmithX",
-    "total_goals": 0,
-    "total_matches": 2,
-    "average_goals": 0,
-    "last_tournament_date": "2026-11-12",
+    "total_goals": 22,
+    "total_matches": 3,
+    "average_goals": 7.3,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
@@ -2102,24 +2102,24 @@
   "ignite_ninja": {
     "display_name": "IGNITE NINJA",
     "total_goals": 48,
-    "total_matches": 2,
-    "average_goals": 24,
-    "last_tournament_date": "2026-11-12",
+    "total_matches": 3,
+    "average_goals": 16,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
   "amur": {
     "display_name": "Amur",
-    "total_goals": 24,
-    "total_matches": 1,
-    "average_goals": 24,
-    "last_tournament_date": "2026-11-09",
+    "total_goals": 47,
+    "total_matches": 2,
+    "average_goals": 23.5,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-09_baan_charan_club",
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
@@ -2138,24 +2138,24 @@
   "легенды2205": {
     "display_name": "Легенды2205",
     "total_goals": 23,
-    "total_matches": 1,
-    "average_goals": 23,
-    "last_tournament_date": "2026-11-09",
+    "total_matches": 2,
+    "average_goals": 11.5,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-09_baan_charan_club",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
   "jadid123": {
     "display_name": "jadid123",
     "total_goals": 0,
-    "total_matches": 1,
+    "total_matches": 2,
     "average_goals": 0,
-    "last_tournament_date": "2026-11-12",
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
@@ -2173,13 +2173,13 @@
   },
   "санчо": {
     "display_name": "санчо",
-    "total_goals": 0,
-    "total_matches": 1,
-    "average_goals": 0,
-    "last_tournament_date": "2026-11-12",
+    "total_goals": 36,
+    "total_matches": 2,
+    "average_goals": 18,
+    "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   },
@@ -2192,6 +2192,42 @@
     "eligibility_streak": {
       "current_fail_streak": 1,
       "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "flagged_for_review": false
+    }
+  },
+  "doxiberoi": {
+    "display_name": "DOXIBEROI",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-11-13",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "flagged_for_review": false
+    }
+  },
+  "sueeek": {
+    "display_name": "sueeek",
+    "total_goals": 0,
+    "total_matches": 1,
+    "average_goals": 0,
+    "last_tournament_date": "2026-11-13",
+    "eligibility_streak": {
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "flagged_for_review": false
+    }
+  },
+  "wiseoff": {
+    "display_name": "wiseoff",
+    "total_goals": 17,
+    "total_matches": 1,
+    "average_goals": 17,
+    "last_tournament_date": "2026-11-13",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
   }
