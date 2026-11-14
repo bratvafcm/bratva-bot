@@ -2,9 +2,9 @@
   "player_id": "ridoy",
   "display_name": "Ridoy",
   "known_aliases": [],
-  "total_goals": 0,
-  "total_matches": 1,
-  "average_goals": 0,
+  "total_goals": 9,
+  "total_matches": 7,
+  "average_goals": 1.3,
   "matches": [
     {
       "tournament_id": "2026-10-03_legends_league",
@@ -17,11 +17,83 @@
       "turns_played": 0,
       "player_display_name": "Ridoy",
       "player_id": "ridoy"
+    },
+    {
+      "tournament_id": "2026-10-20_garuda_official",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "GARUDA OFFICIAL",
+      "opponent_id": "2026-10-20_garuda_official",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Ridoy",
+      "player_id": "ridoy"
+    },
+    {
+      "tournament_id": "2026-10-22_legends",
+      "match_index_in_tournament": 9,
+      "opponent_display_name": "Legends",
+      "opponent_id": "2026-10-22_legends",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Ridoy",
+      "player_id": "ridoy"
+    },
+    {
+      "tournament_id": "2026-10-23_ultimate_cptns",
+      "match_index_in_tournament": 9,
+      "opponent_display_name": "Ultimate cptns",
+      "opponent_id": "2026-10-23_ultimate_cptns",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Ridoy",
+      "player_id": "ridoy"
+    },
+    {
+      "tournament_id": "2026-10-24_bluuelook_fc",
+      "match_index_in_tournament": 7,
+      "opponent_display_name": "BLUUELOOK FC",
+      "opponent_id": "2026-10-24_bluuelook_fc",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Ridoy",
+      "player_id": "ridoy"
+    },
+    {
+      "tournament_id": "2026-10-31_reyes_fc26",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "REYES_FC26",
+      "opponent_id": "2026-10-31_reyes_fc26",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Ridoy",
+      "player_id": "ridoy"
+    },
+    {
+      "tournament_id": "2026-11-01_pacific_league",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "PACIFIC LEAGUE",
+      "opponent_id": "2026-11-01_pacific_league",
+      "goals_for": 9,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 1,
+      "player_display_name": "Ridoy",
+      "player_id": "ridoy"
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 1,
-    "last_evaluated_tournament_id": "2026-10-03_legends_league",
-    "flagged_for_review": false
+    "current_fail_streak": 7,
+    "last_evaluated_tournament_id": "2026-11-01_pacific_league",
+    "flagged_for_review": true
   }
 }

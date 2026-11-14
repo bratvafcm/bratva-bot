@@ -3,8 +3,8 @@
   "display_name": "Llonchik",
   "known_aliases": [],
   "total_goals": 105,
-  "total_matches": 8,
-  "average_goals": 13.1,
+  "total_matches": 10,
+  "average_goals": 10.5,
   "matches": [
     {
       "tournament_id": "2026-09-25_garuda_indonesia",
@@ -101,11 +101,35 @@
       "turns_played": 0,
       "player_display_name": "Llonchik",
       "player_id": "llonchik"
+    },
+    {
+      "tournament_id": "2026-10-13_enez_fc_fan",
+      "match_index_in_tournament": 7,
+      "opponent_display_name": "ENEZ FC FAN",
+      "opponent_id": "2026-10-13_enez_fc_fan",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Llonchik",
+      "player_id": "llonchik"
+    },
+    {
+      "tournament_id": "2026-10-24_bluuelook_fc",
+      "match_index_in_tournament": 28,
+      "opponent_display_name": "BLUUELOOK FC",
+      "opponent_id": "2026-10-24_bluuelook_fc",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Llonchik",
+      "player_id": "llonchik"
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 1,
-    "last_evaluated_tournament_id": "2026-10-08_garuda_la_liga",
-    "flagged_for_review": false
+    "current_fail_streak": 3,
+    "last_evaluated_tournament_id": "2026-10-24_bluuelook_fc",
+    "flagged_for_review": true
   }
 }

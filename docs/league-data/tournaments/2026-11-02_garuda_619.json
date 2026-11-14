@@ -13,8 +13,8 @@
   "matches": [
     {
       "board_order": 1,
-      "player_id": "свня",
-      "player_display_name": "СВНЯ",
+      "player_id": "саня",
+      "player_display_name": "САНЯ",
       "ovr": 129,
       "goals_for": 33,
       "turns_played": 3
@@ -173,8 +173,8 @@
     },
     {
       "board_order": 21,
-      "player_id": "koustav__007",
-      "player_display_name": "KOUSTAV__007",
+      "player_id": "koustav_007",
+      "player_display_name": "KOUSTAV_007",
       "ovr": 127,
       "goals_for": 36,
       "turns_played": 3

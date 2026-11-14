@@ -13,8 +13,8 @@
   "matches": [
     {
       "board_order": 1,
-      "player_id": "свня",
-      "player_display_name": "СВНЯ",
+      "player_id": "саня",
+      "player_display_name": "САНЯ",
       "ovr": 129,
       "goals_for": 0,
       "turns_played": 0
@@ -53,16 +53,16 @@
     },
     {
       "board_order": 6,
-      "player_id": "doxiberoi",
-      "player_display_name": "DOXIBEROI",
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
       "ovr": 127,
       "goals_for": 0,
       "turns_played": 0
     },
     {
       "board_order": 7,
-      "player_id": "amur",
-      "player_display_name": "Amur",
+      "player_id": "arnur",
+      "player_display_name": "Arnur",
       "ovr": 127,
       "goals_for": 23,
       "turns_played": 3
@@ -165,8 +165,8 @@
     },
     {
       "board_order": 20,
-      "player_id": "sueeek",
-      "player_display_name": "sueeek",
+      "player_id": "sueeex",
+      "player_display_name": "sueeex",
       "ovr": 127,
       "goals_for": 0,
       "turns_played": 0

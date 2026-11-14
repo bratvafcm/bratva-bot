@@ -13,8 +13,8 @@
   "matches": [
     {
       "board_order": 1,
-      "player_id": "свя",
-      "player_display_name": "СВЯ",
+      "player_id": "саня",
+      "player_display_name": "САНЯ",
       "ovr": 129,
       "goals_for": 38,
       "turns_played": 3
@@ -61,8 +61,8 @@
     },
     {
       "board_order": 7,
-      "player_id": "qqww_ee",
-      "player_display_name": "qqww ee",
+      "player_id": "qqwwee",
+      "player_display_name": "qqwwee",
       "ovr": 127,
       "goals_for": 0,
       "turns_played": 0
@@ -205,8 +205,8 @@
     },
     {
       "board_order": 25,
-      "player_id": "ð_trung",
-      "player_display_name": "Ð Trung",
+      "player_id": "đ_trung",
+      "player_display_name": "Đ Trung",
       "ovr": 126,
       "goals_for": 0,
       "turns_played": 0

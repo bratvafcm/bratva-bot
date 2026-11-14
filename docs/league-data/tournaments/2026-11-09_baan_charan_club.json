@@ -13,8 +13,8 @@
   "matches": [
     {
       "board_order": 1,
-      "player_id": "свня",
-      "player_display_name": "СВНЯ",
+      "player_id": "саня",
+      "player_display_name": "САНЯ",
       "ovr": 129,
       "goals_for": 34,
       "turns_played": 3
@@ -85,8 +85,8 @@
     },
     {
       "board_order": 10,
-      "player_id": "amur",
-      "player_display_name": "Amur",
+      "player_id": "arnur",
+      "player_display_name": "Arnur",
       "ovr": 127,
       "goals_for": 24,
       "turns_played": 3
@@ -109,8 +109,8 @@
     },
     {
       "board_order": 13,
-      "player_id": "свнчо",
-      "player_display_name": "свнчо",
+      "player_id": "санчо",
+      "player_display_name": "санчо",
       "ovr": 126,
       "goals_for": 28,
       "turns_played": 3

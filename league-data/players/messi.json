@@ -1,15 +1,27 @@
 {
   "player_id": "messi",
-  "display_name": "MESSI",
+  "display_name": "Messi",
   "known_aliases": [],
   "total_goals": 0,
-  "total_matches": 0,
+  "total_matches": 1,
   "average_goals": 0,
-  "matches": [],
+  "matches": [
+    {
+      "tournament_id": "2026-10-29_th_nevergiveup",
+      "match_index_in_tournament": 20,
+      "opponent_display_name": "TH NeverGiveUp",
+      "opponent_id": "2026-10-29_th_nevergiveup",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Messi",
+      "player_id": "messi"
+    }
+  ],
   "eligibility_streak": {
     "current_fail_streak": 0,
-    "last_evaluated_tournament_id": null,
+    "last_evaluated_tournament_id": "2026-10-29_th_nevergiveup",
     "flagged_for_review": false
-  },
-  "last_tournament_date": null
+  }
 }

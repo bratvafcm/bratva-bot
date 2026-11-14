@@ -3,7 +3,7 @@
   "display_name": "SOMO",
   "known_aliases": [],
   "total_goals": 0,
-  "total_matches": 1,
+  "total_matches": 2,
   "average_goals": 0,
   "matches": [
     {
@@ -17,11 +17,23 @@
       "turns_played": 0,
       "player_display_name": "SOMO",
       "player_id": "somo"
+    },
+    {
+      "tournament_id": "2026-10-22_legends",
+      "match_index_in_tournament": 15,
+      "opponent_display_name": "Legends",
+      "opponent_id": "2026-10-22_legends",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "SOMO",
+      "player_id": "somo"
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 1,
-    "last_evaluated_tournament_id": "2026-09-29_blivion",
+    "current_fail_streak": 2,
+    "last_evaluated_tournament_id": "2026-10-22_legends",
     "flagged_for_review": false
   }
 }

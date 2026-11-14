@@ -798,11 +798,14 @@ async function getTournamentById(tId) {
  * - Exact board order #1 to #N
  * - Limit & turns mapping
  */
-function analyzeImagesWithGemini(imageBuffers) {
+function analyzeImagesWithGemini(imageBuffers, rosterHints = []) {
   return new Promise((resolve, reject) => {
     if (!GEMINI_KEY) return reject(new Error('GEMINI_KEY environment variable is missing'));
 
     const todayIso = new Date().toISOString().split('T')[0];
+    const rosterSection = (rosterHints && rosterHints.length > 0)
+      ? `\nKNOWN LEAGUE ROSTER PLAYERS (Use these exact spellings when matching player rows):\n${rosterHints.join(', ')}\n`
+      : '';
 
     const prompt = `You are the master tournament data auditor for EA Sports FC Mobile league "БРАТВА".
 You are analyzing ${imageBuffers.length} screenshot(s).
@@ -842,6 +845,16 @@ RULES FOR EACH TOURNAMENT:
      * "3/3" limit = 0 turns played (STRIKE!)
      * SANITY CHECK: If a player scored goals (goals > 0), their turns_played is ALWAYS 3 (or at least 1-3). NEVER output turns_played: 0 for a player who scored goals!
 
+5. CRITICAL OCR ANTI-CONFUSION SAFEGUARDS (In EA FC Mobile font, characters can be deceptive):
+   - "rn" vs "m": The letters "rn" tightly touch and can look like "m". The player "Arnur" is spelled A-r-n-u-r. It is NEVER "Amur"! Always extract as "Arnur".
+   - Board #1 League Owner: The owner at board 1 is "САНЯ" (Cyrillic letters С-А-Н-Я). NEVER extract as "СВНЯ" or "СВЯ"!
+   - Cyrillic "санчо": Always extract as "санчо", NEVER "свнчо".
+   - DOXIBERO1: Ends in the digit "1", NEVER the letter "I" (DOXIBERO1, not DOXIBEROI).
+   - sueeex: Ends in the letter "x", NEVER "k" (sueeex, not sueeek).
+   - KOUSTAV_007: Contains a single underscore, NEVER double underscores (KOUSTAV_007, not KOUSTAV__007).
+   - Đ Trung: Vietnamese character "Đ", NEVER "Ð".
+   - qqwwee: No internal spaces (qqwwee, not qqww ee).
+${rosterSection}
 Return STRICT JSON ONLY, no markdown ticks, no commentary:
 {
   "is_tournament_screenshot": true,
@@ -5038,14 +5051,118 @@ function slugifyLeague(text) {
   return s || 'opponent';
 }
 
-function slugifyPlayerId(name, idx) {
-  if (!name) return `player_${idx}`;
-  let clean = name.trim();
+const CANONICAL_OCR_ALIASES = {
+  'amur': { id: 'arnur', name: 'Arnur' },
+  'arnur': { id: 'arnur', name: 'Arnur' },
+  'свня': { id: 'саня', name: 'САНЯ' },
+  'свя': { id: 'саня', name: 'САНЯ' },
+  'саня': { id: 'саня', name: 'САНЯ' },
+  'свнчо': { id: 'санчо', name: 'санчо' },
+  'санчо': { id: 'санчо', name: 'санчо' },
+  'doxiberoi': { id: 'doxibero1', name: 'DOXIBERO1' },
+  'doxibero1': { id: 'doxibero1', name: 'DOXIBERO1' },
+  'doxibéro': { id: 'doxibero', name: 'DOXIBERO' },
+  'doxibero': { id: 'doxibero', name: 'DOXIBERO' },
+  'doxibro': { id: 'doxibero', name: 'DOXIBERO' },
+  'koustav__007': { id: 'koustav_007', name: 'KOUSTAV_007' },
+  'koustav_007': { id: 'koustav_007', name: 'KOUSTAV_007' },
+  'sueeek': { id: 'sueeex', name: 'sueeex' },
+  'sueeex': { id: 'sueeex', name: 'sueeex' },
+  'ð_trung': { id: 'đ_trung', name: 'Đ Trung' },
+  'ð trung': { id: 'đ_trung', name: 'Đ Trung' },
+  'đ_trung': { id: 'đ_trung', name: 'Đ Trung' },
+  'đ trung': { id: 'đ_trung', name: 'Đ Trung' },
+  'qqww_ee': { id: 'qqwwee', name: 'qqwwee' },
+  'qqww ee': { id: 'qqwwee', name: 'qqwwee' },
+  'qqwwee': { id: 'qqwwee', name: 'qqwwee' },
+  'llonchik': { id: 'l1onchik', name: 'L1onchik' },
+  'l1onchik': { id: 'l1onchik', name: 'L1onchik' }
+};
+
+function normalizeOcrName(str) {
+  if (!str) return '';
+  return String(str)
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_\.\-]+/g, '')
+    .replace(/rn/g, 'm')
+    .replace(/1/g, 'i')
+    .replace(/в/g, 'а');
+}
+
+function resolveCanonicalPlayer(name, idx, regData = null) {
+  if (!name) {
+    return {
+      playerId: `player_${idx}`,
+      displayName: `Player ${idx}`
+    };
+  }
+
+  const clean = String(name).trim();
   const lower = clean.toLowerCase();
-  if (lower === 'doxibéro' || lower === 'doxibero' || lower === 'doxibro') return 'doxibero';
-  if (lower === 'doxibero1') return 'doxibero1';
-  let pid = lower.replace(/[^\p{L}\p{N}_]+/gu, '_').replace(/^_+|_+$/g, '');
-  return pid || `player_${idx}`;
+  const baseSlug = lower.replace(/[^\p{L}\p{N}_]+/gu, '_').replace(/^_+|_+$/g, '') || `player_${idx}`;
+
+  // 1. Direct match in canonical OCR dictionary
+  if (CANONICAL_OCR_ALIASES[lower]) {
+    return {
+      playerId: CANONICAL_OCR_ALIASES[lower].id,
+      displayName: CANONICAL_OCR_ALIASES[lower].name
+    };
+  }
+  if (CANONICAL_OCR_ALIASES[baseSlug]) {
+    return {
+      playerId: CANONICAL_OCR_ALIASES[baseSlug].id,
+      displayName: CANONICAL_OCR_ALIASES[baseSlug].name
+    };
+  }
+
+  // 2. Cross-reference against registered players
+  if (regData && regData.registrations) {
+    const regs = Object.values(regData.registrations);
+
+    // 2a. Direct match with registered in_game_name or display_name
+    for (const r of regs) {
+      const ign = (r.in_game_name || '').trim();
+      const disp = (r.display_name || '').trim();
+      if ((ign && ign.toLowerCase() === lower) || (disp && disp.toLowerCase() === lower)) {
+        const pSlug = ign ? ign.toLowerCase().replace(/[^\p{L}\p{N}_]+/gu, '_').replace(/^_+|_+$/g, '') : baseSlug;
+        return {
+          playerId: pSlug || baseSlug,
+          displayName: ign || disp || clean
+        };
+      }
+    }
+
+    // 2b. Fuzzy / OCR-tolerant normalized match
+    const normClean = normalizeOcrName(clean);
+    for (const r of regs) {
+      const ign = (r.in_game_name || '').trim();
+      const disp = (r.display_name || '').trim();
+      if (ign && normalizeOcrName(ign) === normClean) {
+        const pSlug = ign.toLowerCase().replace(/[^\p{L}\p{N}_]+/gu, '_').replace(/^_+|_+$/g, '');
+        return {
+          playerId: pSlug || baseSlug,
+          displayName: ign
+        };
+      }
+      if (disp && normalizeOcrName(disp) === normClean) {
+        const pSlug = disp.toLowerCase().replace(/[^\p{L}\p{N}_]+/gu, '_').replace(/^_+|_+$/g, '');
+        return {
+          playerId: pSlug || baseSlug,
+          displayName: disp
+        };
+      }
+    }
+  }
+
+  return {
+    playerId: baseSlug,
+    displayName: clean
+  };
+}
+
+function slugifyPlayerId(name, idx, regData = null) {
+  return resolveCanonicalPlayer(name, idx, regData).playerId;
 }
 
 // -------------------------------------------------------------
@@ -5736,14 +5853,20 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
   const ourGoals = aiResult.score_bratva || 0;
   const oppGoals = aiResult.score_opponent || 0;
 
-  const extractedMatches = (aiResult.players || []).map((p, idx) => ({
-    board_order: p.board_order || (idx + 1),
-    player_id: slugifyPlayerId(p.name, idx),
-    player_display_name: p.name,
-    ovr: p.ovr || 125,
-    goals_for: p.goals !== undefined ? p.goals : 0,
-    turns_played: resolveTurnsPlayed(p)
-  }));
+  let regData = null;
+  try { regData = await getRegisteredPlayers(); } catch (e) {}
+
+  const extractedMatches = (aiResult.players || []).map((p, idx) => {
+    const canonical = resolveCanonicalPlayer(p.name, idx, regData);
+    return {
+      board_order: p.board_order || (idx + 1),
+      player_id: canonical.playerId,
+      player_display_name: canonical.displayName,
+      ovr: p.ovr || 125,
+      goals_for: p.goals !== undefined ? p.goals : 0,
+      turns_played: resolveTurnsPlayed(p)
+    };
+  });
 
   // Robust Turn Verification against Header Banner Total:
   const teamTurnsFromBanner = aiResult.turns_bratva || 0;
@@ -6022,6 +6145,10 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
         }
       };
     });
+    // Safety purge of legacy OCR split keys
+    ['amur', 'свня', 'свя', 'свнчо', 'doxiberoi', 'koustav__007', 'sueeek', 'ð_trung', 'qqww_ee'].forEach(k => {
+      delete pIndexObj[k];
+    });
     const pIndexPayload = {
       message: `Auto-Update: Player standings for vs ${tData.opponent_league}`,
       content: Buffer.from(JSON.stringify(pIndexObj, null, 2)).toString('base64')
@@ -6157,7 +6284,16 @@ async function processBufferedAlbum(albumId, chatId, res = null) {
 
   try {
     const buffers = await Promise.all(uniqueFileIds.map(fid => downloadTelegramFile(fid)));
-    const aiResult = await analyzeImagesWithGemini(buffers);
+    let rosterHints = [];
+    try {
+      const reg = await getRegisteredPlayers();
+      if (reg && reg.registrations) {
+        rosterHints = Object.values(reg.registrations)
+          .map(r => r.in_game_name || r.display_name)
+          .filter(Boolean);
+      }
+    } catch (e) {}
+    const aiResult = await analyzeImagesWithGemini(buffers, rosterHints);
 
     let tournaments = [];
     if (aiResult && Array.isArray(aiResult.tournaments) && aiResult.tournaments.length > 0) {

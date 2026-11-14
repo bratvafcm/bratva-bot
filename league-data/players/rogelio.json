@@ -2,9 +2,9 @@
   "player_id": "rogelio",
   "display_name": "Rogelio",
   "known_aliases": [],
-  "total_goals": 116,
-  "total_matches": 7,
-  "average_goals": 16.6,
+  "total_goals": 173,
+  "total_matches": 10,
+  "average_goals": 17.3,
   "matches": [
     {
       "tournament_id": "2026-09-25_garuda_indonesia",
@@ -89,11 +89,47 @@
       "turns_played": 0,
       "player_display_name": "Rogelio",
       "player_id": "rogelio"
+    },
+    {
+      "tournament_id": "2026-10-13_enez_fc_fan",
+      "match_index_in_tournament": 4,
+      "opponent_display_name": "ENEZ FC FAN",
+      "opponent_id": "2026-10-13_enez_fc_fan",
+      "goals_for": 30,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "Rogelio",
+      "player_id": "rogelio"
+    },
+    {
+      "tournament_id": "2026-10-15_boss_fc_c1",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "Boss FC - C1",
+      "opponent_id": "2026-10-15_boss_fc_c1",
+      "goals_for": 27,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 3,
+      "player_display_name": "Rogelio",
+      "player_id": "rogelio"
+    },
+    {
+      "tournament_id": "2026-10-20_garuda_official",
+      "match_index_in_tournament": 5,
+      "opponent_display_name": "GARUDA OFFICIAL",
+      "opponent_id": "2026-10-20_garuda_official",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Rogelio",
+      "player_id": "rogelio"
     }
   ],
   "eligibility_streak": {
     "current_fail_streak": 1,
-    "last_evaluated_tournament_id": "2026-10-02_the_king",
+    "last_evaluated_tournament_id": "2026-10-20_garuda_official",
     "flagged_for_review": false
   }
 }

@@ -3,7 +3,7 @@
   "display_name": "Maco...JGL",
   "known_aliases": [],
   "total_goals": 0,
-  "total_matches": 1,
+  "total_matches": 6,
   "average_goals": 0,
   "matches": [
     {
@@ -17,11 +17,71 @@
       "turns_played": 0,
       "player_display_name": "Maco...JGL",
       "player_id": "maco_jgl"
+    },
+    {
+      "tournament_id": "2026-10-23_ultimate_cptns",
+      "match_index_in_tournament": 17,
+      "opponent_display_name": "Ultimate cptns",
+      "opponent_id": "2026-10-23_ultimate_cptns",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Maco...JGL",
+      "player_id": "maco_jgl"
+    },
+    {
+      "tournament_id": "2026-10-24_bluuelook_fc",
+      "match_index_in_tournament": 21,
+      "opponent_display_name": "BLUUELOOK FC",
+      "opponent_id": "2026-10-24_bluuelook_fc",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Maco...JGL",
+      "player_id": "maco_jgl"
+    },
+    {
+      "tournament_id": "2026-10-27_profi_ua",
+      "match_index_in_tournament": 18,
+      "opponent_display_name": "ProFi UA",
+      "opponent_id": "2026-10-27_profi_ua",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 0,
+      "player_display_name": "Maco...JGL",
+      "player_id": "maco_jgl"
+    },
+    {
+      "tournament_id": "2026-11-01_pacific_league",
+      "match_index_in_tournament": 3,
+      "opponent_display_name": "PACIFIC LEAGUE",
+      "opponent_id": "2026-11-01_pacific_league",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Maco...JGL",
+      "player_id": "maco_jgl"
+    },
+    {
+      "tournament_id": "2026-11-02_garuda_619",
+      "match_index_in_tournament": 15,
+      "opponent_display_name": "GARUDA 619",
+      "opponent_id": "2026-11-02_garuda_619",
+      "goals_for": 0,
+      "goals_against": 0,
+      "result": "loss",
+      "turns_played": 0,
+      "player_display_name": "Maco...JGL",
+      "player_id": "maco_jgl"
     }
   ],
   "eligibility_streak": {
-    "current_fail_streak": 1,
-    "last_evaluated_tournament_id": "2026-09-29_blivion",
-    "flagged_for_review": false
+    "current_fail_streak": 6,
+    "last_evaluated_tournament_id": "2026-11-02_garuda_619",
+    "flagged_for_review": true
   }
 }
