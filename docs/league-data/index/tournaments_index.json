@@ -214,5 +214,14 @@
     "opponent_total_goals": 160,
     "result": "win",
     "status": "complete"
+  },
+  "2026-11-12_fc_arab_leagu": {
+    "date": "2026-11-12",
+    "timestamp": 1794484800000,
+    "opponent_league": "FC ARAB LEAGU",
+    "our_total_goals": 224,
+    "opponent_total_goals": 197,
+    "result": "win",
+    "status": "complete"
   }
 }
