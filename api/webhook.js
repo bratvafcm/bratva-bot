@@ -5068,10 +5068,12 @@ const CANONICAL_OCR_ALIASES = {
   'koustav_007': { id: 'koustav_007', name: 'KOUSTAV_007' },
   'sueeek': { id: 'sueeex', name: 'sueeex' },
   'sueeex': { id: 'sueeex', name: 'sueeex' },
-  'ð_trung': { id: 'đ_trung', name: 'Đ Trung' },
-  'ð trung': { id: 'đ_trung', name: 'Đ Trung' },
-  'đ_trung': { id: 'đ_trung', name: 'Đ Trung' },
-  'đ trung': { id: 'đ_trung', name: 'Đ Trung' },
+  'ð_trung': { id: 'đ_trung', name: 'ĐTrung' },
+  'ð trung': { id: 'đ_trung', name: 'ĐTrung' },
+  'ðtrung': { id: 'đ_trung', name: 'ĐTrung' },
+  'đ_trung': { id: 'đ_trung', name: 'ĐTrung' },
+  'đ trung': { id: 'đ_trung', name: 'ĐTrung' },
+  'đtrung': { id: 'đ_trung', name: 'ĐTrung' },
   'qqww_ee': { id: 'qqwwee', name: 'qqwwee' },
   'qqww ee': { id: 'qqwwee', name: 'qqwwee' },
   'qqwwee': { id: 'qqwwee', name: 'qqwwee' },
@@ -6291,6 +6293,12 @@ async function processBufferedAlbum(albumId, chatId, res = null) {
         rosterHints = Object.values(reg.registrations)
           .map(r => r.in_game_name || r.display_name)
           .filter(Boolean);
+      }
+      const activeRoster = await getActiveRoster();
+      if (activeRoster && Array.isArray(activeRoster.members)) {
+        activeRoster.members.forEach(m => {
+          if (!rosterHints.includes(m)) rosterHints.push(m);
+        });
       }
     } catch (e) {}
     const aiResult = await analyzeImagesWithGemini(buffers, rosterHints);
