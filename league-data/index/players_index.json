@@ -1562,8 +1562,8 @@
   "cr7": {
     "display_name": "CR7",
     "total_goals": 93,
-    "total_matches": 11,
-    "average_goals": 8.5,
+    "total_matches": 12,
+    "average_goals": 7.8,
     "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
       "current_fail_streak": 1,
@@ -1778,8 +1778,8 @@
   "jacob": {
     "display_name": "jacob",
     "total_goals": 58,
-    "total_matches": 6,
-    "average_goals": 9.7,
+    "total_matches": 7,
+    "average_goals": 8.3,
     "last_tournament_date": "2026-11-13",
     "eligibility_streak": {
       "current_fail_streak": 0,
