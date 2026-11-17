@@ -1,0 +1,271 @@
+{
+  "id": "2026-11-16_the_leviatan_fc",
+  "tournament_id": "2026-11-16_the_leviatan_fc",
+  "date": "2026-11-16",
+  "timestamp": 1794830400000,
+  "opponent_league": "THE_LEVIATAN-FC",
+  "our_total_goals": 194,
+  "opponent_total_goals": 378,
+  "result": "loss",
+  "status": "complete",
+  "total_turns_played": 21,
+  "max_possible_turns": 96,
+  "matches": [
+    {
+      "board_order": 1,
+      "player_id": "саня",
+      "player_display_name": "САНЯ",
+      "ovr": 129,
+      "goals_for": 31,
+      "turns_played": 3
+    },
+    {
+      "board_order": 2,
+      "player_id": "ronaldo",
+      "player_display_name": "ronaldo",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 3,
+      "player_id": "lodos_x9",
+      "player_display_name": "LODOS_X9",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 4,
+      "player_id": "manchestercity01",
+      "player_display_name": "manchestercity01",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 5,
+      "player_id": "shadow",
+      "player_display_name": "shadow",
+      "ovr": 127,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "board_order": 6,
+      "player_id": "jadid123",
+      "player_display_name": "jadid123",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 7,
+      "player_id": "doxibero1",
+      "player_display_name": "DOXIBERO1",
+      "ovr": 127,
+      "goals_for": 29,
+      "turns_played": 3
+    },
+    {
+      "board_order": 8,
+      "player_id": "henry",
+      "player_display_name": "Henry",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 9,
+      "player_id": "mohamed_osama",
+      "player_display_name": "Mohamed_Osama",
+      "ovr": 127,
+      "goals_for": 21,
+      "turns_played": 3
+    },
+    {
+      "board_order": 10,
+      "player_id": "qqwwee",
+      "player_display_name": "qqwwee",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 11,
+      "player_id": "nazarov_tjk",
+      "player_display_name": "NAZAROV...TJK",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 12,
+      "player_id": "sueeex",
+      "player_display_name": "sueeex",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 13,
+      "player_id": "ksfalubaz",
+      "player_display_name": "KSFALUBAZ",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 14,
+      "player_id": "ashrooof",
+      "player_display_name": "AshroOof",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 15,
+      "player_id": "smithx",
+      "player_display_name": "SmithX",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 16,
+      "player_id": "kevvvl",
+      "player_display_name": "kevvvl",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 17,
+      "player_id": "twilightfc",
+      "player_display_name": "TWILIGHTFC",
+      "ovr": 127,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "board_order": 18,
+      "player_id": "msrpbot",
+      "player_display_name": "MSRPBOT",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 19,
+      "player_id": "bshdjsjqkq",
+      "player_display_name": "bshdjsjqkq",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 20,
+      "player_id": "cr7",
+      "player_display_name": "CR7",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 21,
+      "player_id": "wwe",
+      "player_display_name": "WWE",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 22,
+      "player_id": "ignite_ninja",
+      "player_display_name": "IGNITE NINJA",
+      "ovr": 126,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 23,
+      "player_id": "king_pentax",
+      "player_display_name": "King_Pentax",
+      "ovr": 126,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 24,
+      "player_id": "đ_trung",
+      "player_display_name": "ĐTrung",
+      "ovr": 126,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 25,
+      "player_id": "anis",
+      "player_display_name": "Anis",
+      "ovr": 126,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 26,
+      "player_id": "edith",
+      "player_display_name": "EDITH",
+      "ovr": 126,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 27,
+      "player_id": "jacob",
+      "player_display_name": "jacob",
+      "ovr": 126,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 28,
+      "player_id": "campeónfc",
+      "player_display_name": "CAMPEÓNFC",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 29,
+      "player_id": "санчо",
+      "player_display_name": "санчо",
+      "ovr": 125,
+      "goals_for": 34,
+      "turns_played": 3
+    },
+    {
+      "board_order": 30,
+      "player_id": "sabil",
+      "player_display_name": "sabil",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 31,
+      "player_id": "oxytraa",
+      "player_display_name": "oxytraa",
+      "ovr": 125,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 32,
+      "player_id": "arnur",
+      "player_display_name": "Arnur",
+      "ovr": 124,
+      "goals_for": 23,
+      "turns_played": 3
+    }
+  ]
+}
