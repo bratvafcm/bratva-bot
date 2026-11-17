@@ -232,5 +232,14 @@
     "opponent_total_goals": 247,
     "result": "win",
     "status": "complete"
+  },
+  "2026-11-16_the_leviatan_fc": {
+    "date": "2026-11-16",
+    "timestamp": 1794830400000,
+    "opponent_league": "THE_LEVIATAN-FC",
+    "our_total_goals": 194,
+    "opponent_total_goals": 378,
+    "result": "loss",
+    "status": "complete"
   }
 }
