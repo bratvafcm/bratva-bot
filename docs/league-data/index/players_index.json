@@ -25,13 +25,13 @@
   },
   "doxibero1": {
     "display_name": "DOXIBERO1",
-    "total_goals": 727,
-    "total_matches": 26,
+    "total_goals": 756,
+    "total_matches": 27,
     "average_goals": 28,
-    "last_tournament_date": "2026-11-13",
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
@@ -73,13 +73,13 @@
   },
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
-    "total_goals": 550,
-    "total_matches": 23,
-    "average_goals": 23.9,
-    "last_tournament_date": "2026-11-13",
+    "total_goals": 571,
+    "total_matches": 24,
+    "average_goals": 23.8,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
@@ -541,13 +541,13 @@
   },
   "саня": {
     "display_name": "САНЯ",
-    "total_goals": 862,
-    "total_matches": 26,
-    "average_goals": 33.2,
-    "last_tournament_date": "2026-11-13",
+    "total_goals": 893,
+    "total_matches": 27,
+    "average_goals": 33.1,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
@@ -602,12 +602,12 @@
   "king_pentax": {
     "display_name": "King_Pentax",
     "total_goals": 137,
-    "total_matches": 17,
-    "average_goals": 8.1,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 18,
+    "average_goals": 7.6,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 9,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 10,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
@@ -662,24 +662,24 @@
   "msrpbot": {
     "display_name": "MSRPBOT",
     "total_goals": 73,
-    "total_matches": 13,
-    "average_goals": 5.6,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 14,
+    "average_goals": 5.2,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 13,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 14,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
   "ksfalubaz": {
     "display_name": "KSFALUBAZ",
     "total_goals": 108,
-    "total_matches": 14,
-    "average_goals": 7.7,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 15,
+    "average_goals": 7.2,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 4,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 5,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
@@ -1430,12 +1430,12 @@
   "sueeex": {
     "display_name": "sueeex",
     "total_goals": 538,
-    "total_matches": 20,
-    "average_goals": 26.9,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 21,
+    "average_goals": 25.6,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
@@ -1454,12 +1454,12 @@
   "oxytraa": {
     "display_name": "oxytraa",
     "total_goals": 108,
-    "total_matches": 9,
-    "average_goals": 12,
-    "last_tournament_date": "2026-11-01",
+    "total_matches": 10,
+    "average_goals": 10.8,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 5,
-      "last_evaluated_tournament_id": "2026-11-01_pacific_league",
+      "current_fail_streak": 6,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
@@ -1490,12 +1490,12 @@
   "henry": {
     "display_name": "Henry",
     "total_goals": 0,
-    "total_matches": 12,
+    "total_matches": 13,
     "average_goals": 0,
-    "last_tournament_date": "2026-11-13",
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 12,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 13,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
@@ -1514,36 +1514,36 @@
   "qqwwee": {
     "display_name": "qqwwee",
     "total_goals": 0,
-    "total_matches": 13,
+    "total_matches": 14,
     "average_goals": 0,
-    "last_tournament_date": "2026-11-13",
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 13,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 14,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
   "bshdjsjqkq": {
     "display_name": "bshdjsjqkq",
     "total_goals": 36,
-    "total_matches": 13,
-    "average_goals": 2.8,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 14,
+    "average_goals": 2.6,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 8,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 9,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
   "twilightfc": {
     "display_name": "TWILIGHTFC",
-    "total_goals": 332,
-    "total_matches": 13,
-    "average_goals": 25.5,
-    "last_tournament_date": "2026-11-13",
+    "total_goals": 360,
+    "total_matches": 14,
+    "average_goals": 25.7,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
@@ -1562,12 +1562,12 @@
   "cr7": {
     "display_name": "CR7",
     "total_goals": 93,
-    "total_matches": 12,
-    "average_goals": 7.8,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 13,
+    "average_goals": 7.2,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
@@ -1586,12 +1586,12 @@
   "sabil": {
     "display_name": "sabil",
     "total_goals": 0,
-    "total_matches": 9,
+    "total_matches": 10,
     "average_goals": 0,
-    "last_tournament_date": "2026-11-12",
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 9,
-      "last_evaluated_tournament_id": "2026-11-12_fc_arab_leagu",
+      "current_fail_streak": 10,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
@@ -1610,12 +1610,12 @@
   "wwe": {
     "display_name": "WWE",
     "total_goals": 94,
-    "total_matches": 12,
-    "average_goals": 7.8,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 13,
+    "average_goals": 7.2,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
@@ -1632,14 +1632,14 @@
     }
   },
   "ashrooof": {
-    "display_name": "AshrOoOf",
+    "display_name": "AshroOof",
     "total_goals": 188,
-    "total_matches": 11,
-    "average_goals": 17.1,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 12,
+    "average_goals": 15.7,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 4,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
@@ -1670,12 +1670,12 @@
   "ronaldo": {
     "display_name": "ronaldo",
     "total_goals": 147,
-    "total_matches": 7,
-    "average_goals": 21,
-    "last_tournament_date": "2026-11-01",
+    "total_matches": 8,
+    "average_goals": 18.4,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-01_pacific_league",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
@@ -1778,24 +1778,24 @@
   "jacob": {
     "display_name": "jacob",
     "total_goals": 58,
-    "total_matches": 7,
-    "average_goals": 8.3,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 8,
+    "average_goals": 7.3,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
   "anis": {
     "display_name": "Anis",
     "total_goals": 0,
-    "total_matches": 4,
+    "total_matches": 5,
     "average_goals": 0,
-    "last_tournament_date": "2026-11-13",
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 4,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 5,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
@@ -1850,12 +1850,12 @@
   "campeónfc": {
     "display_name": "CAMPEÓNFC",
     "total_goals": 30,
-    "total_matches": 4,
-    "average_goals": 7.5,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 5,
+    "average_goals": 6,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 4,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 5,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
@@ -1874,49 +1874,49 @@
   "lodos_x9": {
     "display_name": "LODOS_X9",
     "total_goals": 60,
-    "total_matches": 6,
-    "average_goals": 10,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 7,
+    "average_goals": 8.6,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
-      "flagged_for_review": false
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
+      "flagged_for_review": true
     }
   },
   "arnur": {
     "display_name": "Arnur",
-    "total_goals": 47,
-    "total_matches": 3,
-    "average_goals": 15.7,
-    "last_tournament_date": "2026-11-13",
+    "total_goals": 70,
+    "total_matches": 4,
+    "average_goals": 17.5,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
   "shadow": {
     "display_name": "shadow",
-    "total_goals": 49,
-    "total_matches": 4,
-    "average_goals": 12.3,
-    "last_tournament_date": "2026-11-13",
+    "total_goals": 77,
+    "total_matches": 5,
+    "average_goals": 15.4,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
   "kevvvl": {
     "display_name": "kevvvl",
     "total_goals": 0,
-    "total_matches": 2,
+    "total_matches": 3,
     "average_goals": 0,
-    "last_tournament_date": "2026-11-06",
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-11-06_b13",
-      "flagged_for_review": false
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
+      "flagged_for_review": true
     }
   },
   "ittihad_k9": {
@@ -1934,12 +1934,12 @@
   "đ_trung": {
     "display_name": "ĐTrung",
     "total_goals": 43,
-    "total_matches": 4,
-    "average_goals": 10.8,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 5,
+    "average_goals": 8.6,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
@@ -1958,36 +1958,36 @@
   "nazarov_tjk": {
     "display_name": "NAZAROV...TJK",
     "total_goals": 21,
-    "total_matches": 3,
-    "average_goals": 7,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 4,
+    "average_goals": 5.3,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
-      "flagged_for_review": false
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
+      "flagged_for_review": true
     }
   },
   "manchestercity01": {
     "display_name": "manchestercity01",
     "total_goals": 18,
-    "total_matches": 4,
-    "average_goals": 4.5,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 5,
+    "average_goals": 3.6,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 4,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
   "edith": {
     "display_name": "EDITH",
     "total_goals": 28,
-    "total_matches": 4,
-    "average_goals": 7,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 5,
+    "average_goals": 5.6,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 4,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 5,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": true
     }
   },
@@ -2030,24 +2030,24 @@
   "smithx": {
     "display_name": "SmithX",
     "total_goals": 22,
-    "total_matches": 3,
-    "average_goals": 7.3,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 4,
+    "average_goals": 5.5,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
   "ignite_ninja": {
     "display_name": "IGNITE NINJA",
     "total_goals": 48,
-    "total_matches": 3,
-    "average_goals": 16,
-    "last_tournament_date": "2026-11-13",
+    "total_matches": 4,
+    "average_goals": 12,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "current_fail_streak": 2,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
@@ -2066,13 +2066,13 @@
   "jadid123": {
     "display_name": "jadid123",
     "total_goals": 0,
-    "total_matches": 2,
+    "total_matches": 3,
     "average_goals": 0,
-    "last_tournament_date": "2026-11-13",
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
-      "current_fail_streak": 2,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
-      "flagged_for_review": false
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
+      "flagged_for_review": true
     }
   },
   "aska": {
@@ -2089,13 +2089,13 @@
   },
   "санчо": {
     "display_name": "санчо",
-    "total_goals": 64,
-    "total_matches": 3,
-    "average_goals": 21.3,
-    "last_tournament_date": "2026-11-13",
+    "total_goals": 98,
+    "total_matches": 4,
+    "average_goals": 24.5,
+    "last_tournament_date": "2026-11-16",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
+      "last_evaluated_tournament_id": "2026-11-16_the_leviatan_fc",
       "flagged_for_review": false
     }
   },
