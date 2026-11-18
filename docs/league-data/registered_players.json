@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-28T18:53:37.375Z",
+  "lastUpdated": "2026-11-18T15:14:36.417Z",
   "registrations": {
     "doxibero1": {
       "player_id": "doxibero1",
@@ -143,14 +143,12 @@
     }
   },
   "current_checkin": {
-    "active": false,
-    "openedAt": 1791664852853,
-    "expiresAt": 1791668452853,
+    "active": true,
+    "openedAt": 1795014876417,
+    "expiresAt": 1795018476417,
     "durationMinutes": 60,
     "channel_msg_id": 74,
-    "ready": [
-      "doxibero1"
-    ],
+    "ready": [],
     "away": []
   }
 }
