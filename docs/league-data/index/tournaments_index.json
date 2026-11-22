@@ -241,5 +241,14 @@
     "opponent_total_goals": 378,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-11-21_ss_eagle_blue": {
+    "date": "2026-11-21",
+    "timestamp": 1795262400000,
+    "opponent_league": "SS Eagle Blue",
+    "our_total_goals": 175,
+    "opponent_total_goals": 213,
+    "result": "loss",
+    "status": "complete"
   }
 }
