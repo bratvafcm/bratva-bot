@@ -7720,6 +7720,7 @@ export default async function handler(req, res) {
 
       return sendResponse(res, 200, {
         status: 'online',
+        received_url: req.url,
         bot: 'BratvaFCMBot',
         engine: GEMINI_MODEL,
         mode: 'Vercel Serverless 24/7 (Cross-Instance Album & Two-Column Support)',
