@@ -1573,7 +1573,9 @@ async function checkAndBroadcastFCMIntel(forceBroadcast = false) {
 
   const results = {
     newCodesPosted: 0,
-    newPlayersPosted: 0
+    newPlayersPosted: 0,
+    errors: [],
+    details: {}
   };
 
   // 1. Check Active Redeem Codes
@@ -1615,8 +1617,10 @@ async function checkAndBroadcastFCMIntel(forceBroadcast = false) {
         results.newCodesPosted++;
       }
     }
+    results.details.codesFound = activeCodes.length;
   } catch (err) {
     console.error('Error in redeem codes radar:', err.message);
+    results.errors.push(`Codes error: ${err.message}`);
   }
 
   // 2. Check Top Tier Meta Cards (124+ OVR)
@@ -1664,8 +1668,10 @@ async function checkAndBroadcastFCMIntel(forceBroadcast = false) {
       });
       results.newPlayersPosted += sample.length;
     }
+    results.details.playersFound = metaItems.length;
   } catch (err) {
     console.error('Error in meta players radar:', err.message);
+    results.errors.push(`Players error: ${err.message}`);
   }
 
   regData.fcm_intel.lastChecked = new Date().toISOString();
