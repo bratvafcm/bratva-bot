@@ -2122,17 +2122,5 @@
       "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
       "flagged_for_review": false
     }
-  },
-  "roxtover": {
-    "display_name": "ROXTOVER",
-    "total_goals": 727,
-    "total_matches": 26,
-    "average_goals": 28,
-    "last_tournament_date": "2026-11-13",
-    "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-13_fd_fulbo_clu",
-      "flagged_for_review": false
-    }
   }
 }
