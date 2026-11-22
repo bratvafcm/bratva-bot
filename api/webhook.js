@@ -1538,6 +1538,141 @@ async function saveRegisteredPlayersRaw(data, commitMsg = 'Update registered_pla
   return data;
 }
 
+function fetchRenderzHttps(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Connection': 'close'
+      },
+      timeout: 10000
+    }, res => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve(data));
+    });
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Request timeout'));
+    });
+  });
+}
+
+async function checkAndBroadcastFCMIntel(forceBroadcast = false) {
+  const regData = await getRegisteredPlayers();
+  if (!regData.fcm_intel) {
+    regData.fcm_intel = {
+      postedCodes: [],
+      postedPlayers: [],
+      lastChecked: null
+    };
+  }
+
+  const results = {
+    newCodesPosted: 0,
+    newPlayersPosted: 0
+  };
+
+  // 1. Check Active Redeem Codes
+  try {
+    const html = await fetchRenderzHttps('https://renderz.app/redeem-codes');
+    const codeMatches = [...html.matchAll(/code\s*:\s*["']([^"']+)["']\s*,\s*reward\s*:\s*["']([^"']+)["']\s*,\s*createdAt\s*:\s*["']([^"']+)["']\s*,\s*expired\s*:\s*(true|false)/gi)];
+    const activeCodes = codeMatches
+      .map(m => ({ code: m[1], reward: m[2], createdAt: m[3], expired: m[4] === 'true' }))
+      .filter(c => !c.expired && c.code);
+
+    for (const item of activeCodes) {
+      if (!regData.fcm_intel.postedCodes.includes(item.code) || forceBroadcast) {
+        const msg = `🎁 *إشعار عاجل: كود مكافآت جديد في FC MOBILE!* 🔥\n` +
+          `────────────────────────────\n` +
+          `أعلنت EA Sports عن توفر كود استرداد نشط جديد للاعبين:\n\n` +
+          `🔑 الكود: \`${item.code}\`\n` +
+          `📦 المكافأة: *${escapeMarkdown(item.reward)}*\n` +
+          `⏰ الحالة: *شغال حالياً (نشط)*\n\n` +
+          `⚠️ *سارع بتفعيل الكود الآن عبر موقع EA الرسمي قبل انتهاء صلاحيته!*\n` +
+          `────────────────────────────\n` +
+          `📌 *خطوات تفعيل الكود:*\n` +
+          `1. اضغط على الزر أدناه [ 🎁 تفعيل الكود مباشرة ]\n` +
+          `2. سجّل الدخول بحساب EA المرتبط بلعبتك\n` +
+          `3. أدخل الكود وستصلك المكافأة مباشرة إلى صندوق البريد داخل اللعبة.`;
+
+        const keys = {
+          inline_keyboard: [
+            [{ text: '🎁 تفعيل الكود مباشرة (EA)', url: 'https://redeem.fcm.ea.com' }],
+            [{ text: '🌐 موقع الدوري الرسمي', url: WEBSITE_URL }],
+            [{ text: '💬 مجموعة المناقشة والشات', url: 'https://t.me/BRATVAFCM' }],
+            [{ text: '🤖 فتح بوت الدوري', url: 'https://t.me/BratvaFCMBot' }]
+          ]
+        };
+
+        await sendTelegramMessage(CHANNEL_ID, msg, keys);
+        if (!regData.fcm_intel.postedCodes.includes(item.code)) {
+          regData.fcm_intel.postedCodes.push(item.code);
+        }
+        results.newCodesPosted++;
+      }
+    }
+  } catch (err) {
+    console.error('Error in redeem codes radar:', err.message);
+  }
+
+  // 2. Check Top Tier Meta Cards (124+ OVR)
+  try {
+    const html = await fetchRenderzHttps('https://renderz.app/players?sortType=added&sortDirection=DESC');
+    const jsonLdMatches = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)];
+    let metaItems = [];
+    for (const m of jsonLdMatches) {
+      try {
+        const parsed = JSON.parse(m[1]);
+        if (parsed && Array.isArray(parsed.itemListElement)) {
+          metaItems = parsed.itemListElement.filter(it => it.name && (it.name.includes('124 OVR') || it.name.includes('125 OVR')));
+          if (metaItems.length > 0) break;
+        }
+      } catch (e) {}
+    }
+
+    const unposted = metaItems.filter(it => it.url && !regData.fcm_intel.postedPlayers.includes(it.url));
+    if (unposted.length >= 3 || (forceBroadcast && metaItems.length > 0)) {
+      const sample = (unposted.length >= 3 ? unposted : metaItems).slice(0, 4);
+      const playerLines = sample.map(p => `• *${escapeMarkdown(p.name)}*\n  رابط الإحصائيات: ${p.url}`).join('\n\n');
+
+      const msg = `🔥 *رادار الميتا: كروت 124 OVR جديدة في RENDERZ!* ⚽\n` +
+        `────────────────────────────\n` +
+        `تم رصد بطاقات خارقة جديدة في قاعدة بيانات اللعبة:\n\n` +
+        `${playerLines}\n\n` +
+        `💡 *نصيحة السوق:* لا تتسرع في الشراء الآن في الماركت، انتظر استقرار الأسعار بعد جوائز الأسبوع!\n` +
+        `────────────────────────────\n` +
+        `🌐 تابع تفاصيل وإحصائيات الكروت عبر الأزرار أدناه:`;
+
+      const keys = {
+        inline_keyboard: [
+          [{ text: '🔍 استعراض الكروت على RenderZ', url: 'https://renderz.app/players?sortType=added&sortDirection=DESC' }],
+          [{ text: '🌐 موقع الدوري الرسمي', url: WEBSITE_URL }],
+          [{ text: '💬 مجموعة المناقشة والشات', url: 'https://t.me/BRATVAFCM' }],
+          [{ text: '🤖 فتح بوت الدوري', url: 'https://t.me/BratvaFCMBot' }]
+        ]
+      };
+
+      await sendTelegramMessage(CHANNEL_ID, msg, keys);
+      sample.forEach(p => {
+        if (!regData.fcm_intel.postedPlayers.includes(p.url)) {
+          regData.fcm_intel.postedPlayers.push(p.url);
+        }
+      });
+      results.newPlayersPosted += sample.length;
+    }
+  } catch (err) {
+    console.error('Error in meta players radar:', err.message);
+  }
+
+  regData.fcm_intel.lastChecked = new Date().toISOString();
+  await saveRegisteredPlayersRaw(regData, `FCM Radar: ${results.newCodesPosted} codes, ${results.newPlayersPosted} cards posted`);
+  return results;
+}
+
 async function savePlayerRegistration(reg) {
   const current = await getRegisteredPlayers();
   if (!current.registrations) current.registrations = {};
@@ -7427,6 +7562,17 @@ export default async function handler(req, res) {
             message: 'Daily rally cron is deprecated. Rally is dispatched upon lineup validation.'
           }, true);
         }
+        if (url.searchParams.get('cron') === 'intel' || url.searchParams.get('action') === 'fcm_radar') {
+          const force = url.searchParams.get('force') === 'true';
+          const radarRes = await checkAndBroadcastFCMIntel(force);
+          return sendResponse(res, 200, {
+            status: 'success',
+            action: 'fcm_radar',
+            channel: CHANNEL_ID,
+            results: radarRes,
+            timestamp: new Date().toISOString()
+          }, true);
+        }
         if (url.searchParams.get('action') === 'broadcast_welcome') {
           const wText = formatChannelWelcome('ru');
           const wKeys = getLanguageKeyboard('welcome', '0', 'ru', false);
@@ -9381,6 +9527,15 @@ export default async function handler(req, res) {
         const ciMsg = formatCheckInPrompt('ru');
         const ciKeys = getCheckInKeyboard('ru', false);
         await sendTelegramMessage(chatId, ciMsg, ciKeys);
+        return sendResponse(res, 200, 'OK');
+      }
+
+      if (text.startsWith('/intel') || text.startsWith('/radar')) {
+        const isAdm = await isUserAdmin(userId, username);
+        if (!isAdm) return sendResponse(res, 200, 'Unauthorized');
+        await sendTelegramMessage(chatId, '📡 *جارٍ فحص رادار RenderZ بحثاً عن أكواد وكروت جديدة...*');
+        const radarRes = await checkAndBroadcastFCMIntel(text.includes('force'));
+        await sendTelegramMessage(chatId, `✅ *اكتمل فحص الرادار بنجاح!*\n• الأكواد الجديدة المرسلة للقناة: *${radarRes.newCodesPosted}*\n• الكروت الجديدة المرسلة: *${radarRes.newPlayersPosted}*`);
         return sendResponse(res, 200, 'OK');
       }
 
