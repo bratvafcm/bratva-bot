@@ -7565,7 +7565,8 @@ export default async function handler(req, res) {
             message: 'Daily rally cron is deprecated. Rally is dispatched upon lineup validation.'
           }, true);
         }
-        if (rawUrl.includes('intel') || rawUrl.includes('fcm_radar')) {
+        const isCron = Boolean(req.headers && req.headers['x-vercel-cron']) || rawUrl.includes('intel') || rawUrl.includes('fcm_radar');
+        if (isCron) {
           const force = rawUrl.includes('force') || (queryParams.force === 'true');
           const radarRes = await checkAndBroadcastFCMIntel(force);
           return sendResponse(res, 200, {

@@ -6,7 +6,7 @@
   },
   "crons": [
     {
-      "path": "/api/webhook?cron=intel",
+      "path": "/api/webhook",
       "schedule": "0 * * * *"
     }
   ]
