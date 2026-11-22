@@ -250,5 +250,14 @@
     "opponent_total_goals": 213,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-11-22_los_campeones_f": {
+    "date": "2026-11-22",
+    "timestamp": 1795319827847,
+    "opponent_league": "Los Campeones F.",
+    "our_total_goals": 86,
+    "opponent_total_goals": 81,
+    "result": "win",
+    "status": "complete"
   }
 }
