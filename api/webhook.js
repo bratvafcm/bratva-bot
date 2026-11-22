@@ -7715,6 +7715,7 @@ export default async function handler(req, res) {
         }
       } catch (cronErr) {
         console.error('Cron error:', cronErr);
+        return sendResponse(res, 500, { error: cronErr.message, stack: cronErr.stack }, true);
       }
 
       return sendResponse(res, 200, {
