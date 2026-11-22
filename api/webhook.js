@@ -1921,8 +1921,11 @@ async function evaluateAllSquadStrikes() {
     const horizon = rules.rollingHorizon || 5;
     const recentMatches = pMatches.slice(-horizon);
 
-    const isLeadership = ['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1', 'roxtover'].includes(id.toLowerCase()) ||
-      Boolean(regData && regData.registrations && regData.registrations[id] && (regData.registrations[id].is_admin || regData.registrations[id].is_owner || regData.registrations[id].role === 'Owner' || regData.registrations[id].role === 'Admin'));
+    const isOwner = ['roxtover', 'doxibero1'].includes(id.toLowerCase()) ||
+      Boolean(regData && regData.registrations && regData.registrations[id] && (regData.registrations[id].is_owner || regData.registrations[id].role === 'Owner'));
+
+    const isLeadership = isOwner || ['doxibro', 'doxibero'].includes(id.toLowerCase()) ||
+      Boolean(regData && regData.registrations && regData.registrations[id] && (regData.registrations[id].is_admin || regData.registrations[id].role === 'Admin'));
 
     const isTelegramVerified = Boolean(isLeadership || (regData && regData.registrations && regData.registrations[id]));
     const playedInRecentLeague = pMatches.some(m => recentLeagueTournamentIds.has(m.tournament_id));
@@ -2000,6 +2003,7 @@ async function evaluateAllSquadStrikes() {
       isExcused,
       isTelegramVerified,
       isLeadership,
+      isOwner,
       isDecayed: recentMatches.length >= horizon && strikesCount === 0
     };
   });
@@ -2018,8 +2022,10 @@ async function evaluateAllSquadStrikes() {
   });
 
   const newRegisteredEvaluated = registeredNotInIndex.map(([pid, reg]) => {
-    const isLeadership = ['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1', 'roxtover'].includes(pid.toLowerCase()) ||
-      Boolean(reg.is_admin || reg.is_owner || reg.role === 'Owner' || reg.role === 'Admin');
+    const isOwner = ['roxtover', 'doxibero1'].includes(pid.toLowerCase()) ||
+      Boolean(reg.is_owner || reg.role === 'Owner');
+    const isLeadership = isOwner || ['doxibro', 'doxibero'].includes(pid.toLowerCase()) ||
+      Boolean(reg.is_admin || reg.role === 'Admin');
     const isCheckedIn = Boolean(currentCheckIn && currentCheckIn.ready && currentCheckIn.ready.has(pid));
     return {
       pid: pid,
@@ -2036,6 +2042,7 @@ async function evaluateAllSquadStrikes() {
       isExcused: false,
       isTelegramVerified: true,
       isLeadership,
+      isOwner,
       isDecayed: false
     };
   });
@@ -2127,6 +2134,12 @@ function calculateOptimalTournamentSize(readyCount, fallbackCount = 0) {
 }
 
 function compareLineupCandidates(a, b) {
+  // 0. League Owner (ROXTOVER) always gets #1 priority!
+  const isOwnerA = Boolean(a.isOwner || (a.pid && (a.pid.toLowerCase() === 'roxtover' || a.pid.toLowerCase() === 'doxibero1')));
+  const isOwnerB = Boolean(b.isOwner || (b.pid && (b.pid.toLowerCase() === 'roxtover' || b.pid.toLowerCase() === 'doxibero1')));
+  if (isOwnerA && !isOwnerB) return -1;
+  if (!isOwnerA && isOwnerB) return 1;
+
   // 1. Clean discipline (0 strikes) first!
   if (a.strikesIn5 === 0 && b.strikesIn5 > 0) return -1;
   if (a.strikesIn5 > 0 && b.strikesIn5 === 0) return 1;
@@ -9606,9 +9619,9 @@ export default async function handler(req, res) {
       const inputName = text.trim();
 
       // Protect League Owner / Admins accounts
-      const isTryingOwnerName = ['sanya', 'саня'].includes(inputName.toLowerCase().trim());
-      if (isTryingOwnerName) {
-        await sendTelegramMessage(chatId, '👑 *Этот аккаунт закреплён за Создателем лиги (саня).* Пожалуйста, укажите ваш собственный никнейм в игре.');
+      const isTryingOwnerName = ['roxtover', 'doxibero', 'doxibero1', 'sanya', 'саня'].includes(inputName.toLowerCase().trim());
+      if (isTryingOwnerName && strId !== '5414088590' && username.toLowerCase() !== 'roxtover') {
+        await sendTelegramMessage(chatId, '👑 *Этот аккаунт закреплён за Создателем лиги (ROXTOVER).* Пожалуйста, укажите ваш собственный никнейм в игре.');
         return sendResponse(res, 200, 'Protected Owner Account');
       }
 

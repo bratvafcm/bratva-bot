@@ -23,10 +23,11 @@
       "telegram_id": null,
       "telegram_username": null,
       "telegram_name": "саня",
-      "is_admin": true,
-      "is_owner": true,
-      "role": "Owner",
+      "is_admin": false,
+      "is_owner": false,
+      "role": "Former Owner (Left)",
       "is_new_member": false,
+      "status": "left",
       "registered_at": "2026-08-01T00:00:00.000Z"
     },
     "rogelio": {
@@ -137,7 +138,8 @@
       "telegram_username": "ROXTOVER",
       "telegram_name": "Bilal",
       "is_admin": true,
-      "role": "Admin",
+      "is_owner": true,
+      "role": "Owner",
       "is_new_member": false,
       "registered_at": "2026-09-08T20:00:00.000Z"
     }

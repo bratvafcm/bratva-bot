@@ -549,7 +549,8 @@
       "current_fail_streak": 0,
       "last_evaluated_tournament_id": "2026-11-21_ss_eagle_blue",
       "flagged_for_review": false
-    }
+    },
+    "status": "inactive"
   },
   "karim": {
     "display_name": "KARIM",
