@@ -458,7 +458,7 @@ function loadLeagueData() {
  * Format Player Tag using their exact IN-GAME NAME and Telegram ping link
  * If registered with telegram_id, outputs: [IGN](tg://user?id=123456789)
  * If registered with username, outputs: @username (IGN)
- * If leadership, outputs: 👑 саня (Owner) or [ROXTOVER](tg://user?id=...)
+ * If leadership, outputs: 👑 саня or [ROXTOVER](tg://user?id=...)
  */
 function formatPlayerTag(identifier, regData = null) {
   if (!identifier) return 'Member';
@@ -482,8 +482,13 @@ function formatPlayerTag(identifier, regData = null) {
   const ign = clean(rawIgn);
 
   if (matchedReg && (matchedReg.is_owner || matchedReg.role === 'Owner')) {
-    if (matchedReg.telegram_id) return `👑 [*${ign}*](tg://user?id=${matchedReg.telegram_id}) (Owner)`;
-    return `👑 *${ign}* (Owner)`;
+    if (matchedReg.telegram_id) return `👑 [*${ign}*](tg://user?id=${matchedReg.telegram_id})`;
+    return `👑 *${ign}*`;
+  }
+
+  if (matchedReg && matchedReg.role === 'Admin') {
+    if (matchedReg.telegram_id) return `⭐ [*${ign}*](tg://user?id=${matchedReg.telegram_id})`;
+    return `⭐ *${ign}*`;
   }
 
   if (matchedReg && matchedReg.telegram_id) {
@@ -499,9 +504,11 @@ function formatPlayerTag(identifier, regData = null) {
 
 function sanitizeMemberTag(name) {
   if (!name) return '';
-  // Strip emojis, symbols, trim, limit to 16 chars (Telegram API constraint for member tags)
+  // Strip emojis, symbols, normalize NFKC, limit to 16 chars (Telegram API constraint for member tags)
   return String(name)
+    .normalize('NFKC')
     .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}]/gu, '')
+    .replace(/[^\p{L}\p{N}._\- ]/gu, '')
     .trim()
     .slice(0, 16);
 }
@@ -1187,23 +1194,19 @@ function getAdminPanelKeyboard(currentLang = 'ru') {
                        currentLang === 'es' ? '⚠️ Alertar Infractores' :
                        currentLang === 'en' ? '⚠️ Warn Debtors' : '⚠️ Предупредить должников';
 
-  const kickLabel = currentLang === 'ar' ? '🚨 مراجعة المستبعدين' :
-                    currentLang === 'es' ? '🚨 Revisión Expulsión' :
-                    currentLang === 'en' ? '🚨 Kick Review' : '🚨 Кандидаты на Кик';
+  const strikesLabel = currentLang === 'ar' ? '⛔ مراجعة الإنذارات والاستبعاد' :
+                       currentLang === 'es' ? '⛔ Disciplina y Expulsiones' :
+                       currentLang === 'en' ? '⛔ Discipline & Kick Review' : '⛔ Страйки и Кандидаты на Кик';
 
-  const strikesLabel = currentLang === 'ar' ? '⛔ سجل الإنذارات' :
-                       currentLang === 'es' ? '⛔ Strikes y Faltas' :
-                       currentLang === 'en' ? '⛔ Strikes & Debts' : '⛔ Страйки и Должники';
-
-  const auditLabel = currentLang === 'ar' ? '👥 تدقيق الأعضاء' :
-                     currentLang === 'es' ? '👥 Auditoría Miembros' :
-                     currentLang === 'en' ? '👥 Member Audit' : '👥 Аудит базы игроков';
+  const auditLabel = currentLang === 'ar' ? '👥 تدقيق قاعدة الأعضاء' :
+                     currentLang === 'es' ? '👥 Auditoría de Miembros' :
+                     currentLang === 'en' ? '👥 Member Database Audit' : '👥 Аудит базы игроков';
 
   const syncLabel = currentLang === 'ar' ? '🔄 مزامنة التشكيلة' :
                     currentLang === 'es' ? '🔄 Sincronizar Plantilla' :
                     currentLang === 'en' ? '🔄 Sync Roster' : '🔄 Синхронизация состава';
 
-  const tagsLabel = currentLang === 'ar' ? '🏷️ مزامنة أوسمة الأعضاء (Tags)' :
+  const tagsLabel = currentLang === 'ar' ? '🏷️ مزامنة أوسمة الأعضاء' :
                     currentLang === 'es' ? '🏷️ Sincronizar Tags' :
                     currentLang === 'en' ? '🏷️ Sync Member Tags' : '🏷️ Обновить теги участников';
 
@@ -1228,14 +1231,11 @@ function getAdminPanelKeyboard(currentLang = 'ru') {
         { text: warningLabel, callback_data: 'cmd_notify_warning' }
       ],
       [
-        { text: kickLabel, callback_data: 'cmd_kicklist' },
-        { text: strikesLabel, callback_data: 'cmd_strikes' }
+        { text: strikesLabel, callback_data: 'cmd_strikes' },
+        { text: auditLabel, callback_data: 'cmd_pending' }
       ],
       [
-        { text: auditLabel, callback_data: 'cmd_pending' },
-        { text: syncLabel, callback_data: 'cmd_sync_roster' }
-      ],
-      [
+        { text: syncLabel, callback_data: 'cmd_sync_roster' },
         { text: tagsLabel, callback_data: 'cmd_sync_tags' }
       ],
       [
@@ -2217,30 +2217,24 @@ async function formatSmartLineup(requestedSize = null, lang = 'ru') {
 
   const startingLines = starting.map((p, idx) => {
     const num = idx + 1;
-    const padNum = num < 10 ? ` ${num}` : `${num}`;
+    const padNum = num < 10 ? `0${num}` : `${num}`;
     const playerTag = formatPlayerTag(p.displayName || p.pid, regData);
-    if (lang === 'en') return `${padNum}. 🟢 ${playerTag} — avg *${p.last5Avg}*G`;
-    if (lang === 'ar') return `${padNum}. 🟢 ${playerTag} — معدل *${p.last5Avg}* هدف`;
-    if (lang === 'es') return `${padNum}. 🟢 ${playerTag} — prom *${p.last5Avg}*G`;
-    return `${padNum}. 🟢 ${playerTag} — ср. *${p.last5Avg}*Г`;
+    if (lang === 'en') return `\`${padNum}\` 🟢 ${playerTag} ─── *${p.last5Avg}*G`;
+    if (lang === 'ar') return `\`${padNum}\` 🟢 ${playerTag} ─── *${p.last5Avg}* هدف`;
+    if (lang === 'es') return `\`${padNum}\` 🟢 ${playerTag} ─── *${p.last5Avg}*G`;
+    return `\`${padNum}\` 🟢 ${playerTag} ─── *${p.last5Avg}*Г`;
   });
 
   const benchLines = bench.map((p, idx) => {
     const num = size + idx + 1;
-    const padNum = num < 10 ? ` ${num}` : `${num}`;
+    const padNum = num < 10 ? `0${num}` : `${num}`;
     const playerTag = formatPlayerTag(p.displayName || p.pid, regData);
     const isReadyPlayer = hasReadyCheckIn && currentCheckIn && currentCheckIn.ready && currentCheckIn.ready.has(p.pid);
-    let tag = '';
-    if (lang === 'en') tag = isReadyPlayer ? '(Reserve — Ready)' : '(Backup)';
-    else if (lang === 'ar') tag = isReadyPlayer ? '(احتياط — جاهز)' : '(احتياط غير مؤكد)';
-    else if (lang === 'es') tag = isReadyPlayer ? '(Reserva — Listo)' : '(Reserva)';
-    else tag = isReadyPlayer ? '(Запас — Готов)' : '(Резерв)';
-
     const dot = isReadyPlayer ? '🟡' : '⚪';
-    if (lang === 'en') return `${padNum}. ${dot} ${playerTag} — avg *${p.last5Avg}*G ${tag}`;
-    if (lang === 'ar') return `${padNum}. ${dot} ${playerTag} — معدل *${p.last5Avg}* هدف ${tag}`;
-    if (lang === 'es') return `${padNum}. ${dot} ${playerTag} — prom *${p.last5Avg}*G ${tag}`;
-    return `${padNum}. ${dot} ${playerTag} — ср. *${p.last5Avg}*Г ${tag}`;
+    if (lang === 'en') return `\`${padNum}\` ${dot} ${playerTag} ─── *${p.last5Avg}*G`;
+    if (lang === 'ar') return `\`${padNum}\` ${dot} ${playerTag} ─── *${p.last5Avg}* هدف`;
+    if (lang === 'es') return `\`${padNum}\` ${dot} ${playerTag} ─── *${p.last5Avg}*G`;
+    return `\`${padNum}\` ${dot} ${playerTag} ─── *${p.last5Avg}*Г`;
   });
 
   // Insufficient players alert banner (< 4 ready)
@@ -2275,7 +2269,7 @@ async function formatSmartLineup(requestedSize = null, lang = 'ru') {
       statusBanner +
       `⚜️ *STARTING SQUAD (TOP ${size}):*\n${startingLines.join('\n')}\n`;
     if (benchLines.length > 0) {
-      msg += `────────────────────\n📋 *BENCH & RESERVES:*\n${benchLines.join('\n')}\n`;
+      msg += `────────────────────\n📋 *BENCH & RESERVES (🟡 Ready / ⚪ Standby):*\n${benchLines.join('\n')}\n`;
     }
     msg += `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚡ *Selection Criteria (Auto-Ranked):*\n` +
@@ -2294,7 +2288,7 @@ async function formatSmartLineup(requestedSize = null, lang = 'ru') {
       statusBanner +
       `⚜️ *التشكيلة الأساسية (أفضل ${size} لاعبين):*\n${startingLines.join('\n')}\n`;
     if (benchLines.length > 0) {
-      msg += `────────────────────\n📋 *دكة البدلاء (الاحتياط):*\n${benchLines.join('\n')}\n`;
+      msg += `────────────────────\n📋 *دكة البدلاء (🟡 جاهز / ⚪ غير مؤكد):*\n${benchLines.join('\n')}\n`;
     }
     msg += `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚡ *معايير الاختيار الذكية (ترتيب تلقائي):*\n` +
@@ -2313,7 +2307,7 @@ async function formatSmartLineup(requestedSize = null, lang = 'ru') {
       statusBanner +
       `⚜️ *TITULARES (TOP ${size}):*\n${startingLines.join('\n')}\n`;
     if (benchLines.length > 0) {
-      msg += `────────────────────\n📋 *BANQUILLO Y RESERVAS:*\n${benchLines.join('\n')}\n`;
+      msg += `────────────────────\n📋 *BANQUILLO Y RESERVAS (🟡 Listo / ⚪ Reserva):*\n${benchLines.join('\n')}\n`;
     }
     msg += `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚡ *Criterios de Selección Inteligente:*\n` +
@@ -2332,7 +2326,7 @@ async function formatSmartLineup(requestedSize = null, lang = 'ru') {
     statusBanner +
     `⚜️ *ОСНОВНОЙ СОСТАВ (ТОП-${size}):*\n${startingLines.join('\n')}\n`;
   if (benchLines.length > 0) {
-    msg += `────────────────────\n📋 *СКАМЕЙКА ЗАПАСНЫХ (РЕЗЕРВ):*\n${benchLines.join('\n')}\n`;
+    msg += `────────────────────\n📋 *СКАМЕЙКА ЗАПАСНЫХ (🟡 Готов / ⚪ Резерв):*\n${benchLines.join('\n')}\n`;
   }
   msg += `━━━━━━━━━━━━━━━━━━━━\n` +
     `⚡ *Критерии автоматического отбора:*\n` +
@@ -2843,7 +2837,29 @@ async function formatTournamentsBrowser(filter = '7', lang = 'ru') {
     `📊 *Отображается матчей:* *${list.length}*`;
 }
 
-function formatTournamentScorecard(t, lang = 'ru') {
+async function getTournamentUnplayed(t) {
+  if (!t || !Array.isArray(t.matches)) return [];
+  const activeRoster = await getActiveRoster();
+  const rosterMembers = Array.isArray(activeRoster.members) ? activeRoster.members : [];
+
+  const participantIds = new Set();
+  for (const m of t.matches) {
+    if (m.player_id) participantIds.add(String(m.player_id).normalize('NFKC').trim().toLowerCase());
+    if (m.player_display_name) participantIds.add(String(m.player_display_name).normalize('NFKC').trim().toLowerCase());
+  }
+
+  const unplayed = [];
+  for (const member of rosterMembers) {
+    const cleanMem = String(member).normalize('NFKC').trim();
+    const lower = cleanMem.toLowerCase();
+    if (!participantIds.has(lower)) {
+      unplayed.push(cleanMem);
+    }
+  }
+  return unplayed.sort((a, b) => a.localeCompare(b));
+}
+
+function formatTournamentScorecard(t, lang = 'ru', view = 'overview', unplayed = []) {
   if (!t) return 'No match data available.';
   const opp = bidiIsolate(t.opponent_league || 'OPPONENT');
   const ourScore = t.our_total_goals != null ? t.our_total_goals : (t.our_score || 0);
@@ -2857,7 +2873,7 @@ function formatTournamentScorecard(t, lang = 'ru') {
     cleanDate = `${d}.${m}.${y}`;
   }
 
-  // Sort participants by goals descending
+  // Sort participants by goals descending, then turns
   const matches = ((t.matches || []).slice()).sort((a, b) => {
     const gA = a.goals_for !== undefined ? a.goals_for : 0;
     const gB = b.goals_for !== undefined ? b.goals_for : 0;
@@ -2872,43 +2888,144 @@ function formatTournamentScorecard(t, lang = 'ru') {
   const squadSize = matches.length;
 
   let headerOutcome = '';
-  let subTitle = '';
-
   if (lang === 'ar') {
     headerOutcome = isWin ? '🟢 *فوز مستحق لكتيبة BRATVA*' : (isDraw ? '🟡 *تعادل شاق وقوي*' : '🔴 *خسارة في هذه الجولة*');
-    subTitle = `👥 *سجل هدافي ومشاركي المباراة (من الأعلى للأدنى):*`;
   } else if (lang === 'en') {
     headerOutcome = isWin ? '🟢 *BRATVA FCM: VICTORY!*' : (isDraw ? '🟡 *HARD-FOUGHT DRAW*' : '🔴 *MATCH RESULT: DEFEAT*');
-    subTitle = `👥 *PARTICIPANT SCORECARD (Ranked by Goals):*`;
   } else if (lang === 'es') {
     headerOutcome = isWin ? '🟢 *¡VICTORIA DE BRATVA FCM!*' : (isDraw ? '🟡 *EMPATE MUY DISPUTADO*' : '🔴 *RESULTADO: DERROTA*');
-    subTitle = `👥 *ACTA DE PARTICIPANTES (De mayor a menor):*`;
   } else {
     // Russian
     headerOutcome = isWin ? '🟢 *ПОБЕДА БРАТВА FCM!*' : (isDraw ? '🟡 *БОЕВАЯ НИЧЬЯ*' : '🔴 *ИТОГ МАТЧА: ПОРАЖЕНИЕ*');
-    subTitle = `👥 *ПРОТОКОЛ УЧАСТНИКОВ (По забитым голам):*`;
   }
 
-  const rows = matches.map((m, i) => {
-    const rank = i + 1;
-    const medal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : `${rank < 10 ? ' ' : ''}${rank}.`));
-    const name = bidiIsolate(m.player_display_name || m.player_id || `Player ${rank}`);
+  // 1. SCORERS VIEW (Full squad scorecard)
+  if (view === 'scorers') {
+    const rows = matches.map((m, i) => {
+      const rank = i + 1;
+      const padRank = rank < 10 ? `0${rank}` : `${rank}`;
+      const medal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : (m.goals_for > 0 ? '🟢' : '🔴')));
+      const rawName = m.player_display_name || m.player_id || `Player ${rank}`;
+      const name = clean(rawName).slice(0, 15);
+      const goals = m.goals_for !== undefined ? m.goals_for : 0;
+      const turns = m.turns_played !== undefined ? m.turns_played : 0;
+      const turnWarn = turns < 3 ? ' ❌' : '';
+      const goalUnit = lang === 'ar' ? ' هدف' : (lang === 'ru' ? 'Г' : 'G');
+
+      return `\`${padRank}\` ${medal} *${name}* ─── *${goals}*${goalUnit} (${turns}/3)${turnWarn}`;
+    });
+
+    const playerList = rows.length > 0 ? rows.join('\n') : (lang === 'ar' ? '_لا توجد بيانات_' : '_No player data recorded_');
+
+    if (lang === 'ar') {
+      return `⚽ *بروتوكول هدافي وتشكيلة المباراة (${squadSize} لاعب)* ⚽\n` +
+        `🏆 *دوري БРАТВА FCM ضد ${opp}*\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `${playerList}\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `📊 *مجموع الأهداف:* *${ourScore}*  |  ⚽ *الهجمات:* ${totalTurnsPlayed}/${maxPossibleTurns}`;
+    } else if (lang === 'en') {
+      return `⚽ *FULL MATCH SCORECARD (${squadSize} PLAYERS)* ⚽\n` +
+        `🏆 *BRATVA FCM vs ${opp}*\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `${playerList}\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `📊 *Total Goals:* *${ourScore}*  |  ⚽ *Turns Played:* ${totalTurnsPlayed}/${maxPossibleTurns}`;
+    } else if (lang === 'es') {
+      return `⚽ *ACTA COMPLETA DEL PARTIDO (${squadSize} JUGADORES)* ⚽\n` +
+        `🏆 *BRATVA FCM vs ${opp}*\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `${playerList}\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `📊 *Goles Totales:* *${ourScore}*  |  ⚽ *Turnos:* ${totalTurnsPlayed}/${maxPossibleTurns}`;
+    } else {
+      return `⚽ *ПРОТОКОЛ УЧАСТНИКОВ И ГОЛОВ (${squadSize} ИГРОКОВ)* ⚽\n` +
+        `🏆 *БРАТВА FCM vs ${opp}*\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `${playerList}\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `📊 *Всего голов:* *${ourScore}*  |  ⚽ *Ходов сыграно:* ${totalTurnsPlayed}/${maxPossibleTurns}`;
+    }
+  }
+
+  // 2. UNPLAYED / MISSED VIEW
+  if (view === 'unplayed') {
+    const list = Array.isArray(unplayed) ? unplayed : [];
+    const maxShow = 30;
+    const shown = list.slice(0, maxShow);
+    const remaining = list.length - shown.length;
+
+    const rows = shown.map((name, i) => {
+      const rank = i + 1;
+      const padRank = rank < 10 ? `0${rank}` : `${rank}`;
+      return `\`${padRank}\` ⚪ *${clean(name)}*`;
+    });
+
+    let unplayedListStr = rows.join('\n');
+    if (remaining > 0) {
+      const moreWord = lang === 'ar' ? `و ${remaining} لاعبين آخرين في الاحتياط...` :
+                       lang === 'es' ? `y ${remaining} jugadores más en reserva...` :
+                       lang === 'en' ? `and ${remaining} more players in reserves...` :
+                       `и ещё ${remaining} игроков в запасе...`;
+      unplayedListStr += `\n... ${moreWord}`;
+    }
+    if (rows.length === 0) {
+      unplayedListStr = lang === 'ar' ? '✅ _جميع عناصر الكتيبة شاركوا في هذه المباراة!_' :
+                        lang === 'es' ? '✅ _¡Todos los jugadores activos participaron!_' :
+                        lang === 'en' ? '✅ _All active squad members participated!_' :
+                        '✅ _Все активные игроки состава приняли участие в матче!_';
+    }
+
+    if (lang === 'ar') {
+      return `🚫 *اللاعبون الذين لم يشاركوا في اللقاء (${list.length})* 🚫\n` +
+        `🏆 *دوري БРАТВА FCM ضد ${opp}*\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `📋 *قائمة الغائبين والاحتياط:* \n\n` +
+        `${unplayedListStr}\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `ℹ️ _اللاعبون المسجلون الذين لم يتواجدوا في هذا البروتوكول._`;
+    } else if (lang === 'en') {
+      return `🚫 *PLAYERS WHO MISSED THIS MATCH (${list.length})* 🚫\n` +
+        `🏆 *BRATVA FCM vs ${opp}*\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `📋 *Reserve & Absent Squad Members:* \n\n` +
+        `${unplayedListStr}\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `ℹ️ _Active squad members not included in this match scorecard._`;
+    } else if (lang === 'es') {
+      return `🚫 *JUGADORES QUE NO PARTICIPARON (${list.length})* 🚫\n` +
+        `🏆 *BRATVA FCM vs ${opp}*\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `📋 *Banquillo y Jugadores Ausentes:* \n\n` +
+        `${unplayedListStr}\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `ℹ️ _Jugadores activos que no jugaron este partido._`;
+    } else {
+      return `🚫 *НЕ ПРИНИМАЛИ УЧАСТИЕ В МАТЧЕ (${list.length})* 🚫\n` +
+        `🏆 *БРАТВА FCM vs ${opp}*\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `📋 *Резерв и пропустившие матч игроки:* \n\n` +
+        `${unplayedListStr}\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `ℹ️ _Игроки состава, не вошедшие в официальный протокол матча._`;
+    }
+  }
+
+  // 3. DEFAULT: OVERVIEW VIEW
+  const podium = [];
+  const medals = ['🥇', '🥈', '🥉'];
+  const topCount = Math.min(3, matches.length);
+  for (let i = 0; i < topCount; i++) {
+    const m = matches[i];
+    const rawName = m.player_display_name || m.player_id || `MVP ${i+1}`;
+    const name = clean(rawName).slice(0, 16);
     const goals = m.goals_for !== undefined ? m.goals_for : 0;
     const turns = m.turns_played !== undefined ? m.turns_played : 0;
-    const turnWarn = turns < 3 ? ' ❌' : '';
+    const goalUnit = lang === 'ar' ? 'هدف' : (lang === 'ru' ? 'голов' : 'goals');
+    podium.push(`${medals[i]} ${i+1}. *${name}* ─── *${goals}* ${goalUnit} (${turns}/3)`);
+  }
 
-    const turnText = lang === 'ar' ? `${turns}/3 جولات` :
-                     lang === 'es' ? `${turns}/3 turnos` :
-                     lang === 'en' ? `${turns}/3 turns` : `${turns}/3 ходов`;
-
-    const goalWord = lang === 'ar' ? 'هدف' :
-                     lang === 'es' ? 'goles' :
-                     lang === 'en' ? 'goals' : 'голов';
-
-    return `${medal} *${name}* — *${goals}* ${goalWord} (${turnText})${turnWarn}`;
-  });
-
-  const playerList = rows.length > 0 ? rows.join('\n') : (lang === 'ar' ? '_لا توجد تفاصيل للمشاركين_' : '_No participant details recorded_');
+  const podiumStr = podium.length > 0 ? podium.join('\n') : (lang === 'ar' ? '_لا توجد بيانات_' : '_No MVP data_');
 
   if (lang === 'ar') {
     return `🏆 *دوري БРАТВА FCM ضد ${opp}* ⚔️\n` +
@@ -2916,12 +3033,12 @@ function formatTournamentScorecard(t, lang = 'ru') {
       `${headerOutcome}\n` +
       `📊 *النتيجة النهائية:* *${ourScore}* : *${oppScore}*\n` +
       `📅 *التاريخ:* ${cleanDate}  |  👥 *الحجم:* ${squadSize} ضد ${squadSize}\n` +
-      `⚽ *إجمالي الهجمات الملعوبة:* ${totalTurnsPlayed}/${maxPossibleTurns}\n` +
+      `⚽ *الهجمات الملعوبة:* ${totalTurnsPlayed}/${maxPossibleTurns}\n` +
       `────────────────────\n` +
-      `${subTitle}\n\n` +
-      `${playerList}\n` +
+      `👑 *أفضل 3 لاعبين في المباراة (MVP):*\n` +
+      `${podiumStr}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🌐 *سجل بطولات الرابطة كاملة في الموقع الرسمي:*`;
+      `👇 *اضغط على الأزرار أسفله للاطلاع على التشكيلة كاملة أو الغائبين:*`;
   } else if (lang === 'en') {
     return `🏆 *BRATVA FCM vs ${opp}* ⚔️\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
@@ -2930,10 +3047,10 @@ function formatTournamentScorecard(t, lang = 'ru') {
       `📅 *Date:* ${cleanDate}  |  👥 *Format:* ${squadSize}v${squadSize}\n` +
       `⚽ *Turns Played:* ${totalTurnsPlayed}/${maxPossibleTurns}\n` +
       `────────────────────\n` +
-      `${subTitle}\n\n` +
-      `${playerList}\n` +
+      `👑 *MATCH TOP 3 MVPS (PODIUM):*\n` +
+      `${podiumStr}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🌐 *Official League Match Center:*`;
+      `👇 *Tap buttons below to view full squad scorecard or absent players:*`;
   } else if (lang === 'es') {
     return `🏆 *BRATVA FCM vs ${opp}* ⚔️\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
@@ -2942,10 +3059,10 @@ function formatTournamentScorecard(t, lang = 'ru') {
       `📅 *Fecha:* ${cleanDate}  |  👥 *Formato:* ${squadSize}v${squadSize}\n` +
       `⚽ *Turnos jugados:* ${totalTurnsPlayed}/${maxPossibleTurns}\n` +
       `────────────────────\n` +
-      `${subTitle}\n\n` +
-      `${playerList}\n` +
+      `👑 *TOP 3 MVPS DEL PARTIDO:*\n` +
+      `${podiumStr}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🌐 *Sitio Oficial de la Liga:*`;
+      `👇 *Toca los botones abajo para ver la plantilla o los ausentes:*`;
   } else {
     // Russian
     return `🏆 *БРАТВА FCM vs ${opp}* ⚔️\n` +
@@ -2955,24 +3072,36 @@ function formatTournamentScorecard(t, lang = 'ru') {
       `📅 *Дата:* ${cleanDate}  |  👥 *Формат:* ${squadSize}x${squadSize}\n` +
       `⚽ *Сыграно ходов:* ${totalTurnsPlayed}/${maxPossibleTurns}\n` +
       `────────────────────\n` +
-      `${subTitle}\n\n` +
-      `${playerList}\n` +
+      `👑 *ТОП-3 ИГРОКА МАТЧА (MVP):*\n` +
+      `${podiumStr}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🌐 *Официальный сайт лиги:*`;
+      `👇 *Нажмите кнопки ниже для полного протокола или списка запасных:*`;
   }
 }
 
-function getTournamentScorecardKeyboard(tId, filter = '7', currentLang = 'ru') {
+function getTournamentScorecardKeyboard(tId, filter = '7', currentLang = 'ru', view = 'overview', squadSize = 0, missedCount = 0) {
   const ruLabel = currentLang === 'ru' ? '• 🇷🇺 RU •' : '🇷🇺 RU';
   const enLabel = currentLang === 'en' ? '• 🇬🇧 EN •' : '🇬🇧 EN';
   const arLabel = currentLang === 'ar' ? '• 🇸🇦 AR •' : '🇸🇦 AR';
   const esLabel = currentLang === 'es' ? '• 🇪🇸 ES •' : '🇪🇸 ES';
 
-  const backLabel = currentLang === 'ar' ? '🔙 العودة لقائمة البطولات' :
+  const backLabel = currentLang === 'ar' ? '🔙 العودة للبطولات' :
                     currentLang === 'es' ? '🔙 Volver a Torneos' :
                     currentLang === 'en' ? '🔙 Back to Tournaments' : '🔙 Назад к турнирам';
 
-  const menuLabel = currentLang === 'ar' ? '📋 العودة للقائمة الرئيسية' :
+  const overviewLabel = currentLang === 'ar' ? '🔙 ملخص المباراة' :
+                        currentLang === 'es' ? '🔙 Resumen del Partido' :
+                        currentLang === 'en' ? '🔙 Match Overview' : '🔙 Обзор матча';
+
+  const squadLabel = currentLang === 'ar' ? `⚽ التشكيلة والأهداف (${squadSize})` :
+                     currentLang === 'es' ? `⚽ Plantilla y Goles (${squadSize})` :
+                     currentLang === 'en' ? `⚽ Full Squad & Goals (${squadSize})` : `⚽ Состав и голы (${squadSize})`;
+
+  const missedLabel = currentLang === 'ar' ? `🚫 الغائبون والاحتياط (${missedCount})` :
+                      currentLang === 'es' ? `🚫 Ausentes y Reserva (${missedCount})` :
+                      currentLang === 'en' ? `🚫 Missed / Reserves (${missedCount})` : `🚫 Не играли / Резерв (${missedCount})`;
+
+  const menuLabel = currentLang === 'ar' ? '📋 القائمة الرئيسية' :
                     currentLang === 'es' ? '📋 Menú Principal' :
                     currentLang === 'en' ? '📋 Main Menu' : '📋 Главное Меню';
 
@@ -2980,25 +3109,43 @@ function getTournamentScorecardKeyboard(tId, filter = '7', currentLang = 'ru') {
                     currentLang === 'es' ? '🌐 Web Oficial de la Liga' :
                     currentLang === 'en' ? '🌐 Official League Website' : '🌐 Официальный сайт лиги';
 
-  return {
-    inline_keyboard: [
-      [
-        { text: backLabel, callback_data: `back_t_${filter}_${currentLang}` }
-      ],
-      [
-        { text: ruLabel, callback_data: `tab_tdetail_${tId}_${filter}_ru` },
-        { text: enLabel, callback_data: `tab_tdetail_${tId}_${filter}_en` },
-        { text: arLabel, callback_data: `tab_tdetail_${tId}_${filter}_ar` },
-        { text: esLabel, callback_data: `tab_tdetail_${tId}_${filter}_es` }
-      ],
-      [
-        { text: menuLabel, callback_data: 'cmd_menu' }
-      ],
-      [
-        { text: siteLabel, url: `${WEBSITE_URL}?tournament=${encodeURIComponent(tId)}` }
-      ]
-    ]
-  };
+  const rows = [];
+
+  if (view === 'overview') {
+    rows.push([{ text: squadLabel, callback_data: `tab_td_${tId}_${filter}_${currentLang}_sc` }]);
+    if (missedCount > 0) {
+      rows.push([{ text: missedLabel, callback_data: `tab_td_${tId}_${filter}_${currentLang}_un` }]);
+    }
+  } else if (view === 'scorers') {
+    rows.push([{ text: overviewLabel, callback_data: `tab_td_${tId}_${filter}_${currentLang}_ov` }]);
+    if (missedCount > 0) {
+      rows.push([{ text: missedLabel, callback_data: `tab_td_${tId}_${filter}_${currentLang}_un` }]);
+    }
+  } else if (view === 'unplayed') {
+    rows.push([{ text: overviewLabel, callback_data: `tab_td_${tId}_${filter}_${currentLang}_ov` }]);
+    rows.push([{ text: squadLabel, callback_data: `tab_td_${tId}_${filter}_${currentLang}_sc` }]);
+  }
+
+  // Back to tournaments list
+  rows.push([{ text: backLabel, callback_data: `back_t_${filter}_${currentLang}` }]);
+
+  // Language bar (keeps current view!)
+  rows.push([
+    { text: ruLabel, callback_data: `tab_td_${tId}_${filter}_ru_${view}` },
+    { text: enLabel, callback_data: `tab_td_${tId}_${filter}_en_${view}` },
+    { text: arLabel, callback_data: `tab_td_${tId}_${filter}_ar_${view}` },
+    { text: esLabel, callback_data: `tab_td_${tId}_${filter}_es_${view}` }
+  ]);
+
+  // Main menu
+  rows.push([{ text: menuLabel, callback_data: 'cmd_menu' }]);
+
+  // Website URL (in overview)
+  if (view === 'overview') {
+    rows.push([{ text: siteLabel, url: `${WEBSITE_URL}?tournament=${encodeURIComponent(tId)}` }]);
+  }
+
+  return { inline_keyboard: rows };
 }
 
 const formatTournaments = (lang = 'ru') => formatTournamentsBrowser('7', lang);
@@ -8314,8 +8461,11 @@ export default async function handler(req, res) {
           return sendResponse(res, 200, 'OK');
         }
 
-        const scorecardMsg = formatTournamentScorecard(t, targetLang);
-        const scorecardKeys = getTournamentScorecardKeyboard(tId, filter, targetLang);
+        const unplayedList = await getTournamentUnplayed(t);
+        const squadSize = (t.matches || []).length;
+        const missedCount = unplayedList.length;
+        const scorecardMsg = formatTournamentScorecard(t, targetLang, 'overview', unplayedList);
+        const scorecardKeys = getTournamentScorecardKeyboard(tId, filter, targetLang, 'overview', squadSize, missedCount);
         if (cb.message && cb.message.message_id) {
           await editTelegramMessage(chatId, cb.message.message_id, scorecardMsg, scorecardKeys);
         } else {
@@ -8325,16 +8475,37 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'OK');
       }
 
-      if (data.startsWith('tab_tdetail_')) {
-        const parts = data.replace('tab_tdetail_', '').split('_');
-        const targetLang = parts[parts.length - 1] || 'ru';
-        const filter = parts[parts.length - 2] || '7';
-        const tId = parts.slice(0, parts.length - 2).join('_');
+      if (data.startsWith('tab_tdetail_') || data.startsWith('tab_td_')) {
+        const prefix = data.startsWith('tab_td_') ? 'tab_td_' : 'tab_tdetail_';
+        const raw = data.replace(prefix, '');
+        const parts = raw.split('_');
+
+        const validViews = ['overview', 'scorers', 'unplayed', 'ov', 'sc', 'un'];
+        const validLangs = ['ru', 'en', 'ar', 'es'];
+
+        let view = 'overview';
+        if (parts.length > 0 && validViews.includes(parts[parts.length - 1])) {
+          const v = parts.pop();
+          if (v === 'ov' || v === 'overview') view = 'overview';
+          else if (v === 'sc' || v === 'scorers') view = 'scorers';
+          else if (v === 'un' || v === 'unplayed') view = 'unplayed';
+        }
+
+        let targetLang = 'ru';
+        if (parts.length > 0 && validLangs.includes(parts[parts.length - 1])) {
+          targetLang = parts.pop();
+        }
+
+        const filter = parts.pop() || '7';
+        const tId = parts.join('_');
 
         const t = await getTournamentById(tId);
         if (t) {
-          const scorecardMsg = formatTournamentScorecard(t, targetLang);
-          const scorecardKeys = getTournamentScorecardKeyboard(tId, filter, targetLang);
+          const unplayedList = await getTournamentUnplayed(t);
+          const squadSize = (t.matches || []).length;
+          const missedCount = unplayedList.length;
+          const scorecardMsg = formatTournamentScorecard(t, targetLang, view, unplayedList);
+          const scorecardKeys = getTournamentScorecardKeyboard(tId, filter, targetLang, view, squadSize, missedCount);
           if (cb.message && cb.message.message_id) {
             await editTelegramMessage(chatId, cb.message.message_id, scorecardMsg, scorecardKeys);
           }
