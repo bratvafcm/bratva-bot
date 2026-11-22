@@ -1540,16 +1540,23 @@ async function saveRegisteredPlayersRaw(data, commitMsg = 'Update registered_pla
 
 function fetchRenderzHttps(url) {
   return new Promise((resolve, reject) => {
-    // Route through Jina edge reader to bypass Cloudflare datacenter 403 on Vercel serverless
-    const proxyUrl = `https://r.jina.ai/${url}`;
-    const req = https.get(proxyUrl, {
+    // Add __data.json if not present to fetch SvelteKit raw JSON
+    let targetUrl = url;
+    if (url.includes('redeem-codes') && !url.includes('__data.json')) {
+      targetUrl = 'https://renderz.app/redeem-codes/__data.json';
+    } else if (url.includes('players') && !url.includes('__data.json')) {
+      targetUrl = 'https://renderz.app/players/__data.json?sortType=added&sortDirection=DESC';
+    }
+
+    const req = https.get(targetUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'x-return-format': 'html',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Connection': 'close'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': 'https://renderz.app/',
+        'Origin': 'https://renderz.app'
       },
-      timeout: 15000
+      timeout: 10000
     }, res => {
       let data = '';
       res.on('data', chunk => data += chunk);
@@ -1586,11 +1593,19 @@ async function checkAndBroadcastFCMIntel(forceBroadcast = false) {
     const html = resCodes.html || '';
     results.details.codesStatusCode = resCodes.statusCode;
     results.details.codesHtmlLen = html.length;
-    results.details.codesPreview = html.substring(0, 150);
-    const codeMatches = [...html.matchAll(/code\s*:\s*["']([^"']+)["']\s*,\s*reward\s*:\s*["']([^"']+)["']\s*,\s*createdAt\s*:\s*["']([^"']+)["']\s*,\s*expired\s*:\s*(true|false)/gi)];
-    const activeCodes = codeMatches
-      .map(m => ({ code: m[1], reward: m[2], createdAt: m[3], expired: m[4] === 'true' }))
-      .filter(c => !c.expired && c.code);
+
+    let activeCodes = [];
+    const devalueMatches = [...html.matchAll(/\{"code":\d+,"reward":\d+,"createdAt":\d+,"expired":\d+\},"([^"]+)","([^"]+)","([^"]+)",(true|false)/g)];
+    if (devalueMatches.length > 0) {
+      activeCodes = devalueMatches
+        .map(m => ({ code: m[1], reward: m[2], createdAt: m[3], expired: m[4] === 'true' }))
+        .filter(c => !c.expired && c.code);
+    } else {
+      const codeMatches = [...html.matchAll(/code\s*:\s*["']([^"']+)["']\s*,\s*reward\s*:\s*["']([^"']+)["']\s*,\s*createdAt\s*:\s*["']([^"']+)["']\s*,\s*expired\s*:\s*(true|false)/gi)];
+      activeCodes = codeMatches
+        .map(m => ({ code: m[1], reward: m[2], createdAt: m[3], expired: m[4] === 'true' }))
+        .filter(c => !c.expired && c.code);
+    }
 
     for (const item of activeCodes) {
       if (!regData.fcm_intel.postedCodes.includes(item.code) || forceBroadcast) {
@@ -1635,17 +1650,35 @@ async function checkAndBroadcastFCMIntel(forceBroadcast = false) {
     const html = resPlayers.html || '';
     results.details.playersStatusCode = resPlayers.statusCode;
     results.details.playersHtmlLen = html.length;
-    results.details.playersPreview = html.substring(0, 150);
-    const jsonLdMatches = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)];
+
     let metaItems = [];
-    for (const m of jsonLdMatches) {
-      try {
-        const parsed = JSON.parse(m[1]);
-        if (parsed && Array.isArray(parsed.itemListElement)) {
-          metaItems = parsed.itemListElement.filter(it => it.name && (it.name.includes('124 OVR') || it.name.includes('125 OVR')));
-          if (metaItems.length > 0) break;
+    const cardMatches = [...html.matchAll(/,(\d{7,10}),\d+,"([A-Za-z\u00C0-\u024F\s\.\-]{2,25})","([A-Za-z\u00C0-\u024F\s\.\-]{2,25})","(ST|RW|LW|CAM|CM|CDM|CB|LB|RB|GK|CF|RM|LM|RWB|LWB)"/g)];
+    if (cardMatches.length > 0) {
+      const seen = new Set();
+      for (const m of cardMatches) {
+        const name = `${m[2]} ${m[3]}`.trim();
+        const pos = m[4];
+        if (!seen.has(name) && seen.size < 6) {
+          seen.add(name);
+          metaItems.push({
+            name: `${name} (${pos})`,
+            url: 'https://renderz.app/players?sortType=added&sortDirection=DESC'
+          });
         }
-      } catch (e) {}
+      }
+    }
+
+    if (metaItems.length === 0) {
+      const jsonLdMatches = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)];
+      for (const m of jsonLdMatches) {
+        try {
+          const parsed = JSON.parse(m[1]);
+          if (parsed && Array.isArray(parsed.itemListElement)) {
+            metaItems = parsed.itemListElement.filter(it => it.name && (it.name.includes('124 OVR') || it.name.includes('125 OVR')));
+            if (metaItems.length > 0) break;
+          }
+        } catch (e) {}
+      }
     }
 
     const unposted = metaItems.filter(it => it.url && !regData.fcm_intel.postedPlayers.includes(it.url));
