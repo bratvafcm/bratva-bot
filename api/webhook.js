@@ -7555,25 +7555,25 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       try {
         const host = (req.headers && req.headers.host) ? req.headers.host : 'bratva-bot.vercel.app';
-        const url = new URL(req.url, `https://${host}`);
+        const rawUrl = req.url || '';
+        const url = new URL(rawUrl, `https://${host}`);
         const queryParams = (req.query && typeof req.query === 'object') ? req.query : {};
-        const cronParam = queryParams.cron || url.searchParams.get('cron');
-        const actionParam = queryParams.action || url.searchParams.get('action');
 
-        if (cronParam === 'daily_rally') {
+        if (rawUrl.includes('daily_rally')) {
           return sendResponse(res, 200, {
             status: 'ignored',
             message: 'Daily rally cron is deprecated. Rally is dispatched upon lineup validation.'
           }, true);
         }
-        if (cronParam === 'intel' || actionParam === 'fcm_radar') {
-          const force = (queryParams.force === 'true') || (url.searchParams.get('force') === 'true');
+        if (rawUrl.includes('intel') || rawUrl.includes('fcm_radar')) {
+          const force = rawUrl.includes('force') || (queryParams.force === 'true');
           const radarRes = await checkAndBroadcastFCMIntel(force);
           return sendResponse(res, 200, {
             status: 'success',
             action: 'fcm_radar',
             channel: CHANNEL_ID,
             results: radarRes,
+            rawUrl: rawUrl,
             timestamp: new Date().toISOString()
           }, true);
         }
