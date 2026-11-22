@@ -1551,7 +1551,7 @@ function fetchRenderzHttps(url) {
     }, res => {
       let data = '';
       res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(data));
+      res.on('end', () => resolve({ statusCode: res.statusCode, html: data }));
     });
     req.on('error', reject);
     req.on('timeout', () => {
@@ -1580,7 +1580,11 @@ async function checkAndBroadcastFCMIntel(forceBroadcast = false) {
 
   // 1. Check Active Redeem Codes
   try {
-    const html = await fetchRenderzHttps('https://renderz.app/redeem-codes');
+    const resCodes = await fetchRenderzHttps('https://renderz.app/redeem-codes');
+    const html = resCodes.html || '';
+    results.details.codesStatusCode = resCodes.statusCode;
+    results.details.codesHtmlLen = html.length;
+    results.details.codesPreview = html.substring(0, 150);
     const codeMatches = [...html.matchAll(/code\s*:\s*["']([^"']+)["']\s*,\s*reward\s*:\s*["']([^"']+)["']\s*,\s*createdAt\s*:\s*["']([^"']+)["']\s*,\s*expired\s*:\s*(true|false)/gi)];
     const activeCodes = codeMatches
       .map(m => ({ code: m[1], reward: m[2], createdAt: m[3], expired: m[4] === 'true' }))
@@ -1625,7 +1629,11 @@ async function checkAndBroadcastFCMIntel(forceBroadcast = false) {
 
   // 2. Check Top Tier Meta Cards (124+ OVR)
   try {
-    const html = await fetchRenderzHttps('https://renderz.app/players?sortType=added&sortDirection=DESC');
+    const resPlayers = await fetchRenderzHttps('https://renderz.app/players?sortType=added&sortDirection=DESC');
+    const html = resPlayers.html || '';
+    results.details.playersStatusCode = resPlayers.statusCode;
+    results.details.playersHtmlLen = html.length;
+    results.details.playersPreview = html.substring(0, 150);
     const jsonLdMatches = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)];
     let metaItems = [];
     for (const m of jsonLdMatches) {
