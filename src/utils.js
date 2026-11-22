@@ -14,6 +14,7 @@ export const RAW_DIR = path.join(LEAGUE_DATA_DIR, '_raw');
  * Lowercase, spaces to underscores, strip special chars, handle Cyrillic by transliterating.
  */
 export function slugify(name) {
+    if (!name) return '';
     const cyrillicMap = {
         'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh',
         'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o',
@@ -21,7 +22,7 @@ export function slugify(name) {
         'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
     };
     
-    let slug = name.toLowerCase().split('').map(char => cyrillicMap[char] !== undefined ? cyrillicMap[char] : char).join('');
+    let slug = String(name).normalize('NFKC').toLowerCase().split('').map(char => cyrillicMap[char] !== undefined ? cyrillicMap[char] : char).join('');
     
     slug = slug.replace(/\s+/g, '_');
     slug = slug.replace(/[^a-z0-9_]/g, '');

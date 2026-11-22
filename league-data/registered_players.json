@@ -1,19 +1,6 @@
 {
   "lastUpdated": "2026-10-10T20:41:05.251Z",
   "registrations": {
-    "doxibero1": {
-      "player_id": "doxibero1",
-      "display_name": "DOXIBERO1",
-      "in_game_name": "DOXIBERO1",
-      "uid": null,
-      "telegram_id": 5414088590,
-      "telegram_username": "DOXIBERO",
-      "telegram_name": "Bilal",
-      "is_admin": true,
-      "role": "Admin",
-      "is_new_member": false,
-      "registered_at": "2026-09-08T20:00:00.000Z"
-    },
     "doxibero": {
       "player_id": "doxibero",
       "display_name": "DOXIBÉRO",
@@ -96,6 +83,19 @@
       "telegram_name": "Josue",
       "is_new_member": false,
       "registered_at": "2026-09-10T14:32:10.130Z"
+    },
+    "roxtover": {
+      "player_id": "roxtover",
+      "display_name": "ROXTOVER",
+      "in_game_name": "ＲＯＸＴＯＶＥＲ",
+      "uid": null,
+      "telegram_id": 5414088590,
+      "telegram_username": "ROXTOVER",
+      "telegram_name": "Bilal",
+      "is_admin": true,
+      "role": "Admin",
+      "is_new_member": false,
+      "registered_at": "2026-09-08T20:00:00.000Z"
     }
   },
   "current_checkin": {
@@ -105,7 +105,7 @@
     "durationMinutes": 60,
     "channel_msg_id": 74,
     "ready": [
-      "doxibero1"
+      "roxtover"
     ],
     "away": []
   }

@@ -111,7 +111,7 @@ const I18N = {
     rules_btn_title: 'League Rules',
     news_btn_title: 'League Updates',
     s1_concluded_title: 'SEASON 1 CONCLUDED • 27 TOURNAMENTS',
-    s1_concluded_subtitle: '13W - 1D - 13L (7,285 Goals) • Champion: DOXIBERO1 (695G)',
+    s1_concluded_subtitle: '13W - 1D - 13L (7,285 Goals) • Champion: ROXTOVER (695G)',
     s2_launch_tag: 'SEASON 2 (FC 27) KICKOFF TONIGHT 1:00 AM'
   },
   ar: {
@@ -225,7 +225,7 @@ const I18N = {
     rules_btn_title: 'قوانين الدوري',
     news_btn_title: 'تحديثات الدوري',
     s1_concluded_title: 'ختام الموسم الأول (Season 1) • 27 بطولة',
-    s1_concluded_subtitle: '13 فوز - 1 تعادل - 13 خسارة (7,285 هدف) • الهداف التاريخي: DOXIBERO1 (695 هدف)',
+    s1_concluded_subtitle: '13 فوز - 1 تعادل - 13 خسارة (7,285 هدف) • الهداف التاريخي: ROXTOVER (695 هدف)',
     s2_launch_tag: 'انطلاق الموسم الثاني (FC 27) الليلة الساعة 1:00 صباحاً'
   },
   ru: {
@@ -339,7 +339,7 @@ const I18N = {
     rules_btn_title: 'Правила лиги',
     news_btn_title: 'Новости лиги',
     s1_concluded_title: 'ФИНАЛ 1 СЕЗОНА • 27 ТУРНИРОВ',
-    s1_concluded_subtitle: '13В - 1Н - 13П (7 285 голов) • Чемпион: DOXIBERO1 (695Г)',
+    s1_concluded_subtitle: '13В - 1Н - 13П (7 285 голов) • Чемпион: ROXTOVER (695Г)',
     s2_launch_tag: 'СТАРТ 2 СЕЗОНА (FC 27) СЕГОДНЯ В 1:00 МСК'
   },
   es: {
@@ -454,7 +454,7 @@ const I18N = {
     rules_btn_title: 'Reglas de la Liga',
     news_btn_title: 'Noticias de la Liga',
     s1_concluded_title: 'TEMPORADA 1 FINALIZADA • 27 TORNEOS',
-    s1_concluded_subtitle: '13V - 1E - 13D (7.285 Goles) • Campeón: DOXIBERO1 (695G)',
+    s1_concluded_subtitle: '13V - 1E - 13D (7.285 Goles) • Campeón: ROXTOVER (695G)',
     s2_launch_tag: 'TEMPORADA 2 (FC 27) COMIENZA ESTA NOCHE 1:00 AM'
   }
 };
@@ -1324,7 +1324,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
   renderAll();
 
-  // Handle URL query deep link: ?player=doxibero1 or ?tab=members
+  // Handle URL query deep link: ?player=roxtover or ?tab=members
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const playerParam = urlParams.get('player');
@@ -1379,11 +1379,11 @@ function updateSeasonBanner() {
   const tagEl = document.querySelector('[data-i18n="s2_launch_tag"]');
   if (state.currentSeason === '26') {
     if (titleEl) titleEl.textContent = 'SEASON 26 ARCHIVE • 27 TOURNAMENTS';
-    if (subEl) subEl.textContent = '13W - 1D - 13L (7,285 Goals) • Champion: DOXIBERO1 (695G)';
+    if (subEl) subEl.textContent = '13W - 1D - 13L (7,285 Goals) • Champion: ROXTOVER (695G)';
     if (tagEl) tagEl.textContent = 'ARCHIVED HISTORIC DATA';
   } else {
     if (titleEl) titleEl.textContent = 'SEASON 26 ARCHIVED • 27 TOURNAMENTS';
-    if (subEl) subEl.textContent = '13W - 1D - 13L (7,285 Goals) • Champion: DOXIBERO1 (695G)';
+    if (subEl) subEl.textContent = '13W - 1D - 13L (7,285 Goals) • Champion: ROXTOVER (695G)';
     if (tagEl) tagEl.textContent = 'SEASON 27 ACTIVE • KICKOFF TONIGHT';
   }
 }

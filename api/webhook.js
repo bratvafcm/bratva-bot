@@ -140,8 +140,8 @@ async function isUserAdmin(userId, username = '') {
   const strId = String(userId || '');
   const u = (username || '').toLowerCase().replace('@', '').trim();
 
-  // 0. Hardcoded super-admin Bilal (@DOXIBERO) & Creator: ALWAYS ADMIN
-  if (strId === '5414088590' || u === 'doxibero' || u === 'doxibero1' || u === 'bilalmorocci') {
+  // 0. Hardcoded super-admin Bilal (@ROXTOVER / @DOXIBERO) & Creator: ALWAYS ADMIN
+  if (strId === '5414088590' || u === 'roxtover' || u === 'doxibero' || u === 'doxibero1' || u === 'bilalmorocci') {
     return true;
   }
 
@@ -458,11 +458,11 @@ function loadLeagueData() {
  * Format Player Tag using their exact IN-GAME NAME and Telegram ping link
  * If registered with telegram_id, outputs: [IGN](tg://user?id=123456789)
  * If registered with username, outputs: @username (IGN)
- * If leadership, outputs: 👑 саня (Owner) or [DOXIBERO1](tg://user?id=...)
+ * If leadership, outputs: 👑 саня (Owner) or [ROXTOVER](tg://user?id=...)
  */
 function formatPlayerTag(identifier, regData = null) {
   if (!identifier) return 'Member';
-  const cleanId = String(identifier).trim();
+  const cleanId = String(identifier).normalize('NFKC').trim();
   const lower = cleanId.toLowerCase();
   const normalized = lower.replace(/[\s_\-]+/g, '');
 
@@ -471,9 +471,9 @@ function formatPlayerTag(identifier, regData = null) {
   let matchedReg = registrations[cleanId] || registrations[lower] || registrations[normalized];
   if (!matchedReg) {
     matchedReg = Object.values(registrations).find(r => {
-      const rIgn = (r.in_game_name || '').toLowerCase().replace(/[\s_\-]+/g, '');
-      const rDisp = (r.display_name || '').toLowerCase().replace(/[\s_\-]+/g, '');
-      const rPid = (r.player_id || '').toLowerCase().replace(/[\s_\-]+/g, '');
+      const rIgn = String(r.in_game_name || '').normalize('NFKC').toLowerCase().replace(/[\s_\-]+/g, '');
+      const rDisp = String(r.display_name || '').normalize('NFKC').toLowerCase().replace(/[\s_\-]+/g, '');
+      const rPid = String(r.player_id || '').normalize('NFKC').toLowerCase().replace(/[\s_\-]+/g, '');
       return rIgn === normalized || rDisp === normalized || rPid === normalized;
     });
   }
@@ -849,7 +849,7 @@ RULES FOR EACH TOURNAMENT:
    - "rn" vs "m": The letters "rn" tightly touch and can look like "m". The player "Arnur" is spelled A-r-n-u-r. It is NEVER "Amur"! Always extract as "Arnur".
    - Board #1 League Owner: The owner at board 1 is "САНЯ" (Cyrillic letters С-А-Н-Я). NEVER extract as "СВНЯ" or "СВЯ"!
    - Cyrillic "санчо": Always extract as "санчо", NEVER "свнчо".
-   - DOXIBERO1: Ends in the digit "1", NEVER the letter "I" (DOXIBERO1, not DOXIBEROI).
+   - ROXTOVER (formerly DOXIBERO1): In-game name is written in fullwidth characters 'ＲＯＸＴＯＶＥＲ' or normal 'ROXTOVER'. Always extract as "ROXTOVER" or "ＲＯＸＴＯＶＥＲ".
    - sueeex: Ends in the letter "x", NEVER "k" (sueeex, not sueeek).
    - KOUSTAV_007: Contains a single underscore, NEVER double underscores (KOUSTAV_007, not KOUSTAV__007).
    - Đ Trung: Vietnamese character "Đ", NEVER "Ð".
@@ -1924,7 +1924,7 @@ async function evaluateAllSquadStrikes() {
     const horizon = rules.rollingHorizon || 5;
     const recentMatches = pMatches.slice(-horizon);
 
-    const isLeadership = ['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1'].includes(id.toLowerCase()) ||
+    const isLeadership = ['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1', 'roxtover'].includes(id.toLowerCase()) ||
       Boolean(regData && regData.registrations && regData.registrations[id] && (regData.registrations[id].is_admin || regData.registrations[id].is_owner || regData.registrations[id].role === 'Owner' || regData.registrations[id].role === 'Admin'));
 
     const isTelegramVerified = Boolean(isLeadership || (regData && regData.registrations && regData.registrations[id]));
@@ -2021,7 +2021,7 @@ async function evaluateAllSquadStrikes() {
   });
 
   const newRegisteredEvaluated = registeredNotInIndex.map(([pid, reg]) => {
-    const isLeadership = ['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1'].includes(pid.toLowerCase()) ||
+    const isLeadership = ['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1', 'roxtover'].includes(pid.toLowerCase()) ||
       Boolean(reg.is_admin || reg.is_owner || reg.role === 'Owner' || reg.role === 'Admin');
     const isCheckedIn = Boolean(currentCheckIn && currentCheckIn.ready && currentCheckIn.ready.has(pid));
     return {
@@ -3005,7 +3005,7 @@ const formatTournaments = (lang = 'ru') => formatTournamentsBrowser('7', lang);
 
 function findPlayerByQuery(query) {
   if (!query || typeof query !== 'string') return null;
-  const q = query.trim().toLowerCase();
+  const q = query.normalize('NFKC').trim().toLowerCase();
   const localData = loadLeagueData();
   const pIndex = (playersIndexCache && Object.keys(playersIndexCache).length > 0) ? playersIndexCache : (localData.pIndex || {});
   const players = localData.players || [];
@@ -3071,10 +3071,10 @@ function findPlayerByQuery(query) {
 
 function generatePlayerStatsMessage(query, lang = 'ru') {
   if (!query || !query.trim()) {
-    if (lang === 'ar') return '⚠️ يرجى تحديد اسم اللاعب، مثال: `/player DOXIBERO1`';
-    if (lang === 'es') return '⚠️ Por favor indica el nombre de un jugador, ej: `/player DOXIBERO1`';
-    if (lang === 'en') return '⚠️ Please specify a player name, e.g.: `/player DOXIBERO1`';
-    return '⚠️ Пожалуйста, укажите имя игрока, например: `/player DOXIBERO1`';
+    if (lang === 'ar') return '⚠️ يرجى تحديد اسم اللاعب، مثال: `/player ROXTOVER`';
+    if (lang === 'es') return '⚠️ Por favor indica el nombre de un jugador, ej: `/player ROXTOVER`';
+    if (lang === 'en') return '⚠️ Please specify a player name, e.g.: `/player ROXTOVER`';
+    return '⚠️ Пожалуйста, укажите имя игрока, например: `/player ROXTOVER`';
   }
   const localData = loadLeagueData();
   const pIndex = (playersIndexCache && Object.keys(playersIndexCache).length > 0) ? playersIndexCache : (localData.pIndex || {});
@@ -3728,8 +3728,8 @@ function getCanonicalPlayerKey(pid, displayName) {
   if (normPid === 'doxibro' || normPid === 'doxibero' || normName === 'doxibéro' || normName === 'doxibero') {
     return 'doxibro';
   }
-  if (normPid === 'doxibero1' || normName === 'doxibero1') {
-    return 'doxibero1';
+  if (normPid === 'roxtover' || normName === 'roxtover' || normPid === 'doxibero1' || normName === 'doxibero1' || normName === 'ｒｏｘｔｏｖｅｒ') {
+    return 'roxtover';
   }
   if (normPid === 'tima' || normPid === 'тима' || normName === 'тима' || normName === 'tima') {
     return 'tima';
@@ -3918,7 +3918,7 @@ async function getCleanSquadTelegramStatus() {
     }
     if (!reg && registeredMap[key]) reg = registeredMap[key];
 
-    let isJoined = Boolean(reg || key === 'sanya' || key === 'саня' || key === 'doxibro' || key === 'doxibero' || key === 'doxibero1');
+    let isJoined = Boolean(reg || key === 'sanya' || key === 'саня' || key === 'doxibro' || key === 'doxibero' || key === 'doxibero1' || key === 'roxtover');
     if (!isJoined) {
       const normKey = key.toLowerCase().replace(/[\s_]+/g, '_');
       const targetName = (pInfo.displayName || '').toLowerCase().trim();
@@ -4028,7 +4028,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `🎖️ *HONORABLE DEDICATION: SEASON 26 TOP 3 SCORERS*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `Massive salute to the three legends who powered BRATVA's offense with historic scoring records:\n` +
-      `🥇 *DOXIBERO1* — *695 Goals* (26 Matches)\n` +
+      `🥇 *ROXTOVER* — *695 Goals* (26 Matches)\n` +
       `🥈 *Mohamed\\_Osama* — *542 Goals* (25 Matches)\n` +
       `🥉 *саня (Sanya)* — *532 Goals* (15 Matches | 35.5 Avg)\n\n` +
       `❤️ *SPECIAL SALUTE TO ALL MEMBERS WHO JOINED & REGISTERED*\n` +
@@ -4063,7 +4063,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `🎖️ *ПОЧЕТНОЕ ПОСВЯЩЕНИЕ: ТОП-3 БОМБАРДИРА 26 СЕЗОНА*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `Низкий поклон и респект трем титанам атаки, показавшим колоссальную результативность:\n` +
-      `🥇 *DOXIBERO1* — *695 Голов* (26 Матчей)\n` +
+      `🥇 *ROXTOVER* — *695 Голов* (26 Матчей)\n` +
       `🥈 *Mohamed\\_Osama* — *542 Гола* (25 Матчей)\n` +
       `🥉 *саня (Sanya)* — *532 Гола* (15 Матчей | Среднее: 35.5)\n\n` +
       `❤️ *ОСОБАЯ БЛАГОДАРНОСТЬ ВСЕМ ВСТУПИВШИМ БОЙЦАМ*\n` +
@@ -4098,7 +4098,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `🎖️ *HOMENAJE DE HONOR: TOP 3 GOLEADORES DE LA TEMPORADA 26*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `Un gran reconocimiento a los tres titanes que lideraron la ofensiva de BRATVA con cifras históricas:\n` +
-      `🥇 *DOXIBERO1* — *695 Goles* (26 Partidos)\n` +
+      `🥇 *ROXTOVER* — *695 Goles* (26 Partidos)\n` +
       `🥈 *Mohamed\\_Osama* — *542 Goles* (25 Partidos)\n` +
       `🥉 *саня (Sanya)* — *532 Goles* (15 Partidos | Promedio: 35.5)\n\n` +
       `❤️ *AGRADECIMIENTO ESPECIAL A TODOS LOS MIEMBROS UNIDOS*\n` +
@@ -4134,7 +4134,7 @@ function formatSeason27Announcement(lang = 'ar') {
     `🎖️ *إهداء شرفي خاص لـ TOP 3 (أساطير الموسم 26)*\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
     `تحية إجلال وتقدير لثلاثي القمة الذين قادوا هجوم BRATVA بأعلى معدلات تسجيل للأهداف:\n` +
-    `🥇 *DOXIBERO1* — *695 هدفاً* (26 مباراة)\n` +
+    `🥇 *ROXTOVER* — *695 هدفاً* (26 مباراة)\n` +
     `🥈 *Mohamed\\_Osama* — *542 هدفاً* (25 مباراة)\n` +
     `🥉 *саня (Sanya)* — *532 هدفاً* (15 مباراة | معدل استثنائي 35.5)\n\n` +
     `❤️ *شكر وتقدير خاص لجميع الأبطال المنضمين*\n` +
@@ -4558,7 +4558,7 @@ function formatMyStatsPrompt(lang = 'ru') {
   if (lang === 'en') {
     return `👤 *PERSONAL PLAYER STATS DASHBOARD* 👤\n\n` +
       `👉 *How to view your personal performance card:*\n` +
-      `Simply type and send your in-game nickname here in chat (e.g.: \`DOXIBERO1\` or \`/player DOXIBERO1\`)!\n\n` +
+      `Simply type and send your in-game nickname here in chat (e.g.: \`ROXTOVER\` or \`/player ROXTOVER\`)!\n\n` +
       `📊 You'll get your full stats:\n` +
       `• Total career goals & tournament count\n` +
       `• Scoring average per match\n` +
@@ -4569,7 +4569,7 @@ function formatMyStatsPrompt(lang = 'ru') {
   if (lang === 'ar') {
     return `👤 *لوحة الإحصائيات الشخصية للاعب* 👤\n\n` +
       `👉 *كيفية عرض بطاقة أدائك وإحصائياتك الشخصية:*\n` +
-      `أرسل ببساطة اسمك في اللعبة هنا في المحادثة (مثال: \`DOXIBERO1\` أو \`/player DOXIBERO1\`)!\n\n` +
+      `أرسل ببساطة اسمك في اللعبة هنا في المحادثة (مثال: \`ROXTOVER\` أو \`/player ROXTOVER\`)!\n\n` +
       `📊 ستحصل فوراً على تقريرك الشامل:\n` +
       `• إجمالي أهدافك وعدد البطولات التي شاركت فيها\n` +
       `• معدلك التهديفي في كل مباراة\n` +
@@ -4580,7 +4580,7 @@ function formatMyStatsPrompt(lang = 'ru') {
   if (lang === 'es') {
     return `👤 *PANEL DE RENDIMIENTO PERSONAL* 👤\n\n` +
       `👉 *Cómo ver tus estadísticas personales:*\n` +
-      `¡Simplemente escribe tu nombre de jugador aquí en el chat (ejemplo: \`DOXIBERO1\` o \`/player DOXIBERO1\`)!\n\n` +
+      `¡Simplemente escribe tu nombre de jugador aquí en el chat (ejemplo: \`ROXTOVER\` o \`/player ROXTOVER\`)!\n\n` +
       `📊 Recibirás al instante:\n` +
       `• Total de goles y torneos jugados\n` +
       `• Promedio goleador por partido\n` +
@@ -4590,7 +4590,7 @@ function formatMyStatsPrompt(lang = 'ru') {
   }
   return `👤 *ЛИЧНАЯ СТАТИСТИКА ИГРОКА* 👤\n\n` +
     `👉 *Как посмотреть свою карточку и результаты:*\n` +
-    `Просто напишите ваш игровой никнейм здесь в чате (например: \`DOXIBERO1\` или \`/player DOXIBERO1\`)!\n\n` +
+    `Просто напишите ваш игровой никнейм здесь в чате (например: \`ROXTOVER\` или \`/player ROXTOVER\`)!\n\n` +
     `📊 Бот мгновенно выдаст:\n` +
     `• Всего забитых голов и сыгранных турниров\n` +
     `• Средняя результативность за матч\n` +
@@ -5059,8 +5059,10 @@ const CANONICAL_OCR_ALIASES = {
   'саня': { id: 'саня', name: 'САНЯ' },
   'свнчо': { id: 'санчо', name: 'санчо' },
   'санчо': { id: 'санчо', name: 'санчо' },
-  'doxiberoi': { id: 'doxibero1', name: 'DOXIBERO1' },
-  'doxibero1': { id: 'doxibero1', name: 'DOXIBERO1' },
+  'roxtover': { id: 'roxtover', name: 'ROXTOVER' },
+  'ｒｏｘｔｏｖｅｒ': { id: 'roxtover', name: 'ROXTOVER' },
+  'doxiberoi': { id: 'roxtover', name: 'ROXTOVER' },
+  'doxibero1': { id: 'roxtover', name: 'ROXTOVER' },
   'doxibéro': { id: 'doxibero', name: 'DOXIBERO' },
   'doxibero': { id: 'doxibero', name: 'DOXIBERO' },
   'doxibro': { id: 'doxibero', name: 'DOXIBERO' },
@@ -5084,6 +5086,7 @@ const CANONICAL_OCR_ALIASES = {
 function normalizeOcrName(str) {
   if (!str) return '';
   return String(str)
+    .normalize('NFKC')
     .trim()
     .toLowerCase()
     .replace(/[\s_\.\-]+/g, '')
@@ -5207,7 +5210,7 @@ function resolvePlayerLanguage(player) {
   }
   const name = String(player.displayName || '');
   const user = String(player.telegramUsername || '');
-  if (/[\u0600-\u06FF]/.test(name) || name.toLowerCase().includes('doxibero') || name.toLowerCase().includes('doxibro') || user.toLowerCase().includes('doxibero')) {
+  if (/[\u0600-\u06FF]/.test(name) || name.toLowerCase().includes('roxtover') || user.toLowerCase().includes('roxtover') || name.toLowerCase().includes('doxibero') || name.toLowerCase().includes('doxibro') || user.toLowerCase().includes('doxibero')) {
     return 'ar';
   }
   if (/[а-яА-ЯёЁ]/.test(name) || name.toLowerCase().includes('sanya') || name.toLowerCase().includes('l1onchik') || user.toLowerCase().includes('l1onchik')) {
@@ -6593,7 +6596,7 @@ async function analyzeInGameRoster(extractedNames) {
   const newlyRemoved = [];
   for (const [pid, pData] of Object.entries(pIndex)) {
     if (pData.status === 'inactive') continue;
-    if (['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1'].includes(pid.toLowerCase())) continue;
+    if (['sanya', 'саня', 'doxibro', 'doxibero', 'doxibero1', 'roxtover'].includes(pid.toLowerCase())) continue;
 
     const stillInGame = isPlayerInGame(pid, pData.display_name);
     if (!stillInGame) {
@@ -7944,7 +7947,7 @@ export default async function handler(req, res) {
         const matchedRegs = Object.values(regData.registrations || {}).filter(r => {
           const matchId = r.telegram_id && String(r.telegram_id) === strId;
           const matchUname = userUname && r.telegram_username && (r.telegram_username.toLowerCase().replace('@', '') === userUname);
-          const matchBilal = (userUname === 'bilalmorocci' || userUname === 'doxibero' || strId === '5414088590') && (r.player_id === 'doxibero1');
+          const matchBilal = (userUname === 'bilalmorocci' || userUname === 'doxibero' || userUname === 'roxtover' || strId === '5414088590') && (r.player_id === 'roxtover' || r.player_id === 'doxibero1');
           return matchId || matchUname || matchBilal;
         });
 
@@ -7960,7 +7963,7 @@ export default async function handler(req, res) {
         }
 
         // Deduplicate: if multiple registrations matched (e.g. aliases), keep only 1 canonical player_id
-        const primaryReg = matchedRegs.find(r => r.player_id === 'doxibero1') || matchedRegs[0];
+        const primaryReg = matchedRegs.find(r => r.player_id === 'roxtover' || r.player_id === 'doxibero1') || matchedRegs[0];
         const activeRegs = primaryReg ? [primaryReg] : matchedRegs;
 
         for (const reg of activeRegs) {
@@ -8015,7 +8018,7 @@ export default async function handler(req, res) {
         const matchedRegs = Object.values(regData.registrations || {}).filter(r => {
           const matchId = r.telegram_id && String(r.telegram_id) === strId;
           const matchUname = userUname && r.telegram_username && (r.telegram_username.toLowerCase().replace('@', '') === userUname);
-          const matchBilal = (userUname === 'bilalmorocci' || userUname === 'doxibero' || strId === '5414088590') && (r.player_id === 'doxibero1');
+          const matchBilal = (userUname === 'bilalmorocci' || userUname === 'doxibero' || userUname === 'roxtover' || strId === '5414088590') && (r.player_id === 'roxtover' || r.player_id === 'doxibero1');
           return matchId || matchUname || matchBilal;
         });
 
@@ -8031,7 +8034,7 @@ export default async function handler(req, res) {
         }
 
         // Deduplicate: if multiple registrations matched (e.g. aliases), keep only 1 canonical player_id
-        const primaryRegAway = matchedRegs.find(r => r.player_id === 'doxibero1') || matchedRegs[0];
+        const primaryRegAway = matchedRegs.find(r => r.player_id === 'roxtover' || r.player_id === 'doxibero1') || matchedRegs[0];
         const activeRegsAway = primaryRegAway ? [primaryRegAway] : matchedRegs;
 
         for (const reg of activeRegsAway) {
@@ -8811,7 +8814,7 @@ export default async function handler(req, res) {
     if (isPrivate) {
       const fChat = message.forward_from_chat || (message.forward_origin && (message.forward_origin.chat || message.forward_origin.channel));
       if (fChat && (fChat.type === 'group' || fChat.type === 'supergroup')) {
-        const isOwnerOrAdm = strId === '5414088590' || username.toLowerCase() === 'bilalmorocci' || username.toLowerCase() === 'doxibero' || (await isUserAdmin(userId, username));
+        const isOwnerOrAdm = strId === '5414088590' || username.toLowerCase() === 'bilalmorocci' || username.toLowerCase() === 'doxibero' || username.toLowerCase() === 'roxtover' || (await isUserAdmin(userId, username));
         if (isOwnerOrAdm) {
           cachedLinkedGroupId = fChat.id;
           const bText = formatSeason27Announcement('ar');
@@ -9076,7 +9079,7 @@ export default async function handler(req, res) {
           return sendResponse(res, 200, 'Already registered');
         }
 
-        // Check if message is a player name query (e.g. "DOXIBERO1")
+        // Check if message is a player name query (e.g. "ROXTOVER")
         if (!text.startsWith('/')) {
           const matched = findPlayerByQuery(text);
           if (matched) {
@@ -9689,7 +9692,7 @@ export default async function handler(req, res) {
       }
       const parts = text.split(/\s+/).slice(1);
       if (parts.length === 0) {
-        await sendTelegramMessage(chatId, '⚠️ *Usage:* `/forgive <player_name>`\nExample: `/forgive DOXIBERO1`');
+        await sendTelegramMessage(chatId, '⚠️ *Usage:* `/forgive <player_name>`\nExample: `/forgive ROXTOVER`');
         return sendResponse(res, 200, 'OK');
       }
       const query = parts.join(' ');

@@ -11,18 +11,6 @@
       "flagged_for_review": true
     }
   },
-  "doxibero1": {
-    "display_name": "DOXIBERO1",
-    "total_goals": 695,
-    "total_matches": 26,
-    "average_goals": 26.7,
-    "last_tournament_date": "2026-09-23",
-    "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
-      "flagged_for_review": false
-    }
-  },
   "doxibro": {
     "display_name": "DOXIBÉRO",
     "total_goals": 328,
@@ -1342,6 +1330,18 @@
     "eligibility_streak": {
       "current_fail_streak": 1,
       "last_evaluated_tournament_id": "2026-09-22_fc_the_conqueror",
+      "flagged_for_review": false
+    }
+  },
+  "roxtover": {
+    "display_name": "ROXTOVER",
+    "total_goals": 695,
+    "total_matches": 26,
+    "average_goals": 26.7,
+    "last_tournament_date": "2026-09-23",
+    "eligibility_streak": {
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-09-23_x_elite_legends",
       "flagged_for_review": false
     }
   }

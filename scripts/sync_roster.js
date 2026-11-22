@@ -122,7 +122,7 @@ function processDirectory(baseDir) {
     if (!isMatch) {
       if (pId === 'sanya' || pSummary.display_name.toLowerCase().includes('саня')) isMatch = true;
       if (pId === 'doxibro' && userNormalized.has('doxiber0')) isMatch = true;
-      if (pId === 'doxibero1' && userNormalized.has('doxiber01')) isMatch = true;
+      if ((pId === 'roxtover' || pId === 'doxibero1') && (userNormalized.has('roxtover') || userNormalized.has('doxiber01') || userNormalized.has('roxt0ver'))) isMatch = true;
     }
 
     const pFilePath = path.join(playersDir, `${pId}.json`);

@@ -88,5 +88,167 @@
     "opponent_total_goals": 174,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-10-10_dominators": {
+    "date": "2026-10-10",
+    "timestamp": 1791646513780,
+    "opponent_league": "DOMINATORS",
+    "our_total_goals": 108,
+    "opponent_total_goals": 107,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-10-13_enez_fc_fan": {
+    "date": "2026-10-13",
+    "timestamp": 1791926408663,
+    "opponent_league": "ENEZ FC FAN",
+    "our_total_goals": 194,
+    "opponent_total_goals": 187,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-10-15_boss_fc_c1": {
+    "date": "2026-10-15",
+    "timestamp": 1792024045825,
+    "opponent_league": "Boss FC - C1",
+    "our_total_goals": 204,
+    "opponent_total_goals": 205,
+    "result": "loss",
+    "status": "complete"
+  },
+  "2026-10-20_garuda_official": {
+    "date": "2026-10-20",
+    "timestamp": 1792492818426,
+    "opponent_league": "GARUDA OFFICIAL",
+    "our_total_goals": 356,
+    "opponent_total_goals": 321,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-10-22_legends": {
+    "date": "2026-10-22",
+    "timestamp": 1792670400000,
+    "opponent_league": "Legends",
+    "our_total_goals": 309,
+    "opponent_total_goals": 424,
+    "result": "loss",
+    "status": "complete"
+  },
+  "2026-10-23_ultimate_cptns": {
+    "date": "2026-10-23",
+    "timestamp": 1792787436834,
+    "opponent_league": "Ultimate cptns",
+    "our_total_goals": 403,
+    "opponent_total_goals": 209,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-10-24_bluuelook_fc": {
+    "date": "2026-10-24",
+    "timestamp": 1792876841925,
+    "opponent_league": "BLUUELOOK FC",
+    "our_total_goals": 331,
+    "opponent_total_goals": 430,
+    "result": "loss",
+    "status": "complete"
+  },
+  "2026-10-27_profi_ua": {
+    "date": "2026-10-27",
+    "timestamp": 1793134969577,
+    "opponent_league": "ProFi UA",
+    "our_total_goals": 381,
+    "opponent_total_goals": 333,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-10-29_th_nevergiveup": {
+    "date": "2026-10-29",
+    "timestamp": 1793255326001,
+    "opponent_league": "TH NeverGiveUp",
+    "our_total_goals": 367,
+    "opponent_total_goals": 357,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-10-31_reyes_fc26": {
+    "date": "2026-10-31",
+    "timestamp": 1793448000000,
+    "opponent_league": "REYES_FC26",
+    "our_total_goals": 381,
+    "opponent_total_goals": 128,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-11-01_pacific_league": {
+    "date": "2026-11-01",
+    "timestamp": 1793534400000,
+    "opponent_league": "PACIFIC LEAGUE",
+    "our_total_goals": 289,
+    "opponent_total_goals": 358,
+    "result": "loss",
+    "status": "complete"
+  },
+  "2026-11-02_garuda_619": {
+    "date": "2026-11-02",
+    "timestamp": 1793620800000,
+    "opponent_league": "GARUDA 619",
+    "our_total_goals": 341,
+    "opponent_total_goals": 503,
+    "result": "loss",
+    "status": "complete"
+  },
+  "2026-11-06_b13": {
+    "date": "2026-11-06",
+    "timestamp": 1793973528488,
+    "opponent_league": "#B13",
+    "our_total_goals": 300,
+    "opponent_total_goals": 619,
+    "result": "loss",
+    "status": "complete"
+  },
+  "2026-11-09_baan_charan_club": {
+    "date": "2026-11-09",
+    "timestamp": 1794223292322,
+    "opponent_league": "Baan Charan Club",
+    "our_total_goals": 262,
+    "opponent_total_goals": 160,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-11-12_fc_arab_leagu": {
+    "date": "2026-11-12",
+    "timestamp": 1794484800000,
+    "opponent_league": "FC ARAB LEAGU",
+    "our_total_goals": 224,
+    "opponent_total_goals": 197,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-11-13_fd_fulbo_clu": {
+    "date": "2026-11-13",
+    "timestamp": 1794608201380,
+    "opponent_league": "FD FULBO CLU",
+    "our_total_goals": 281,
+    "opponent_total_goals": 247,
+    "result": "win",
+    "status": "complete"
+  },
+  "2026-11-16_the_leviatan_fc": {
+    "date": "2026-11-16",
+    "timestamp": 1794830400000,
+    "opponent_league": "THE_LEVIATAN-FC",
+    "our_total_goals": 194,
+    "opponent_total_goals": 378,
+    "result": "loss",
+    "status": "complete"
+  },
+  "2026-11-21_ss_eagle_blue": {
+    "date": "2026-11-21",
+    "timestamp": 1795262400000,
+    "opponent_league": "SS Eagle Blue",
+    "our_total_goals": 175,
+    "opponent_total_goals": 213,
+    "result": "loss",
+    "status": "complete"
   }
 }

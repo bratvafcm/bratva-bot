@@ -1,10 +1,15 @@
 {
-  "player_id": "doxibero1",
-  "display_name": "DOXIBERO1",
-  "known_aliases": [],
-  "total_goals": 727,
-  "total_matches": 26,
-  "average_goals": 28,
+  "player_id": "roxtover",
+  "display_name": "ROXTOVER",
+  "known_aliases": [
+    "DOXIBERO1",
+    "ＲＯＸＴＯＶＥＲ",
+    "roxtover",
+    "doxibero1"
+  ],
+  "total_goals": 790,
+  "total_matches": 28,
+  "average_goals": 28.2,
   "matches": [
     {
       "tournament_id": "2026-09-25_garuda_indonesia",
@@ -15,8 +20,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-09-26_ujedinjeni_strim",
@@ -27,8 +32,8 @@
       "goals_against": 0,
       "result": "loss",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-09-27_shaidul",
@@ -39,8 +44,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-09-28_alymn_alsayd",
@@ -51,8 +56,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-09-29_blivion",
@@ -63,8 +68,8 @@
       "goals_against": 0,
       "result": "loss",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-09-30_the_eagles_egypt",
@@ -75,8 +80,8 @@
       "goals_against": 0,
       "result": "draw",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-01_banda_blokhera",
@@ -87,8 +92,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-02_the_king",
@@ -99,8 +104,8 @@
       "goals_against": 0,
       "result": "loss",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-03_legends_league",
@@ -111,8 +116,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-08_garuda_la_liga",
@@ -123,8 +128,8 @@
       "goals_against": 0,
       "result": "loss",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-10_dominators",
@@ -135,8 +140,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-13_enez_fc_fan",
@@ -147,8 +152,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-15_boss_fc_c1",
@@ -159,8 +164,8 @@
       "goals_against": 0,
       "result": "loss",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-20_garuda_official",
@@ -171,8 +176,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-22_legends",
@@ -183,8 +188,8 @@
       "goals_against": 0,
       "result": "loss",
       "turns_played": 0,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-23_ultimate_cptns",
@@ -195,8 +200,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-24_bluuelook_fc",
@@ -207,8 +212,8 @@
       "goals_against": 0,
       "result": "loss",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-27_profi_ua",
@@ -219,8 +224,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-29_th_nevergiveup",
@@ -231,8 +236,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-10-31_reyes_fc26",
@@ -243,8 +248,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-11-01_pacific_league",
@@ -255,8 +260,8 @@
       "goals_against": 0,
       "result": "loss",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-11-02_garuda_619",
@@ -267,8 +272,8 @@
       "goals_against": 0,
       "result": "loss",
       "turns_played": 0,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-11-06_b13",
@@ -279,8 +284,8 @@
       "goals_against": 0,
       "result": "loss",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-11-09_baan_charan_club",
@@ -291,8 +296,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-11-12_fc_arab_leagu",
@@ -303,8 +308,8 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 3,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     },
     {
       "tournament_id": "2026-11-13_fd_fulbo_clu",
@@ -315,8 +320,32 @@
       "goals_against": 0,
       "result": "win",
       "turns_played": 0,
-      "player_display_name": "DOXIBERO1",
-      "player_id": "doxibero1"
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
+    },
+    {
+      "tournament_id": "2026-11-16_the_leviatan_fc",
+      "match_index_in_tournament": 7,
+      "opponent_display_name": "THE LEVIATAN FC",
+      "opponent_id": "2026-11-16_the_leviatan_fc",
+      "goals_for": 29,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
+    },
+    {
+      "tournament_id": "2026-11-21_ss_eagle_blue",
+      "match_index_in_tournament": 6,
+      "opponent_display_name": "SS Eagle Blue",
+      "opponent_id": "2026-11-21_ss_eagle_blue",
+      "goals_for": 34,
+      "goals_against": 0,
+      "result": "win",
+      "turns_played": 3,
+      "player_display_name": "ROXTOVER",
+      "player_id": "roxtover"
     }
   ],
   "eligibility_streak": {
