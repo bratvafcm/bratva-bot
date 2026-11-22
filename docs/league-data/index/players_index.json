@@ -25,13 +25,13 @@
   },
   "roxtover": {
     "display_name": "ROXTOVER",
-    "total_goals": 790,
-    "total_matches": 28,
+    "total_goals": 819,
+    "total_matches": 29,
     "average_goals": 28.2,
-    "last_tournament_date": "2026-11-21",
+    "last_tournament_date": "2026-11-22",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-21_ss_eagle_blue",
+      "last_evaluated_tournament_id": "2026-11-22_los_campeones_f",
       "flagged_for_review": false
     }
   },
@@ -373,13 +373,13 @@
   },
   "koustav_007": {
     "display_name": "KOUSTAV_007",
-    "total_goals": 512,
-    "total_matches": 20,
-    "average_goals": 25.6,
-    "last_tournament_date": "2026-11-21",
+    "total_goals": 539,
+    "total_matches": 21,
+    "average_goals": 25.7,
+    "last_tournament_date": "2026-11-22",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-21_ss_eagle_blue",
+      "last_evaluated_tournament_id": "2026-11-22_los_campeones_f",
       "flagged_for_review": false
     }
   },
@@ -542,15 +542,14 @@
   "саня": {
     "display_name": "САНЯ",
     "total_goals": 927,
-    "total_matches": 28,
-    "average_goals": 33.1,
-    "last_tournament_date": "2026-11-21",
+    "total_matches": 29,
+    "average_goals": 32,
+    "last_tournament_date": "2026-11-22",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-21_ss_eagle_blue",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-22_los_campeones_f",
       "flagged_for_review": false
-    },
-    "status": "inactive"
+    }
   },
   "karim": {
     "display_name": "KARIM",
@@ -1538,13 +1537,13 @@
   },
   "twilightfc": {
     "display_name": "TWILIGHTFC",
-    "total_goals": 387,
-    "total_matches": 15,
-    "average_goals": 25.8,
-    "last_tournament_date": "2026-11-21",
+    "total_goals": 417,
+    "total_matches": 16,
+    "average_goals": 26.1,
+    "last_tournament_date": "2026-11-22",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-21_ss_eagle_blue",
+      "last_evaluated_tournament_id": "2026-11-22_los_campeones_f",
       "flagged_for_review": false
     }
   },
