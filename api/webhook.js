@@ -59,13 +59,19 @@ const currentCheckIn = {
 };
 let globalCommandsSynced = false;
 
+function escapeMarkdown(str) {
+  if (str == null) return '';
+  return String(str).replace(/([\\_*`\[\]])/g, '\\$1');
+}
+
 function clean(str) {
-  return String(str || '').replace(/[_*`\[\]()]/g, ' ').trim();
+  // Safe Markdown escaping without stripping underscores, brackets, parentheses, or any in-game characters
+  return escapeMarkdown(str);
 }
 
 function bidiIsolate(str) {
-  const cleaned = clean(str);
-  return `\u2066${cleaned}\u2069`;
+  if (str == null) return '';
+  return `\u2066${escapeMarkdown(str)}\u2069`;
 }
 
 function sendResponse(res, statusCode, body, isJson = false) {
@@ -462,7 +468,7 @@ function loadLeagueData() {
  */
 function formatPlayerTag(identifier, regData = null) {
   if (!identifier) return 'Member';
-  const cleanId = String(identifier).normalize('NFKC').trim();
+  const cleanId = String(identifier).trim();
   const lower = cleanId.toLowerCase();
   const normalized = lower.replace(/[\s_\-]+/g, '');
 
@@ -471,15 +477,16 @@ function formatPlayerTag(identifier, regData = null) {
   let matchedReg = registrations[cleanId] || registrations[lower] || registrations[normalized];
   if (!matchedReg) {
     matchedReg = Object.values(registrations).find(r => {
-      const rIgn = String(r.in_game_name || '').normalize('NFKC').toLowerCase().replace(/[\s_\-]+/g, '');
-      const rDisp = String(r.display_name || '').normalize('NFKC').toLowerCase().replace(/[\s_\-]+/g, '');
-      const rPid = String(r.player_id || '').normalize('NFKC').toLowerCase().replace(/[\s_\-]+/g, '');
+      const rIgn = String(r.in_game_name || '').toLowerCase().replace(/[\s_\-]+/g, '');
+      const rDisp = String(r.display_name || '').toLowerCase().replace(/[\s_\-]+/g, '');
+      const rPid = String(r.player_id || '').toLowerCase().replace(/[\s_\-]+/g, '');
       return rIgn === normalized || rDisp === normalized || rPid === normalized;
     });
   }
 
-  const rawIgn = matchedReg ? (matchedReg.in_game_name || matchedReg.display_name || cleanId) : cleanId;
-  const ign = clean(rawIgn);
+  // Preserve 100% exact in-game name without stripping or modifying ANY characters
+  const rawIgn = matchedReg ? (matchedReg.in_game_name || matchedReg.display_name || identifier) : identifier;
+  const ign = escapeMarkdown(rawIgn);
 
   if (matchedReg && matchedReg.telegram_id) {
     return `[${ign}](tg://user?id=${matchedReg.telegram_id})`;
@@ -1801,7 +1808,7 @@ async function formatTopScorers(lang = 'ru') {
     .filter(([_, data]) => data && data.status !== 'inactive')
     .map(([id, data]) => ({
       id,
-      name: bidiIsolate(data.display_name || id),
+      name: bidiIsolate(data.in_game_name || data.display_name || id),
       goals: data.total_goals || 0,
       matches: data.total_matches || 0,
       avg: data.average_goals || 0
@@ -1980,7 +1987,7 @@ async function evaluateAllSquadStrikes() {
 
     return {
       pid: id,
-      displayName: clean(fullPlayer.display_name || (pData && pData.display_name) || id),
+      displayName: fullPlayer.in_game_name || fullPlayer.display_name || (pData && (pData.in_game_name || pData.display_name)) || id,
       last5Avg,
       totalMatches: pMatches.length,
       recentMatchesCount: recentMatches.length,
@@ -2016,7 +2023,7 @@ async function evaluateAllSquadStrikes() {
     const isCheckedIn = Boolean(currentCheckIn && currentCheckIn.ready && currentCheckIn.ready.has(pid));
     return {
       pid: pid,
-      displayName: clean(reg.display_name || reg.in_game_name || pid),
+      displayName: reg.in_game_name || reg.display_name || pid,
       last5Avg: 0,
       totalMatches: 0,
       recentMatchesCount: 0,
@@ -2952,8 +2959,8 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
     const rows = activeScorers.map((m, i) => {
       const rank = i + 1;
       const padRank = rank < 10 ? `0${rank}` : `${rank}`;
-      const rawName = m.player_display_name || m.player_id || `Player ${rank}`;
-      const name = clean(rawName).slice(0, 16);
+      const rawName = m.player_in_game_name || m.player_display_name || m.player_id || `Player ${rank}`;
+      const name = escapeMarkdown(rawName);
       const goals = m.goals_for !== undefined ? m.goals_for : 0;
       const turns = m.turns_played !== undefined ? m.turns_played : 0;
       const goalUnit = lang === 'ar' ? 'هدف' : (lang === 'ru' ? 'Г' : 'G');
@@ -3018,8 +3025,8 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
     const rows = missedPlayers.map((m, i) => {
       const rank = i + 1;
       const padRank = rank < 10 ? `0${rank}` : `${rank}`;
-      const rawName = m.player_display_name || m.player_id || `Player ${rank}`;
-      const name = clean(rawName).slice(0, 16);
+      const rawName = m.player_in_game_name || m.player_display_name || m.player_id || `Player ${rank}`;
+      const name = escapeMarkdown(rawName);
       const turns = m.turns_played !== undefined ? m.turns_played : 0;
       const missed = 3 - turns;
       if (lang === 'ar') return `\`${padRank}\`  ${name} ─── ${turns}/3 جولات (ضيع ${missed} هجمات) ❌`;
@@ -3092,8 +3099,8 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
   const topCount = Math.min(3, activeScorers.length);
   for (let i = 0; i < topCount; i++) {
     const m = activeScorers[i];
-    const rawName = m.player_display_name || m.player_id || `MVP ${i+1}`;
-    const name = clean(rawName).slice(0, 16);
+    const rawName = m.player_in_game_name || m.player_display_name || m.player_id || `MVP ${i+1}`;
+    const name = escapeMarkdown(rawName);
     const goals = m.goals_for !== undefined ? m.goals_for : 0;
     const turns = m.turns_played !== undefined ? m.turns_played : 0;
     const goalUnit = lang === 'ar' ? 'هدف' : (lang === 'ru' ? 'голов' : 'goals');
@@ -3374,7 +3381,8 @@ function generatePlayerStatsMessage(query, lang = 'ru') {
   const avg = totalMatches > 0 ? parseFloat((totalGoals / totalMatches).toFixed(1)) : 0;
 
   const strikes = indexData.eligibility_streak?.current_fail_streak || 0;
-  const dName = clean(found.display_name || pid);
+  const rawDisplayName = found.in_game_name || found.display_name || pid;
+  const dName = escapeMarkdown(rawDisplayName);
   const profileUrl = `${WEBSITE_URL}?player=${encodeURIComponent(pid)}`;
 
   if (lang === 'en') {
@@ -6865,12 +6873,12 @@ async function analyzeInGameRoster(extractedNames) {
   const { pIndex } = loadLeagueData();
   const allStrikes = await evaluateAllSquadStrikes();
 
-  const cleanExtracted = (extractedNames || []).map(n => clean(n)).filter(Boolean);
+  const cleanExtracted = (extractedNames || []).map(n => String(n || '').trim()).filter(Boolean);
   const inGameSet = new Set(cleanExtracted.map(n => n.toLowerCase()));
 
   const isPlayerInGame = (pid, displayName) => {
-    const dLower = clean(displayName || '').toLowerCase();
-    const pLower = clean(pid || '').toLowerCase();
+    const dLower = String(displayName || '').trim().toLowerCase();
+    const pLower = String(pid || '').trim().toLowerCase();
     if (inGameSet.has(dLower) || inGameSet.has(pLower)) return true;
     const cKey = getCanonicalPlayerKey(pid, displayName);
     return cleanExtracted.some(en => getCanonicalPlayerKey(null, en) === cKey);
