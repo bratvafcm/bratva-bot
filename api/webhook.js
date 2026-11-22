@@ -1540,14 +1540,16 @@ async function saveRegisteredPlayersRaw(data, commitMsg = 'Update registered_pla
 
 function fetchRenderzHttps(url) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, {
+    // Route through Jina edge reader to bypass Cloudflare datacenter 403 on Vercel serverless
+    const proxyUrl = `https://r.jina.ai/${url}`;
+    const req = https.get(proxyUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'x-return-format': 'html',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
         'Connection': 'close'
       },
-      timeout: 10000
+      timeout: 15000
     }, res => {
       let data = '';
       res.on('data', chunk => data += chunk);
@@ -7789,6 +7791,17 @@ export default async function handler(req, res) {
       });
       if (recentLogs.length > 25) recentLogs.pop();
     } catch (e) {}
+
+    // Autonomous zero-token FCM Radar: opportunistic sweep if >= 1 hour elapsed
+    (async () => {
+      try {
+        const regData = await getRegisteredPlayers();
+        const lastCheck = regData?.fcm_intel?.lastChecked ? new Date(regData.fcm_intel.lastChecked).getTime() : 0;
+        if (Date.now() - lastCheck >= 3600000) {
+          checkAndBroadcastFCMIntel(false).catch(err => console.error('Passive radar error:', err.message));
+        }
+      } catch (e) {}
+    })();
 
     if (update.channel_post) {
       return sendResponse(res, 200, 'Channel post ignored');
