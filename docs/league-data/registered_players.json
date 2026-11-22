@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-11-22T05:03:53.259Z",
+  "lastUpdated": "2026-11-22T23:33:49.043Z",
   "registrations": {
     "doxibero": {
       "player_id": "doxibero",
@@ -145,12 +145,17 @@
     }
   },
   "current_checkin": {
-    "active": true,
+    "active": false,
     "openedAt": 1795320761399,
     "expiresAt": 1795324361399,
     "durationMinutes": 60,
     "channel_msg_id": 74,
     "ready": [],
     "away": []
+  },
+  "fcm_intel": {
+    "postedCodes": [],
+    "postedPlayers": [],
+    "lastChecked": "2026-11-22T23:33:49.042Z"
   }
 }
