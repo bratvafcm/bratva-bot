@@ -259,5 +259,14 @@
     "opponent_total_goals": 81,
     "result": "win",
     "status": "complete"
+  },
+  "2026-11-24_globe_trotters": {
+    "date": "2026-11-24",
+    "timestamp": 1795561550079,
+    "opponent_league": "GLOBE TROTTERs",
+    "our_total_goals": 199,
+    "opponent_total_goals": 349,
+    "result": "loss",
+    "status": "complete"
   }
 }
