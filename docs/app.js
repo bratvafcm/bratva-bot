@@ -1,5 +1,5 @@
 /* ============================================
-   БРАТВА FC Mobile — Notebook Engine
+   INVICTUS FCM — Official League Portal Engine
    Slide animations, sketchy charts, hand-drawn UI
    ============================================ */
 
@@ -2233,7 +2233,7 @@ function renderDashboard() {
         </div>
         <div class="ucl-match-teams">
           <div class="ucl-team home">
-            <div class="ucl-team-name">Братва</div>
+            <div class="ucl-team-name">INVICTUS FCM</div>
             <div class="ucl-team-score">${tItem.our_total_goals}</div>
           </div>
           <div class="ucl-vs-badge">VS</div>
@@ -2315,7 +2315,7 @@ function renderTournaments() {
         </div>
         <div class="ucl-match-teams">
           <div class="ucl-team home">
-            <div class="ucl-team-name">Братва</div>
+            <div class="ucl-team-name">INVICTUS FCM</div>
             <div class="ucl-team-score">${tItem.our_total_goals}</div>
           </div>
           <div class="ucl-vs-badge">VS</div>
@@ -2707,7 +2707,7 @@ function openTournamentModal(tId) {
 
     <div style="display: flex; justify-content: space-around; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
       <div style="text-align:center; flex: 1;">
-        <div style="color: var(--ucl-cyan); font-weight: 800; font-size: 0.95rem;">Братва</div>
+        <div style="color: var(--ucl-cyan); font-weight: 800; font-size: 0.95rem;">INVICTUS FCM</div>
         <div style="font-size: 2rem; font-family: var(--font-main); font-weight: 900; color: #ffffff;">${tItem.our_total_goals}</div>
       </div>
       <div style="font-family: var(--font-main); font-weight: 800; color: var(--ucl-slate); font-size: 0.8rem; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px;">VS</div>

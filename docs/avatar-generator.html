@@ -665,7 +665,7 @@
 
     function exportPNG() {
       const link = document.createElement('a');
-      link.download = 'bratva-' + currentMode + '-avatar.png';
+      link.download = 'invictus-' + currentMode + '-avatar.png';
       link.href = masterCanvas.toDataURL('image/png');
       link.click();
       statusLog.innerText = '? Saved High-Res PNG with 3D Stamped Plaque!';
@@ -698,7 +698,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'bratva-' + currentMode + '-seamless-avatar.' + ext;
+        a.download = 'invictus-' + currentMode + '-seamless-avatar.' + ext;
         a.click();
         URL.revokeObjectURL(url);
 
@@ -760,7 +760,7 @@
             if (!obj.error) {
               const a = document.createElement('a');
               a.href = obj.image;
-              a.download = 'bratva-' + currentMode + '-infinite-avatar.gif';
+              a.download = 'invictus-' + currentMode + '-infinite-avatar.gif';
               a.click();
               statusLog.innerText = '? Infinite Looping GIF downloaded! Seamless continuous animation.';
             } else {
