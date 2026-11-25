@@ -26,7 +26,7 @@ const GEMINI_MODEL = (rawEnvModel && rawEnvModel !== 'gemini-1.5-flash' && rawEn
 const GITHUB_PAT = (process.env.GITHUB_PAT || '').trim();
 const GITHUB_REPO = process.env.GITHUB_REPO || 'bratvafcm/bratvafcm.github.io';
 const CHANNEL_ID = process.env.CHANNEL_ID || '@BRATVAFCM';
-const WEBSITE_URL = process.env.WEBSITE_URL || 'https://bratvafcm.github.io/';
+const WEBSITE_URL = process.env.WEBSITE_URL || 'https://invictusfcm.github.io/';
 const COMMUNITY_URL = 'https://t.me/addlist/c2IRI0ZsvfEwYzU0';
 const BOT_USERNAME = process.env.BOT_USERNAME || 'BratvaFCMBot';
 const BOT_REGISTER_URL = `https://t.me/${BOT_USERNAME}?start=register`;
@@ -9435,7 +9435,7 @@ export default async function handler(req, res) {
           `⚖️ */rules* — Official League Rules\n` +
           `🤖 */register* — Register your in-game name\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
-          `🌐 *Website:* [bratvafcm.github.io](${WEBSITE_URL})`;
+          `🌐 *Website:* [invictusfcm.github.io](${WEBSITE_URL})`;
         const helpKeys = {
           inline_keyboard: [
             [
