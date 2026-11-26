@@ -1,0 +1,79 @@
+{
+  "id": "2026-11-25_warriors_romania",
+  "tournament_id": "2026-11-25_warriors_romania",
+  "date": "2026-11-25",
+  "timestamp": 1795649999107,
+  "opponent_league": "warriors.Romania",
+  "our_total_goals": 191,
+  "opponent_total_goals": 248,
+  "result": "loss",
+  "status": "complete",
+  "total_turns_played": 21,
+  "max_possible_turns": 24,
+  "matches": [
+    {
+      "board_order": 1,
+      "player_id": "villain1380",
+      "player_display_name": "Villain1380",
+      "ovr": 129,
+      "goals_for": 33,
+      "turns_played": 3
+    },
+    {
+      "board_order": 2,
+      "player_id": "arnur",
+      "player_display_name": "Arnur",
+      "ovr": 127,
+      "goals_for": 30,
+      "turns_played": 3
+    },
+    {
+      "board_order": 3,
+      "player_id": "twilightfc",
+      "player_display_name": "TWILIGHTFC",
+      "ovr": 127,
+      "goals_for": 30,
+      "turns_played": 3
+    },
+    {
+      "board_order": 4,
+      "player_id": "koustav_007",
+      "player_display_name": "KOUSTAV_007",
+      "ovr": 127,
+      "goals_for": 31,
+      "turns_played": 3
+    },
+    {
+      "board_order": 5,
+      "player_id": "mohamed_osama",
+      "player_display_name": "Mohamed_Osama",
+      "ovr": 127,
+      "goals_for": 20,
+      "turns_played": 3
+    },
+    {
+      "board_order": 6,
+      "player_id": "mike",
+      "player_display_name": "Mike",
+      "ovr": 127,
+      "goals_for": 0,
+      "turns_played": 0
+    },
+    {
+      "board_order": 7,
+      "player_id": "roxtover",
+      "player_display_name": "ROXTOVER",
+      "ovr": 126,
+      "goals_for": 29,
+      "turns_played": 3
+    },
+    {
+      "board_order": 8,
+      "player_id": "doxibero",
+      "player_display_name": "DOXIBERO",
+      "ovr": 122,
+      "goals_for": 18,
+      "turns_played": 3
+    }
+  ]
+}
