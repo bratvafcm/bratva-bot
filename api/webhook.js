@@ -7627,6 +7627,18 @@ export default async function handler(req, res) {
             timestamp: new Date().toISOString()
           }, true);
         }
+        if (url.searchParams.get('action') === 'update_channel_branding') {
+          const title = url.searchParams.get('title') || 'INVICTUS FCM 🦁';
+          const titleRes = await telegramRequest('setChatTitle', { chat_id: CHANNEL_ID, title });
+          const desc = '🦁 Official Channel for INVICTUS FCM League.\n\n🌐 Portal: https://invictusfcm.github.io/\n🤖 Bot: @BratvaFCMBot';
+          const descRes = await telegramRequest('setChatDescription', { chat_id: CHANNEL_ID, description: desc });
+          return sendResponse(res, 200, {
+            status: 'success',
+            title: titleRes,
+            description: descRes
+          }, true);
+        }
+
         if (url.searchParams.get('action') === 'update_bot_branding') {
           const nameRes = await telegramRequest('setMyName', { name: 'INVICTUS FCM 🦁' });
           const descRes = await telegramRequest('setMyDescription', {
