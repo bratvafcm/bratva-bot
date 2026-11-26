@@ -25,7 +25,7 @@ const rawEnvModel = (process.env.GEMINI_MODEL || '').trim();
 const GEMINI_MODEL = (rawEnvModel && rawEnvModel !== 'gemini-1.5-flash' && rawEnvModel !== 'gemini-2.5-flash') ? rawEnvModel : 'gemini-3.1-flash-lite-preview';
 const GITHUB_PAT = (process.env.GITHUB_PAT || '').trim();
 const GITHUB_REPO = process.env.GITHUB_REPO || 'invictusfcm/invictusfcm.github.io';
-const CHANNEL_ID = process.env.CHANNEL_ID || '@invictusfcm';
+const CHANNEL_ID = '@invictusfcm';
 const WEBSITE_URL = process.env.WEBSITE_URL || 'https://invictusfcm.github.io/';
 const COMMUNITY_URL = 'https://t.me/addlist/c2IRI0ZsvfEwYzU0';
 const BOT_USERNAME = 'invictusfcmBOT';
