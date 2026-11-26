@@ -268,5 +268,14 @@
     "opponent_total_goals": 349,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-11-25_warriors_romania": {
+    "date": "2026-11-25",
+    "timestamp": 1795649999107,
+    "opponent_league": "warriors.Romania",
+    "our_total_goals": 191,
+    "opponent_total_goals": 248,
+    "result": "loss",
+    "status": "complete"
   }
 }
