@@ -1,11 +1,11 @@
 /**
- * Vercel Serverless Telegram Webhook Handler for БРАТВА FCM LEAGUE
+ * Vercel Serverless Telegram Webhook Handler for INVICTUS FCM LEAGUE
  * 100% Free, 24/7 Always-On, Zero Credit Card Required
  * Powered by Google Gemini 3.6 Flash (Latest 2026 Architecture)
  * 
  * Features:
  * - Cross-Instance Multi-Screenshot Album Batching (via GitHub .tmp store)
- * - Two-Column Layout Intelligence (Left = БРАТВА only, Right = Opponent ignored)
+ * - Two-Column Layout Intelligence (Left = INVICTUS FCM only, Right = Opponent ignored)
  * - Top-to-Bottom Rank Preserving Extraction (#1 to #N)
  * - Multilingual Instant Tabs (RU, EN, AR, ES)
  * - Safe Markdown & Automatic Plain-Text Fallback
@@ -368,7 +368,7 @@ function githubApi(path, method = 'GET', body = null) {
   return new Promise((resolve, reject) => {
     if (!GITHUB_PAT) return resolve(null);
     const headers = {
-      'User-Agent': 'Bratva-Vercel-Bot',
+      'User-Agent': 'Invictus-Vercel-Bot',
       'Authorization': `Bearer ${GITHUB_PAT}`,
       'Accept': 'application/vnd.github+json'
     };
@@ -797,7 +797,7 @@ async function getTournamentById(tId) {
 /**
  * High-Precision Multi-Image Analysis with Google Gemini 3.6 Flash
  * Correctly handles:
- * - Two-column screen (LEFT = БРАТВА only, RIGHT = Opponent ignored)
+ * - Two-column screen (LEFT = INVICTUS FCM only, RIGHT = Opponent ignored)
  * - Multi-screenshot stitching and deduplication across 1-5 images
  * - Exact board order #1 to #N
  * - Limit & turns mapping
@@ -811,7 +811,7 @@ function analyzeImagesWithGemini(imageBuffers, rosterHints = []) {
       ? `\nKNOWN LEAGUE ROSTER PLAYERS (Use these exact spellings when matching player rows):\n${rosterHints.join(', ')}\n`
       : '';
 
-    const prompt = `You are the master tournament data auditor for EA Sports FC Mobile league "БРАТВА".
+    const prompt = `You are the master tournament data auditor for EA Sports FC Mobile league "INVICTUS FCM" (formerly БРАТВА).
 You are analyzing ${imageBuffers.length} screenshot(s).
 
 CRITICAL MULTI-TOURNAMENT & MATCH DETECTION:
@@ -823,7 +823,7 @@ CRITICAL MULTI-TOURNAMENT & MATCH DETECTION:
 
 RULES FOR EACH TOURNAMENT:
 1. TWO COLUMNS ON SCREEN:
-   - LEFT COLUMN: ALWAYS our league "БРАТВА". EXTRACT PLAYERS EXCLUSIVELY FROM THIS LEFT COLUMN!
+   - LEFT COLUMN: ALWAYS our league "INVICTUS FCM" (or legacy "БРАТВА"). EXTRACT PLAYERS EXCLUSIVELY FROM THIS LEFT COLUMN!
    - RIGHT COLUMN: OPPONENT league. COMPLETELY IGNORE the right column! DO NOT extract any opponent players!
 
 2. MULTI-SCREENSHOT SCROLLING & STITCHING:
@@ -832,7 +832,7 @@ RULES FOR EACH TOURNAMENT:
    - PRESERVE EXACT BOARD ORDER (#1 to #N).
 
 3. SCORE & HEADER (Look at top banner):
-   - Left side: "БРАТВА" score (e.g. 155) and turns (e.g. "18/48 TURNS").
+   - Left side: "INVICTUS FCM" (or "БРАТВА") score (e.g. 155) and turns (e.g. "18/48 TURNS").
    - Right side: Opponent league name (e.g. "Memequis Juniors") and score (e.g. 220).
    - Status: "HISTORY" (completed) or "LIVE" if active timer.
 
@@ -987,13 +987,13 @@ function askGeminiAI(userQuestion) {
       // ignore
     }
 
-    const systemPrompt = `You are the official AI Assistant for the "БРАТВА" FCM League in EA Sports FC Mobile.
+    const systemPrompt = `You are the official AI Assistant for the "INVICTUS FCM" FCM League in EA Sports FC Mobile.
 League Website: ${WEBSITE_URL}
 Telegram Channel: ${CHANNEL_ID}
 Telegram Community Folder (Channel + Discussion Group): ${COMMUNITY_URL}
 
 League Knowledge & Context:
-- League Name: БРАТВА (FCM League)
+- League Name: INVICTUS FCM (FCM League)
 - Game: EA Sports FC Mobile
 - Core Rules: Every member MUST play all 3 turns (3/3) in tournaments. Target is 20+ goals per tournament. 1 missed match = 1 strike. 3 strikes = automatic kick from the league.
 - Top scorers right now: ${topScorersSummary || 'See website for live leaderboard'}
@@ -1003,7 +1003,7 @@ CRITICAL GUIDELINES:
 - Reply in the EXACT same language the user speaks (Moroccan Darija / Arabizi / Arabic, Russian, English, French, Spanish, etc.).
 - If the user talks in Darija (e.g. Arabizi numbers like 7, 3, 9, kh, etc. or Arabic script), respond naturally in warm, friendly Moroccan Darija.
 - If they ask about EA FC Mobile (gameplay, tactics, 4-3-3 Holding, 4-1-2-1-2 Narrow, skill moves, scouting, best players), provide expert pro-level gaming advice.
-- If they ask about БРАТВА league, standings, or rules, give accurate info based on the league context above.
+- If they ask about INVICTUS FCM league, standings, or rules, give accurate info based on the league context above.
 - If they ask general questions, respond concisely, smartly, and politely just like Gemini.
 - Use emojis and clean formatting. Keep responses focused and engaging.`;
 
@@ -1890,7 +1890,7 @@ function formatRecap(t, lang = 'ru') {
   const squadCount = (t.matches || []).length;
 
   if (lang === 'en') {
-    let outcomeHeader = isWin ? '🏆 *BRATVA FCM: VICTORY!* 🟢' : (isDraw ? '⚖️ *BRATVA FCM: HARD-FOUGHT DRAW!* 🟡' : '🛡️ *BRATVA FCM: MATCH RESULT* 🔴');
+    let outcomeHeader = isWin ? '🏆 *INVICTUS FCM: VICTORY!* 🟢' : (isDraw ? '⚖️ *INVICTUS FCM: HARD-FOUGHT DRAW!* 🟡' : '🛡️ *INVICTUS FCM: MATCH RESULT* 🔴');
     let closing = isWin ? "⚡ *Awesome performance squad! Let's keep winning!*" : "⚡ *Hard-fought match! Next time we take the win!*";
     let strikesText = missed.length > 0
       ? `⛔ *DISCIPLINE & STRIKES:*\n${missed.join('\n')}\n⚠️ *Strike 1/3! Must play 3/3 in next match or get kicked!*`
@@ -1914,7 +1914,7 @@ function formatRecap(t, lang = 'ru') {
       `🌐 *Live Standings:*\n${WEBSITE_URL}`;
   } else if (lang === 'ar') {
     const rules = getLeagueRules();
-    let outcomeHeader = isWin ? '🏆 *دوري БРАТВА: فوز ساحق!* 🟢' : (isDraw ? '⚖️ *دوري БРАТВА: تعادل بطولي!* 🟡' : '🛡️ *دوري БРАТВА: نتيجة المباراة* 🔴');
+    let outcomeHeader = isWin ? '🏆 *دوري INVICTUS FCM: فوز ساحق!* 🟢' : (isDraw ? '⚖️ *دوري INVICTUS FCM: تعادل بطولي!* 🟡' : '🛡️ *دوري INVICTUS FCM: نتيجة المباراة* 🔴');
     let closing = isWin ? "⚡ *أداء استثنائي يا أبطال! لنواصل الانتصارات معاً!*" : "⚡ *مباراة قوية! سنعوض بالفوز في البطولة القادمة بإذن الله!*";
     let strikesText = missed.length > 0
       ? `⛔ *الانضباط والإنذارات:*\n${missed.join('\n')}\n⚠️ *إنذار (سترايك 1/${rules.maxMissesKick})! يجب لعب ${rules.minTurnsPerTournament}/3 لتجنب الطرد!*`
@@ -1937,7 +1937,7 @@ function formatRecap(t, lang = 'ru') {
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *الترتيب المباشر:*\n${WEBSITE_URL}`;
   } else if (lang === 'es') {
-    let outcomeHeader = isWin ? '🏆 *LIGA BRATVA: ¡GRAN VICTORIA!* 🟢' : (isDraw ? '⚖️ *LIGA BRATVA: ¡EMPATE COMBATIVO!* 🟡' : '🛡️ *LIGA BRATVA: RESULTADO* 🔴');
+    let outcomeHeader = isWin ? '🏆 *LIGA INVICTUS FCM: ¡GRAN VICTORIA!* 🟢' : (isDraw ? '⚖️ *LIGA INVICTUS FCM: ¡EMPATE COMBATIVO!* 🟡' : '🛡️ *LIGA INVICTUS FCM: RESULTADO* 🔴');
     let closing = isWin ? "⚡ *¡Gran partido chavales! ¡A seguir ganando!*" : "⚡ *¡Partido reñido! ¡La próxima nos llevamos la victoria!*";
     let strikesText = missed.length > 0
       ? `⛔ *DISCIPLINA Y STRIKES:*\n${missed.join('\n')}\n⚠️ *¡Strike 1/3! ¡Obligatorio jugar 3/3 en el próximo partido!*`
@@ -1961,7 +1961,7 @@ function formatRecap(t, lang = 'ru') {
       `🌐 *Clasificación en vivo:*\n${WEBSITE_URL}`;
   } else {
     // Russian (Default)
-    let outcomeHeader = isWin ? '🏆 *БРАТВА: ПОБЕДА!* 🟢' : (isDraw ? '⚖️ *БРАТВА: БОЕВАЯ НИЧЬЯ!* 🟡' : '🛡️ *БРАТВА: РЕЗУЛЬТАТ МАТЧА* 🔴');
+    let outcomeHeader = isWin ? '🏆 *INVICTUS FCM: ПОБЕДА!* 🟢' : (isDraw ? '⚖️ *INVICTUS FCM: БОЕВАЯ НИЧЬЯ!* 🟡' : '🛡️ *INVICTUS FCM: РЕЗУЛЬТАТ МАТЧА* 🔴');
     let closing = isWin ? "⚡ *Красавцы парни! Идем дальше за победами!*" : "⚡ *Боевой матч! В след. матче только победа!*";
     let strikesText = missed.length > 0
       ? `⛔ *ДИСЦИПЛИНА И СТРАЙКИ:*\n${missed.join('\n')}\n⚠️ *Страйк 1/3! Обязательно 3/3 в след. матче, иначе кик!*`
@@ -2038,27 +2038,27 @@ async function formatTopScorers(lang = 'ru') {
   }
 
   if (lang === 'en') {
-    return `👑 *BRATVA FCM: TOP 10 SCORERS* 👑\n` +
+    return `👑 *INVICTUS FCM: TOP 10 SCORERS* 👑\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `${body}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *Full Player Standings:*\n${WEBSITE_URL}`;
   }
   if (lang === 'ar') {
-    return `👑 *دوري БРАТВА: قائمة أفضل 10 هدافين* 👑\n` +
+    return `👑 *دوري INVICTUS FCM: قائمة أفضل 10 هدافين* 👑\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `${body}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *الترتيب الكامل للهدافين:*\n${WEBSITE_URL}`;
   }
   if (lang === 'es') {
-    return `👑 *LIGA BRATVA: TOP 10 GOLEADORES* 👑\n` +
+    return `👑 *LIGA INVICTUS FCM: TOP 10 GOLEADORES* 👑\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `${body}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🌐 *Clasificación completa:*\n${WEBSITE_URL}`;
   }
-  return `👑 *ТОП-10 БОМБАРДИРОВ БРАТВА* 👑\n` +
+  return `👑 *ТОП-10 БОМБАРДИРОВ INVICTUS FCM* 👑\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `${body}\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
@@ -2254,7 +2254,7 @@ async function formatStrikes(lang = 'ru') {
   });
 
   if (lang === 'en') {
-    let msg = `⛔ *BRATVA FCM: ROLLING 5-MATCH STRIKES REPORT* ⛔\n` +
+    let msg = `⛔ *INVICTUS FCM: ROLLING 5-MATCH STRIKES REPORT* ⛔\n` +
       `━━━━━━━━━━━━━━━━━━━━\n`;
     if (critical.length > 0) msg += `🚨 *CRITICAL (ELIGIBLE FOR KICK):*\n${critical.join('\n')}\n────────────────────\n`;
     if (warnings.length > 0) msg += `⚠️ *ACTIVE WARNINGS (1-2 STRIKES):*\n${warnings.join('\n')}\n────────────────────\n`;
@@ -2267,7 +2267,7 @@ async function formatStrikes(lang = 'ru') {
     return msg;
   }
   if (lang === 'ar') {
-    let msg = `⛔ *دوري БРАТВА: تقرير الإنذارات والغياب* ⛔\n` +
+    let msg = `⛔ *دوري INVICTUS FCM: تقرير الإنذارات والغياب* ⛔\n` +
       `━━━━━━━━━━━━━━━━━━━━\n`;
     if (critical.length > 0) msg += `🚨 *حالات حرجة (مؤهلة للطرد الفوري):*\n${critical.join('\n')}\n────────────────────\n`;
     if (warnings.length > 0) msg += `⚠️ *إنذارات نشطة (1-2 إنذار):*\n${warnings.join('\n')}\n────────────────────\n`;
@@ -2280,7 +2280,7 @@ async function formatStrikes(lang = 'ru') {
     return msg;
   }
   if (lang === 'es') {
-    let msg = `⛔ *LIGA BRATVA: INFORME DE STRIKES (ÚLTIMOS 5)* ⛔\n` +
+    let msg = `⛔ *LIGA INVICTUS FCM: INFORME DE STRIKES (ÚLTIMOS 5)* ⛔\n` +
       `━━━━━━━━━━━━━━━━━━━━\n`;
     if (critical.length > 0) msg += `🚨 *CRÍTICO (APTOS PARA EXPULSIÓN):*\n${critical.join('\n')}\n────────────────────\n`;
     if (warnings.length > 0) msg += `⚠️ *AVISOS ACTIVOS (1-2 STRIKES):*\n${warnings.join('\n')}\n────────────────────\n`;
@@ -2294,7 +2294,7 @@ async function formatStrikes(lang = 'ru') {
   }
 
   // Russian (Default)
-  let msg = `⛔ *БРАТВА: ОТЧЕТ ПО СТРАЙКАМ (ПОСЛЕДНИЕ 5 ТУРНИРОВ)* ⛔\n` +
+  let msg = `⛔ *INVICTUS FCM: ОТЧЕТ ПО СТРАЙКАМ (ПОСЛЕДНИЕ 5 ТУРНИРОВ)* ⛔\n` +
     `━━━━━━━━━━━━━━━━━━━━\n`;
   if (critical.length > 0) msg += `🚨 *КАНДИДАТЫ НА КИК (3 страйка / 0/3 x2):*\n${critical.join('\n')}\n────────────────────\n`;
   if (warnings.length > 0) msg += `⚠️ *ПРЕДУПРЕЖДЕНИЕ (1-2 СТРАЙКА):*\n${warnings.join('\n')}\n────────────────────\n`;
@@ -2467,7 +2467,7 @@ async function formatSmartLineup(requestedSize = null, lang = 'ru') {
   }
 
   if (lang === 'en') {
-    let msg = `⚔️ *BRATVA FCM ── OFFICIAL LINEUP (${size}v${size})*
+    let msg = `⚔️ *INVICTUS FCM ── OFFICIAL LINEUP (${size}v${size})*
 ` +
       `────────────────────────────
 ` +
@@ -2491,7 +2491,7 @@ ${benchLines.join('\n')}
   }
 
   if (lang === 'ar') {
-    let msg = `⚔️ *دوري BRATVA FCM ── التشكيلة الرسمية (${size} ضد ${size})*
+    let msg = `⚔️ *دوري INVICTUS FCM ── التشكيلة الرسمية (${size} ضد ${size})*
 ` +
       `────────────────────────────
 ` +
@@ -2515,7 +2515,7 @@ ${benchLines.join('\n')}
   }
 
   if (lang === 'es') {
-    let msg = `⚔️ *LIGA BRATVA ── ALINEACIÓN OFICIAL (${size}v${size})*
+    let msg = `⚔️ *LIGA INVICTUS FCM ── ALINEACIÓN OFICIAL (${size}v${size})*
 ` +
       `────────────────────────────
 ` +
@@ -2539,7 +2539,7 @@ ${benchLines.join('\n')}
   }
 
   // Russian (Default)
-  let msg = `⚔️ *БРАТВА FCM ── БОЕВОЙ СОСТАВ (${size}x${size})*
+  let msg = `⚔️ *INVICTUS FCM ── БОЕВОЙ СОСТАВ (${size}x${size})*
 ` +
     `────────────────────────────
 ` +
@@ -2685,7 +2685,7 @@ function formatCheckInPrompt(lang = 'ru') {
     : (lang === 'ar' ? '_لا يوجد_' : '_None_');
 
   if (lang === 'ar') {
-    return `⚔️ *دوري BRATVA FCM ── تأكيد الجاهزية (CHECK-IN)*
+    return `⚔️ *دوري INVICTUS FCM ── تأكيد الجاهزية (CHECK-IN)*
 ` +
       `────────────────────────────
 ` +
@@ -2706,7 +2706,7 @@ ${awayList}
       `${footerText}`;
   }
   if (lang === 'en') {
-    return `⚔️ *BRATVA FCM ── PRE-MATCH CHECK-IN*
+    return `⚔️ *INVICTUS FCM ── PRE-MATCH CHECK-IN*
 ` +
       `────────────────────────────
 ` +
@@ -2727,7 +2727,7 @@ ${awayList}
       `${footerText}`;
   }
   if (lang === 'es') {
-    return `⚔️ *LIGA BRATVA ── CHECK-IN PRE-PARTIDO*
+    return `⚔️ *LIGA INVICTUS FCM ── CHECK-IN PRE-PARTIDO*
 ` +
       `────────────────────────────
 ` +
@@ -2748,7 +2748,7 @@ ${awayList}
       `${footerText}`;
   }
   // Russian
-  return `⚔️ *БРАТВА FCM ── ПРЕДМАТЧЕВЫЙ ЧЕК-ИН*
+  return `⚔️ *INVICTUS FCM ── ПРЕДМАТЧЕВЫЙ ЧЕК-ИН*
 ` +
     `────────────────────────────
 ` +
@@ -3030,7 +3030,7 @@ async function formatTournamentsBrowser(filter = '7', lang = 'ru') {
   if (list.length === 0) {
     if (filter === 's27') {
       if (lang === 'ar') {
-        return `🏆 *أرشيف بطولات دوري БРАТВА FCM — الموسم 27* ⏳\n` +
+        return `🏆 *أرشيف بطولات دوري INVICTUS FCM — الموسم 27* ⏳\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `✨ *موسم FCM 27 ينطلق الليلة!*\n` +
           `• لم تُلعب أي بطولة في الموسم 27 حتى الآن.\n` +
@@ -3038,7 +3038,7 @@ async function formatTournamentsBrowser(filter = '7', lang = 'ru') {
           `👉 *يمكنك مراجعة مباريات الموسم 26 بالضغط على زر [ 🏆 الموسم 26 ] بالأسفل!*`;
       }
       if (lang === 'en') {
-        return `🏆 *BRATVA FCM TOURNAMENT ARCHIVE — SEASON 27* ⏳\n` +
+        return `🏆 *INVICTUS FCM TOURNAMENT ARCHIVE — SEASON 27* ⏳\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `✨ *Season 27 Kickoff is Tonight!*\n` +
           `• No matches have been played yet in Season 27.\n` +
@@ -3046,14 +3046,14 @@ async function formatTournamentsBrowser(filter = '7', lang = 'ru') {
           `👉 *You can review Season 26 matches by tapping [ 🏆 Season 26 ] below!*`;
       }
       if (lang === 'es') {
-        return `🏆 *ARCHIVO DE TORNEOS DE BRATVA FCM — TEMPORADA 27* ⏳\n` +
+        return `🏆 *ARCHIVO DE TORNEOS DE INVICTUS FCM — TEMPORADA 27* ⏳\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `✨ *¡El saque inicial de la Temporada 27 es esta noche!*\n` +
           `• Aún no se han jugado partidos en la Temporada 27.\n` +
           `• ¡En cuanto termine el primer torneo, aparecerá aquí con los datos de todos los jugadores!\n\n` +
           `👉 *¡Puedes ver los torneos de la Temporada 26 pulsando [ 🏆 Temporada 26 ] abajo!*`;
       }
-      return `🏆 *АРХИВ ТУРНИРОВ БРАТВА FCM — СЕЗОН 27* ⏳\n` +
+      return `🏆 *АРХИВ ТУРНИРОВ INVICTUS FCM — СЕЗОН 27* ⏳\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `✨ *Старт Сезона 27 уже сегодня ночью!*\n` +
         `• В новом сезоне пока не сыграно матчей.\n` +
@@ -3067,7 +3067,7 @@ async function formatTournamentsBrowser(filter = '7', lang = 'ru') {
   }
 
   if (lang === 'ar') {
-    return `🏆 *سجل وأرشيف بطولات دوري БРАТВА FCM* 📊\n` +
+    return `🏆 *سجل وأرشيف بطولات دوري INVICTUS FCM* 📊\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📌 *اختر أي بطولة من الأزرار بالأسفل لعرض تفاصيلها الكاملة:*\n` +
       `⚡ سيعرض لك البوت قائمة المشاركين كاملة مرتبة حسب عدد الأهداف المسجلة (من الأعلى للأدنى)!\n\n` +
@@ -3075,7 +3075,7 @@ async function formatTournamentsBrowser(filter = '7', lang = 'ru') {
       `📊 *عدد البطولات المعروضة:* *${list.length}* مباراة`;
   }
   if (lang === 'en') {
-    return `🏆 *BRATVA FCM TOURNAMENT HISTORY ARCHIVE* 📊\n` +
+    return `🏆 *INVICTUS FCM TOURNAMENT HISTORY ARCHIVE* 📊\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📌 *Tap any tournament button below to view the full participant scorecard:*\n` +
       `⚡ The bot will display all participants ranked by goals scored (top to bottom)!\n\n` +
@@ -3083,7 +3083,7 @@ async function formatTournamentsBrowser(filter = '7', lang = 'ru') {
       `📊 *Tournaments Displayed:* *${list.length}* matches`;
   }
   if (lang === 'es') {
-    return `🏆 *HISTORIAL Y ARCHIVO DE TORNEOS BRATVA FCM* 📊\n` +
+    return `🏆 *HISTORIAL Y ARCHIVO DE TORNEOS INVICTUS FCM* 📊\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📌 *Toca cualquier torneo abajo para ver el acta completa:*\n` +
       `⚡ ¡El bot mostrará la lista de todos los participantes ordenada por goles (de mayor a menor)!\n\n` +
@@ -3091,7 +3091,7 @@ async function formatTournamentsBrowser(filter = '7', lang = 'ru') {
       `📊 *Torneos mostrados:* *${list.length}* partidos`;
   }
 
-  return `🏆 *АРХИВ И ИСТОРИЯ ТУРНИРОВ БРАТВА FCM* 📊\n` +
+  return `🏆 *АРХИВ И ИСТОРИЯ ТУРНИРОВ INVICTUS FCM* 📊\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `📌 *Нажмите на любой турнир в кнопках ниже для детального протокола:*\n` +
     `⚡ Бот покажет полный список участников с голами и ходами (от лучших к худшим)!\n\n` +
@@ -3141,14 +3141,14 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
 
   let headerOutcome = '';
   if (lang === 'ar') {
-    headerOutcome = isWin ? '🟢 *فوز مستحق لكتيبة BRATVA*' : (isDraw ? '🟡 *تعادل شاق وقوي*' : '🔴 *خسارة في هذه الجولة*');
+    headerOutcome = isWin ? '🟢 *فوز مستحق لكتيبة INVICTUS*' : (isDraw ? '🟡 *تعادل شاق وقوي*' : '🔴 *خسارة في هذه الجولة*');
   } else if (lang === 'en') {
-    headerOutcome = isWin ? '🟢 *BRATVA FCM: VICTORY!*' : (isDraw ? '🟡 *HARD-FOUGHT DRAW*' : '🔴 *MATCH RESULT: DEFEAT*');
+    headerOutcome = isWin ? '🟢 *INVICTUS FCM: VICTORY!*' : (isDraw ? '🟡 *HARD-FOUGHT DRAW*' : '🔴 *MATCH RESULT: DEFEAT*');
   } else if (lang === 'es') {
-    headerOutcome = isWin ? '🟢 *¡VICTORIA DE BRATVA FCM!*' : (isDraw ? '🟡 *EMPATE MUY DISPUTADO*' : '🔴 *RESULTADO: DERROTA*');
+    headerOutcome = isWin ? '🟢 *¡VICTORIA DE INVICTUS FCM!*' : (isDraw ? '🟡 *EMPATE MUY DISPUTADO*' : '🔴 *RESULTADO: DERROTA*');
   } else {
     // Russian
-    headerOutcome = isWin ? '🟢 *ПОБЕДА БРАТВА FCM!*' : (isDraw ? '🟡 *БОЕВАЯ НИЧЬЯ*' : '🔴 *ИТОГ МАТЧА: ПОРАЖЕНИЕ*');
+    headerOutcome = isWin ? '🟢 *ПОБЕДА INVICTUS FCM!*' : (isDraw ? '🟡 *БОЕВАЯ НИЧЬЯ*' : '🔴 *ИТОГ МАТЧА: ПОРАЖЕНИЕ*');
   }
 
   // 1. SCORERS VIEW
@@ -3167,7 +3167,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
     const playerList = rows.length > 0 ? rows.join('\n') : (lang === 'ar' ? '_لا توجد بيانات_' : '_No player data recorded_');
 
     if (lang === 'ar') {
-      return `⚽ *دوري BRATVA FCM ── قائمة الهدافين والمشاركين (${activeScorers.length} لاعب)*
+      return `⚽ *دوري INVICTUS FCM ── قائمة الهدافين والمشاركين (${activeScorers.length} لاعب)*
 ` +
         `⚔️ ضد: *${opp}* | النتيجة: *${ourScore}* : *${oppScore}*
 ` +
@@ -3179,7 +3179,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
 ` +
         `• مجموع الأهداف: *${ourScore}* في ${totalTurnsPlayed} هجمة`;
     } else if (lang === 'en') {
-      return `⚽ *BRATVA FCM ── MATCH SCORERS (${activeScorers.length} PLAYERS)*
+      return `⚽ *INVICTUS FCM ── MATCH SCORERS (${activeScorers.length} PLAYERS)*
 ` +
         `⚔️ vs *${opp}* | Score: *${ourScore}* : *${oppScore}*
 ` +
@@ -3191,7 +3191,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
 ` +
         `• Squad Total: *${ourScore}* goals in ${totalTurnsPlayed} turns`;
     } else if (lang === 'es') {
-      return `⚽ *LIGA BRATVA ── GOLEADORES DEL PARTIDO (${activeScorers.length} JUGADORES)*
+      return `⚽ *LIGA INVICTUS FCM ── GOLEADORES DEL PARTIDO (${activeScorers.length} JUGADORES)*
 ` +
         `⚔️ vs *${opp}* | Marcador: *${ourScore}* : *${oppScore}*
 ` +
@@ -3203,7 +3203,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
 ` +
         `• Goles Totales: *${ourScore}* en ${totalTurnsPlayed} turnos`;
     } else {
-      return `⚽ *БРАТВА FCM ── БОМБАРДИРЫ МАТЧА (${activeScorers.length} ИГРОКОВ)*
+      return `⚽ *INVICTUS FCM ── БОМБАРДИРЫ МАТЧА (${activeScorers.length} ИГРОКОВ)*
 ` +
         `⚔️ против *${opp}* | Счёт: *${ourScore}* : *${oppScore}*
 ` +
@@ -3241,7 +3241,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
     }
 
     if (lang === 'ar') {
-      return `⚠️ *دوري BRATVA FCM ── تقرير المتخلفين عن الهجمات*
+      return `⚠️ *دوري INVICTUS FCM ── تقرير المتخلفين عن الهجمات*
 ` +
         `⚔️ ضد: *${opp}* | التاريخ: ${cleanDate}
 ` +
@@ -3253,7 +3253,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
 ` +
         `• إجمالي المقصرين: ${missedPlayers.length} لاعبين | الهجمات الضائعة: ${missedTurnsCount}`;
     } else if (lang === 'en') {
-      return `⚠️ *BRATVA FCM ── MISSED TURNS & INFRACTIONS*
+      return `⚠️ *INVICTUS FCM ── MISSED TURNS & INFRACTIONS*
 ` +
         `⚔️ vs *${opp}* | Date: ${cleanDate}
 ` +
@@ -3265,7 +3265,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
 ` +
         `• Defaulters: ${missedPlayers.length} players | Total Missed: ${missedTurnsCount} turns`;
     } else if (lang === 'es') {
-      return `⚠️ *LIGA BRATVA ── TURNOS NO JUGADOS E INFRACCIONES*
+      return `⚠️ *LIGA INVICTUS FCM ── TURNOS NO JUGADOS E INFRACCIONES*
 ` +
         `⚔️ vs *${opp}* | Fecha: ${cleanDate}
 ` +
@@ -3277,7 +3277,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
 ` +
         `• Infractores: ${missedPlayers.length} jugadores | Turnos perdidos: ${missedTurnsCount}`;
     } else {
-      return `⚠️ *БРАТВА FCM ── ПРОПУСКИ ХОДОВ И НАРУШЕНИЯ*
+      return `⚠️ *INVICTUS FCM ── ПРОПУСКИ ХОДОВ И НАРУШЕНИЯ*
 ` +
         `⚔️ против *${opp}* | Дата: ${cleanDate}
 ` +
@@ -3307,7 +3307,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
   const podiumStr = podium.length > 0 ? podium.join('\n') : (lang === 'ar' ? '_لا توجد بيانات_' : '_No MVP data_');
 
   if (lang === 'ar') {
-    return `🏆 *دوري BRATVA FCM ضد ${opp}*
+    return `🏆 *دوري INVICTUS FCM ضد ${opp}*
 ` +
       `────────────────────────────
 ` +
@@ -3331,7 +3331,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
 ` +
       `• المتخلفون عن الهجمات: ${missedPlayers.length} لاعبين (${missedTurnsCount} هجمات ضائعة)`;
   } else if (lang === 'en') {
-    return `🏆 *BRATVA FCM vs ${opp}*
+    return `🏆 *INVICTUS FCM vs ${opp}*
 ` +
       `────────────────────────────
 ` +
@@ -3355,7 +3355,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
 ` +
       `• Missed Turns: ${missedPlayers.length} players (${missedTurnsCount} turns missed)`;
   } else if (lang === 'es') {
-    return `🏆 *BRATVA FCM vs ${opp}*
+    return `🏆 *INVICTUS FCM vs ${opp}*
 ` +
       `────────────────────────────
 ` +
@@ -3380,7 +3380,7 @@ function formatTournamentScorecard(t, lang = 'ru', view = 'overview') {
       `• Turnos no jugados: ${missedPlayers.length} jugadores (${missedTurnsCount} turnos)`;
   } else {
     // Russian
-    return `🏆 *БРАТВА FCM vs ${opp}*
+    return `🏆 *INVICTUS FCM vs ${opp}*
 ` +
       `────────────────────────────
 ` +
@@ -3584,7 +3584,7 @@ function generatePlayerStatsMessage(query, lang = 'ru') {
 
   if (lang === 'en') {
     const statusText = strikes >= 3 ? 'ELIGIBLE FOR KICK (3+ strikes)' : (strikes > 0 ? `Warning (${strikes}/3 strikes)` : 'Clean Discipline (0 strikes)');
-    return `*BRATVA FCM ── PLAYER PROFILE*
+    return `*INVICTUS FCM ── PLAYER PROFILE*
 ` +
       `────────────────────────────
 ` +
@@ -3606,7 +3606,7 @@ function generatePlayerStatsMessage(query, lang = 'ru') {
   }
   if (lang === 'ar') {
     const statusText = strikes >= 3 ? 'مؤهل للاستبعاد (3+ إنذارات)' : (strikes > 0 ? `إنذار غياب (${strikes}/3)` : 'انضباط كامل وسجل نظيف (0 إنذارات)');
-    return `*دوري BRATVA FCM ── الملف الشخصي للاعب*
+    return `*دوري INVICTUS FCM ── الملف الشخصي للاعب*
 ` +
       `────────────────────────────
 ` +
@@ -3628,7 +3628,7 @@ function generatePlayerStatsMessage(query, lang = 'ru') {
   }
   if (lang === 'es') {
     const statusText = strikes >= 3 ? 'APTO PARA EXPULSIÓN (3+ faltas)' : (strikes > 0 ? `Aviso (${strikes}/3 strikes)` : 'Disciplina Limpia (0 faltas)');
-    return `*LIGA BRATVA ── PERFIL DEL JUGADOR*
+    return `*LIGA INVICTUS FCM ── PERFIL DEL JUGADOR*
 ` +
       `────────────────────────────
 ` +
@@ -3650,7 +3650,7 @@ function generatePlayerStatsMessage(query, lang = 'ru') {
   }
   // Russian
   const statusText = strikes >= 3 ? 'КАНДИДАТ НА КИК (3+ страйка)' : (strikes > 0 ? `Предупреждение (${strikes}/3 страйка)` : 'Безупречная дисциплина (0 страйков)');
-  return `*БРАТВА FCM ── ПРОФИЛЬ ИГРОКА*
+  return `*INVICTUS FCM ── ПРОФИЛЬ ИГРОКА*
 ` +
     `────────────────────────────
 ` +
@@ -3673,9 +3673,9 @@ function generatePlayerStatsMessage(query, lang = 'ru') {
 
 function formatWelcome(lang = 'ru') {
   if (lang === 'en') {
-    return `⚜️ *BRATVA FCM LEAGUE* ⚜️\n` +
+    return `⚜️ *INVICTUS FCM LEAGUE* ⚜️\n` +
       `🏆 *Official League Portal & Squad Companion*\n\n` +
-      `Welcome to the official **BRATVA FCM** League Bot!\n` +
+      `Welcome to the official **INVICTUS FCM** League Bot!\n` +
       `All squad tracking, tournament lineups, and player performance in one place:\n\n` +
       `• 👤 *Player Profile:* View your goals, matches played, and career card\n` +
       `• ⚔️ *Pre-Match Check-In:* Confirm your availability for the next tournament\n` +
@@ -3687,9 +3687,9 @@ function formatWelcome(lang = 'ru') {
       `📋 *Choose an option from the menu below 👇*`;
   }
   if (lang === 'ar') {
-    return `⚜️ *دوري БРАТВА FCM LEAGUE* ⚜️\n` +
+    return `⚜️ *دوري INVICTUS FCM LEAGUE* ⚜️\n` +
       `🏆 *البوابة الرسمية لدوري براتفا*\n\n` +
-      `مرحباً بك في البوت الرسمي لفريق ودوري **БРАТВА FCM**!\n` +
+      `مرحباً بك في البوت الرسمي لفريق ودوري **INVICTUS FCM**!\n` +
       `كل ما يخص الفريق وإحصائيات اللاعبين في مكان واحد:\n\n` +
       `• 👤 *الملف الشخصي:* استعرض أهدافك، مشاركاتك وبطاقتك كلاعب\n` +
       `• ⚔️ *تأكيد الجاهزية (Check-In):* سجّل حضورك للمشاركة في البطولة القادمة\n` +
@@ -3701,9 +3701,9 @@ function formatWelcome(lang = 'ru') {
       `📋 *اختر ما تريد من القائمة أدناه 👇*`;
   }
   if (lang === 'es') {
-    return `⚜️ *LIGA BRATVA FCM* ⚜️\n` +
+    return `⚜️ *LIGA INVICTUS FCM* ⚜️\n` +
       `🏆 *Portal Oficial de la Liga*\n\n` +
-      `¡Bienvenido al bot oficial de la Liga **БРАТВА FCM**!\n` +
+      `¡Bienvenido al bot oficial de la Liga **INVICTUS FCM**!\n` +
       `Toda la gestión del equipo, alineaciones y rendimiento en un solo lugar:\n\n` +
       `• 👤 *Perfil de Jugador:* Consulta tus goles, partidos y tarjeta personal\n` +
       `• ⚔️ *Check-In Pre-Partido:* Confirma tu disponibilidad para el torneo\n` +
@@ -3714,9 +3714,9 @@ function formatWelcome(lang = 'ru') {
       `👥 *Comunidad de Telegram (Canal + Grupo):*\n${COMMUNITY_URL}\n\n` +
       `📋 *Elige una opción en el menú abajo 👇*`;
   }
-  return `⚜️ *БРАТВА FCM LEAGUE* ⚜️\n` +
+  return `⚜️ *INVICTUS FCM LEAGUE* ⚜️\n` +
     `🏆 *Официальный бот и портал лиги*\n\n` +
-    `Добро пожаловать в официальный клубный бот лиги **БРАТВА FCM**!\n` +
+    `Добро пожаловать в официальный клубный бот лиги **INVICTUS FCM**!\n` +
     `Здесь собрана вся статистика команды и ключевые функции для каждого игрока:\n\n` +
     `• 👤 *Карточка игрока:* Личные голы, сыгранные турниры и статистика\n` +
     `• ⚔️ *Предматчевый сбор:* Подтверждение участия в турнире (Check-In)\n` +
@@ -3730,7 +3730,7 @@ function formatWelcome(lang = 'ru') {
 
 function formatAdminPanel(lang = 'ru') {
   if (lang === 'ar') {
-    return `👑 *لوحة تحكم الإدارة — دوري БРАТВА FCM* ⚜️\n` +
+    return `👑 *لوحة تحكم الإدارة — دوري INVICTUS FCM* ⚜️\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📸 *تسجيل نتائج البطولة:*\n` +
       `أرسل 4-5 لقطات شاشة (Screenshots) للبطولة من لعبة EA FC Mobile مباشرة هنا كألبوم صور.\n` +
@@ -3746,7 +3746,7 @@ function formatAdminPanel(lang = 'ru') {
       `⚙️ *تعديل قوانين الدوري:* \`/setrules <أهداف> <إنذارات> <هجمات>\``;
   }
   if (lang === 'en') {
-    return `👑 *ADMIN CONTROL PANEL — BRATVA FCM LEAGUE* ⚜️\n` +
+    return `👑 *ADMIN CONTROL PANEL — INVICTUS FCM LEAGUE* ⚜️\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📸 *Upload Tournament Results:*\n` +
       `Send 4-5 tournament screenshots from EA FC Mobile directly to this chat as a photo album.\n` +
@@ -3762,7 +3762,7 @@ function formatAdminPanel(lang = 'ru') {
       `⚙️ *Rules Manager:* \`/setrules <min_goals> <max_strikes> <turns>\``;
   }
   if (lang === 'es') {
-    return `👑 *PANEL DE ADMINISTRACIÓN — LIGA BRATVA FCM* ⚜️\n` +
+    return `👑 *PANEL DE ADMINISTRACIÓN — LIGA INVICTUS FCM* ⚜️\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📸 *Subir Resultados de Torneo:*\n` +
       `Envía 4-5 capturas de pantalla de EA FC Mobile a este chat como álbum.\n` +
@@ -3777,7 +3777,7 @@ function formatAdminPanel(lang = 'ru') {
       `👥 *Auditoría de Miembros:* \`/audit\` o \`/pending\`\n` +
       `⚙️ *Reglas de Liga:* \`/setrules <goles> <strikes> <turnos>\``;
   }
-  return `👑 *ПАНЕЛЬ УПРАВЛЕНИЯ АДМИНИСТРАТОРА (BRATVA FCM)* ⚜️\n` +
+  return `👑 *ПАНЕЛЬ УПРАВЛЕНИЯ АДМИНИСТРАТОРА (INVICTUS FCM)* ⚜️\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `📸 *Загрузка результатов турнира:*\n` +
     `Отправьте 4-5 скриншотов турнира из EA FC Mobile прямо в этот чат (альбомом).\n` +
@@ -3795,7 +3795,7 @@ function formatAdminPanel(lang = 'ru') {
 
 function formatChannelWelcome(lang = 'ru') {
   if (lang === 'en') {
-    return `⚜️ *WELCOME TO BRATVA FCM!* ⚜️\n\n` +
+    return `⚜️ *WELCOME TO INVICTUS FCM!* ⚜️\n\n` +
       `Welcome to our official league community!\n\n` +
       `📌 *Key info for all members:*\n` +
       `• Daily tournament lineups, match recaps, and announcements are published here.\n` +
@@ -3804,7 +3804,7 @@ function formatChannelWelcome(lang = 'ru') {
       `⚔️ *Standard rule:* Stay active, complete all 3/3 turns in every match, and let's keep winning together! ⚽`;
   }
   if (lang === 'ar') {
-    return `⚜️ *مرحباً بكم في دوري БРАТВА FCM!* ⚜️\n\n` +
+    return `⚜️ *مرحباً بكم في دوري INVICTUS FCM!* ⚜️\n\n` +
       `أهلاً وسهلاً بجميع الأعضاء في قناتنا الرسمية!\n\n` +
       `📌 *معلومات أساسية لكل لاعب:*\n` +
       `• هنا ننشر يومياً تشكيلات البطولات، نتائج المباريات، وجميع إعلانات الفريق.\n` +
@@ -3813,7 +3813,7 @@ function formatChannelWelcome(lang = 'ru') {
       `⚔️ *القانون الأساسي:* الالتزام التام، لعب 3/3 محاولات دائماً في كل بطولة، والقتال من أجل الفوز معاً! ⚽`;
   }
   if (lang === 'es') {
-    return `⚜️ *¡BIENVENIDOS A BRATVA FCM!* ⚜️\n\n` +
+    return `⚜️ *¡BIENVENIDOS A INVICTUS FCM!* ⚜️\n\n` +
       `¡Bienvenidos a todos los miembros al canal oficial de nuestra liga!\n\n` +
       `📌 *Información clave del equipo:*\n` +
       `• Aquí publicamos a diario las alineaciones, resultados de torneos y avisos oficiales.\n` +
@@ -3821,7 +3821,7 @@ function formatChannelWelcome(lang = 'ru') {
       `• Uníos al grupo de debate de la plantilla para coordinar tácticas, turnos y comunicaros con el equipo.\n\n` +
       `⚔️ *Regla fundamental:* Máximo compromiso, jugar siempre los 3/3 turnos y ganar juntos! ⚽`;
   }
-  return `⚜️ *ДОБРО ПОЖАЛОВАТЬ В БРАТВА FCM!* ⚜️\n\n` +
+  return `⚜️ *ДОБРО ПОЖАЛОВАТЬ В INVICTUS FCM!* ⚜️\n\n` +
     `Приветствуем всех участников в нашем официальном канале!\n\n` +
     `📌 *Главное о нашей лиге:*\n` +
     `• Здесь ежедневно выходят составы на турниры, результаты матчей и важные объявления.\n` +
@@ -3834,7 +3834,7 @@ function formatJoinRequiredPrompt(lang = 'ru') {
   if (lang === 'ar') {
     return `📢 *تنبيه إلزامي: الانضمام لمجتمع الفريق أولاً!* 📢\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `⚠️ للمشاركة في دوري **БРАТВА FCM** والظهور في تشكيلة البطولات، يجب أولاً الانضمام إلى القناة الرسمية ومجموعة الفريق!\n\n` +
+      `⚠️ للمشاركة في دوري **INVICTUS FCM** والظهور في تشكيلة البطولات، يجب أولاً الانضمام إلى القناة الرسمية ومجموعة الفريق!\n\n` +
       `📲 *خطوات التسجيل الإلزامية:*\n` +
       `**1.** انضم إلى القناة الرسمية ومجموعة الفريق عبر الزر بالأسفل.\n` +
       `**2.** فور انضمامك، سيرسل لك البوت تلقائياً رسالة المتابعة لتسجيل اسمك في قائمة الفريق.\n` +
@@ -3845,7 +3845,7 @@ function formatJoinRequiredPrompt(lang = 'ru') {
   if (lang === 'en') {
     return `📢 *MANDATORY: JOIN OUR OFFICIAL COMMUNITY FIRST!* 📢\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `⚠️ To participate in **BRATVA FCM** tournaments, you must first join our official Channel and Discussion Group!\n\n` +
+      `⚠️ To participate in **INVICTUS FCM** tournaments, you must first join our official Channel and Discussion Group!\n\n` +
       `📲 *Mandatory Steps to Register:*\n` +
       `**1.** Join our official Channel and Discussion Group via the button below.\n` +
       `**2.** Once joined, the bot will automatically prompt you to enter your player nickname.\n` +
@@ -3856,7 +3856,7 @@ function formatJoinRequiredPrompt(lang = 'ru') {
   if (lang === 'es') {
     return `📢 *¡OBLIGATORIO: ÚNETE PRIMERO A LA COMUNIDAD!* 📢\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `⚠️ Para participar en los torneos de **BRATVA FCM**, ¡primero debes unirte a nuestro Canal y Grupo oficial!\n\n` +
+      `⚠️ Para participar en los torneos de **INVICTUS FCM**, ¡primero debes unirte a nuestro Canal y Grupo oficial!\n\n` +
       `📲 *Pasos obligatorios:*\n` +
       `**1.** Únete a nuestro Canal y Grupo oficial mediante el botón de abajo.\n` +
       `**2.** Una vez dentro, el bot te enviará automáticamente el mensaje para registrar tu nombre de jugador.\n` +
@@ -3867,7 +3867,7 @@ function formatJoinRequiredPrompt(lang = 'ru') {
   // Russian (Default)
   return `📢 *ОБЯЗАТЕЛЬНО: ВСТУПИТЕ В КАНАЛ И ЧАТ ЛИГИ!* 📢\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `⚠️ Для участия в турнирах **БРАТВА FCM** необходимо сначала вступить в наш официальный Канал и Чат команды!\n\n` +
+    `⚠️ Для участия в турнирах **INVICTUS FCM** необходимо сначала вступить в наш официальный Канал и Чат команды!\n\n` +
     `📲 *Обязательные шаги для допуска:*\n` +
     `**1.** Вступите в наш официальный Канал и Чат по кнопке ниже.\n` +
     `**2.** После вступления бот автоматически пришлет сообщение для записи вашего игрового ника в состав.\n` +
@@ -3903,15 +3903,15 @@ function getJoinRequiredKeyboard(currentLang = 'ru') {
 
 function formatCommunityJoinedPrompt(lang = 'ru') {
   if (lang === 'ar') {
-    return `👋 *مرحباً بك في مجتمع БРАТВА FCM!* ⚜️\n\n` +
+    return `👋 *مرحباً بك في مجتمع INVICTUS FCM!* ⚜️\n\n` +
       `🎉 *لقد انضممت بنجاح إلى القناة الرسمية ومجموعة الفريق!*\n\n` +
       `👉 *الخطوة التالية — تسجيل اسمك في تشكيلة البطولات:*\n` +
       `اضغط على الزر بالأسفل لتأكيد عضويتك وإرسال اسمك المستعار في لعبة EA FC Mobile!\n\n` +
       `🔒 *آمن 100%:* نطلب فقط اسمك المستعار الظاهر في اللعبة (Nickname) لحساب أهدافك وإدراجك في تشكيلة المباريات — لا نطلب أي كلمة مرور أو دخول لحسابك نهائياً!\n\n` +
-      `⚠️ *تنبيه:* التسجيل مخصص للاعبي БРАТВА FCM في اللعبة (إلزامية لعب 3/3 جولات في كل بطولة لتفادي الاستبعاد).`;
+      `⚠️ *تنبيه:* التسجيل مخصص للاعبي INVICTUS FCM في اللعبة (إلزامية لعب 3/3 جولات في كل بطولة لتفادي الاستبعاد).`;
   }
   if (lang === 'en') {
-    return `👋 *Welcome to the BRATVA FCM Community!* ⚜️\n\n` +
+    return `👋 *Welcome to the INVICTUS FCM Community!* ⚜️\n\n` +
       `🎉 *You have successfully joined our official Channel and Squad Chat!*\n\n` +
       `👉 *Next Step — Enter Tournament Squad Roster:*\n` +
       `Tap the button below to confirm your membership and submit your public EA FC Mobile In-Game Nickname!\n\n` +
@@ -3919,7 +3919,7 @@ function formatCommunityJoinedPrompt(lang = 'ru') {
       `⚠️ *Important:* Tournament participation requires playing all 3/3 turns in every match to avoid strikes.`;
   }
   if (lang === 'es') {
-    return `👋 *¡Bienvenido a la comunidad de BRATVA FCM!* ⚜️\n\n` +
+    return `👋 *¡Bienvenido a la comunidad de INVICTUS FCM!* ⚜️\n\n` +
       `🎉 *¡Te has unido con éxito a nuestro Canal y Grupo oficial!*\n\n` +
       `👉 *Siguiente paso — Registro en la plantilla de torneos:*\n` +
       `¡Pulsa el botón de abajo para confirmar tu membresía y registrar tu nombre de EA FC Mobile!\n\n` +
@@ -3927,7 +3927,7 @@ function formatCommunityJoinedPrompt(lang = 'ru') {
       `⚠️ *Importante:* Es obligatorio jugar los 3/3 turnos en cada torneo para evitar sanciones.`;
   }
   // Russian (Default)
-  return `👋 *Добро пожаловать в сообщество БРАТВА FCM!* ⚜️\n\n` +
+  return `👋 *Добро пожаловать в сообщество INVICTUS FCM!* ⚜️\n\n` +
     `🎉 *Вы успешно вступили в наш официальный Канал и Чат команды!*\n\n` +
     `👉 *Следующий шаг — Запись в состав лиги на турниры:*\n` +
     `Нажмите кнопку ниже, чтобы подтвердить участие и записать свой игровой никнейм EA FC Mobile в состав команды!\n\n` +
@@ -3969,7 +3969,7 @@ function getCommunityJoinedKeyboard(currentLang = 'ru') {
 
 function formatVerificationPrompt(lang = 'ru') {
   if (lang === 'ar') {
-    return `⚜️ *دوري БРАТВА FCM — تسجيل اسم اللاعب* ⚜️\n\n` +
+    return `⚜️ *دوري INVICTUS FCM — تسجيل اسم اللاعب* ⚜️\n\n` +
       `✅ *تم تأكيد عضويتك بنجاح! مرحباً بك في الفريق!*\n\n` +
       `👉 *أرسل الآن اسمك المستعار في لعبة EA FC Mobile (In-Game Nickname) هنا في المحادثة:*\n` +
       `_(اكتب اسمك تماماً كما يظهر في قائمة الفريق باللعبة)_\n\n` +
@@ -3977,7 +3977,7 @@ function formatVerificationPrompt(lang = 'ru') {
       `نحتاج فقط لاسمك الظاهر في اللعبة لحساب أهدافك في البطولات وتنزيلك في التشكيلة الأساسية — لا نحتاج لأي كلمة مرور أو دخول لحسابك نهائياً!`;
   }
   if (lang === 'en') {
-    return `⚜️ *BRATVA FCM — SQUAD ROSTER REGISTRATION* ⚜️\n\n` +
+    return `⚜️ *INVICTUS FCM — SQUAD ROSTER REGISTRATION* ⚜️\n\n` +
       `✅ *Community Membership Confirmed! Welcome to the squad!*\n\n` +
       `👉 *Simply send your public EA FC Mobile In-Game Nickname (IGN) here in chat:*\n` +
       `_(Type it exactly as it appears in the game squad roster)_\n\n` +
@@ -3985,14 +3985,14 @@ function formatVerificationPrompt(lang = 'ru') {
       `We only use your public in-game name to record tournament goals and include you in starting lineups — no passwords or account logins ever!`;
   }
   if (lang === 'es') {
-    return `⚜️ *BRATVA FCM — REGISTRO EN LA PLANTILLA* ⚜️\n\n` +
+    return `⚜️ *INVICTUS FCM — REGISTRO EN LA PLANTILLA* ⚜️\n\n` +
       `✅ *¡Membresía confirmada con éxito! ¡Bienvenido al equipo!*\n\n` +
       `👉 *Simplemente escribe aquí en el chat tu nombre de EA FC Mobile (IGN):*\n` +
       `_(Escríbelo exactamente como aparece en la plantilla del juego)_\n\n` +
       `🔒 *100% Seguro y sencillo:*\n` +
       `Solo necesitamos tu nombre público del juego para registrar tus goles en torneos y convocarte en la alineación — ¡sin contraseñas ni accesos!`;
   }
-  return `⚜️ *БРАТВА FCM — ЗАПИСЬ В СОСТАВ КОМАНДЫ* ⚜️\n\n` +
+  return `⚜️ *INVICTUS FCM — ЗАПИСЬ В СОСТАВ КОМАНДЫ* ⚜️\n\n` +
     `✅ *Подписка на сообщество подтверждена! Добро пожаловать в команду!*\n\n` +
     `👉 *Просто отправьте сюда в чат ваш игровой никнейм EA FC Mobile (IGN):*\n` +
     `_(Напишите его в точности так, как он указан в списке состава в игре)_\n\n` +
@@ -4272,7 +4272,7 @@ async function formatPendingAudit(lang = 'ru') {
   const pct = total > 0 ? Math.round((vCount / total) * 100) : 0;
 
   if (lang === 'en') {
-    let msg = `📋 *БРАТВА FCM — TELEGRAM SQUAD AUDIT* ⚜️\n\n` +
+    let msg = `📋 *INVICTUS FCM — TELEGRAM SQUAD AUDIT* ⚜️\n\n` +
       `📊 *Registration Status (🚨 TODAY IS THE LAST CHANCE!):*\n` +
       `• Total Roster: *${total}* players\n` +
       `• ✅ Joined on Telegram: *${vCount}* (${pct}%)\n` +
@@ -4294,7 +4294,7 @@ async function formatPendingAudit(lang = 'ru') {
   }
 
   if (lang === 'ar') {
-    let msg = `📋 *دوري БРАТВА — تدقيق أعضاء تيليجرام* ⚜️\n\n` +
+    let msg = `📋 *دوري INVICTUS FCM — تدقيق أعضاء تيليجرام* ⚜️\n\n` +
       `📊 *حالة التسجيل (🚨 اليوم هو آخر فرصة!):*\n` +
       `• إجمالي اللاعبين: *${total}* لاعباً\n` +
       `• ✅ المنضمون لتيليجرام: *${vCount}* (${pct}%)\n` +
@@ -4316,7 +4316,7 @@ async function formatPendingAudit(lang = 'ru') {
   }
 
   if (lang === 'es') {
-    let msg = `📋 *БРАТВА FCM — AUDITORÍA DE TELEGRAM* ⚜️\n\n` +
+    let msg = `📋 *INVICTUS FCM — AUDITORÍA DE TELEGRAM* ⚜️\n\n` +
       `📊 *Estado de Registro (🚨 ¡HOY ES LA ÚLTIMA OPORTUNIDAD!):*\n` +
       `• Plantilla Total: *${total}* jugadores\n` +
       `• ✅ Unidos a Telegram: *${vCount}* (${pct}%)\n` +
@@ -4338,7 +4338,7 @@ async function formatPendingAudit(lang = 'ru') {
   }
 
   // Russian (Default)
-  let msg = `📋 *БРАТВА FCM — АУДИТ СОСТАВА В TELEGRAM* ⚜️\n\n` +
+  let msg = `📋 *INVICTUS FCM — АУДИТ СОСТАВА В TELEGRAM* ⚜️\n\n` +
     `📊 *Статус регистрации (🚨 СЕГОДНЯ ПОСЛЕДНИЙ ШАНС!):*\n` +
     `• Общий состав: *${total}* бойцов\n` +
     `• ✅ Вступили в Telegram: *${vCount}* (${pct}%)\n` +
@@ -4474,7 +4474,7 @@ async function getCleanSquadTelegramStatus() {
  */
 function formatTelegramNotice(lang = 'ru') {
   if (lang === 'en') {
-    return `📢 *BRATVA FCM: OFFICIAL TELEGRAM REGISTRATION* 📢\n` +
+    return `📢 *INVICTUS FCM: OFFICIAL TELEGRAM REGISTRATION* 📢\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ *ATTENTION TO ALL IN-GAME SQUAD MEMBERS:*\n\n` +
       `Registration in our official Telegram bot is **MANDATORY** to participate in LvL tournaments!\n\n` +
@@ -4487,7 +4487,7 @@ function formatTelegramNotice(lang = 'ru') {
       `⚡ Once verified, your stats, match history, and tournament lineup eligibility will be activated!`;
   }
   if (lang === 'ar') {
-    return `📢 *دوري БРАТВА FCM: تنبيه رسمي للتسجيل في تيليجرام* 📢\n` +
+    return `📢 *دوري INVICTUS FCM: تنبيه رسمي للتسجيل في تيليجرام* 📢\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ *إلى جميع أعضاء الدوري داخل لعبة FC Mobile:*\n\n` +
       `التسجيل في بوت تيليجرام الرسمي **إلزامي وضروري** للمشاركة في بطولات الدوري (LvL)!\n\n` +
@@ -4500,7 +4500,7 @@ function formatTelegramNotice(lang = 'ru') {
       `⚡ بعد التوثيق، يتم تفعيل إحصائياتك وأهليتك لدخول التشكيلة والمنافسة في البطولات!`;
   }
   if (lang === 'es') {
-    return `📢 *BRATVA FCM: REGISTRO OFICIAL EN TELEGRAM* 📢\n` +
+    return `📢 *INVICTUS FCM: REGISTRO OFICIAL EN TELEGRAM* 📢\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ *ATENCIÓN A TODOS LOS MIEMBROS EN FC MOBILE:*\n\n` +
       `¡El registro en nuestro bot oficial de Telegram es **OBLIGATORIO** para participar en torneos LvL!\n\n` +
@@ -4513,7 +4513,7 @@ function formatTelegramNotice(lang = 'ru') {
       `⚡ ¡Una vez verificado, tendrás acceso a las alineaciones de torneos y tus estadísticas!`;
   }
   // Russian (Default)
-  return `📢 *БРАТВА FCM: РЕГИСТРАЦИЯ В TELEGRAM* 📢\n` +
+  return `📢 *INVICTUS FCM: РЕГИСТРАЦИЯ В TELEGRAM* 📢\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `⚠️ *ВНИМАНИЮ ВСЕХ УЧАСТНИКОВ ЛИГИ В FC MOBILE:*\n\n` +
     `Регистрация в официальном боте Telegram **ОБЯЗАТЕЛЬНА** для участия в турнирах LvL!\n\n` +
@@ -4535,7 +4535,7 @@ function formatTelegramNotice(lang = 'ru') {
  */
 function formatSeason27Announcement(lang = 'ar') {
   if (lang === 'en') {
-    return `🚨👑 *BRATVA FCM: OFFICIAL SEASON 27 KICKOFF BRIEFING* 👑🚨\n` +
+    return `🚨👑 *INVICTUS FCM: OFFICIAL SEASON 27 KICKOFF BRIEFING* 👑🚨\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `With the dawn of *Season 27*, we officially launch a new era of ambition, unity, and dominance in EA FC Mobile! 🏆\n\n` +
       `A warm welcome to all warriors! Here is the official roadmap and operational update for our squad:\n\n` +
@@ -4545,7 +4545,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `Right now, we are fully focused on squad building and recruiting top-tier talent. Invite elite warriors to join our bot and community so we reach our target fast! 🎯\n\n` +
       `🎖️ *HONORABLE DEDICATION: SEASON 26 TOP 3 SCORERS*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `Massive salute to the three legends who powered BRATVA's offense with historic scoring records:\n` +
+      `Massive salute to the three legends who powered INVICTUS's offense with historic scoring records:\n` +
       `🥇 *ROXTOVER* — *695 Goals* (26 Matches)\n` +
       `🥈 *Mohamed\\_Osama* — *542 Goals* (25 Matches)\n` +
       `🥉 *саня (Sanya)* — *532 Goals* (15 Matches | 35.5 Avg)\n\n` +
@@ -4561,16 +4561,16 @@ function formatSeason27Announcement(lang = 'ar') {
       `⭐ *L1onchik (L1on⚡🏆)* — 119 Goals\n` +
       `And huge respect to our active fighters:\n` +
       `• *MSRPBOT* • *KSFALUBAZ* • *RMa\\_jXAHB* • *Тима* • *Omar* • *Real* • *PSG* • *PapaCarlos1234* • *Awukufc* • *RÈDHAWK前*\n\n` +
-      `You are the true backbone and heartbeat of BRATVA! 🤝🔥\n\n` +
+      `You are the true backbone and heartbeat of INVICTUS! 🤝🔥\n\n` +
       `🤖 *COMMANDS & FEATURES AT YOUR FINGERTIPS:*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `🔹 */tournaments* — Browse past match results and participant scorecards ranked top-to-bottom.\n` +
       `🔹 */stats* — View your personal stats, goal totals, and turn reliability.\n` +
       `🔹 */rules* — Review league standards, minimum targets, and strike discipline.\n\n` +
-      `🦁⚔️ *ONE FAMILY. ONE CREED. DOMINATION! FOR BRATVA!* 🔴⚪️`;
+      `🦁⚔️ *ONE FAMILY. ONE CREED. DOMINATION! FOR INVICTUS!* 🔴⚪️`;
   }
   if (lang === 'ru') {
-    return `🚨👑 *БРАТВА FCM: ОФИЦИАЛЬНЫЙ СТАРТ 27 СЕЗОНА* 👑🚨\n` +
+    return `🚨👑 *INVICTUS FCM: ОФИЦИАЛЬНЫЙ СТАРТ 27 СЕЗОНА* 👑🚨\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `С началом *27 Сезона* мы открываем новую главу побед, единства и абсолютного доминирования в EA FC Mobile! 🏆\n\n` +
       `Приветствуем всех бойцов! Главная информация, стратегия и правила на старте сезона:\n\n` +
@@ -4586,7 +4586,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `🥉 *саня (Sanya)* — *532 Гола* (15 Матчей | Среднее: 35.5)\n\n` +
       `❤️ *ОСОБАЯ БЛАГОДАРНОСТЬ ВСЕМ ВСТУПИВШИМ БОЙЦАМ*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `Огромное спасибо каждому игроку, кто присоединился к BRATVA, зарегистрировался в боте и держит строй:\n` +
+      `Огромное спасибо каждому игроку, кто присоединился к INVICTUS, зарегистрировался в боте и держит строй:\n` +
       `⭐ *Mike (Josue)* — 450 Голов\n` +
       `⭐ *Abirsh07* — 364 Гола\n` +
       `⭐ *DOXIBÉRO (Второй аккаунт)* — 328 Голов\n` +
@@ -4605,7 +4605,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `🦁⚔️ *ВМЕСТЕ МЫ — СИЛА! ОДНА СЕМЬЯ! ЗА БРАТВУ!* 🔴⚪️`;
   }
   if (lang === 'es') {
-    return `🚨👑 *BRATVA FCM: COMUNICADO OFICIAL TEMPORADA 27* 👑🚨\n` +
+    return `🚨👑 *INVICTUS FCM: COMUNICADO OFICIAL TEMPORADA 27* 👑🚨\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `¡Con el inicio de la *Temporada 27*, abrimos una nueva era de gloria, ambición y dominio en EA FC Mobile! 🏆\n\n` +
       `¡Bienvenidos a todos los guerreros! Esta es la hoja de ruta y actualización oficial para nuestra plantilla:\n\n` +
@@ -4615,7 +4615,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `Ahora mismo estamos en fase de reclutamiento y consolidación de la plantilla. ¡Inviten a jugadores de alto nivel para alcanzar la meta pronto! 🎯\n\n` +
       `🎖️ *HOMENAJE DE HONOR: TOP 3 GOLEADORES DE LA TEMPORADA 26*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `Un gran reconocimiento a los tres titanes que lideraron la ofensiva de BRATVA con cifras históricas:\n` +
+      `Un gran reconocimiento a los tres titanes que lideraron la ofensiva de INVICTUS con cifras históricas:\n` +
       `🥇 *ROXTOVER* — *695 Goles* (26 Partidos)\n` +
       `🥈 *Mohamed\\_Osama* — *542 Goles* (25 Partidos)\n` +
       `🥉 *саня (Sanya)* — *532 Goles* (15 Partidos | Promedio: 35.5)\n\n` +
@@ -4637,11 +4637,11 @@ function formatSeason27Announcement(lang = 'ar') {
       `🔹 */tournaments* — Historial interactivo de torneos y lista de goleadores.\n` +
       `🔹 */stats* — Estadísticas personales, goles y turnos jugados.\n` +
       `🔹 */rules* — Reglas oficiales de la liga y disciplina.\n\n` +
-      `🦁⚔️ *¡UNA SOLA FAMILIA, UN SOLO OBJETIVO! ¡VAMOS BRATVA!* 🔴⚪️`;
+      `🦁⚔️ *¡UNA SOLA FAMILIA, UN SOLO OBJETIVO! ¡VAMOS INVICTUS!* 🔴⚪️`;
   }
 
   // Arabic (Default System)
-  return `🚨👑 *إعلان انطلاق الموسم 27 — عائلة BRATVA FCM* 👑🚨\n` +
+  return `🚨👑 *إعلان انطلاق الموسم 27 — عائلة INVICTUS FCM* 👑🚨\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
     `مع إشراقة *الموسم الجديد 27*، نعلن رسمياً افتتاح فصل جديد من القوة، المجد، والسيطرة المطلقة على ساحة EA FC Mobile! 🏆\n\n` +
     `مرحباً بجميع الأبطال والمحاربين! إليكم التوجيهات الرسمية وخطة العمل للموسم الجديد:\n\n` +
@@ -4651,13 +4651,13 @@ function formatSeason27Announcement(lang = 'ar') {
     `نحن حالياً في مرحلة استقطاب وبناء كتيبة نخبة قوية. شاركوا البوت والدوري مع أقوى اللاعبين حتى نصل للهدف سريعاً! 🎯\n\n` +
     `🎖️ *إهداء شرفي خاص لـ TOP 3 (أساطير الموسم 26)*\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-    `تحية إجلال وتقدير لثلاثي القمة الذين قادوا هجوم BRATVA بأعلى معدلات تسجيل للأهداف:\n` +
+    `تحية إجلال وتقدير لثلاثي القمة الذين قادوا هجوم INVICTUS بأعلى معدلات تسجيل للأهداف:\n` +
     `🥇 *ROXTOVER* — *695 هدفاً* (26 مباراة)\n` +
     `🥈 *Mohamed\\_Osama* — *542 هدفاً* (25 مباراة)\n` +
     `🥉 *саня (Sanya)* — *532 هدفاً* (15 مباراة | معدل استثنائي 35.5)\n\n` +
     `❤️ *شكر وتقدير خاص لجميع الأبطال المنضمين*\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-    `شكراً من أعماق القلب لكل محارب التحق بكتيبة BRATVA، سجل في البوت، وأثبت ولاءه والتزامه:\n` +
+    `شكراً من أعماق القلب لكل محارب التحق بكتيبة INVICTUS، سجل في البوت، وأثبت ولاءه والتزامه:\n` +
     `⭐ *Mike (Josue)* — 450 هدفاً\n` +
     `⭐ *Abirsh07* — 364 هدفاً\n` +
     `⭐ *DOXIBÉRO (الحساب الثاني)* — 328 هدفاً\n` +
@@ -4667,13 +4667,13 @@ function formatSeason27Announcement(lang = 'ar') {
     `⭐ *L1onchik (L1on⚡🏆)* — 119 هدفاً\n` +
     `وكذلك تحية تقدير خاصة لباقي أبطال التشكيلة:\n` +
     `• *MSRPBOT* • *KSFALUBAZ* • *RMa\\_jXAHB* • *Тима* • *Omar* • *Real* • *PSG* • *PapaCarlos1234* • *Awukufc* • *RÈDHAWK前*\n\n` +
-    `بفضلكم جميعاً تصنع BRATVA هيبتها.. أنتم العمود الفقري للفريق! 🤝🔥\n\n` +
+    `بفضلكم جميعاً تصنع INVICTUS هيبتها.. أنتم العمود الفقري للفريق! 🤝🔥\n\n` +
     `🤖 *أوامر البوت الجديدة في خدمتكم:*\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
     `🔹 */tournaments* — استعراض سجل البطولات وترتيب الهدافين من الأعلى للأسفل.\n` +
     `🔹 */stats* — متابعة أرقامك الفردية ونسبة التزامك بالهجمات.\n` +
     `🔹 */rules* — القوانين الرسمية، الأهداف المطلوبة ونظام الإنذارات.\n\n` +
-    `🦁⚔️ *عائلة واحدة.. هدف واحد.. ديما BRATVA!* 🔴⚪️`;
+    `🦁⚔️ *عائلة واحدة.. هدف واحد.. ديما INVICTUS!* 🔴⚪️`;
 }
 
 function getSeason27Keyboard(currentLang = 'ar', isPrivate = false) {
@@ -4733,7 +4733,7 @@ async function formatLastChanceWarning(lang = 'ru') {
   const { uniqueJoined, uniquePending } = await getCleanSquadTelegramStatus();
 
   if (lang === 'en') {
-    let msg = `🚨 *БРАТВА FCM: FINAL NOTICE — TODAY IS THE LAST CHANCE!* 🚨\n` +
+    let msg = `🚨 *INVICTUS FCM: FINAL NOTICE — TODAY IS THE LAST CHANCE!* 🚨\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ *ATTENTION ALL SQUAD MEMBERS!*\n` +
       `Today is the **FINAL DEADLINE** to register on our official Telegram! All EA FC Mobile league members must verify their in-game nickname.\n\n` +
@@ -4758,7 +4758,7 @@ async function formatLastChanceWarning(lang = 'ru') {
   }
 
   if (lang === 'ar') {
-    let msg = `🚨 *دوري БРАТВА: تنبيه أخير وحاسم — اليوم هو آخر فرصة!* 🚨\n` +
+    let msg = `🚨 *دوري INVICTUS FCM: تنبيه أخير وحاسم — اليوم هو آخر فرصة!* 🚨\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ *إلى جميع أعضاء الدوري في اللعبة:*\n` +
       `اليوم هو **الموعد النهائي والأخير** لإتمام التسجيل في بوت تيليجرام الرسمي! يجب على كل لاعب تأكيد نك نيم حسابه.\n\n` +
@@ -4783,7 +4783,7 @@ async function formatLastChanceWarning(lang = 'ru') {
   }
 
   if (lang === 'es') {
-    let msg = `🚨 *БРАТВА FCM: AVISO FINAL — ¡HOY ES LA ÚLTIMA OPORTUNIDAD!* 🚨\n` +
+    let msg = `🚨 *INVICTUS FCM: AVISO FINAL — ¡HOY ES LA ÚLTIMA OPORTUNIDAD!* 🚨\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ *¡ATENCIÓN A TODOS LOS MIEMBROS DE LA LIGA!*\n` +
       `¡Hoy es el **PLAZO FINAL DEFINITIVO** para registrarse en nuestro bot oficial de Telegram! Todos deben confirmar su nick del juego.\n\n` +
@@ -4808,7 +4808,7 @@ async function formatLastChanceWarning(lang = 'ru') {
   }
 
   // Russian (Default)
-  let msg = `🚨 *БРАТВА FCM: ПОСЛЕДНЕЕ ПРЕДУПРЕЖДЕНИЕ — СЕГОДНЯ ПОСЛЕДНИЙ ШАНС!* 🚨\n` +
+  let msg = `🚨 *INVICTUS FCM: ПОСЛЕДНЕЕ ПРЕДУПРЕЖДЕНИЕ — СЕГОДНЯ ПОСЛЕДНИЙ ШАНС!* 🚨\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `⚠️ *ВНИМАНИЕ ВСЕМ БОЙЦАМ ЛИГИ!*\n` +
     `Сегодня наступает **крайний срок регистрации** в нашем Telegram-боте! Все игроки Лиги в EA FC Mobile обязаны подтвердить свой ник.\n\n` +
@@ -4884,7 +4884,7 @@ async function formatKickedWarning(lang = 'ru') {
   const { uniqueJoined, uniquePending } = await getCleanSquadTelegramStatus();
 
   if (lang === 'en') {
-    let msg = `🚨 *BRATVA FCM: KICKED PLAYERS NOTICE & TOMORROW'S WARNING!* 🚨\n` +
+    let msg = `🚨 *INVICTUS FCM: KICKED PLAYERS NOTICE & TOMORROW'S WARNING!* 🚨\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📢 *OFFICIAL CLARIFICATION TO ALL LEAGUE MEMBERS:*\n` +
       `The players recently removed from our in-game league were removed **STRICTLY BECAUSE THEY FAILED TO JOIN TELEGRAM**!\n` +
@@ -4911,7 +4911,7 @@ async function formatKickedWarning(lang = 'ru') {
   }
 
   if (lang === 'ar') {
-    let msg = `🚨 *دوري БРАТВА FCM: توضيح بخصوص المطرودين وتنبيه حاسم لغد!* 🚨\n` +
+    let msg = `🚨 *دوري INVICTUS FCM: توضيح بخصوص المطرودين وتنبيه حاسم لغد!* 🚨\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📢 *بيان رسمي وتوضيح لجميع أعضاء الدوري:*\n` +
       `اللاعبون الذين تم طردهم مؤخراً من الدوري داخل اللعبة تم استبعادهم **فقط وحصرياً لأنهم لم ينضموا إلى تيليجرام**!\n` +
@@ -4938,7 +4938,7 @@ async function formatKickedWarning(lang = 'ru') {
   }
 
   if (lang === 'es') {
-    let msg = `🚨 *БРАТВА FCM: AVISO SOBRE EXPULSADOS Y ¡MAÑANA TE TOCA A TI!* 🚨\n` +
+    let msg = `🚨 *INVICTUS FCM: AVISO SOBRE EXPULSADOS Y ¡MAÑANA TE TOCA A TI!* 🚨\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📢 *COMUNICADO OFICIAL PARA TODOS LOS MIEMBROS DE LA LIGA:*\n` +
       `Los jugadores recientemente expulsados de la liga en el juego fueron removidos **EXCLUSIVAMENTE POR NO UNIRSE A TELEGRAM**!\n` +
@@ -4965,7 +4965,7 @@ async function formatKickedWarning(lang = 'ru') {
   }
 
   // Russian (Default)
-  let msg = `🚨 *БРАТВА FCM: РАЗЪЯСНЕНИЕ ПО ИСКЛЮЧЁННЫМ И ПОСЛЕДНЕЕ ПРЕДУПРЕЖДЕНИЕ!* 🚨\n` +
+  let msg = `🚨 *INVICTUS FCM: РАЗЪЯСНЕНИЕ ПО ИСКЛЮЧЁННЫМ И ПОСЛЕДНЕЕ ПРЕДУПРЕЖДЕНИЕ!* 🚨\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `📢 *ОФИЦИАЛЬНОЕ УВЕДОМЛЕНИЕ ДЛЯ ВСЕХ ИГРОКОВ ЛИГИ:*\n` +
     `Игроки, которые были недавно исключены из состава лиги в игре, были исключены **ИСКЛЮЧИТЕЛЬНО ИЗ-ЗА ОТСУТСТВИЯ В TELEGRAM**!\n` +
@@ -5148,7 +5148,7 @@ async function formatKicklist(lang = 'ru') {
   });
 
   if (lang === 'en') {
-    let msg = `📋 *БРАТВА INACTIVITY & KICK REVIEW* 📋\n` +
+    let msg = `📋 *INVICTUS FCM INACTIVITY & KICK REVIEW* 📋\n` +
       `━━━━━━━━━━━━━━━━━━━━\n`;
     if (critical.length > 0) msg += `🚨 *CRITICAL: ELIGIBLE FOR KICK (${rules.maxMissesKick}+ STRIKES OR 2x 0/3):*\n${critical.join('\n')}\n────────────────────\n`;
     if (warning.length > 0) msg += `⚠️ *ON NOTICE (1-${rules.maxMissesKick - 1} STRIKES):*\n${warning.join('\n')}\n────────────────────\n`;
@@ -5161,7 +5161,7 @@ async function formatKicklist(lang = 'ru') {
     return msg;
   }
   if (lang === 'ar') {
-    let msg = `📋 *دوري БРАТВА: مراجعة الحضور وقائمة الاستبعاد* 📋\n` +
+    let msg = `📋 *دوري INVICTUS FCM: مراجعة الحضور وقائمة الاستبعاد* 📋\n` +
       `━━━━━━━━━━━━━━━━━━━━\n`;
     if (critical.length > 0) msg += `🚨 *حالة حرجة: مؤهلون للاستبعاد الفوري (${rules.maxMissesKick}+ إنذارات أو غياب 0/3 مرتين):*\n${critical.join('\n')}\n────────────────────\n`;
     if (warning.length > 0) msg += `⚠️ *تحت الملاحظة (1-${rules.maxMissesKick - 1} إنذار):*\n${warning.join('\n')}\n────────────────────\n`;
@@ -5174,7 +5174,7 @@ async function formatKicklist(lang = 'ru') {
     return msg;
   }
   if (lang === 'es') {
-    let msg = `📋 *БРАТВА: AUDITORÍA DE INACTIVIDAD Y EXPULSIONES* 📋\n` +
+    let msg = `📋 *INVICTUS FCM: AUDITORÍA DE INACTIVIDAD Y EXPULSIONES* 📋\n` +
       `━━━━━━━━━━━━━━━━━━━━\n`;
     if (critical.length > 0) msg += `🚨 *CRÍTICO: APTOS PARA EXPULSIÓN (${rules.maxMissesKick}+ STRIKES O 2x 0/3):*\n${critical.join('\n')}\n────────────────────\n`;
     if (warning.length > 0) msg += `⚠️ *BAJO AVISO (1-${rules.maxMissesKick - 1} STRIKES):*\n${warning.join('\n')}\n────────────────────\n`;
@@ -5188,7 +5188,7 @@ async function formatKicklist(lang = 'ru') {
   }
 
   // Russian (Default)
-  let msg = `📋 *БРАТВА: ПРОВЕРКА АКТИВНОСТИ И КАНДИДАТЫ НА КИК* 📋\n` +
+  let msg = `📋 *INVICTUS FCM: ПРОВЕРКА АКТИВНОСТИ И КАНДИДАТЫ НА КИК* 📋\n` +
     `━━━━━━━━━━━━━━━━━━━━\n`;
   if (critical.length > 0) msg += `🚨 *КРИТИЧНО: КАНДИДАТЫ НА ИСКЛЮЧЕНИЕ (${rules.maxMissesKick}+ СТРАЙКА ИЛИ 2x 0/3):*\n${critical.join('\n')}\n────────────────────\n`;
   if (warning.length > 0) msg += `⚠️ *НА ПРЕДУПРЕЖДЕНИИ (1-${rules.maxMissesKick - 1} СТРАЙКА):*\n${warning.join('\n')}\n────────────────────\n`;
@@ -5204,7 +5204,7 @@ async function formatKicklist(lang = 'ru') {
 function formatRules(lang = 'ru') {
   const rules = getLeagueRules();
   if (lang === 'en') {
-    return `📜 *OFFICIAL BRATVA FCM LEAGUE RULEBOOK* 📜\n` +
+    return `📜 *OFFICIAL INVICTUS FCM LEAGUE RULEBOOK* 📜\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `1️⃣ ⚽ *Attendance & Sanction Matrix (Mandatory 3/3):*\n` +
       `• *Partial Miss (1/3 or 2/3 turns):* Warning + *1-Match Temporary Bench Suspension* (remains in the league).\n` +
@@ -5236,7 +5236,7 @@ function formatRules(lang = 'ru') {
       `🌐 *Official Website:* ${WEBSITE_URL}`;
   }
   if (lang === 'ar') {
-    return `📜 *دستور وقوانين دوري БРАТВА FCM الرسمية* 📜\n` +
+    return `📜 *دستور وقوانين دوري INVICTUS FCM الرسمية* 📜\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `1️⃣ ⚽ *مصفوفة الحضور والعقوبات المتدرجة (إلزامي 3/3):*\n` +
       `• *نقص الهجمات (1/3 أو 2/3):* إنذار أصفر + *حظر مؤقت لمباراة واحدة* (احتياط لمباراة واحدة لتدارك الأمر مع البقاء في الدوري).\n` +
@@ -5268,7 +5268,7 @@ function formatRules(lang = 'ru') {
       `🌐 *الموقع الرسمي للدوري:* ${WEBSITE_URL}`;
   }
   if (lang === 'es') {
-    return `📜 *REGLAMENTO OFICIAL DE LA LIGA BRATVA FCM* 📜\n` +
+    return `📜 *REGLAMENTO OFICIAL DE LA LIGA INVICTUS FCM* 📜\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `1️⃣ ⚽ *Matriz de Asistencia y Sanciones (Obligatorio 3/3):*\n` +
       `• *Turnos incompletos (1/3 o 2/3):* Aviso + *Suspensión temporal de 1 partido* (banquillo por 1 partido, permanece en la liga).\n` +
@@ -5301,7 +5301,7 @@ function formatRules(lang = 'ru') {
   }
 
   // Russian (Default)
-  return `📜 *ОФИЦИАЛЬНЫЙ СВОД ПРАВИЛ БРАТВА FCM* 📜\n` +
+  return `📜 *ОФИЦИАЛЬНЫЙ СВОД ПРАВИЛ INVICTUS FCM* 📜\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `1️⃣ ⚽ *Матрица дисциплины и ходов (Обязательно 3/3):*\n` +
     `• *Неполные ходы (1/3 или 2/3):* Желтая карточка + *Временный бан на 1 матч* (скамейка запасных на 1 игру, игрок остается в лиге).\n` +
@@ -5372,54 +5372,54 @@ function formatMvp(lang = 'multi') {
   const third = candidates[2];
 
   if (lang === 'ru') {
-    return `👑 *БРАТВА: ЛУЧШИЙ ИГРОК НЕДЕЛИ (MVP)* 👑\n\n` +
+    return `👑 *INVICTUS FCM: ЛУЧШИЙ ИГРОК НЕДЕЛИ (MVP)* 👑\n\n` +
       `⭐ *MVP:* *${mvp.name}* 🥇\n` +
       `⚽ Голы: *${mvp.goals}* (${mvp.matches} турниров, *ср. ${mvp.avg}* г/м)\n` +
       `🎯 Дисциплина: *100% (0 Страйков)*\n\n` +
       `🥈 *2-е место:* ${runnerUp ? `${runnerUp.name} (${runnerUp.goals}Г, ср. ${runnerUp.avg})` : '-'}\n` +
       `🥉 *3-е место:* ${third ? `${third.name} (${third.goals}Г, ср. ${third.avg})` : '-'}\n\n` +
-      `⚡ Выдающаяся игра за честь БРАТВА!\n` +
+      `⚡ Выдающаяся игра за честь INVICTUS FCM!\n` +
       `🌐 *Сайт лиги:*\n${WEBSITE_URL}`;
   }
   if (lang === 'en') {
-    return `👑 *БРАТВА PLAYER OF THE WEEK (MVP SPOTLIGHT)* 👑\n\n` +
+    return `👑 *INVICTUS FCM PLAYER OF THE WEEK (MVP SPOTLIGHT)* 👑\n\n` +
       `⭐ *MVP:* *${mvp.name}* 🥇\n` +
       `⚽ Goals: *${mvp.goals}* (${mvp.matches} tournaments, *avg ${mvp.avg}* G/M)\n` +
       `🎯 Discipline: *100% (0 Strikes)*\n\n` +
       `🥈 *Runner-Up:* ${runnerUp ? `${runnerUp.name} (${runnerUp.goals}G, avg ${runnerUp.avg})` : '-'}\n` +
       `🥉 *3rd Place:* ${third ? `${third.name} (${third.goals}G, avg ${third.avg})` : '-'}\n\n` +
-      `⚡ Outstanding performance leading БРАТВА to glory!\n` +
+      `⚡ Outstanding performance leading INVICTUS FCM to glory!\n` +
       `🌐 *Full Player Standings:*\n${WEBSITE_URL}`;
   }
   if (lang === 'ar') {
-    return `👑 *دوري БРАТВА: نجم الأسبوع (MVP)* 👑\n\n` +
+    return `👑 *دوري INVICTUS FCM: نجم الأسبوع (MVP)* 👑\n\n` +
       `⭐ *الأسطورة MVP:* *${mvp.name}* 🥇\n` +
       `⚽ مجموع الأهداف: *${mvp.goals}* (${mvp.matches} بطولات، *معدل ${mvp.avg}* هدف/مباراة)\n` +
       `🎯 الانضباط: *100% (0 إنذار)*\n\n` +
       `🥈 *الوصيف (2):* ${runnerUp ? `${runnerUp.name} (${runnerUp.goals} هدف، معدل ${runnerUp.avg})` : '-'}\n` +
       `🥉 *المركز الثالث (3):* ${third ? `${third.name} (${third.goals} هدف، معدل ${third.avg})` : '-'}\n\n` +
-      `⚡ أداء استثنائي يقود كتيبة БРАТВА نحو القمة!\n` +
+      `⚡ أداء استثنائي يقود كتيبة INVICTUS FCM نحو القمة!\n` +
       `🌐 *الترتيب المباشر:*\n${WEBSITE_URL}`;
   }
   if (lang === 'es') {
-    return `👑 *LIGA БРАТВА: JUGADOR DE LA SEMANA (MVP)* 👑\n\n` +
+    return `👑 *LIGA INVICTUS FCM: JUGADOR DE LA SEMANA (MVP)* 👑\n\n` +
       `⭐ *MVP:* *${mvp.name}* 🥇\n` +
       `⚽ Goles: *${mvp.goals}* (${mvp.matches} torneos, *promedio ${mvp.avg}* G/P)\n` +
       `🎯 Disciplina: *100% (0 Strikes)*\n\n` +
       `🥈 *Subcampeón:* ${runnerUp ? `${runnerUp.name} (${runnerUp.goals}G, prom. ${runnerUp.avg})` : '-'}\n` +
       `🥉 *3º Puesto:* ${third ? `${third.name} (${third.goals}G, prom. ${third.avg})` : '-'}\n\n` +
-      `⚡ ¡Rendimiento estelar llevando a БРАТВА a la cima!\n` +
+      `⚡ ¡Rendimiento estelar llevando a INVICTUS FCM a la cima!\n` +
       `🌐 *Clasificación en vivo:*\n${WEBSITE_URL}`;
   }
 
   // Russian (Default)
-  return `👑 *БРАТВА: ЛУЧШИЙ ИГРОК НЕДЕЛИ (MVP)* 👑\n\n` +
+  return `👑 *INVICTUS FCM: ЛУЧШИЙ ИГРОК НЕДЕЛИ (MVP)* 👑\n\n` +
     `⭐ *MVP:* *${mvp.name}* 🥇\n` +
     `⚽ Голы: *${mvp.goals}* (${mvp.matches} турниров, *ср. ${mvp.avg}* г/м)\n` +
     `🎯 Дисциплина: *100% (0 Страйков)*\n\n` +
     `🥈 *2-е место:* ${runnerUp ? `${runnerUp.name} (${runnerUp.goals}Г, ср. ${runnerUp.avg})` : '-'}\n` +
     `🥉 *3-е место:* ${third ? `${third.name} (${third.goals}Г, ср. ${third.avg})` : '-'}\n\n` +
-    `⚡ Выдающаяся игра за честь БРАТВА!\n` +
+    `⚡ Выдающаяся игра за честь INVICTUS FCM!\n` +
     `🌐 *Сайт лиги:*\n${WEBSITE_URL}`;
 }
 
@@ -5428,24 +5428,24 @@ const generateMvpMessage = (lang = 'ru') => formatMvp(lang);
 function formatRally(lang = 'ru') {
   const rules = getLeagueRules();
   if (lang === 'en') {
-    return `⚔️ *БРАТВА LEAGUE: TOURNAMENT RALLY!* ⚔️\n\n` +
-      `🛡️ *Attention БРАТВА Squad!* Tournament is LIVE!\n` +
+    return `⚔️ *INVICTUS FCM LEAGUE: TOURNAMENT RALLY!* ⚔️\n\n` +
+      `🛡️ *Attention INVICTUS FCM Squad!* Tournament is LIVE!\n` +
       `⚽ All members must complete *${rules.minTurnsPerTournament}/3* turns!\n` +
       `🎯 Target: *${rules.minGoalsPerTournament}+ goals* minimum!\n` +
       `⛔ Missed tournament = strike (${rules.maxMissesKick} strikes = automatic kick)!\n\n` +
       `🌐 *League Website:*\n${WEBSITE_URL}`;
   }
   if (lang === 'ar') {
-    return `⚔️ *دوري БРАТВА: نداء المشاركة في البطولة!* ⚔️\n\n` +
-      `🛡️ *إلى جميع أبطال БРАТВА!* البطولة الجديدة بدأت الآن!\n` +
+    return `⚔️ *دوري INVICTUS FCM: نداء المشاركة في البطولة!* ⚔️\n\n` +
+      `🛡️ *إلى جميع أبطال INVICTUS FCM!* البطولة الجديدة بدأت الآن!\n` +
       `⚽ يجب على جميع الأعضاء إكمال جميع المحاولات *${rules.minTurnsPerTournament}/3* في المباراة!\n` +
       `🎯 الهدف الأدنى: *${rules.minGoalsPerTournament}+ هدف*!\n` +
       `⛔ تفويت البطولة = إنذار سترايك (${rules.maxMissesKick} سترايكات = استبعاد تلقائي)!\n\n` +
       `🌐 *الموقع الرسمي:*\n${WEBSITE_URL}`;
   }
   if (lang === 'es') {
-    return `⚔️ *LIGA БРАТВА: ¡LLAMADA A LA BATALLA!* ⚔️\n\n` +
-      `🛡️ *¡Guerreros de БРАТВА!* ¡El nuevo torneo ha comenzado!\n` +
+    return `⚔️ *LIGA INVICTUS FCM: ¡LLAMADA A LA BATALLA!* ⚔️\n\n` +
+      `🛡️ *¡Guerreros de INVICTUS FCM!* ¡El nuevo torneo ha comenzado!\n` +
       `⚽ ¡Obligatorio jugar los *${rules.minTurnsPerTournament}/3* turnos en el partido!\n` +
       `🎯 Objetivo mínimo: *¡${rules.minGoalsPerTournament}+ goles*!\n` +
       `⛔ Falta en torneo = strike automático (¡${rules.maxMissesKick} strikes = expulsión)!\n\n` +
@@ -5453,8 +5453,8 @@ function formatRally(lang = 'ru') {
   }
 
   // Russian (Default)
-  return `⚔️ *БРАТВА LEAGUE: БОЕВОЙ СБОР!* ⚔️\n\n` +
-    `🛡️ *Бойцы БРАТВА!* Новый турнир стартовал!\n` +
+  return `⚔️ *INVICTUS FCM LEAGUE: БОЕВОЙ СБОР!* ⚔️\n\n` +
+    `🛡️ *Бойцы INVICTUS FCM!* Новый турнир стартовал!\n` +
     `⚽ Обязательно сыграть *${rules.minTurnsPerTournament}/3* ходов в матче!\n` +
     `🎯 Планка: *${rules.minGoalsPerTournament}+ голов*!\n` +
     `⛔ Пропуск турнира = автоматический страйк (${rules.maxMissesKick} страйка = кик)!\n\n` +
@@ -5764,7 +5764,7 @@ async function notifyVerifiedPlayersLineup(lineupData) {
     let msg = '';
     if (isStarting) {
       if (lang === 'ar') {
-        msg = `⚔️ *دوري БРАТВА FCM: استدعاء رسمي للبطولة!* ⚔️\n` +
+        msg = `⚔️ *دوري INVICTUS FCM: استدعاء رسمي للبطولة!* ⚔️\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `⚜️ *أهلاً بالبطل:* *${pName}* 🛡️\n\n` +
           `🎯 *قرار القيادة الفنية للرابطة:*\n` +
@@ -5772,14 +5772,14 @@ async function notifyVerifiedPlayersLineup(lineupData) {
           `⚽ *مهمتك القتالية في المباراة:*\n` +
           `• إنهاء جميع المحاولات *3/3 كاملة* فور انطلاق البطولة!\n` +
           `• استهداف تسجيل *20+ هدف* لقيادة الكتيبة نحو الانتصار!\n` +
-          `• اللعب بروح الأخوة والانضباط العالي التي تميز БРАТВА.\n\n` +
+          `• اللعب بروح الأخوة والانضباط العالي التي تميز INVICTUS FCM.\n\n` +
           `📊 *معدلك في آخر 5 مباريات:* *${avg}* هدف\n` +
           `🎯 *سجل الإنضباط:* *${strikes}* إنذارات (100% نظيف ✅)\n\n` +
           `🔥 *الفريق كامل يثق فيك ويعول عليك... لا تخذل كتيبتك وكن في الموعد!* 🏆\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `🌐 *الموقع الرسمي للدوري:* ${WEBSITE_URL}`;
       } else if (lang === 'en') {
-        msg = `⚔️ *BRATVA FCM: OFFICIAL TOURNAMENT CALL-UP!* ⚔️\n` +
+        msg = `⚔️ *INVICTUS FCM: OFFICIAL TOURNAMENT CALL-UP!* ⚔️\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `⚜️ *Warrior:* *${pName}* 🛡️\n\n` +
           `🎯 *League Technical Selection:*\n` +
@@ -5787,14 +5787,14 @@ async function notifyVerifiedPlayersLineup(lineupData) {
           `⚽ *Your Match Directives:*\n` +
           `• Complete all *3/3 turns* promptly once match is live!\n` +
           `• Target *20+ goals* minimum to lead our brotherhood to victory!\n` +
-          `• Play with the relentless spirit and discipline of BRATVA.\n\n` +
+          `• Play with the relentless spirit and discipline of INVICTUS.\n\n` +
           `📊 *Recent Form (Last 5):* avg *${avg}*G\n` +
           `🎯 *Discipline Status:* *${strikes}* Strikes (Clean ✅)\n\n` +
           `🔥 *The entire league stands behind you. Lead the attack to glory!* 🏆\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `🌐 *Official Website:* ${WEBSITE_URL}`;
       } else if (lang === 'es') {
-        msg = `⚔️ *LIGA BRATVA FCM: ¡CONVOCATORIA OFICIAL!* ⚔️\n` +
+        msg = `⚔️ *LIGA INVICTUS FCM: ¡CONVOCATORIA OFICIAL!* ⚔️\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `⚜️ *Guerrero:* *${pName}* 🛡️\n\n` +
           `🎯 *Decisión Técnica de la Liga:*\n` +
@@ -5802,7 +5802,7 @@ async function notifyVerifiedPlayersLineup(lineupData) {
           `⚽ *Tu misión en la cancha:*\n` +
           `• ¡Completar tus *3/3 turnos* puntualmente!\n` +
           `• ¡Buscar la meta de *20+ goles* para asegurar la victoria!\n` +
-          `• Defender el honor y la disciplina de BRATVA.\n\n` +
+          `• Defender el honor y la disciplina de INVICTUS.\n\n` +
           `📊 *Promedio reciente:* prom. *${avg}*G\n` +
           `🎯 *Disciplina:* *${strikes}* Strikes (Limpio ✅)\n\n` +
           `🔥 *¡El equipo confía plenamente en ti! ¡Sal a ganar!* 🏆\n` +
@@ -5810,7 +5810,7 @@ async function notifyVerifiedPlayersLineup(lineupData) {
           `🌐 *Sitio Oficial:* ${WEBSITE_URL}`;
       } else {
         // Russian (Default)
-        msg = `⚔️ *БРАТВА FCM: БОЕВОЙ ВЫЗОВ НА ТУРНИР!* ⚔️\n` +
+        msg = `⚔️ *INVICTUS FCM: БОЕВОЙ ВЫЗОВ НА ТУРНИР!* ⚔️\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `⚜️ *Боец:* *${pName}* 🛡️\n\n` +
           `🎯 *Решение руководства лиги:*\n` +
@@ -5818,17 +5818,17 @@ async function notifyVerifiedPlayersLineup(lineupData) {
           `⚽ *Твоя боевая задача:*\n` +
           `• Сыграть все *3/3 ходов* вовремя, без задержек!\n` +
           `• Пробить командную планку *20+ голов* для победы!\n` +
-          `• Держать планку чести и дисциплины БРАТВА.\n\n` +
+          `• Держать планку чести и дисциплины INVICTUS FCM.\n\n` +
           `📊 *Твоя форма (посл. 5):* ср. *${avg}*Г\n` +
           `🎯 *Страйки:* *${strikes}* (Чисто ✅)\n\n` +
-          `🔥 *Братва рассчитывает на тебя. Выходи на поле и забери победу!* 🏆\n` +
+          `🔥 *INVICTUS рассчитывает на тебя. Выходи на поле и забери победу!* 🏆\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
       }
     } else {
       // Bench / Reserve
       if (lang === 'ar') {
-        msg = `🟡 *دوري БРАТВА FCM: وضعية التشكيلة (دكة الاحتياط)* 🟡\n` +
+        msg = `🟡 *دوري INVICTUS FCM: وضعية التشكيلة (دكة الاحتياط)* 🟡\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `⚜️ *البطل:* *${pName}* 🛡️\n\n` +
           `📋 *أنت مسجل في دكة البدلاء كاحتياطي أول جاهز!*\n` +
@@ -5837,7 +5837,7 @@ async function notifyVerifiedPlayersLineup(lineupData) {
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `🌐 *الموقع الرسمي:* ${WEBSITE_URL}`;
       } else if (lang === 'en') {
-        msg = `🟡 *BRATVA FCM: SQUAD STATUS (BENCH / RESERVE)* 🟡\n` +
+        msg = `🟡 *INVICTUS FCM: SQUAD STATUS (BENCH / RESERVE)* 🟡\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `⚜️ *Warrior:* *${pName}* 🛡️\n\n` +
           `📋 *You are placed on the Official Bench as Priority Reserve!*\n` +
@@ -5846,7 +5846,7 @@ async function notifyVerifiedPlayersLineup(lineupData) {
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `🌐 *Official Website:* ${WEBSITE_URL}`;
       } else if (lang === 'es') {
-        msg = `🟡 *LIGA BRATVA FCM: ESTADO DE LA PLANTILLA (BANQUILLO)* 🟡\n` +
+        msg = `🟡 *LIGA INVICTUS FCM: ESTADO DE LA PLANTILLA (BANQUILLO)* 🟡\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `⚜️ *Guerrero:* *${pName}* 🛡️\n\n` +
           `📋 *¡Estás en el Banquillo como Reserva Prioritaria!*\n` +
@@ -5856,12 +5856,12 @@ async function notifyVerifiedPlayersLineup(lineupData) {
           `🌐 *Sitio Oficial:* ${WEBSITE_URL}`;
       } else {
         // Russian
-        msg = `🟡 *БРАТВА FCM: СКАМЕЙКА ЗАПАСНЫХ (РЕЗЕРВ)* 🟡\n` +
+        msg = `🟡 *INVICTUS FCM: СКАМЕЙКА ЗАПАСНЫХ (РЕЗЕРВ)* 🟡\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `⚜️ *Боец:* *${pName}* 🛡️\n\n` +
           `📋 *Ты в официальном резерве лиги как приоритетный запасной!*\n` +
           `• Будь наготове, если кому-то из основы потребуется срочная замена.\n` +
-          `• Твоя верность и готовность делают БРАТВА сильнее!\n` +
+          `• Твоя верность и готовность делают INVICTUS FCM сильнее!\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `🌐 *Сайт лиги:* ${WEBSITE_URL}`;
       }
@@ -5924,12 +5924,12 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
     if (lang === 'ar') resultBadge = result === 'win' ? '🟢 فوز مستحق!' : (result === 'draw' ? '🟡 تعادل حماسي' : '🔴 خسارة قتالية');
     else if (lang === 'es') resultBadge = result === 'win' ? '🟢 ¡VICTORIA!' : (result === 'draw' ? '🟡 EMPATE' : '🔴 DERROTA');
     else if (lang === 'en') resultBadge = result === 'win' ? '🟢 GLORIOUS WIN!' : (result === 'draw' ? '🟡 HARD DRAW' : '🔴 TOUGH LOSS');
-    else resultBadge = result === 'win' ? '🟢 ПОБЕДА БРАТВА!' : (result === 'draw' ? '🟡 БОЕВАЯ НИЧЬЯ' : '🔴 ПОРАЖЕНИЕ');
+    else resultBadge = result === 'win' ? '🟢 ПОБЕДА INVICTUS FCM!' : (result === 'draw' ? '🟡 БОЕВАЯ НИЧЬЯ' : '🔴 ПОРАЖЕНИЕ');
 
     let feedback = '';
     if (lang === 'ar') {
       if (turns === 3 && goals >= 25) {
-        feedback = `🌟 *أداء أسطوري استثنائي!* أبدعت اليوم وكنت سلاحاً فتاكاً في شباك الخصم. هذا هو المقاتل الحقيقي الذي يفتخر به دوري БРАТВА! استمر في قيادة الهجوم نحو القمة! 🔥`;
+        feedback = `🌟 *أداء أسطوري استثنائي!* أبدعت اليوم وكنت سلاحاً فتاكاً في شباك الخصم. هذا هو المقاتل الحقيقي الذي يفتخر به دوري INVICTUS FCM! استمر في قيادة الهجوم نحو القمة! 🔥`;
       } else if (turns === 3 && goals >= 20) {
         feedback = `🔥 *مستوى بطولي ممتاز!* حققت هدف الفريق (20+ هدف) ولعبت هجماتك 3/3 كاملة. شكراً لتفانيك وانضباطك العالي الذي صنع الفارق! 👏`;
       } else if (turns === 3 && goals < 20) {
@@ -5939,7 +5939,7 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
       }
     } else if (lang === 'en') {
       if (turns === 3 && goals >= 25) {
-        feedback = `🌟 *MASTERCLASS PERFORMANCE!* Unstoppable finishing and lethal presence on the field. You exemplified true BRATVA warrior spirit today! Keep conquering! 🔥`;
+        feedback = `🌟 *MASTERCLASS PERFORMANCE!* Unstoppable finishing and lethal presence on the field. You exemplified true INVICTUS warrior spirit today! Keep conquering! 🔥`;
       } else if (turns === 3 && goals >= 20) {
         feedback = `🔥 *EXCELLENT CONTRIBUTION!* Reached our 20+ goal benchmark and played all 3/3 turns promptly. Outstanding dedication to the team! 👏`;
       } else if (turns === 3 && goals < 20) {
@@ -5949,7 +5949,7 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
       }
     } else if (lang === 'es') {
       if (turns === 3 && goals >= 25) {
-        feedback = `🌟 *¡ACTUACIÓN MAGISTRAL!* Fuiste imparable ante la defensa rival. ¡Auténtico espíritu guerrero de BRATVA! ¡Sigue liderando el ataque! 🔥`;
+        feedback = `🌟 *¡ACTUACIÓN MAGISTRAL!* Fuiste imparable ante la defensa rival. ¡Auténtico espíritu guerrero de INVICTUS! ¡Sigue liderando el ataque! 🔥`;
       } else if (turns === 3 && goals >= 20) {
         feedback = `🔥 *¡EXCELENTE RENDIMIENTO!* Superaste la meta de 20+ goles jugando tus 3/3 turnos completos. ¡Orgullo de equipo! 👏`;
       } else if (turns === 3 && goals < 20) {
@@ -5960,7 +5960,7 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
     } else {
       // Russian
       if (turns === 3 && goals >= 25) {
-        feedback = `🌟 *ВЫДАЮЩАЯСЯ ИГРА!* Ты показал чемпионский уровень и сокрушил оборону соперника. Настоящий лидер атаки БРАТВА! Продолжай вести команду вперёд! 🔥`;
+        feedback = `🌟 *ВЫДАЮЩАЯСЯ ИГРА!* Ты показал чемпионский уровень и сокрушил оборону соперника. Настоящий лидер атаки INVICTUS FCM! Продолжай вести команду вперёд! 🔥`;
       } else if (turns === 3 && goals >= 20) {
         feedback = `🔥 *ОТЛИЧНЫЙ РЕЗУЛЬТАТ!* Пробил командную планку 20+ голов и выполнил все 3/3 хода вовремя. Огромный вклад в общую победу! 👏`;
       } else if (turns === 3 && goals < 20) {
@@ -5983,7 +5983,7 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
 
     let msg = '';
     if (lang === 'ar') {
-      msg = `🏁 *دوري БРАТВА FCM: تقرير أدائك في المباراة* 🏁\n` +
+      msg = `🏁 *دوري INVICTUS FCM: تقرير أدائك في المباراة* 🏁\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `⚔️ *الخصم:* *${opponent}*\n` +
         `🏆 *النتيجة:* *${ourScore} : ${oppScore}* (${resultBadge})\n` +
@@ -6002,7 +6002,7 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `🌐 *رابط بطاقتك الشخصية في الموقع:* ${WEBSITE_URL}`;
     } else if (lang === 'en') {
-      msg = `🏁 *BRATVA FCM: YOUR MATCH PERFORMANCE REPORT* 🏁\n` +
+      msg = `🏁 *INVICTUS FCM: YOUR MATCH PERFORMANCE REPORT* 🏁\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `⚔️ *Opponent:* *${opponent}*\n` +
         `🏆 *Final Score:* *${ourScore} : ${oppScore}* (${resultBadge})\n` +
@@ -6013,7 +6013,7 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
         `────────────────────\n` +
         `${feedback}\n` +
         `────────────────────\n` +
-        `📊 *Your Career Overview in BRATVA:*\n` +
+        `📊 *Your Career Overview in INVICTUS:*\n` +
         `• Total Career Goals: *${totalGoals}*\n` +
         `• Tournaments Played: *${totalMatches}*\n` +
         `• Scoring Average: *${avg}* G/M\n` +
@@ -6021,7 +6021,7 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `🌐 *Your Interactive Card:* ${WEBSITE_URL}`;
     } else if (lang === 'es') {
-      msg = `🏁 *LIGA BRATVA FCM: REPORTE DE RENDIMIENTO* 🏁\n` +
+      msg = `🏁 *LIGA INVICTUS FCM: REPORTE DE RENDIMIENTO* 🏁\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `⚔️ *Rival:* *${opponent}*\n` +
         `🏆 *Marcador Final:* *${ourScore} : ${oppScore}* (${resultBadge})\n` +
@@ -6032,7 +6032,7 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
         `────────────────────\n` +
         `${feedback}\n` +
         `────────────────────\n` +
-        `📊 *Tu Carrera en BRATVA:*\n` +
+        `📊 *Tu Carrera en INVICTUS:*\n` +
         `• Goles Totales: *${totalGoals}*\n` +
         `• Torneos Jugados: *${totalMatches}*\n` +
         `• Promedio Goleador: *${avg}* G/P\n` +
@@ -6041,7 +6041,7 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
         `🌐 *Tu Perfil Interactivo:* ${WEBSITE_URL}`;
     } else {
       // Russian (Default)
-      msg = `🏁 *БРАТВА FCM: ОТЧЁТ О ТВОЕЙ ИГРЕ В МАТЧЕ* 🏁\n` +
+      msg = `🏁 *INVICTUS FCM: ОТЧЁТ О ТВОЕЙ ИГРЕ В МАТЧЕ* 🏁\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `⚔️ *Соперник:* *${opponent}*\n` +
         `🏆 *Итог матча:* *${ourScore} : ${oppScore}* (${resultBadge})\n` +
@@ -6052,7 +6052,7 @@ async function notifyVerifiedPlayersMatchDebrief(tData) {
         `────────────────────\n` +
         `${feedback}\n` +
         `────────────────────\n` +
-        `📊 *Твоя общая статистика в БРАТВА:*\n` +
+        `📊 *Твоя общая статистика в INVICTUS FCM:*\n` +
         `• Всего забито голов: *${totalGoals}*\n` +
         `• Сыграно турниров: *${totalMatches}*\n` +
         `• Средний показатель: *${avg}* г/м\n` +
@@ -6099,7 +6099,7 @@ async function notifyVerifiedPlayersCheckIn() {
 
     let msg = '';
     if (lang === 'ar') {
-      msg = `⚔️ *دوري БРАТВА FCM: نداء الحضور للبطولة القادمة!* ⚔️\n` +
+      msg = `⚔️ *دوري INVICTUS FCM: نداء الحضور للبطولة القادمة!* ⚔️\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `🛡️ *إلى البطل:* *${pName}*\n\n` +
         `🔥 بدأ الآن سحب الحضور (Check-In) للبطولة القادمة بمهلة *60 دقيقة* فقط!\n` +
@@ -6107,7 +6107,7 @@ async function notifyVerifiedPlayersCheckIn() {
         `• اضغط زر [ 🟢 أنا جاهز ] الآن لتضمن مقعدك في التشكيلة الأساسية!\n\n` +
         `👉 *أكد حالتك بضغطة زر مباشرة بالأسفل:*`;
     } else if (lang === 'en') {
-      msg = `⚔️ *BRATVA FCM: PRE-MATCH CHECK-IN IS OPEN!* ⚔️\n` +
+      msg = `⚔️ *INVICTUS FCM: PRE-MATCH CHECK-IN IS OPEN!* ⚔️\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `🛡️ *Attention Warrior:* *${pName}*\n\n` +
         `🔥 The 60-minute roll call for the upcoming tournament is now LIVE!\n` +
@@ -6115,7 +6115,7 @@ async function notifyVerifiedPlayersCheckIn() {
         `• Tap [ 🟢 I'm Ready ] below to lock in your starting spot!\n\n` +
         `👉 *Confirm your availability directly below:*`;
     } else if (lang === 'es') {
-      msg = `⚔️ *LIGA BRATVA FCM: ¡CHECK-IN PREVIO ABIERTO!* ⚔️\n` +
+      msg = `⚔️ *LIGA INVICTUS FCM: ¡CHECK-IN PREVIO ABIERTO!* ⚔️\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `🛡️ *¡Atención Guerrero:* *${pName}*!\n\n` +
         `🔥 ¡El pase de lista de 60 minutos para el próximo torneo ya comenzó!\n` +
@@ -6124,7 +6124,7 @@ async function notifyVerifiedPlayersCheckIn() {
         `👉 *Confirma tu disponibilidad con un toque abajo:*`;
     } else {
       // Russian
-      msg = `⚔️ *БРАТВА FCM: ОТКРЫТ ПРЕДМАТЧЕВЫЙ ЧЕК-ИН!* ⚔️\n` +
+      msg = `⚔️ *INVICTUS FCM: ОТКРЫТ ПРЕДМАТЧЕВЫЙ ЧЕК-ИН!* ⚔️\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `🛡️ *Боец:* *${pName}*\n\n` +
         `🔥 Открыт сбор готовности на 60 минут перед следующим турниром!\n` +
@@ -6181,46 +6181,46 @@ async function notifyVerifiedPlayersDisciplineWarning() {
 
     let msg = '';
     if (lang === 'ar') {
-      msg = `⚠️ *دوري БРАТВА FCM: تذكير أخوي بالانضباط* ⚠️\n` +
+      msg = `⚠️ *دوري INVICTUS FCM: تذكير أخوي بالانضباط* ⚠️\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `⚜️ *أهلاً بالبطل:* *${pName}* 🛡️\n\n` +
         `نرسل لك هذا التذكير الأخوي لأن لديك حالياً *${strikes}/3* إنذارات بسبب تفويت بعض الهجمات في البطولات السابقة.\n\n` +
         `🟢 *كيف تسقط الإنذارات؟*\n` +
         `• قانون الرابطة ينص على أن لعب *5 بطولات متتالية بـ 3/3 هجمات* يمسح جميع الإنذارات السابقة بنسبة 100%!\n` +
-        `• مكانك أساسي في كتيبة БРАТВА ونحن حريصون على استمرارك معنا.\n\n` +
+        `• مكانك أساسي في كتيبة INVICTUS FCM ونحن حريصون على استمرارك معنا.\n\n` +
         `⚽ احرص على لعب هجماتك كاملة في البطولة القادمة لحماية مكانتك في الرابطة!\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `🌐 *الموقع الرسمي:* ${WEBSITE_URL}`;
     } else if (lang === 'es') {
-      msg = `⚠️ *LIGA BRATVA FCM: RECORDATORIO DE DISCIPLINA* ⚠️\n` +
+      msg = `⚠️ *LIGA INVICTUS FCM: RECORDATORIO DE DISCIPLINA* ⚠️\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `⚜️ *Guerrero:* *${pName}* 🛡️\n\n` +
         `Aviso fraternal: actualmente tienes *${strikes}/3* strikes por turnos incompletos en torneos recientes.\n\n` +
         `🟢 *¿Cómo eliminar los strikes?*\n` +
-        `• Regla BRATVA: ¡jugar *5 partidos consecutivos limpios (3/3 turnos)* elimina todos los strikes pasados!\n` +
+        `• Regla INVICTUS: ¡jugar *5 partidos consecutivos limpios (3/3 turnos)* elimina todos los strikes pasados!\n` +
         `• Eres una pieza valiosa en el equipo y confiamos en tu compromiso.\n\n` +
         `⚽ ¡Asegúrate de jugar todos tus 3 turnos en el próximo torneo para cuidar tu lugar en la liga!\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `🌐 *Sitio Oficial:* ${WEBSITE_URL}`;
     } else if (lang === 'en') {
-      msg = `⚠️ *BRATVA FCM: BROTHERHOOD DISCIPLINE REMINDER* ⚠️\n` +
+      msg = `⚠️ *INVICTUS FCM: BROTHERHOOD DISCIPLINE REMINDER* ⚠️\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `⚜️ *Warrior:* *${pName}* 🛡️\n\n` +
         `Friendly check-in: you currently have *${strikes}/3* strikes from missed turns in recent tournaments.\n\n` +
         `🟢 *How to clear strikes?*\n` +
-        `• Under BRATVA rules: playing *5 consecutive clean matches (3/3 turns)* completely wipes away past strikes!\n` +
+        `• Under INVICTUS rules: playing *5 consecutive clean matches (3/3 turns)* completely wipes away past strikes!\n` +
         `• You are a valued member of our squad, and we count on your dedication.\n\n` +
         `⚽ Complete all 3 turns in the upcoming tournament to protect your roster spot!\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `🌐 *Official Website:* ${WEBSITE_URL}`;
     } else {
       // Russian
-      msg = `⚠️ *БРАТВА FCM: ДРУЖЕСКОЕ НАПОМИНАНИЕ О ДИСЦИПЛИНЕ* ⚠️\n` +
+      msg = `⚠️ *INVICTUS FCM: ДРУЖЕСКОЕ НАПОМИНАНИЕ О ДИСЦИПЛИНЕ* ⚠️\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `⚜️ *Боец:* *${pName}* 🛡️\n\n` +
         `Напоминаем, что у тебя сейчас *${strikes}/3* страйка за пропущенные ходы в прошлых турнирах.\n\n` +
         `🟢 *Как сжечь страйки?*\n` +
-        `• По правилам БРАТВА: *5 чистых турниров подряд с 3/3 ходов* полностью обнуляют все прошлые страйки!\n` +
+        `• По правилам INVICTUS: *5 чистых турниров подряд с 3/3 ходов* полностью обнуляют все прошлые страйки!\n` +
         `• Ты важная часть нашей команды, и мы рассчитываем на твою стабильность.\n\n` +
         `⚽ Отыграй все 3 хода в следующем турнире и защити своё место в основе!\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
@@ -6491,7 +6491,7 @@ async function handleTournamentResult(aiResult, chatId, res, isAlbum = false, pr
       const dateRecorded = duplicateMeta?.date || existingTournament.date || duplicateId.slice(0, 10);
       const dmMsg = `⚠️ *هاد التورنوا مسجل ديجا ف السيستيم!* ⚠️\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
-        `⚔️ *БРАТВА FCM* ${ourGoals} - ${oppGoals} *${clean(duplicateMeta?.opponent_league || aiResult.opponent_league)}*\n` +
+        `⚔️ *INVICTUS FCM* ${ourGoals} - ${oppGoals} *${clean(duplicateMeta?.opponent_league || aiResult.opponent_league)}*\n` +
         `📅 *التاريخ / Дата:* ${dateRecorded}\n` +
         `👥 *اللاعبين المسجلين / Игроков в протоколе:* ${existingMatchCount}\n\n` +
         `🛡️ *حماية التكرار (Idempotency Guard):*\n` +
@@ -6964,7 +6964,7 @@ async function analyzeRosterMediaWithGemini(mediaBuffers, mimeType = 'video/mp4'
   if (!GEMINI_KEY) throw new Error('GEMINI_KEY environment variable is missing');
 
   const isVideo = mimeType.startsWith('video');
-  const prompt = `You are the master roster auditor for EA Sports FC Mobile league "БРАТВА".
+  const prompt = `You are the master roster auditor for EA Sports FC Mobile league "INVICTUS FCM".
 Analyze the provided in-game league member list (${isVideo ? 'screen recording video scrolling through the roster' : 'screenshots of the member list'}).
 Carefully extract ALL player nicknames present in the league roster.
 
@@ -8503,7 +8503,7 @@ export default async function handler(req, res) {
             message_id: cb.message.message_id
           });
           if (!delRes || !delRes.ok) {
-            await editTelegramMessage(chatId, cb.message.message_id, '❌ *BRATVA FCM ── CHECK-IN CANCELLED*\n────────────────────────────\nSession closed by Admin.');
+            await editTelegramMessage(chatId, cb.message.message_id, '❌ *INVICTUS FCM ── CHECK-IN CANCELLED*\n────────────────────────────\nSession closed by Admin.');
           }
         }
 
@@ -9190,7 +9190,7 @@ export default async function handler(req, res) {
           minTurnsPerTournament: turns
         }, cb.from.id);
 
-        const successMsg = `✅ *БРАТВА LEAGUE RULES UPDATED!* ⚜️\n\n` +
+        const successMsg = `✅ *INVICTUS FCM LEAGUE RULES UPDATED!* ⚜️\n\n` +
           `• 🎯 *Min Goals Target:* *${updated.minGoalsPerTournament}+* goals\n` +
           `• ⛔ *Strikes Before Kick:* *${updated.maxMissesKick}* strikes\n` +
           `• ⚽ *Mandatory Turns:* *${updated.minTurnsPerTournament}/3* turns\n\n` +
@@ -9245,7 +9245,7 @@ export default async function handler(req, res) {
           })();
 
           const names = humanMembers.map(u => bidiIsolate(u.first_name || u.username || 'Member')).join(', ');
-          const welcomeGroupMsg = `👋 *Добро пожаловать / Welcome ${names} to БРАТВА FCM!* ⚜️\n` +
+          const welcomeGroupMsg = `👋 *Добро пожаловать / Welcome ${names} to INVICTUS FCM!* ⚜️\n` +
             `━━━━━━━━━━━━━━━━━━━━\n` +
             `⚠️ *ОБЯЗАТЕЛЬНАЯ РЕГИСТРАЦИЯ (3 ДНЯ) / MANDATORY (3 DAYS):*\n` +
             `Каждый игрок обязан зарегистрироваться в боте в течение 3 дней, чтобы участвовать в турнирах и избежать кика!\n` +
@@ -9309,7 +9309,7 @@ export default async function handler(req, res) {
 
       // 2. Direct Bot Registration Link
       if (cmd === '/register' || cmd === '/bot' || cmd === '/start' || cmd === '/verify') {
-        const replyText = `🤖 *БРАТВА FCM Official Bot:* [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n\n` +
+        const replyText = `🤖 *INVICTUS FCM Official Bot:* [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n\n` +
           `👉 [Нажмите сюда / Click here to open bot](https://t.me/BratvaFCMBot?start=register) to verify your in-game name and join the squad roster!`;
         const replyKeys = {
           inline_keyboard: [
@@ -9423,7 +9423,7 @@ export default async function handler(req, res) {
 
       // 12. Help / Commands Menu
       if (cmd === '/help' || cmd === '/commands' || cmd === '/menu') {
-        const helpMsg = `⚜️ *BRATVA FCM LEAGUE BOT COMMANDS:* ⚽\n` +
+        const helpMsg = `⚜️ *INVICTUS FCM LEAGUE BOT COMMANDS:* ⚽\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `📊 */top* — Top Scorers & Rankings\n` +
           `📜 */tournaments* — Match History & Archive\n` +
@@ -10120,7 +10120,7 @@ export default async function handler(req, res) {
       const currentRules = getLeagueRules();
 
       if (parts.length === 0) {
-        const infoMsg = `⚙️ *БРАТВА LEAGUE RULES MANAGER (Admin)* ⚙️\n\n` +
+        const infoMsg = `⚙️ *INVICTUS FCM LEAGUE RULES MANAGER (Admin)* ⚙️\n\n` +
           `📋 *Current Active Rules:*\n` +
           `• 🎯 *Min Goals Target:* *${currentRules.minGoalsPerTournament}+* goals\n` +
           `• ⛔ *Strikes Before Kick:* *${currentRules.maxMissesKick}* strikes\n` +
@@ -10164,7 +10164,7 @@ export default async function handler(req, res) {
         minTurnsPerTournament: isNaN(turns) ? 3 : Math.max(1, Math.min(turns, 3))
       }, message.from?.id || 'admin');
 
-      const successMsg = `✅ *БРАТВА LEAGUE RULES UPDATED!* ⚜️\n\n` +
+      const successMsg = `✅ *INVICTUS FCM LEAGUE RULES UPDATED!* ⚜️\n\n` +
         `• 🎯 *Min Goals Target:* *${updated.minGoalsPerTournament}+* goals\n` +
         `• ⛔ *Strikes Before Kick:* *${updated.maxMissesKick}* strikes\n` +
         `• ⚽ *Mandatory Turns:* *${updated.minTurnsPerTournament}/3* turns\n\n` +
@@ -10238,7 +10238,7 @@ export default async function handler(req, res) {
 
       const pKeys = {
         inline_keyboard: [
-          [{ text: '🚀 Join BRATVA Channel & Group Chat', url: COMMUNITY_URL }]
+          [{ text: '🚀 Join INVICTUS Channel & Group Chat', url: COMMUNITY_URL }]
         ]
       };
       const resPentax = await sendTelegramMessage(6577572183, pentaxMsg, pKeys);
