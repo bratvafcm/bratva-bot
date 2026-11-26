@@ -4631,7 +4631,7 @@ function formatSeason27Announcement(lang = 'ar') {
       `⭐ *L1onchik (L1on⚡🏆)* — 119 Goles\n` +
       `Y un saludo especial a todos nuestros luchadores:\n` +
       `• *MSRPBOT* • *KSFALUBAZ* • *RMa\\_jXAHB* • *Тима* • *Omar* • *Real* • *PSG* • *PapaCarlos1234* • *Awukufc* • *RÈDHAWK前*\n\n` +
-      `¡Ustedes son el corazón y la columna vertebral de BRATVA! 🤝🔥\n\n` +
+      `¡Ustedes son el corazón y la columna vertebral de INVICTUS FCM! 🤝🔥\n\n` +
       `🤖 *HERRAMIENTAS DEL BOT DISPONIBLES:*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `🔹 */tournaments* — Historial interactivo de torneos y lista de goleadores.\n` +
