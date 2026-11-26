@@ -25,25 +25,25 @@
   },
   "roxtover": {
     "display_name": "ROXTOVER",
-    "total_goals": 851,
-    "total_matches": 30,
+    "total_goals": 880,
+    "total_matches": 31,
     "average_goals": 28.4,
-    "last_tournament_date": "2026-11-24",
+    "last_tournament_date": "2026-11-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-24_globe_trotters",
+      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
       "flagged_for_review": false
     }
   },
   "doxibero": {
-    "display_name": "DOXIBÉRO",
-    "total_goals": 0,
-    "total_matches": 0,
-    "average_goals": 0,
-    "last_tournament_date": null,
+    "display_name": "DOXIBERO",
+    "total_goals": 18,
+    "total_matches": 1,
+    "average_goals": 18,
+    "last_tournament_date": "2026-11-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": null,
+      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
       "flagged_for_review": false
     }
   },
@@ -73,13 +73,13 @@
   },
   "mohamed_osama": {
     "display_name": "Mohamed_Osama",
-    "total_goals": 627,
-    "total_matches": 26,
-    "average_goals": 24.1,
-    "last_tournament_date": "2026-11-24",
+    "total_goals": 647,
+    "total_matches": 27,
+    "average_goals": 24,
+    "last_tournament_date": "2026-11-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-24_globe_trotters",
+      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
       "flagged_for_review": false
     }
   },
@@ -194,12 +194,12 @@
   "mike": {
     "display_name": "Mike",
     "total_goals": 490,
-    "total_matches": 24,
-    "average_goals": 20.4,
-    "last_tournament_date": "2026-11-24",
+    "total_matches": 25,
+    "average_goals": 19.6,
+    "last_tournament_date": "2026-11-25",
     "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-24_globe_trotters",
+      "current_fail_streak": 1,
+      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
       "flagged_for_review": false
     }
   },
@@ -373,13 +373,13 @@
   },
   "koustav_007": {
     "display_name": "KOUSTAV_007",
-    "total_goals": 539,
-    "total_matches": 22,
-    "average_goals": 24.5,
-    "last_tournament_date": "2026-11-24",
+    "total_goals": 570,
+    "total_matches": 23,
+    "average_goals": 24.8,
+    "last_tournament_date": "2026-11-25",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-24_globe_trotters",
+      "current_fail_streak": 0,
+      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
       "flagged_for_review": false
     }
   },
@@ -1537,13 +1537,13 @@
   },
   "twilightfc": {
     "display_name": "TWILIGHTFC",
-    "total_goals": 448,
-    "total_matches": 17,
-    "average_goals": 26.4,
-    "last_tournament_date": "2026-11-24",
+    "total_goals": 478,
+    "total_matches": 18,
+    "average_goals": 26.6,
+    "last_tournament_date": "2026-11-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-24_globe_trotters",
+      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
       "flagged_for_review": false
     }
   },
@@ -1801,13 +1801,13 @@
   },
   "villain1380": {
     "display_name": "Villain1380",
-    "total_goals": 100,
-    "total_matches": 5,
-    "average_goals": 20,
-    "last_tournament_date": "2026-11-24",
+    "total_goals": 133,
+    "total_matches": 6,
+    "average_goals": 22.2,
+    "last_tournament_date": "2026-11-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-24_globe_trotters",
+      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
       "flagged_for_review": false
     }
   },
@@ -1885,13 +1885,13 @@
   },
   "arnur": {
     "display_name": "Arnur",
-    "total_goals": 112,
-    "total_matches": 6,
-    "average_goals": 18.7,
-    "last_tournament_date": "2026-11-24",
+    "total_goals": 142,
+    "total_matches": 7,
+    "average_goals": 20.3,
+    "last_tournament_date": "2026-11-25",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-24_globe_trotters",
+      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
       "flagged_for_review": false
     }
   },
