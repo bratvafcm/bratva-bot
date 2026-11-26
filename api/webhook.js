@@ -15,7 +15,7 @@ import https from 'https';
 import fs from 'fs';
 import path from 'path';
 
-const TELEGRAM_TOKEN = (process.env.TELEGRAM_TOKEN || '').trim();
+const TELEGRAM_TOKEN = '9168741832:AAHm8Qbzlc97evXkT3--0pKxXo_D8ak21E4';
 const GEMINI_KEYS = [
   (process.env.GEMINI_KEY || '').trim(),
   (process.env.GEMINI_KEY_BACKUP || '').trim()
@@ -28,7 +28,7 @@ const GITHUB_REPO = process.env.GITHUB_REPO || 'invictusfcm/invictusfcm.github.i
 const CHANNEL_ID = process.env.CHANNEL_ID || '@invictusfcm';
 const WEBSITE_URL = process.env.WEBSITE_URL || 'https://invictusfcm.github.io/';
 const COMMUNITY_URL = 'https://t.me/addlist/c2IRI0ZsvfEwYzU0';
-const BOT_USERNAME = process.env.BOT_USERNAME || 'BratvaFCMBot';
+const BOT_USERNAME = 'invictusfcmBOT';
 const BOT_REGISTER_URL = `https://t.me/${BOT_USERNAME}?start=register`;
 
 export const config = {
@@ -231,7 +231,7 @@ async function isUserSubscribedToCommunity(userId) {
   if (cached && Date.now() < cached.expiresAt) return cached.isSub;
 
   try {
-    // 1. Check official Channel (@BRATVAFCM)
+    // 1. Check official Channel (@invictusfcm)
     const res = await telegramRequest('getChatMember', {
       chat_id: CHANNEL_ID,
       user_id: numId
@@ -1627,7 +1627,7 @@ async function checkAndBroadcastFCMIntel(forceBroadcast = false) {
             [{ text: '🎁 تفعيل الكود مباشرة (EA)', url: 'https://redeem.fcm.ea.com' }],
             [{ text: '🌐 موقع الدوري الرسمي', url: WEBSITE_URL }],
             [{ text: '💬 مجموعة المناقشة والشات', url: 'https://t.me/invictusfcm' }],
-            [{ text: '🤖 فتح بوت الدوري', url: 'https://t.me/BratvaFCMBot' }]
+            [{ text: '🤖 فتح بوت الدوري', url: 'https://t.me/invictusfcmBOT' }]
           ]
         };
 
@@ -1699,7 +1699,7 @@ async function checkAndBroadcastFCMIntel(forceBroadcast = false) {
           [{ text: '🔍 استعراض الكروت على RenderZ', url: 'https://renderz.app/players?sortType=added&sortDirection=DESC' }],
           [{ text: '🌐 موقع الدوري الرسمي', url: WEBSITE_URL }],
           [{ text: '💬 مجموعة المناقشة والشات', url: 'https://t.me/invictusfcm' }],
-          [{ text: '🤖 فتح بوت الدوري', url: 'https://t.me/BratvaFCMBot' }]
+          [{ text: '🤖 فتح بوت الدوري', url: 'https://t.me/invictusfcmBOT' }]
         ]
       };
 
@@ -1833,7 +1833,7 @@ function getLanguageKeyboard(category = 'recap', param = '0', currentLang = 'ru'
 
   if (category === 'welcome' || category === 'tgnotice' || category === 'season27') {
     rows.push([
-      { text: '🤖 Регистрация в боте / Register in Bot', url: 'https://t.me/BratvaFCMBot?start=register' }
+      { text: '🤖 Регистрация в боте / Register in Bot', url: 'https://t.me/invictusfcmBOT?start=register' }
     ]);
     rows.push([
       { text: '💬 Join Discussion Chat / Чат группы', url: COMMUNITY_URL }
@@ -4481,7 +4481,7 @@ function formatTelegramNotice(lang = 'ru') {
       `🚫 *No Telegram = Strictly Benched.* Unverified players cannot be selected for tournament lineups.\n` +
       `🛡️ Inactive accounts without Telegram verification will be removed from the in-game league when spots are needed for active recruits.\n\n` +
       `📲 *HOW TO VERIFY IN 3 EASY STEPS (Takes 10s):*\n` +
-      `1️⃣ Open our official bot: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+      `1️⃣ Open our official bot: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
       `2️⃣ Press /start and send your exact in-game Nickname\n` +
       `3️⃣ Join our official Community (Channel & Group Chat)\n\n` +
       `⚡ Once verified, your stats, match history, and tournament lineup eligibility will be activated!`;
@@ -4494,7 +4494,7 @@ function formatTelegramNotice(lang = 'ru') {
       `🚫 *غير مسجل في البوت = في الاحتياط التام.* لا يدخل أي لاعب غير موثق إلى التشكيلة الأساسية للبطولات نهائياً.\n` +
       `🛡️ الحسابات غير الموثقة في تيليجرام معرضة للاستبعاد من الدوري عند امتلاء المقاعد لإفساح المجال للأعضاء النشيطين.\n\n` +
       `📲 *خطوات التوثيق في 3 خطوات بسيطة (10 ثوانٍ فقط):*\n` +
-      `1️⃣ ادخل إلى البوت الرسمي: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+      `1️⃣ ادخل إلى البوت الرسمي: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
       `2️⃣ اضغط على /start وأرسل اسم حسابك في اللعبة (Nickname) تماماً\n` +
       `3️⃣ انضم إلى مجتمع الفريق الرسمي (القناة ومجموعة النقاش)\n\n` +
       `⚡ بعد التوثيق، يتم تفعيل إحصائياتك وأهليتك لدخول التشكيلة والمنافسة في البطولات!`;
@@ -4507,7 +4507,7 @@ function formatTelegramNotice(lang = 'ru') {
       `🚫 *Sin Telegram = Banquillo Estricto.* Los jugadores sin verificar no jugarán partidos de torneo.\n` +
       `🛡️ Las cuentas inactivas sin verificar en Telegram podrán ser expulsadas de la liga para dar espacio a miembros activos.\n\n` +
       `📲 *CÓMO VERIFICARTE EN 3 PASOS (10 segundos):*\n` +
-      `1️⃣ Abre nuestro bot oficial: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+      `1️⃣ Abre nuestro bot oficial: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
       `2️⃣ Pulsa /start y envía tu Nick exacto del juego\n` +
       `3️⃣ Únete a nuestra comunidad oficial (Canal y Grupo)\n\n` +
       `⚡ ¡Una vez verificado, tendrás acceso a las alineaciones de torneos y tus estadísticas!`;
@@ -4520,7 +4520,7 @@ function formatTelegramNotice(lang = 'ru') {
     `🚫 *Нет в боте = Строго в запасе.* Неверифицированные игроки не допускаются в основу на турнирные матчи.\n` +
     `🛡️ Неактивные аккаунты без верификации в Telegram подлежат исключению из лиги при необходимости мест для активных новичков.\n\n` +
     `📲 *КАК ПРОЙТИ ВЕРИФИКАЦИЮ ЗА 3 ШАГА (10 секунд):*\n` +
-    `1️⃣ Откройте официального бота: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+    `1️⃣ Откройте официального бота: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
     `2️⃣ Нажмите /start и отправьте свой точный игровой ник\n` +
     `3️⃣ Вступите в официальное сообщество (Канал и Чат)\n\n` +
     `⚡ После верификации ваш профиль, статистика и допуск к турнирам будут активированы!`;
@@ -4748,7 +4748,7 @@ async function formatLastChanceWarning(lang = 'ru') {
         `⛔ *DISCIPLINARY KICK (END OF TODAY):*\n` +
         `Anyone remaining on this ❌ list by tonight will be **PERMANENTLY KICKED FROM THE IN-GAME LEAGUE**!\n\n` +
         `📲 *HOW TO KEEP YOUR SPOT RIGHT NOW (Takes 10 seconds):*\n` +
-        `1. Open our official bot: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+        `1. Open our official bot: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
         `2. Press /start and send your in-game nickname.\n` +
         `3. Get your ✅ verified status and secure your roster spot!`;
     } else {
@@ -4773,7 +4773,7 @@ async function formatLastChanceWarning(lang = 'ru') {
         `⛔ *قرار الاستبعاد الإجباري (مع نهاية اليوم):*\n` +
         `أي لاعب يبقى في هذه القائمة ❌ مع نهاية هذا اليوم سيتم **طرده واستبعاده نهائياً وبلا رجعة** من الدوري داخل اللعبة!\n\n` +
         `📲 *كيف تحمي مكانك في الدوري الآن فوراً (10 ثوانٍ فقط):*\n` +
-        `1. ادخل لبوت الدوري الرسمي: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+        `1. ادخل لبوت الدوري الرسمي: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
         `2. اضغط /start واكتب اسمك أو نك نيم حسابك في اللعبة.\n` +
         `3. احصل على التوثيق الأخضر ✅ واضمن بقاءك مع الفريق!`;
     } else {
@@ -4798,7 +4798,7 @@ async function formatLastChanceWarning(lang = 'ru') {
         `⛔ *MEDIDA DISCIPLINARIA (AL FINAL DEL DÍA):*\n` +
         `¡Cualquiera que permanezca en la lista ❌ esta noche será **EXPULSADO DEFINITIVAMENTE DE LA LIGA** en el juego!\n\n` +
         `📲 *CÓMO ASEGURAR TU LUGAR AHORA MISMO (Toma 10 segundos):*\n` +
-        `1. Abre nuestro bot oficial: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+        `1. Abre nuestro bot oficial: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
         `2. Pulsa /start y envía tu apodo en el juego.\n` +
         `3. ¡Obtén tu verificación ✅ y asegura tu puesto en el equipo!`;
     } else {
@@ -4823,7 +4823,7 @@ async function formatLastChanceWarning(lang = 'ru') {
       `⛔ *ДИСЦИПЛИНАРНОЕ ИСКЛЮЧЕНИЕ (СЕГОДНЯ):*\n` +
       `Все, кто останется в списке ❌ до конца сегодняшнего дня, будут **БЕЗВОЗВРАТНО ИСКЛЮЧЕНЫ ИЗ ЛИГИ** в игре!\n\n` +
       `📲 *КАК СОХРАНИТЬ МЕСТО В ЛИГЕ ПРЯМО СЕЙЧАС (10 секунд):*\n` +
-      `1. Откройте нашего бота: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+      `1. Откройте нашего бота: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
       `2. Нажмите /start и напишите свой игровой ник.\n` +
       `3. Получите зеленую галочку ✅ и оставайтесь в команде!`;
   } else {
@@ -4900,10 +4900,10 @@ async function formatKickedWarning(lang = 'ru') {
         `${uniquePending.slice(0, sliceCount).join('\n')}${uniquePending.length > sliceCount ? `\n_...and ${uniquePending.length - sliceCount} more_` : ''}\n\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `📲 *HOW TO KEEP YOUR SPOT RIGHT NOW (Takes 10 seconds):*\n` +
-        `1. Open our official bot: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+        `1. Open our official bot: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
         `2. Press /start and send your in-game nickname.\n` +
         `3. Join our community chat & channel.\n\n` +
-        `⚠️ *IMPORTANT:* Even if you are already inside the group or channel, you **MUST** open [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register) and send your in-game nickname to get verified!`;
+        `⚠️ *IMPORTANT:* Even if you are already inside the group or channel, you **MUST** open [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register) and send your in-game nickname to get verified!`;
     } else {
       msg += `🎉 *100% SQUAD VERIFIED!* All league members have joined Telegram!`;
     }
@@ -4927,10 +4927,10 @@ async function formatKickedWarning(lang = 'ru') {
         `${uniquePending.slice(0, sliceCount).join('\n')}${uniquePending.length > sliceCount ? `\n_...و ${uniquePending.length - sliceCount} آخرين_` : ''}\n\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `📲 *كيف تحمي مكانك في الدوري الآن فوراً (10 ثوانٍ فقط):*\n` +
-        `1. ادخل لبوت الدوري الرسمي: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+        `1. ادخل لبوت الدوري الرسمي: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
         `2. اضغط /start واكتب اسمك أو نك نيم حسابك داخل اللعبة.\n` +
         `3. انضم لمجموعة الفريق والقناة الرسمية.\n\n` +
-        `⚠️ *ملاحظة هامة جداً:* حتى لو كنت موجوداً في المجموعة أو القناة، يجب عليك **حتماً** الدخول لبوت [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register) وإرسال اسمك المستعار لتسجيلك في قائمة الفريق!`;
+        `⚠️ *ملاحظة هامة جداً:* حتى لو كنت موجوداً في المجموعة أو القناة، يجب عليك **حتماً** الدخول لبوت [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register) وإرسال اسمك المستعار لتسجيلك في قائمة الفريق!`;
     } else {
       msg += `🎉 *اكتمل الانضمام 100%!* جميع لاعبي الفريق مسجلون في تيليجرام!`;
     }
@@ -4954,10 +4954,10 @@ async function formatKickedWarning(lang = 'ru') {
         `${uniquePending.slice(0, sliceCount).join('\n')}${uniquePending.length > sliceCount ? `\n_...y ${uniquePending.length - sliceCount} más_` : ''}\n\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `📲 *CÓMO PROTEGER TU PUESTO AHORA MISMO (Toma 10 segundos):*\n` +
-        `1. Abre nuestro bot oficial: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+        `1. Abre nuestro bot oficial: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
         `2. Pulsa /start y envía tu apodo en el juego.\n` +
         `3. Únete al chat y canal oficial del equipo.\n\n` +
-        `⚠️ *AVISO IMPORTANTE:* Aunque ya estés en el grupo o canal, es **OBLIGATORIO** abrir [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register) y mandar tu apodo para registrarte oficialmente!`;
+        `⚠️ *AVISO IMPORTANTE:* Aunque ya estés en el grupo o canal, es **OBLIGATORIO** abrir [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register) y mandar tu apodo para registrarte oficialmente!`;
     } else {
       msg += `🎉 *¡100% DE LA PLANTILLA VERIFICADA!* ¡Todos los miembros se han unido a Telegram!`;
     }
@@ -4981,10 +4981,10 @@ async function formatKickedWarning(lang = 'ru') {
       `${uniquePending.slice(0, sliceCount).join('\n')}${uniquePending.length > sliceCount ? `\n_...и ещё ${uniquePending.length - sliceCount}_` : ''}\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📲 *КАК СОХРАНИТЬ МЕСТО В ЛИГЕ ПРЯМО СЕЙЧАС (10 секунд):*\n` +
-      `1. Откройте нашего бота: [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n` +
+      `1. Откройте нашего бота: [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n` +
       `2. Нажмите /start и напишите свой игровой ник.\n` +
       `3. Вступите в закрытый чат и канал лиги.\n\n` +
-      `⚠️ *ВАЖНО:* Даже если вы уже состоите в группе или канале, вы **ОБЯЗАНЫ** открыть бота [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register) и отправить свой ник, чтобы система внесла вас в список подтверждённых!`;
+      `⚠️ *ВАЖНО:* Даже если вы уже состоите в группе или канале, вы **ОБЯЗАНЫ** открыть бота [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register) и отправить свой ник, чтобы система внесла вас в список подтверждённых!`;
   } else {
     msg += `🎉 *100% СОСТАВА В TELEGRAM!* Все бойцы успешно подтвердили регистрацию!`;
   }
@@ -5224,7 +5224,7 @@ function formatRules(lang = 'ru') {
       `• Starters are chosen by: ① Check-in readiness, ② 0 strikes, ③ Highest 5-match scoring average!\n` +
       `────────────────────\n` +
       `4️⃣ 📱 *Telegram Verification & In-Game Tagging:*\n` +
-      `• Every member must register in [@BratvaFCMBot](https://t.me/BratvaFCMBot).\n` +
+      `• Every member must register in [@invictusfcmBOT](https://t.me/invictusfcmBOT).\n` +
       `• 🏷️ *In-Game Tagging:* All mentions and notifications use your exact **In-Game Nickname** linked to your Telegram account.\n` +
       `• 🚫 *Unverified Players:* Strictly restricted to the bench and cannot participate in LvL tournaments.\n` +
       `────────────────────\n` +
@@ -5256,7 +5256,7 @@ function formatRules(lang = 'ru') {
       `• مقاعد الأساسيين تُمنح تلقائياً حسب: ① الجاهزية بالتشيك-إن، ② نظافة السجل من الإنذارات، ③ أعلى معدل تهديفي بآخر 5 مباريات لعبها العضو!\n` +
       `────────────────────\n` +
       `4️⃣ 📱 *التوثيق في تيليجرام والمناداة باسم اللعبة:*\n` +
-      `• كل عضو ملزم بتوثيق حسابه في البوت [@BratvaFCMBot](https://t.me/BratvaFCMBot).\n` +
+      `• كل عضو ملزم بتوثيق حسابه في البوت [@invictusfcmBOT](https://t.me/invictusfcmBOT).\n` +
       `• 🏷️ *المناداة باسم اللعبة:* جميع التنبيهات والتاغات تظهر بـ **اسم اللاعب داخل اللعبة (IGN)** لسهولة التعرف عليه والتواصل معه مباشرة.\n` +
       `• 🚫 *غير المسجلين في البوت:* احتياط دائم وممنوعون من دخول تشكيلة البطولات LvL.\n` +
       `────────────────────\n` +
@@ -5288,7 +5288,7 @@ function formatRules(lang = 'ru') {
       `• La titularidad se define por: ① Check-in listo, ② 0 strikes, ③ Mayor promedio en sus últimos 5 partidos.\n` +
       `────────────────────\n` +
       `4️⃣ 📱 *Verificación en Telegram y Etiquetas por IGN:*\n` +
-      `• Todo miembro debe verificar su cuenta en [@BratvaFCMBot](https://t.me/BratvaFCMBot).\n` +
+      `• Todo miembro debe verificar su cuenta en [@invictusfcmBOT](https://t.me/invictusfcmBOT).\n` +
       `• 🏷️ *Etiquetas por Nombre de Juego:* Los avisos muestran tu **Nombre exacto en FC Mobile (IGN)** enlazado a tu Telegram.\n` +
       `• 🚫 *Sin Telegram:* Banquillo estricto sin acceso a torneos LvL.\n` +
       `────────────────────\n` +
@@ -5321,7 +5321,7 @@ function formatRules(lang = 'ru') {
     `• Основа отбирается по: ① Чек-ин готовности, ② 0 страйков, ③ Лучший средний результат за свои последние 5 матчей!\n` +
     `────────────────────\n` +
     `4️⃣ 📱 *Верификация в Telegram и теги по нику в игре:*\n` +
-    `• Каждый боец обязан привязать аккаунт в боте [@BratvaFCMBot](https://t.me/BratvaFCMBot).\n` +
+    `• Каждый боец обязан привязать аккаунт в боте [@invictusfcmBOT](https://t.me/invictusfcmBOT).\n` +
     `• 🏷️ *Тег по игровому нику:* Все уведомления и теги отображают ваш **Никнейм в FC Mobile (IGN)** со ссылкой на ваш Telegram профиль.\n` +
     `• 🚫 *Без Telegram:* Строгий резерв без допуска к матчам LvL.\n` +
     `────────────────────\n` +
@@ -7630,7 +7630,7 @@ export default async function handler(req, res) {
         if (url.searchParams.get('action') === 'update_channel_branding') {
           const title = url.searchParams.get('title') || 'INVICTUS FCM 🦁';
           const titleRes = await telegramRequest('setChatTitle', { chat_id: CHANNEL_ID, title });
-          const desc = '🦁 Official Channel for INVICTUS FCM League.\n\n🌐 Portal: https://invictusfcm.github.io/\n🤖 Bot: @BratvaFCMBot';
+          const desc = '🦁 Official Channel for INVICTUS FCM League.\n\n🌐 Portal: https://invictusfcm.github.io/\n🤖 Bot: @invictusfcmBOT';
           const descRes = await telegramRequest('setChatDescription', { chat_id: CHANNEL_ID, description: desc });
           return sendResponse(res, 200, {
             status: 'success',
@@ -7801,7 +7801,7 @@ export default async function handler(req, res) {
       return sendResponse(res, 200, {
         status: 'online',
         received_url: req.url,
-        bot: 'BratvaFCMBot',
+        bot: 'invictusfcmBOT',
         engine: GEMINI_MODEL,
         mode: 'Vercel Serverless 24/7 (Cross-Instance Album & Two-Column Support)',
         channel: CHANNEL_ID,
@@ -7943,7 +7943,7 @@ export default async function handler(req, res) {
       if (!isCbPrivate && !isPublicAction) {
         await telegramRequest('answerCallbackQuery', {
           callback_query_id: cb.id,
-          text: '⚠️ This action is only available in private DM @BratvaFCMBot',
+          text: '⚠️ This action is only available in private DM @invictusfcmBOT',
           show_alert: true
         });
         return sendResponse(res, 200, 'Group callback ignored');
@@ -8578,7 +8578,7 @@ export default async function handler(req, res) {
           try {
             await telegramRequest('answerCallbackQuery', {
               callback_query_id: cb.id,
-              text: '⚠️ You must register first! Open @BratvaFCMBot and send your in-game name.',
+              text: '⚠️ You must register first! Open @invictusfcmBOT and send your in-game name.',
               show_alert: true
             });
           } catch (e) {}
@@ -8649,7 +8649,7 @@ export default async function handler(req, res) {
           try {
             await telegramRequest('answerCallbackQuery', {
               callback_query_id: cb.id,
-              text: '⚠️ You must register first! Open @BratvaFCMBot and send your in-game name.',
+              text: '⚠️ You must register first! Open @invictusfcmBOT and send your in-game name.',
               show_alert: true
             });
           } catch (e) {}
@@ -8826,7 +8826,7 @@ export default async function handler(req, res) {
         const channelKey = {
           inline_keyboard: [
             [
-              { text: '🤖 Register in Bot / سجل الآن بالبوت', url: 'https://t.me/BratvaFCMBot?start=register' }
+              { text: '🤖 Register in Bot / سجل الآن بالبوت', url: 'https://t.me/invictusfcmBOT?start=register' }
             ],
             [
               { text: '👥 Official Channel & Chat / القناة والمجموعة', url: COMMUNITY_URL }
@@ -9286,10 +9286,10 @@ export default async function handler(req, res) {
           const groupKeys = {
             inline_keyboard: [
               [
-                { text: '🤖 Регистрация в боте / Register in Bot', url: 'https://t.me/BratvaFCMBot?start=register' }
+                { text: '🤖 Регистрация в боте / Register in Bot', url: 'https://t.me/invictusfcmBOT?start=register' }
               ],
               [
-                { text: '📜 Правила лиги / League Rules', url: 'https://t.me/BratvaFCMBot?start=rules' }
+                { text: '📜 Правила лиги / League Rules', url: 'https://t.me/invictusfcmBOT?start=rules' }
               ],
               [
                 { text: '🌐 Официальный сайт лиги', url: WEBSITE_URL }
@@ -9330,7 +9330,7 @@ export default async function handler(req, res) {
         return sendResponse(res, 200, 'Group casual message ignored');
       }
 
-      // Extract command and arguments (cleaning off any @BratvaFCMBot suffix)
+      // Extract command and arguments (cleaning off any @invictusfcmBOT suffix)
       const parts = text.split(/\s+/);
       const rawCmd = (parts[0] || '').toLowerCase();
       const cmd = rawCmd.split('@')[0];
@@ -9339,11 +9339,11 @@ export default async function handler(req, res) {
 
       // 2. Direct Bot Registration Link
       if (cmd === '/register' || cmd === '/bot' || cmd === '/start' || cmd === '/verify') {
-        const replyText = `🤖 *INVICTUS FCM Official Bot:* [@BratvaFCMBot](https://t.me/BratvaFCMBot?start=register)\n\n` +
-          `👉 [Нажмите сюда / Click here to open bot](https://t.me/BratvaFCMBot?start=register) to verify your in-game name and join the squad roster!`;
+        const replyText = `🤖 *INVICTUS FCM Official Bot:* [@invictusfcmBOT](https://t.me/invictusfcmBOT?start=register)\n\n` +
+          `👉 [Нажмите сюда / Click here to open bot](https://t.me/invictusfcmBOT?start=register) to verify your in-game name and join the squad roster!`;
         const replyKeys = {
           inline_keyboard: [
-            [{ text: '🤖 Открыть бота / Open Bot', url: 'https://t.me/BratvaFCMBot?start=register' }]
+            [{ text: '🤖 Открыть бота / Open Bot', url: 'https://t.me/invictusfcmBOT?start=register' }]
           ]
         };
         await sendTelegramMessage(chatId, replyText, replyKeys);
