@@ -7627,6 +7627,24 @@ export default async function handler(req, res) {
             timestamp: new Date().toISOString()
           }, true);
         }
+        if (url.searchParams.get('action') === 'update_bot_branding') {
+          const nameRes = await telegramRequest('setMyName', { name: 'INVICTUS FCM 🦁' });
+          const descRes = await telegramRequest('setMyDescription', {
+            description: '🦁 Official Tournament & League Bot for INVICTUS FCM.\n\n⚔️ Real-time Lineups\n🏆 Tournament MVP & Stats\n🎯 Check-ins & Live Radar\n🌐 https://invictusfcm.github.io/'
+          });
+          const shortDescRes = await telegramRequest('setMyShortDescription', {
+            short_description: 'Official League & Tournament Bot for INVICTUS FCM 🦁'
+          });
+          const cmdRes = await syncBotCommands();
+          return sendResponse(res, 200, {
+            status: 'success',
+            name: nameRes,
+            description: descRes,
+            short_description: shortDescRes,
+            commands: cmdRes
+          }, true);
+        }
+
         if (url.searchParams.get('action') === 'broadcast_welcome') {
           const wText = formatChannelWelcome('ru');
           const wKeys = getLanguageKeyboard('welcome', '0', 'ru', false);
