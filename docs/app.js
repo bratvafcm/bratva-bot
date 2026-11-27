@@ -1196,7 +1196,8 @@ const CinematicDirector = {
     if (recordEl) recordEl.textContent = `${wins}W - ${draws}D - ${losses}L`;
 
     // Top Scorer
-    const sorted = [...state.players].sort((a, b) => getPlayerGoals(b) - getPlayerGoals(a));
+    const activePlayers = state.players.filter(p => p.status !== 'inactive');
+    const sorted = [...activePlayers].sort((a, b) => getPlayerGoals(b) - getPlayerGoals(a));
     const hasGoals = sorted.some(p => getPlayerGoals(p) > 0);
     if (sorted.length > 0 && hasGoals) {
       const topP = sorted[0];
@@ -2250,9 +2251,10 @@ function renderDashboard() {
     `;
   }
 
-  // Top performers FC Cards
+  // Top performers FC Cards (active roster only)
   const topContainer = document.getElementById('top-performers-container');
-  const sortedPlayers = [...state.players].sort((a, b) => getPlayerGoals(b) - getPlayerGoals(a));
+  const activePlayers = getActivePlayers();
+  const sortedPlayers = [...activePlayers].sort((a, b) => getPlayerGoals(b) - getPlayerGoals(a));
   const hasGoals = sortedPlayers.some(p => getPlayerGoals(p) > 0);
 
   if (topContainer) {
@@ -2271,10 +2273,10 @@ function renderDashboard() {
     }
   }
 
-  // Flagged Section
+  // Flagged Section (active roster only)
   const flaggedBox = document.getElementById('flagged-card-box');
   const flaggedList = document.getElementById('flagged-players-list');
-  const flagged = state.players.filter(p => p.eligibility_streak?.flagged_for_review);
+  const flagged = activePlayers.filter(p => p.eligibility_streak?.flagged_for_review);
 
   if (flagged.length > 0) {
     flaggedBox.style.display = 'block';
@@ -2336,13 +2338,17 @@ function setupSearch() {
   });
 }
 
+function getActivePlayers() {
+  return state.players.filter(p => p.status !== 'inactive');
+}
+
 function renderRoster() {
   const cardsContainer = document.getElementById('roster-cards-container');
-  let list = state.players.filter(p => p.status !== 'inactive');
+  let list = getActivePlayers();
 
   if (state.searchQuery) {
     const q = state.searchQuery.toLowerCase();
-    list = state.players.filter(p => p.display_name.toLowerCase().includes(q));
+    list = list.filter(p => p.display_name.toLowerCase().includes(q));
   }
   list.sort((a, b) => a.display_name.localeCompare(b.display_name));
 
@@ -2390,7 +2396,7 @@ function renderLeaderboard() {
       list.sort((a, b) => b.goals - a.goals);
     }
   } else {
-    list = state.players.map(p => {
+    list = getActivePlayers().map(p => {
       let matches = p.matches || [];
       if (windowDays !== 'all') {
         const days = parseInt(windowDays, 10);
@@ -2469,7 +2475,7 @@ function openPlayerModal(playerId) {
   };
 
   // 1. Calculate overall player rank & metrics
-  const sortedPlayers = [...state.players].sort((a, b) => getPlayerGoals(b) - getPlayerGoals(a));
+  const sortedPlayers = [...getActivePlayers()].sort((a, b) => getPlayerGoals(b) - getPlayerGoals(a));
   const playerRank = sortedPlayers.findIndex(p => p.player_id === player.player_id) + 1;
   const totalGoals = getPlayerGoals(player);
   const matches = [...(player.matches || [])];
