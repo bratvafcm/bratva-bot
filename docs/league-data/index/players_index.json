@@ -425,13 +425,13 @@
   },
   "koustav_007": {
     "display_name": "KOUSTAV_007",
-    "total_goals": 570,
-    "total_matches": 23,
-    "average_goals": 24.8,
-    "last_tournament_date": "2026-11-25",
+    "total_goals": 600,
+    "total_matches": 24,
+    "average_goals": 25,
+    "last_tournament_date": "2026-11-26",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
+      "last_evaluated_tournament_id": "2026-11-26_torneos_24_7",
       "flagged_for_review": false
     }
   },
@@ -1771,13 +1771,13 @@
   },
   "twilightfc": {
     "display_name": "TWILIGHTFC",
-    "total_goals": 478,
-    "total_matches": 18,
+    "total_goals": 506,
+    "total_matches": 19,
     "average_goals": 26.6,
-    "last_tournament_date": "2026-11-25",
+    "last_tournament_date": "2026-11-26",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
+      "last_evaluated_tournament_id": "2026-11-26_torneos_24_7",
       "flagged_for_review": false
     }
   },
@@ -2077,13 +2077,13 @@
   },
   "villain1380": {
     "display_name": "Villain1380",
-    "total_goals": 133,
-    "total_matches": 6,
-    "average_goals": 22.2,
-    "last_tournament_date": "2026-11-25",
+    "total_goals": 164,
+    "total_matches": 7,
+    "average_goals": 23.4,
+    "last_tournament_date": "2026-11-26",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
+      "last_evaluated_tournament_id": "2026-11-26_torneos_24_7",
       "flagged_for_review": false
     }
   },
@@ -2173,13 +2173,13 @@
   },
   "arnur": {
     "display_name": "Arnur",
-    "total_goals": 142,
-    "total_matches": 7,
-    "average_goals": 20.3,
-    "last_tournament_date": "2026-11-25",
+    "total_goals": 172,
+    "total_matches": 8,
+    "average_goals": 21.5,
+    "last_tournament_date": "2026-11-26",
     "eligibility_streak": {
       "current_fail_streak": 0,
-      "last_evaluated_tournament_id": "2026-11-25_warriors_romania",
+      "last_evaluated_tournament_id": "2026-11-26_torneos_24_7",
       "flagged_for_review": false
     }
   },
