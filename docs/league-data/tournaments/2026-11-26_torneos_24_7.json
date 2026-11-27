@@ -1,0 +1,47 @@
+{
+  "id": "2026-11-26_torneos_24_7",
+  "tournament_id": "2026-11-26_torneos_24_7",
+  "date": "2026-11-26",
+  "timestamp": 1795737529333,
+  "opponent_league": "TORNEOS 24/7",
+  "our_total_goals": 119,
+  "opponent_total_goals": 127,
+  "result": "loss",
+  "status": "complete",
+  "total_turns_played": 12,
+  "max_possible_turns": 12,
+  "matches": [
+    {
+      "board_order": 1,
+      "player_id": "villain1380",
+      "player_display_name": "Villain1380",
+      "ovr": 129,
+      "goals_for": 31,
+      "turns_played": 3
+    },
+    {
+      "board_order": 2,
+      "player_id": "arnur",
+      "player_display_name": "Arnur",
+      "ovr": 127,
+      "goals_for": 30,
+      "turns_played": 3
+    },
+    {
+      "board_order": 3,
+      "player_id": "twilightfc",
+      "player_display_name": "TWILIGHTFC",
+      "ovr": 127,
+      "goals_for": 28,
+      "turns_played": 3
+    },
+    {
+      "board_order": 4,
+      "player_id": "koustav_007",
+      "player_display_name": "KOUSTAV_007",
+      "ovr": 127,
+      "goals_for": 30,
+      "turns_played": 3
+    }
+  ]
+}
