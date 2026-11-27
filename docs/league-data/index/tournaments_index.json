@@ -277,5 +277,14 @@
     "opponent_total_goals": 248,
     "result": "loss",
     "status": "complete"
+  },
+  "2026-11-26_torneos_24_7": {
+    "date": "2026-11-26",
+    "timestamp": 1795737529333,
+    "opponent_league": "TORNEOS 24/7",
+    "our_total_goals": 119,
+    "opponent_total_goals": 127,
+    "result": "loss",
+    "status": "complete"
   }
 }
