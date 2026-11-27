@@ -4247,6 +4247,9 @@ function getCanonicalPlayerKey(pid, displayName) {
   if (normPid === 'sanya' || normPid === 'саня' || normName === 'саня' || normName === 'sanya') {
     return 'sanya';
   }
+  if (normPid === 'llonchik' || normPid === 'lionchik' || normPid === 'l1onchik' || normName === 'llonchik' || normName === 'lionchik' || normName === 'l1onchik') {
+    return 'l1onchik';
+  }
   if (normPid === 'doxibro' || normPid === 'doxibero' || normName === 'doxibéro' || normName === 'doxibero') {
     return 'doxibro';
   }

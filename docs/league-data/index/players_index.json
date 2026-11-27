@@ -91,18 +91,6 @@
       "flagged_for_review": false
     }
   },
-  "sanya": {
-    "display_name": "саня",
-    "total_goals": 0,
-    "total_matches": 0,
-    "average_goals": 0,
-    "last_tournament_date": null,
-    "eligibility_streak": {
-      "current_fail_streak": 0,
-      "last_evaluated_tournament_id": null,
-      "flagged_for_review": false
-    }
-  },
   "egpet": {
     "display_name": "Egpet",
     "total_goals": 0,
@@ -625,7 +613,9 @@
       "current_fail_streak": 1,
       "last_evaluated_tournament_id": "2026-11-22_los_campeones_f",
       "flagged_for_review": false
-    }
+    },
+    "status": "inactive",
+    "status_updated_at": "2026-11-27T01:07:02.603Z"
   },
   "karim": {
     "display_name": "KARIM",
@@ -797,17 +787,17 @@
   },
   "l1onchik": {
     "display_name": "L1onchik",
-    "total_goals": 0,
-    "total_matches": 1,
-    "average_goals": 0,
-    "last_tournament_date": "2026-11-24",
+    "total_goals": 105,
+    "total_matches": 10,
+    "average_goals": 10.5,
+    "last_tournament_date": "2026-10-24",
     "eligibility_streak": {
-      "current_fail_streak": 1,
-      "last_evaluated_tournament_id": "2026-11-24_globe_trotters",
-      "flagged_for_review": false
+      "current_fail_streak": 3,
+      "last_evaluated_tournament_id": "2026-10-24_bluuelook_fc",
+      "flagged_for_review": true
     },
-    "status": "inactive",
-    "status_updated_at": "2026-11-27T00:48:39.694Z"
+    "status": "active",
+    "status_updated_at": "2026-11-27T01:07:02.721Z"
   },
   "madara_09": {
     "display_name": "MADARA.09",
@@ -1550,18 +1540,6 @@
     },
     "status": "inactive",
     "status_updated_at": "2026-11-27T00:48:39.694Z"
-  },
-  "llonchik": {
-    "display_name": "Llonchik",
-    "total_goals": 105,
-    "total_matches": 10,
-    "average_goals": 10.5,
-    "last_tournament_date": "2026-10-24",
-    "eligibility_streak": {
-      "current_fail_streak": 3,
-      "last_evaluated_tournament_id": "2026-10-24_bluuelook_fc",
-      "flagged_for_review": true
-    }
   },
   "dredd": {
     "display_name": "Dredd",
