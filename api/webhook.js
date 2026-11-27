@@ -22,7 +22,8 @@ const GEMINI_KEYS = [
 ].filter((k, i, a) => k && a.indexOf(k) === i);
 const GEMINI_KEY = GEMINI_KEYS[0];
 const rawEnvModel = (process.env.GEMINI_MODEL || '').trim();
-const GEMINI_MODEL = (rawEnvModel && rawEnvModel !== 'gemini-1.5-flash' && rawEnvModel !== 'gemini-2.5-flash') ? rawEnvModel : 'gemini-3.1-flash-lite-preview';
+const LEGACY_MODELS = new Set(['gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-3.1-flash-lite-preview', 'gemini-3.5-flash-lite']);
+const GEMINI_MODEL = (rawEnvModel && !LEGACY_MODELS.has(rawEnvModel)) ? rawEnvModel : 'gemini-4-hydrogen';
 const GITHUB_PAT = (process.env.GITHUB_PAT || '').trim();
 const GITHUB_REPO = process.env.GITHUB_REPO || 'invictusfcm/invictusfcm.github.io';
 const CHANNEL_ID = '@invictusfcm';
@@ -900,8 +901,8 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
 
     const modelsToTry = [
       GEMINI_MODEL,
-      'gemini-3.1-flash-lite-preview',
-      'gemini-3.5-flash-lite',
+      'gemini-4-hydrogen',
+      'gemini-3.8-flash',
       'gemini-3.6-flash',
       'gemini-3.5-flash',
       'gemini-flash-latest'
@@ -1018,8 +1019,8 @@ CRITICAL GUIDELINES:
 
     const modelsToTry = [
       GEMINI_MODEL,
-      'gemini-3.1-flash-lite-preview',
-      'gemini-3.5-flash-lite',
+      'gemini-4-hydrogen',
+      'gemini-3.8-flash',
       'gemini-3.6-flash',
       'gemini-3.5-flash',
       'gemini-flash-latest'
@@ -6969,11 +6970,11 @@ Analyze the provided in-game league member list (${isVideo ? 'screen recording v
 Carefully extract ALL player nicknames present in the league roster.
 
 CRITICAL EXTRACTION RULES:
-1. Extract EVERY unique player display name visible on screen across the entire media.
-2. Maintain exact casing, characters (Latin, Cyrillic, Arabic, special symbols, numbers, underscores, spaces).
-3. Do NOT include role titles (such as "Owner", "Admin", "Member", "Владелец", "Админ", "Участник"), OVR ratings, fan counts, or level numbers in the player name.
-4. Deduplicate: Each player name must appear EXACTLY ONCE in your final list.
-5. If a name has special characters or emoji-like text, preserve the exact characters.
+1. Focus ONLY on the right-side "MEMBERS" player rows. Ignore the left-side League Info card ("INVICTUS FCM", "League Motto", "JOIN TELEGRAM BEFORE KICK!", bot links).
+2. Extract EVERY unique player nickname visible in the MEMBERS rows across all images or video frames (each row has an avatar, the player nickname on top, and "OVR XXX" underneath).
+3. Maintain 100% exact casing, accents, and characters (Latin like "DOXIBÉRO", Cyrillic, Arabic, special symbols, numbers, underscores, spaces). Never guess or alter spelling.
+4. Do NOT include "OVR 127", "Online", "> 2 Days", Activity numbers, Division Rivals badges, or role titles (Owner, Admin, Member, Владелец, Админ, Участник).
+5. Deduplicate: Each player name must appear EXACTLY ONCE in your final list.
 
 Return STRICT JSON ONLY, no markdown ticks, no commentary:
 {
@@ -6998,8 +6999,8 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
 
   const modelsToTry = [
     GEMINI_MODEL,
-    'gemini-3.1-flash-lite-preview',
-    'gemini-3.5-flash-lite',
+    'gemini-4-hydrogen',
+    'gemini-3.8-flash',
     'gemini-3.6-flash',
     'gemini-3.5-flash',
     'gemini-flash-latest'
