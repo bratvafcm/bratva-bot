@@ -6994,6 +6994,8 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
     });
   }
 
+  const payload = JSON.stringify({ contents: [{ parts }] });
+
   const modelsToTry = [
     GEMINI_MODEL,
     'gemini-3.1-flash-lite-preview',
