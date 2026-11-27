@@ -15,7 +15,7 @@ import https from 'https';
 import fs from 'fs';
 import path from 'path';
 
-const TELEGRAM_TOKEN = '9168741832:AAHm8Qbzlc97evXkT3--0pKxXo_D8ak21E4';
+const TELEGRAM_TOKEN = (process.env.TELEGRAM_TOKEN || '').trim();
 const GEMINI_KEYS = [
   (process.env.GEMINI_KEY || '').trim(),
   (process.env.GEMINI_KEY_BACKUP || '').trim()
