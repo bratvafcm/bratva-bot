@@ -897,8 +897,6 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
       });
     }
 
-    const payload = JSON.stringify({ contents: [{ parts }] });
-
     const modelsToTry = [
       GEMINI_MODEL,
       'gemini-4-hydrogen',
@@ -920,6 +918,11 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
       }
       const activeKey = GEMINI_KEYS[keyIdx];
       const modelName = modelsToTry[modelIdx++];
+      const generationConfig = { responseMimeType: 'application/json' };
+      if (modelName.startsWith('gemini-4') || modelName.startsWith('gemini-3.8')) {
+        generationConfig.thinkingConfig = { thinkingLevel: 'low' };
+      }
+      const payload = JSON.stringify({ contents: [{ parts }], generationConfig });
       const req = https.request({
         hostname: 'generativelanguage.googleapis.com',
         path: `/v1beta/models/${modelName}:generateContent`,
@@ -6995,8 +6998,6 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
     });
   }
 
-  const payload = JSON.stringify({ contents: [{ parts }] });
-
   const modelsToTry = [
     GEMINI_MODEL,
     'gemini-4-hydrogen',
@@ -7019,6 +7020,11 @@ Return STRICT JSON ONLY, no markdown ticks, no commentary:
       }
       const activeKey = GEMINI_KEYS[keyIdx];
       const modelName = modelsToTry[modelIdx++];
+      const generationConfig = { responseMimeType: 'application/json' };
+      if (modelName.startsWith('gemini-4') || modelName.startsWith('gemini-3.8')) {
+        generationConfig.thinkingConfig = { thinkingLevel: 'low' };
+      }
+      const payload = JSON.stringify({ contents: [{ parts }], generationConfig });
       const req = https.request({
         hostname: 'generativelanguage.googleapis.com',
         path: `/v1beta/models/${modelName}:generateContent`,
